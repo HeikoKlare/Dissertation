@@ -1,0 +1,52 @@
+\newcommand{\vdistance}{6.5em}
+\newcommand{\hdistance}{16em}
+\newcommand{\classwidth}{5.5em}
+\newcommand{\labeldistance}{1.2em}
+\newcommand{\mmborder}{1em}
+
+\begin{tikzpicture}
+
+\pgfdeclarelayer{bg}
+\pgfsetlayers{bg,main}
+
+
+% METACLASSES
+
+\umlclassvarwidth{java_class}{}{Class}{
+name\\
+}{\classwidth}  
+
+\umlclassvarwidth[, below=\vdistance of java_class.center, anchor=center]{uml_class}{}{Class}{
+name\\
+}{\classwidth} 
+
+\umlclassvarwidth[, below right=0.5*\vdistance and \hdistance of java_class.center, anchor=center]{pcm_component}{}{Component}{
+name\\
+}{\classwidth} 
+
+
+% METAMODELS
+
+\coordinate (java_label_coordinate) at ([yshift=\labeldistance]java_class.north);
+\node[mmlabel, anchor=center] (java_label) at (java_label_coordinate) {Java};
+
+\coordinate (uml_label_coordinate) at ([yshift=-\labeldistance]uml_class.south);
+\node[mmlabel, anchor=center] (java_label) at (uml_label_coordinate) {UML};
+
+\coordinate (pcm_label_coordinate) at ([yshift=\labeldistance]pcm_component.north);
+\node[mmlabel, anchor=center] (pcm_label) at (pcm_label_coordinate) {PCM};
+
+\begin{pgfonlayer}{bg}
+    \node[mmbg, fit=(java_class)(java_label_coordinate), inner sep=\mmborder] (java) {};
+    \node[mmbg, fit=(uml_class)(uml_label_coordinate), inner sep=\mmborder] (uml) {};
+    \node[mmbg, fit=(pcm_component)(pcm_label_coordinate), inner sep=\mmborder] (pcm) {};
+\end{pgfonlayer}
+
+
+% CONSISTENCY RELATIONS
+
+\draw[consistencyrel] (java_class) -- node[below left=0.1*\vdistance and 0.2em, anchor=north, align=center] {Class.name $=$\\ Component.name + "Impl"} (pcm_component);
+\draw[consistencyrel] (java_class) -- node[right] {$=$} (uml_class);
+\draw[consistencyrel] (uml_class) -- (pcm_component);
+
+\end{tikzpicture}

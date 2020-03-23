@@ -1,0 +1,53 @@
+\newcommand{\vdistance}{7.5em}
+\newcommand{\hdistance}{11em}
+\newcommand{\classwidth}{5.5em}
+\newcommand{\labeldistance}{1.2em}
+\newcommand{\labelshift}{0.3*\classwidth}
+\newcommand{\representstext}{\emph{«manifests»}}
+\newcommand{\mmborder}{1em}
+
+\begin{tikzpicture}
+
+\pgfdeclarelayer{bg}
+\pgfsetlayers{bg,main}
+
+
+% METACLASSES
+
+\umlclassvarwidth{java_class}{}{Class}{
+name\\
+}{\classwidth}  
+
+\umlclassvarwidth[, right=\hdistance of java_class.north, anchor=north]{uml_class}{}{Class}{
+name\\
+}{\classwidth} 
+
+\umlclassvarwidth[, above right=\vdistance and 0.5*\hdistance of java_class.north, anchor=north]{oo_class}{}{Class\vphantom{p}}{
+name\\
+}{\classwidth} 
+
+
+% METAMODELS
+
+\coordinate (java_label_coordinate) at ([xshift=-\labelshift,yshift=\labeldistance]java_class.north);
+\node[mmlabel, anchor=center] (java_label) at (java_label_coordinate) {Java};
+
+\coordinate (uml_label_coordinate) at ([xshift=\labelshift,yshift=\labeldistance]uml_class.north);
+\node[mmlabel, anchor=center] (java_label) at (uml_label_coordinate) {UML};
+
+\coordinate (oo_label_coordinate) at ([yshift=\labeldistance]oo_class.north);
+\node[mmlabel, anchor=center] (oo_label) at (oo_label_coordinate) {Object-oriented Design};
+
+\begin{pgfonlayer}{bg}
+    \node[mmbg, fit=(java_class)(java_label_coordinate), inner sep=\mmborder] (java) {};
+    \node[mmbg, fit=(uml_class)(uml_label_coordinate), inner sep=\mmborder] (uml) {};
+    \node[conceptmmbg, minimum width=11.5em, fit=(oo_class)(oo_label_coordinate), inner sep=\mmborder] (oo) {};
+\end{pgfonlayer}
+
+
+% CONSISTENCY RELATIONS
+
+\draw[consistencyrel, <-] (java_class) -- node[above, sloped] {\representstext} (oo_class);
+\draw[consistencyrel, <-] (uml_class) -- node[above, sloped] {\representstext} (oo_class);
+
+\end{tikzpicture}

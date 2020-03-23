@@ -1,0 +1,78 @@
+\newcommand{\vdistance}{8em}
+\newcommand{\hdistance}{11.5em}
+\newcommand{\classwidth}{5.5em}
+\newcommand{\smallclasswidth}{4em}
+\newcommand{\labeldistance}{1.2em}
+\newcommand{\labelshift}{0.3*\classwidth}
+\newcommand{\representstext}{\emph{«manifests»}}
+\newcommand{\mmborder}{1em}
+
+\begin{tikzpicture}
+
+\pgfdeclarelayer{bg}
+\pgfsetlayers{bg,main}
+
+
+% METACLASSES
+
+\umlclassvarwidth{java_class}{}{Class\vphantom{p}}{
+name\\
+}{\smallclasswidth}  
+
+\umlclassvarwidth[, right=0.65*\hdistance of java_class.north, anchor=north]{uml_class}{}{Class\vphantom{p}}{
+name\\
+}{\smallclasswidth}
+
+\umlclassvarwidth[, right=1.3*\classwidth of uml_class.north, anchor=north]{uml_component}{}{Component}{
+name\\
+}{\classwidth} 
+
+\umlclassvarwidth[, above right=\vdistance and 0.5*\hdistance of java_class.north, anchor=north]{oo_class}{}{Class\vphantom{p}}{
+name\\
+}{\classwidth} 
+
+\umlclassvarwidth[, right=\hdistance of oo_class.north, anchor=north]{pcm_component}{}{Component}{
+name\\
+}{\classwidth} 
+
+\umlclassvarwidth[, above right=\vdistance and 0.5*\hdistance of oo_class.north, anchor=north]{component_component}{}{Component}{
+name\\
+}{\classwidth}
+
+% METAMODELS
+
+\coordinate (java_label_coordinate) at ([xshift=-\labelshift,yshift=\labeldistance]java_class.north);
+\node[mmlabel, anchor=center] (java_label) at (java_label_coordinate) {Java};
+
+\coordinate (uml_label_coordinate) at ([xshift=\labelshift,yshift=\labeldistance]uml_component.north);
+\node[mmlabel, anchor=center] (java_label) at (uml_label_coordinate) {UML};
+
+\coordinate (oo_label_coordinate) at ([xshift=-4*\labelshift,yshift=\labeldistance]oo_class.north);
+\node[mmlabel, anchor=west, align=left] (oo_label) at ([xshift=-0.7em, yshift=-0.8em]oo_label_coordinate) {Object-oriented\\ Design};
+
+\coordinate (pcm_label_coordinate) at ([xshift=\labelshift,yshift=\labeldistance]pcm_component.north);
+\node[mmlabel, anchor=center] (pcm_label) at (pcm_label_coordinate) {PCM};
+
+\coordinate (component_label_coordinate) at ([yshift=\labeldistance]component_component.north);
+\node[mmlabel, anchor=center] (component_label) at (component_label_coordinate) {Componend-based Design};
+
+\begin{pgfonlayer}{bg}
+    \node[mmbg, fit=(java_class)(java_label_coordinate), inner sep=\mmborder] (java) {};
+    \node[mmbg, fit=(uml_class)(uml_component)(uml_label_coordinate), inner sep=\mmborder] (uml) {};
+    \node[conceptmmbg, fit=(oo_class)(oo_label_coordinate), inner sep=\mmborder] (oo) {};
+    \node[mmbg, fit=(pcm_component)(pcm_label_coordinate), inner sep=\mmborder] (pcm) {};
+    \node[conceptmmbg, minimum width=12.5em, fit=(component_component)(component_label_coordinate), inner sep=\mmborder] (component) {};
+\end{pgfonlayer}
+
+\draw[-, color=gray] ($(uml_class.south east)!0.5!(uml_component.south west)-(0,\mmborder)$) -- ($(uml_class.north east)!0.5!(uml_component.north west)+(0,\mmborder+\labeldistance)$);
+
+
+% CONSISTENCY RELATIONS
+
+\draw[consistencyrel, <-] (java_class) -- node[above, sloped] {\representstext} (oo_class);
+\draw[consistencyrel, <-] (uml_class) -- node[above, sloped] {\representstext} (oo_class);
+\draw[consistencyrel, <-] (oo_class) -- node[above, sloped] {\representstext} (component_component);
+\draw[consistencyrel, <-] (pcm_component) -- node[above, sloped] {\representstext} (component_component);
+\draw[consistencyrel, <-] ([xshift=-1.5em]uml_component.north) -- node[below, sloped] {\representstext} (component_component);
+
+\end{tikzpicture}
