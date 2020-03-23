@@ -1,0 +1,79 @@
+\newcommand{\hdistance}{10.6em}
+\newcommand{\classwidth}{4.5em}
+\newcommand{\sameheight}{\vphantom{Êy}}
+
+\begin{tikzpicture}
+
+% \node[uml class] (personal_employee) {Employee
+% \nodepart{two}
+% name\\
+% address\\
+% salary\\
+% dailyWorkingTime\\
+% department
+% };
+
+% PERSONNEL
+\umlclassvarwidth{personnel_employee}{}{Employee\sameheight}{
+firstname\\
+lastname\\
+%address\\
+salary\\
+workingTime\\
+department
+}{\classwidth}
+
+\node[above=0.2em of personnel_employee.north] (personnel_label) {\emph{(1) Personnel Data}};
+
+
+% TASK MANAGEMENT
+\umlclassvarwidth[,right=\hdistance of personnel_employee.north, anchor=north]{task_task}{}{Task\sameheight}{
+name\\
+description\\
+%department
+}{\classwidth}
+
+\umlclassvarwidth[,below=1.5em of task_task.south, anchor=north]{task_employee}{}{Employee\sameheight}{
+name\\
+department
+}{\classwidth}
+
+\umlassociationfromto{(task_employee) -- %node[uml role end] {assigned to} 
+node[uml cardinality end, pos=0.7, left] {*} node[uml role end, pos=0.65, right] {responsible for}  node[uml cardinality start, pos=0.2, left] {*} (task_task)}
+
+\node[above=0.2em of task_task.north] (task_label) {\emph{(2) Task Management}};
+
+
+% SCHEDULING
+\umlclassvarwidth[,right=\hdistance of task_task.north, anchor=north]{scheduling_task}{}{Task\sameheight}{
+name\\
+deadline
+}{\classwidth}
+
+\umlclassvarwidth[,right=8.5em of scheduling_task.north, anchor=north]{scheduling_schedule}{}{Schedule\sameheight}{}{\classwidth}
+
+\umlclassvarwidth[,below=1.5em of scheduling_schedule.south, anchor=north]{scheduling_workday}{}{WorkDay\sameheight}{
+date
+}{\classwidth}
+
+\umlclassvarwidth[,right=\hdistance of task_employee.north, anchor=north]{scheduling_employee}{}{Employee\sameheight}{
+name\\
+workingTime
+}{\classwidth}
+
+\umlcomposition{(scheduling_schedule) -- node[uml cardinality end] {*} (scheduling_schedule-|scheduling_task.east)}
+\umlcomposition{(scheduling_schedule) -- node[uml cardinality end] {*} (scheduling_workday)}
+\umlassociationfromto{([yshift=-0.5em]scheduling_workday.west) -- node[uml cardinality end] {*} node[uml role end, above, pos=0.5] {working} ([yshift=-0.5em]scheduling_workday.west-|scheduling_employee.east)}
+\umlassociationfromto{(scheduling_employee) -- node[uml cardinality start, pos=0.2, right] {*} node[uml cardinality end, pos=0.7, right] {*} node[uml role end, left, pos=0.6] {responsible for} (scheduling_task)}
+
+\coordinate (scheduling_upper_middle) at ($(scheduling_schedule.north)!0.5!(scheduling_task.north)$);
+\node[above=0.2em of scheduling_upper_middle] (scheduling_label) {\emph{(3) Scheduling}};
+
+
+% CONSISTENCY RELATIONS
+\draw[consistencyrel] ([xshift=0.5em]personnel_employee) |- node[pos=0.75, below, align=center] {(first/last)name,\\ department} ([yshift=-2.2em]task_employee.north west);
+\draw[consistencyrel] ([yshift=-2.2em]task_employee.north east) -- node[below, align=center] {name, \\ relation to task} ([yshift=-2.2em]scheduling_employee.north west);
+\draw[consistencyrel] ([xshift=-0.5em]personnel_employee.south) -- ++(0,-4.2em) -| node[above, pos=0.25] {(first/last)name, workingTime} (scheduling_employee.south);
+\draw[consistencyrel] (task_task.east) -- node[below] {name} (task_task.east-|scheduling_task.west);
+
+\end{tikzpicture}
