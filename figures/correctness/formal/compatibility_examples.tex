@@ -1,0 +1,38 @@
+\newcommand{\hdistance}{14em}
+\newcommand{\classwidth}{6em}
+
+\begin{tikzpicture}
+
+% Person
+\umlclassvarwidth{person}{}{Person\sameheight}{
+firstname\\
+lastname
+}{\classwidth}
+
+% Employee
+\umlclassvarwidth[,above right=4em and \hdistance of person.center, anchor=south]{employee}{}{Employee\sameheight}{
+name
+}{\classwidth}
+
+\umlclassvarwidth[,right=\hdistance of person.south, anchor=south]{resident}{}{Resident\sameheight}{
+name
+}{\classwidth}
+
+
+% CONSISTENCY RELATIONS
+\draw[consistency relation] (person.north) |- node[pos=0, above right] {$p$} node[pos=0.5, above right] {$\consistencyrelation{CR}{2}$ / $\consistencyrelation{CR'}{2}$ / $\consistencyrelation{CR''}{2}$} node[pos=1, below left] {$e$} (employee.west);
+\draw[consistency relation] (employee.south) -- node[pos=0, below left] {$e$} node[right, align=left] {$\consistencyrelation{CR}{3}$  / $\consistencyrelation{CR'}{3}$} node[pos=1, above left] {$r$} (resident.north);
+\draw[consistency relation] (resident.west-|person.east) -- node[pos=0, above right] {$p$} node[pos=0.5, below] {$\consistencyrelation{CR}{1}$} node[pos=1, above left] {$r$} (resident.west);
+
+\node[consistency related element, below left=1.5em and 2em of person.south west, anchor=north west] {
+$\begin{aligned}
+    \consistencyrelation{CR}{1} =\; & \setted{\tupled{p,r} \mid r.name = p.firstname + "\textnormal{\textvisiblespace}" + p.lastname}\\[0.5em]
+    \consistencyrelation{CR}{2} =\; & \setted{\tupled{p,e} \mid e.name = p.firstname + "\textnormal{\textvisiblespace}" + p.lastname}\\
+    \consistencyrelation{CR'}{2} =\; & \setted{\tupled{p,e} \mid e.name = p.firstname + ",\textnormal{\textvisiblespace}" + p.lastname}\\
+    \consistencyrelation{CR''}{2} =\; & \setted{\tupled{p,e} \mid e.name = p.lastname + "\textnormal{\textvisiblespace}" + p.firstname}\\[0.5em]
+    \consistencyrelation{CR}{3} =\; & \setted{\tupled{r,e} \mid r.name = e.name}\\
+    \consistencyrelation{CR'}{3} =\; & \setted{\tupled{r,e} \mid r.name = e.name.toLower}
+\end{aligned}$
+};
+
+\end{tikzpicture}

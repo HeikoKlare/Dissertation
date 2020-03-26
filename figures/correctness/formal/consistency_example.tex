@@ -1,0 +1,132 @@
+\newcommand{\hdistance}{20em}
+\newcommand{\vdistance}{1.5em}
+\newcommand{\internalvdistance}{0.5em}
+\newcommand{\classwidth}{6em}
+\newcommand{\objectwidth}{6.7em}
+\newcommand{\leftshift}{5em}
+
+\begin{tikzpicture}[
+    witness/.style={consistency relation, latex-latex},
+    witness fault/.style={witness, color=darkred, dashed}
+]
+
+% Employee
+\umlclassvarwidth{employee}{}{Employee\sameheight}{
+name
+}{\classwidth}
+
+% Resident
+\umlclassvarwidth[, right=\hdistance of employee.north, anchor=north]{resident}{}{Resident\sameheight}{
+name
+}{\classwidth}
+
+% CONSISTENCY RELATIONS
+\draw[consistency relation] (employee.east) -- node[pos=0, above right] {$e$} node[pos=0.5, below, align=center] {
+$\begin{aligned}
+    \consistencyrelation{CR}{} = \setted{ \tupled{e,r} \mid e.name = r.name \\
+	\lor e.name.toLower = r.name }
+\end{aligned}$} node[pos=1, above left] {$r$} (resident.west);
+
+% EXAMPLE 1
+% Employee
+\umlobjectvarwidth[, below right=1.8*\vdistance and \leftshift of employee.south west, anchor=north west]{instance1_employee}{}{Employee\sameheight}{
+	name = "Alice"
+}{\objectwidth}
+% Resident
+\umlobjectvarwidth[, below=1.8*\vdistance of resident.south east, anchor=north east]{instance1_resident}{}{Resident\sameheight}{
+	name = "Alice"
+}{\objectwidth}
+
+% EXAMPLE 2
+% Employee
+\umlobjectvarwidth[, below=\vdistance of instance1_employee.south, anchor=north]{instance2_employee}{}{Employee\sameheight}{
+	name = "alice"
+}{\objectwidth}
+% Resident
+\umlobjectvarwidth[, below=\vdistance of instance1_resident.south, anchor=north]{instance2_resident}{}{Resident\sameheight}{
+	name = "Alice"
+}{\objectwidth}
+
+
+% EXAMPLE 3
+% Employee
+\umlobjectvarwidth[, below=\vdistance of instance2_employee.south, anchor=north]{instance3_employee1}{}{Employee\sameheight}{
+	name = "alice"
+}{\objectwidth}
+\umlobjectvarwidth[, below=\internalvdistance of instance3_employee1.south, anchor=north]{instance3_employee2}{}{Employee\sameheight}{
+	name = "Alice"
+}{\objectwidth}
+% Resident
+\umlobjectvarwidth[, below=\vdistance of instance2_resident.south, anchor=north]{instance3_resident1}{}{Resident\sameheight}{
+	name = "alice"
+}{\objectwidth}
+\umlobjectvarwidth[, below=\internalvdistance of instance3_resident1.south, anchor=north]{instance3_resident2}{}{Resident\sameheight}{
+	name = "Alice"
+}{\objectwidth}
+
+% EXAMPLE 4
+% Employee
+\umlobjectvarwidth[, below=\vdistance of instance3_employee2.south, anchor=north]{instance4_employee1}{}{Employee\sameheight}{
+	name = "Alice"
+}{\objectwidth}
+% Resident
+\umlobjectvarwidth[, below=\vdistance of instance3_resident2.south, anchor=north]{instance4_resident1}{}{Resident\sameheight}{
+	name = "Alice"
+}{\objectwidth}
+\umlobjectvarwidth[, below=\internalvdistance of instance4_resident1.south, anchor=north]{instance4_resident2}{}{Resident\sameheight}{
+	name = "John"
+}{\objectwidth}
+
+% EXAMPLE 5
+% Resident
+\umlobjectvarwidth[, below=\vdistance of instance4_resident2.south, anchor=north]{instance5_resident1}{}{Resident\sameheight}{
+	name = "Alice"
+}{\objectwidth}
+\umlobjectvarwidth[, below=\internalvdistance of instance5_resident1.south, anchor=north]{instance5_resident2}{}{Resident\sameheight}{
+	name = "alice"
+}{\objectwidth}
+% Employee
+\umlobjectvarwidth[, left=\hdistance-\leftshift+(\classwidth-\objectwidth) of instance5_resident1.north, anchor=north]{instance5_employee1}{}{Employee\sameheight}{
+	name = "alice"
+}{\objectwidth}
+
+% EXAMPLE 6
+% Resident
+\umlobjectvarwidth[, below=\vdistance of instance5_resident2.south, anchor=north]{instance6_resident1}{}{Resident\sameheight}{
+	name = "alice"
+}{\objectwidth}
+% Employee
+\umlobjectvarwidth[, left=\hdistance-\leftshift+(\classwidth-\objectwidth) of instance6_resident1.north, anchor=north]{instance6_employee1}{}{Employee\sameheight}{
+	name = "alice"
+}{\objectwidth}
+\umlobjectvarwidth[, below=\internalvdistance of instance6_employee1.south, anchor=north]{instance6_employee2}{}{Employee\sameheight}{
+	name = "Alice"
+}{\objectwidth}
+
+\node[left=0.5*\leftshift of instance1_employee.west] {\textbf{1.}};
+\node[left=0.5*\leftshift of instance2_employee.west] {\textbf{2.}};
+\node[left=0.5*\leftshift of instance3_employee1.west] {\textbf{3.}};
+\node[left=0.5*\leftshift of instance4_employee1.west] {\textbf{4.}};
+\node[left=0.5*\leftshift of instance5_employee1.west] {\textbf{5.}};
+\node[left=0.5*\leftshift of instance6_employee1.west] {\textbf{6.}};
+
+\draw ([xshift=-\leftshift,yshift=0.5*\vdistance]instance1_employee.north west) -- ([yshift=0.5*\vdistance]instance1_resident.north east); 
+\draw ([xshift=-\leftshift,yshift=0.5*\vdistance]instance2_employee.north west) -- ([yshift=0.5*\vdistance]instance2_resident.north east); 	 
+\draw ([xshift=-\leftshift,yshift=0.5*\vdistance]instance3_employee1.north west) -- ([yshift=0.5*\vdistance]instance3_resident1.north east); 	 
+\draw ([xshift=-\leftshift,yshift=0.5*\vdistance]instance4_employee1.north west) -- ([yshift=0.5*\vdistance]instance4_resident1.north east); 	 
+\draw ([xshift=-\leftshift,yshift=0.5*\vdistance]instance5_employee1.north west) -- ([yshift=0.5*\vdistance]instance5_resident1.north east); 
+\draw ([xshift=-\leftshift,yshift=0.5*\vdistance]instance6_employee1.north west) -- ([yshift=0.5*\vdistance]instance6_resident1.north east); 	
+
+
+% WITNESS STRUCTURE
+\draw[witness] (instance1_employee) -- (instance1_resident);
+\draw[witness] (instance2_employee) -- (instance2_resident);
+\draw[witness] (instance3_employee1) -- (instance3_resident1);
+\draw[witness] (instance3_employee2) -- (instance3_resident2);
+\draw[witness] (instance4_employee1) -- (instance4_resident1);
+\draw[witness fault] (instance5_employee1) -- (instance5_resident1);
+\draw[witness fault] (instance5_employee1) -- (instance5_resident2);
+\draw[witness fault] (instance6_employee1) -- (instance6_resident1);
+\draw[witness fault] (instance6_employee2) -- (instance6_resident1);
+
+\end{tikzpicture}
