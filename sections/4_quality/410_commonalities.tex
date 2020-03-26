@@ -26,15 +26,15 @@ system.
 % What transformations are
 In practice, redundancies are often kept consistent manually~\cite{sax2017survey, guissouma2018study}.
 A common means to automate consistency preservation are \emph{incremental model transformations}.
-Such transformations define how an instance of one \metamodel has to be updated to restore consistency whenever an instance of another was modified.
+Such transformations define how an instance of one metamodel has to be updated to restore consistency whenever an instance of another was modified.
 A transformation can be declared in different ways: %can be defined on different abstraction levels: it 
 it may either specify what has to be changed to restore consistency %after a modification 
 (\emph{imperative}), or only the consistency constraints that have to hold, from which the rules to restore consistency are derived automatically (\emph{declarative}).
 %A transformation can be rather imperative, defining what has to be changed to restore consistency after a modification, or rather declarative, defining only the consistency constraints that have to hold and automatically deriving rules to restore consistency when a constraint gets violated.
-But no matter how a transformation is defined, it specifies a \emph{relation} between two (or more) \metamodels.
+But no matter how a transformation is defined, it specifies a \emph{relation} between two (or more) metamodels.
 However, redundant elements are representations of a \emph{common concept} rather than independent elements that have to be directly related.
 In consequence, we think that it is natural to make the common concept, which the redundant elements are supposed to describe, explicit. 
-We can then specify how this concept manifests itself in the different \metamodels, instead of defining directly how the redundant elements are related.
+We can then specify how this concept manifests itself in the different metamodels, instead of defining directly how the redundant elements are related.
 For example, %we assume that it is 
 it appears to be more natural to say that classes in UML and Java are different manifestations of the concept of a class in object-oriented design, rather than saying that a UML class should be related to a corresponding Java class.
 Such a common concept is what we call a \emph{\commonality}.
@@ -52,10 +52,10 @@ Such a common concept is what we call a \emph{\commonality}.
 % APPROACH
 In this paper, we present the \emph{\commonalities approach}. %, which is based on the Bachelor's thesis of \textcite{gleitze2017a}.
 % Vorschlag:
-It defines \commonalities between \metamodels explicitly and thereby allows to state clearly which common concepts they share.
+It defines \commonalities between metamodels explicitly and thereby allows to state clearly which common concepts they share.
 %, instead of encoding this information implicitly in a transformation.
-%The approach aims to explicitly define commonalities of \metamodels for describing their consistency relations rather than implicitly encoding them in a transformation.
-From such a specification, transformations are derived that keep instances of those \metamodels consistent.
+%The approach aims to explicitly define commonalities of metamodels for describing their consistency relations rather than implicitly encoding them in a transformation.
+From such a specification, transformations are derived that keep instances of those metamodels consistent.
 We discuss options how to derive such transformations, strategies to hierarchically compose \commonalities, as well as benefits and limitations of the approach.
 Additionally, we discuss design options for a language that supports the specification of \commonalities and present the \emph{\commonalities language}, which we have developed as a proof-of-concept.
 It is based on the Bachelor's thesis of \textcite{gleitze2017a}. 
@@ -69,26 +69,26 @@ It is based on the Bachelor's thesis of \textcite{gleitze2017a}.
 % CONTRIBUTIONS
 Our main contributions in this paper are:
 \begin{description}[leftmargin=\parindent]
-    \item[\contributionlabel{contrib:approach}{Commonalities Approach}{C1}:] We propose an approach for making common concepts of different \metamodels explicit rather than encoding them implicitly in constraints of a transformation.
+    \item[\contributionlabel{contrib:approach}{Commonalities Approach}{C1}:] We propose an approach for making common concepts of different metamodels explicit rather than encoding them implicitly in constraints of a transformation.
     \item[\contributionlabel{contrib:language}{Commonalities Language}{C2}:] We discuss design options for a language to define \commonalities and outline one language to specify them.
     %\item[Dynamic Extensibility:] We provide an approach that allows to dynamically extend a declarative specification language.
-    \item[\contributionlabel{contrib:proofofconcept}{Proof-of-Concept}{C3}:] We give an indicator for the applicability of the approach by providing a proof-of-concept implementation and applying it to a scenario with four simple \metamodels sharing common concepts. % that have to be kept consistent.
+    \item[\contributionlabel{contrib:proofofconcept}{Proof-of-Concept}{C3}:] We give an indicator for the applicability of the approach by providing a proof-of-concept implementation and applying it to a scenario with four simple metamodels sharing common concepts. % that have to be kept consistent.
 \end{description}
 
 % BENEFITS
-We expect several benefits from our approach, i.e. specifying \commonalities, in comparison to direct transformation specifications between \metamodels.
-First, we claim to achieve \emph{better understandability} of relations between \metamodels, because common concepts are made explicit. % rather than encoding them implicitly in transformations.
-Second, the approach \emph{reduces errors} when more than two \metamodels are to be kept consistent.
-Transformations usually relate two \metamodels, especially because multidirectional relations are hard to express~\cite{stevens2017a},
+We expect several benefits from our approach, i.e. specifying \commonalities, in comparison to direct transformation specifications between metamodels.
+First, we claim to achieve \emph{better understandability} of relations between metamodels, because common concepts are made explicit. % rather than encoding them implicitly in transformations.
+Second, the approach \emph{reduces errors} when more than two metamodels are to be kept consistent.
+Transformations usually relate two metamodels, especially because multidirectional relations are hard to express~\cite{stevens2017a},
 %\modified{either because the developer does not know about multidirectional relations or due to cognitive limitations~\cite{stevens2017a},} %keep instances of two metamodels consistent 
-and therefore have to be combined to a network of transformations to keep instances of more than two \metamodels consistent.
+and therefore have to be combined to a network of transformations to keep instances of more than two metamodels consistent.
 % Following sentence moved from approach section
-Such a network can be regarded as a graph, formed by \metamodels as its nodes and transformations as its edges.
-However, such a network can easily raise compatibility problems if there exists more than one path of transformations between two \metamodels.
+Such a network can be regarded as a graph, formed by metamodels as its nodes and transformations as its edges.
+However, such a network can easily raise compatibility problems if there exists more than one path of transformations between two metamodels.
 A hierarchy of \commonality specifications is, by design, not prone to such problems.
 Finally, we \emph{improve reusability} in comparison to a network of transformations, %regarding a network of transformations, 
-because an arbitrary subset of \metamodels, between which \commonalities are defined, can be selected to keep their instances consistent.
-In contrast, removing \metamodels from a transformation network can easily lead to missing transformation paths between two \metamodels.
+because an arbitrary subset of metamodels, between which \commonalities are defined, can be selected to keep their instances consistent.
+In contrast, removing metamodels from a transformation network can easily lead to missing transformation paths between two metamodels.
 
 % Benefits:
 % \begin{itemize}
@@ -104,12 +104,12 @@ In contrast, removing \metamodels from a transformation network can easily lead 
 \section{Running Example}
 
 We use a running example throughout the paper to explain the \commonalities idea.
-It relies on three \metamodels: UML class models, Java code, whose grammar definition can be treated as a \metamodel~\cite{heidenreich2010a}, and the \ac{PCM}~\cite{reussner2016a}, a component-based architecture description language.
+It relies on three metamodels: UML class models, Java code, whose grammar definition can be treated as a metamodel~\cite{heidenreich2010a}, and the \ac{PCM}~\cite{reussner2016a}, a component-based architecture description language.
 The consistency relations between Java and UML class models are mostly one-to-one mappings, as they provide the same concepts of object-oriented design. %provide redundant representations of the same concepts, so the consistency relations between them define mostly one-to-one mappings.
 Consistency relations between \ac{PCM} and Java were proposed by \textcite{langhammer2015a}.
 For this paper, only the one-to-one mapping between components in \ac{PCM} and classes in Java---or generally all object-oriented languages---are relevant, whereby each component is mapped to a class but not vice versa.
 
-For the examples in this paper, a minimalist subset of those \metamodels, depicted in \autoref{fig:quality:running_example}, is sufficient.
+For the examples in this paper, a minimalist subset of those metamodels, depicted in \autoref{fig:quality:running_example}, is sufficient.
 It only comprises classes in UML and Java and components in \ac{PCM}, which all have a name.
 The name shall be equal between corresponding classes in UML and Java, whereas the classes realizing a component shall have the same name as the component, complemented by an \enquote{Impl} suffix (cf.~\cite{langhammer2015a}).
 With state-of-the-art techniques, those constraints could be implemented as relations in declarative or as enforcing routines in imperative transformation languages.
@@ -117,12 +117,12 @@ With state-of-the-art techniques, those constraints could be implemented as rela
 \begin{figure}
 	\centering
 	\input{figures/quality/running_example.tex}
-	\caption{\Metamodel extracts for Java, UML and \ac{PCM} and consistency relations ({\protect\tikz[baseline=-0.5ex] \protect\draw[latex-latex, consistency related element] (0,0) -- (1.5em,0);}) between them}
+	\caption{Metamodel extracts for Java, UML and \ac{PCM} and consistency relations ({\protect\tikz[baseline=-0.5ex] \protect\draw[latex-latex, consistency related element] (0,0) -- (1.5em,0);}) between them}
 	\label{fig:quality:running_example}
 \end{figure}
 
-In this paper, we consider \metamodels that conform to the \ac{EMOF} standard~\cite{mof}.
-Such \metamodels consist of classes, which we denote as \emph{\metaclasses} to avoid confusion with classes in exemplary \metamodels such as Java and UML.
+In this paper, we consider metamodels that conform to the \ac{EMOF} standard~\cite{mof}.
+Such metamodels consist of classes, which we denote as \emph{\metaclasses} to avoid confusion with classes in exemplary metamodels such as Java and UML.
 \Metaclasses can in turn contain attributes and associations to other classes, which may be containments.
 
 
@@ -139,55 +139,55 @@ Such \metamodels consist of classes, which we denote as \emph{\metaclasses} to a
 %\todoConference{A description of the proposed solution and which other work (e.g., methods or tools) it depends on.}
 %\todoHeiko{One Solution: Add additional models. Already proposed by Stevens, but just to solve constraints. Here, we make overlaps explicit}
 %\todo{Referenz zu Aussage von Stevens hinzufügen}
-%\todoHeiko{Discuss necessity to provide orthogonal concept \metamodels}
+%\todoHeiko{Discuss necessity to provide orthogonal concept metamodels}
 
 %\todoHeiko{Why ''virtual``? Because they are transparent to the user and nothing he has to deal with}
 %\todo{Referenz auf Grafik und Optimalfall davon erklären}
 Based on the decomposition of consistency relations, we propose another approach to achieve a tree structure of transformations, which inherently optimizes \emph{modularity}.
 %In the following, we propose another solution option to achieve a tree structure of consistency relations, next to decomposing consistency relations into independent subsets.
-%This approach called \emph{\acp{CMM}} ensures consistency between specifications inherently given by the tree structure, but also optimizes modularity, so that an arbitrary subset of the \metamodels can be used.
+%This approach called \emph{\acp{CMM}} ensures consistency between specifications inherently given by the tree structure, but also optimizes modularity, so that an arbitrary subset of the metamodels can be used.
 %It also reuses the concepts for decomposing consistency relations.
 % In \autoref{sec:Introduction}, we discussed reasons for specifying consistency using binary transformations instead of defining multiary relations.
 % Nevertheless, as discussed in the previous section, trade-off decisions regarding the identified challenges have to made with that approach.
 % Therefore, we propose an approach called \emph{\acp{CMM}} for a certain kind of relations that addresses all those identified challenges.
 The idea bases on the insight that we can distinguish two kinds of consistency relations:
 \begin{description}[leftmargin=\parindent]
-    \item[Descriptive consistency relations] are \enquote{naturally} given when two \metamodels represent common \emph{concepts} %with common properties
+    \item[Descriptive consistency relations] are \enquote{naturally} given when two metamodels represent common \emph{concepts} %with common properties
     redundantly or at least with dependent properties. This is, for example, the case for \ac{UML} class models and Java realizing \ac{OO}. %, and for \ac{UML} component models and \ac{PCM} models realizing a component concept.
     %They have to be expressed by transformations in a way that they describe the underlying consistency relations.
     \item[Normative consistency relations] prescribe consistency and %are induced by transformations and that 
-    do not exist \enquote{naturally}. This is especially the case if \metamodels represent different abstractions or domains of a system, which have no implicit relation, such as an \ac{ADL} and Java. % in our example.
+    do not exist \enquote{naturally}. This is especially the case if metamodels represent different abstractions or domains of a system, which have no implicit relation, such as an \ac{ADL} and Java. % in our example.
 \end{description}
 
-While descriptive consistency relations between two \metamodels are usually definite, such as those between \ac{OO} design in \ac{UML} and Java, normative consistency relations may vary depending on the project context.
+While descriptive consistency relations between two metamodels are usually definite, such as those between \ac{OO} design in \ac{UML} and Java, normative consistency relations may vary depending on the project context.
 For example, several possible relations can be defined between an \ac{ADL} and \ac{OO} design, for example the realization of each component as a class or as a complete project~\cite{langhammer2017a}.
 %$For example, the relation between \ac{OO} design in \ac{UML} and Java will usually be definite and not depend on the context, whereas there may be several possible relations between an \ac{ADL} and OO-design.
 %Depending on the context, a component could be realized by a class or a complete project, and a class realizing an architectural component may be placed anywhere or in a specific package, as discussed by \textcite{langhammer2017a}.
 
 Transformations for descriptive consistency relations implicitly encode %the preservation of consistency between 
 the common concepts.
-%Descriptive consistency relations base on the fact that different \metamodels represent similar or equal concepts.
+%Descriptive consistency relations base on the fact that different metamodels represent similar or equal concepts.
 %In consequence, transformations are supposed to define the preservation of consistency between those common concepts.
 %Instead of implicitly encoding those common concepts in transformations, 
-Instead, we propose to make these common concepts explicit in so-called \emph{\acfp{CMM}} and define relations between them and the concrete \metamodels.
+Instead, we propose to make these common concepts explicit in so-called \emph{\acfp{CMM}} and define relations between them and the concrete metamodels.
 We illustrate this in \autoref{fig:quality:concept_metamodel_integration}.
-The descriptive consistency relation \ref{fig:quality:concept_metamodel_integration:R1} is converted into a \ac{CMM} for the \metamodels \ref{fig:quality:concept_metamodel_integration:A} and \ref{fig:quality:concept_metamodel_integration:B} with new relations \ref{fig:quality:concept_metamodel_integration:R4} and \ref{fig:quality:concept_metamodel_integration:R5} between the concrete \metamodels and the \ac{CMM}.
-The existing normative consistency relations \ref{fig:quality:concept_metamodel_integration} and \ref{fig:quality:concept_metamodel_integration:R3} to \metamodel \ref{fig:quality:concept_metamodel_integration:C} are replaced by a new relation \ref{fig:quality:concept_metamodel_integration:R6} to the \ac{CMM}. % to the \metamodel \ref{fig:concept:C}.
+The descriptive consistency relation \ref{fig:quality:concept_metamodel_integration:R1} is converted into a \ac{CMM} for the metamodels \ref{fig:quality:concept_metamodel_integration:A} and \ref{fig:quality:concept_metamodel_integration:B} with new relations \ref{fig:quality:concept_metamodel_integration:R4} and \ref{fig:quality:concept_metamodel_integration:R5} between the concrete metamodels and the \ac{CMM}.
+The existing normative consistency relations \ref{fig:quality:concept_metamodel_integration} and \ref{fig:quality:concept_metamodel_integration:R3} to metamodel \ref{fig:quality:concept_metamodel_integration:C} are replaced by a new relation \ref{fig:quality:concept_metamodel_integration:R6} to the \ac{CMM}. % to the metamodel \ref{fig:concept:C}.
 The \ac{CMM} and its consistency relations have to be appropriately defined to replace the original ones, as depicted in \autoref{fig:quality:concept_metamodel_integration}. %, have to be fulfilled by appropriately defining the \ac{CMM}.
-It will be part of our research to figure out how to define such a \ac{CMM}, so that it can also be combined with other \metamodels. %, without estimating the additional information that may be necessary in the \ac{CMM} a-priori.
-While it basically has to contain the common concepts of the \metamodels sharing a descriptive consistency relations, it may also need to contain additional information depending on consistency relations to other \metamodels, which are not known a-priori.
+It will be part of our research to figure out how to define such a \ac{CMM}, so that it can also be combined with other metamodels. %, without estimating the additional information that may be necessary in the \ac{CMM} a-priori.
+While it basically has to contain the common concepts of the metamodels sharing a descriptive consistency relations, it may also need to contain additional information depending on consistency relations to other metamodels, which are not known a-priori.
 
 \begin{figure}
     \centering
     \input{figures/quality/concept_metamodel_integration.tex}
-    \caption{Definition of a concept \metamodel}
+    \caption{Definition of a concept metamodel}
     \label{fig:quality:concept_metamodel_integration}
     \todo{We can use this for showing how to integrate commonalities with ordinary direct relations, maybe there should be a section about that.}
 \end{figure}
 
 %%%As one concrete example, instead of specifying transformations between \ac{OO} design in \ac{UML} and Java, an OO-\ac{CMM}, with concepts like classes, inheritance and so on, and the relations of \ac{UML} and Java to this \ac{CMM} could be defined.
-% These concept \metamodels can be seen as additional \metamodels 
-% of \metamodels having inherent consistency relations explicit within a \ac{VOMM} and to define a mapping between concrete \metamodels and \acp{VOMM}. We claim that prescribed consistency is actually not specific for concrete \metamodels, but for concepts as represented by our \acp{VOMM}, which means that \metamodels with prescribed consistency relations can be kept consistent by specifying consistency preservation between their \acp{VOMM}. In our example, this means that consistency relations between \ac{PCM} and Java should be expressed as relations between OO and component concept. 
+% These concept metamodels can be seen as additional metamodels 
+% of metamodels having inherent consistency relations explicit within a \ac{VOMM} and to define a mapping between concrete metamodels and \acp{VOMM}. We claim that prescribed consistency is actually not specific for concrete metamodels, but for concepts as represented by our \acp{VOMM}, which means that metamodels with prescribed consistency relations can be kept consistent by specifying consistency preservation between their \acp{VOMM}. In our example, this means that consistency relations between \ac{PCM} and Java should be expressed as relations between OO and component concept. 
 
 %%%%% CBSE-EXAMPLE REMOVED!
 % In \autoref{fig:cmm_example}, we illustrate the usage of such \acp{CMM} to define an OO-concept and a concept for component-based architecture descriptions, relating component models of \ac{UML} and the \acf{PCM} to.
@@ -205,12 +205,12 @@ While it basically has to contain the common concepts of the \metamodels sharing
 % \end{figure}
 
 %\todoHeiko{Das mit der Baumstruktur ist ein Knackpunkt. Kommt der gut genug rüber?}
-% To avoid the drawbacks of transitive transformation execution between \acp{VOMM}, it is necessary that only one propagation path between two \metamodels exists. This requires to define \ac{VOMM} relations in a way such that they induce an an acyclic graph by also extracting common concepts of \acp{VOMM} in another \ac{VOMM}. 
+% To avoid the drawbacks of transitive transformation execution between \acp{VOMM}, it is necessary that only one propagation path between two metamodels exists. This requires to define \ac{VOMM} relations in a way such that they induce an an acyclic graph by also extracting common concepts of \acp{VOMM} in another \ac{VOMM}. 
 %In the example, the component \ac{VOMM} could be seen as an abstracted concept of the OO \ac{VOMM}. 
 % It will be part of our research to identify if such an ordering of concepts can be achieved in different case studies.
 
 %%% REMOVED THE FOLLOWING, AS NOT A RELEVANT "DRAWBACK"
-%Such \acp{CMM} are technically similar to introducing new \metamodels and defining transformations between them and existing \metamodels.
+%Such \acp{CMM} are technically similar to introducing new metamodels and defining transformations between them and existing metamodels.
 %Nevertheless, they are conceptually different.
 %First, they are supposed to be transparent to the user of the concrete models.
 %Additionally, 
@@ -218,23 +218,23 @@ This approach addresses all identified challenges % identified in \autoref{sec:a
 and solves them under the assumption that all consistency relations %of a system 
 are described using \acp{CMM}. %if their specification is encapsulated in a specialized language, our challenges identified in \autoref{sec:approach:challenges} can be addressed.
 %Under the assumption that all consistency relations of a system can be described using \acp{CMM}, we would be able to solve all identified challenges, as using \acp{CMM} allows to have the expressiveness of a graph of transformations, but abstracted to a tree structure with all its advantages.
-%We achieve \emph{uniqueness} by extracting common concepts into \acp{CMM} having to define only one relation of a \metamodel to the \ac{CMM}. 
+%We achieve \emph{uniqueness} by extracting common concepts into \acp{CMM} having to define only one relation of a metamodel to the \ac{CMM}. 
 We achieve inherent transformation compatibility by avoiding more than one transformation path %for the propagation of one change 
-between two \metamodels by design. %Therefore, it is necessary to define \acp{CMM} relations in a way such that they induce a tree by also extracting common concepts of \acp{CMM} in other \acp{CMM}.  
-Since \metamodels are only coupled across \acp{CMM} and thus represent leaves of the transformation tree, any subset of them can be selected, maximizing modularity. % can be performed in a concrete usage scenario, maximizing modularity.
+between two metamodels by design. %Therefore, it is necessary to define \acp{CMM} relations in a way such that they induce a tree by also extracting common concepts of \acp{CMM} in other \acp{CMM}.  
+Since metamodels are only coupled across \acp{CMM} and thus represent leaves of the transformation tree, any subset of them can be selected, maximizing modularity. % can be performed in a concrete usage scenario, maximizing modularity.
 %Finally, we assume that expressing consistency with explicit common concepts improves comprehensibility, %over combining binary consistency specifications
 %as it is a more natural representation and especially no transformations paths have to be traversed to understand a specific relation. % and expressing common information in common concepts is more natural than expressing it in transformations.
-%An approach of adding additional \metamodels is also shortly discussed in \cite{stevens2017a}, but with the focus on definability of multiary relations rather than the optimization regarding certain challenges.
+%An approach of adding additional metamodels is also shortly discussed in \cite{stevens2017a}, but with the focus on definability of multiary relations rather than the optimization regarding certain challenges.
 Finally, we assume that making common concepts explicit improves comprehensibility.
 
 The most crucial part of this approach is the necessity to build a tree of \acp{CMM}.
-This will not be possible if always considering whole \metamodels and their relations, but can be possible if independent concepts are extracted to be treated individually.
+This will not be possible if always considering whole metamodels and their relations, but can be possible if independent concepts are extracted to be treated individually.
 For that, we will apply our findings on consistency relation decomposition (see \autoref{chap:commonalities:approach}).
 %This is similar to decomposing consistency relations, as introduced in \autoref{sec:approach:decomposition}, which is why we will apply our findings therefrom.
 Additionally, the approach specifically aims to improve the specification of transformations for descriptive relations.
-In consequence, it must be combined with transformations expressing the normative relations between \acp{CMM} and other \metamodels.
+In consequence, it must be combined with transformations expressing the normative relations between \acp{CMM} and other metamodels.
 
-% Introduction of the \emph{MultiCons} approach for consistency between multiple, heterogeneous models with the specification of virtual overlap \metamodels.
+% Introduction of the \emph{MultiCons} approach for consistency between multiple, heterogeneous models with the specification of virtual overlap metamodels.
 
 % \begin{itemize}
 %     \item Why do we keep two models consistent?
@@ -243,11 +243,11 @@ In consequence, it must be combined with transformations expressing the normativ
 %         \item They represent different abstractions of or views on a system, but a prescription of consistency preservation rules exists. For example, for descriptions of the component-based software architecture with the Palladio Component Model (PCM) and Java code a consistency specification was developed by \textcite{langhammer2017a}.
 %     \end{enumerate}
 %     \item We call this overlap of information that is represented in several models and that requires consistency preservation a \emph{semantic overlap}, as models overlap because they contain information with the same or dependent semantics.
-%     \item Currently, consistency preservation tools require the specification of relations between two models, which implicitly defines the common properties. E.g. specifying the relations between Java code and UML class models implicitly contains a specification of the common properties of both \metamodels
+%     \item Currently, consistency preservation tools require the specification of relations between two models, which implicitly defines the common properties. E.g. specifying the relations between Java code and UML class models implicitly contains a specification of the common properties of both metamodels
 %     \item Idea: 
 %     \begin{enumerate}
-%         \item Make the common properties explicit in \emph{virtual overlap \metamodels (VOMMs)} and define how these properties map to the concrete properties of existing \metamodels
-%         \item Define consistency relations between \metamodels representing different abstractions or views on the systems between VOMMs rather than the actual \metamodels.
+%         \item Make the common properties explicit in \emph{virtual overlap metamodels (VOMMs)} and define how these properties map to the concrete properties of existing metamodels
+%         \item Define consistency relations between metamodels representing different abstractions or views on the systems between VOMMs rather than the actual metamodels.
 %     \end{enumerate}
 % \end{itemize}
 
@@ -256,13 +256,13 @@ In consequence, it must be combined with transformations expressing the normativ
 % Envisioned benefits of this approach are:
 % \begin{itemize}
 %     \item Reduction of risk of inconsistent consistency specifications by design and thus reductions of risk of propagation cycles: Refer to challenge in introduction
-%     \item Modular consistency specifications: Relations between two \metamodels are defined across VOMMs, such that single \metamodels can be omitted without losing necessary consistency relations (transitive relations)
-%     \item Comprehensibility: Defining common concepts and their relations is (hopefully) better comprehensible than defining relations between pairs of \metamodels
+%     \item Modular consistency specifications: Relations between two metamodels are defined across VOMMs, such that single metamodels can be omitted without losing necessary consistency relations (transitive relations)
+%     \item Comprehensibility: Defining common concepts and their relations is (hopefully) better comprehensible than defining relations between pairs of metamodels
 % \end{itemize}
 
 % Known drawbacks:
 % \begin{itemize}
-%     \item Specification is more elaborate in simple cases (two \metamodels only), as the VOMM has to be defined additionally
+%     \item Specification is more elaborate in simple cases (two metamodels only), as the VOMM has to be defined additionally
 %     \item 
 % \end{itemize}
 
@@ -277,10 +277,10 @@ In consequence, it must be combined with transformations expressing the normativ
 \label{chap:commonalities:approach}
 
 The state-of-the-art approach to keep models consistent automatically is the application of transformation languages.
-If instances of multiple (i.e., more than two) \metamodels are to be kept consistent, one can either use multidirectional transformation approaches, or compose bidirectional transformations to a network of transformations~\cite{cleve2019dagstuhl}.
+If instances of multiple (i.e., more than two) metamodels are to be kept consistent, one can either use multidirectional transformation approaches, or compose bidirectional transformations to a network of transformations~\cite{cleve2019dagstuhl}.
 % Following sentence moved to introduction
-%Such a network can be regarded as a graph, formed by \metamodels as its nodes and transformations as its edges.
-When an instance of one \metamodel is changed in such a network, the transformations are executed successively to propagate the change transitively across all models.
+%Such a network can be regarded as a graph, formed by metamodels as its nodes and transformations as its edges.
+When an instance of one metamodel is changed in such a network, the transformations are executed successively to propagate the change transitively across all models.
 There are strategies to find one ordering of transformations to apply~\cite{stevens2017a} and strategies to perform a fixpoint iteration until no further changes are conducted~\cite{klare2019icmt}.
 
 %Short introduction of transformation network, what nodes and edges are and so on.
@@ -298,11 +298,11 @@ This forms our contribution~\ref{contrib:approach}.
 
 \subsection{Making Common Concepts Explicit}
 
-The redundancies between different \metamodels are an expression of common concepts that are represented redundantly.
+The redundancies between different metamodels are an expression of common concepts that are represented redundantly.
 We already gave the example of a class in UML and Java, which are different representations of the common concept of a class in general object-oriented design.
 We propose to make common concepts explicit rather than encoding them into the rules of a transformation.
-This can be achieved by creating a \emph{\conceptmetamodel}, which defines those common concepts, and specifying the relations between the \conceptmetamodel and the existing \metamodels.
-We refer to the existing \metamodels as \emph{\concretemetamodels}.
+This can be achieved by creating a \emph{\conceptmetamodel}, which defines those common concepts, and specifying the relations between the \conceptmetamodel and the existing metamodels.
+We refer to the existing metamodels as \emph{\concretemetamodels}.
 The relation specifications can be used to derive transformations between the \concretemetamodels and the \conceptmetamodel.
 
 \autoref{fig:quality:commonalities_example} shows the \metaclasses for a \texttt{Class} as extracts of the \concretemetamodels for UML and Java and the \metaclass for the common concept of a \texttt{Class} in the \conceptmetamodel for object-oriented design.
@@ -320,8 +320,8 @@ In our simplified example, the relation would especially define that the names o
 \end{figure}
 
 When another \concretemetamodel that represents the same concepts shall be added, it is only necessary to define its relation to the \conceptmetamodel.
-For example, adding \cplusplus as another \metamodel representing object-oriented design would require the definition of the relation between the \texttt{Class} \commonality in object-oriented design and its representation in \cplusplus.
-Adding an additional \metamodel may require the \conceptmetamodel to be extended by \commonalities that were not relevant for the already considered \metamodels.
+For example, adding \cplusplus as another metamodel representing object-oriented design would require the definition of the relation between the \texttt{Class} \commonality in object-oriented design and its representation in \cplusplus.
+Adding an additional metamodel may require the \conceptmetamodel to be extended by \commonalities that were not relevant for the already considered metamodels.
 In general, a \conceptmetamodel has to contain \commonalities for redundancies in all \concretemetamodels, which---mathematically speaking---can be expressed as the union of all pairwise intersections of the \concretemetamodels.
 
 % Short description of the Commonalities concept and application to example (UML and Java classes, could e.g. be extended by C++)
@@ -332,7 +332,7 @@ In general, a \conceptmetamodel has to contain \commonalities for redundancies i
 
 \subsection{Composing \commonalities}
 
-We have explained how multiple \metamodels can be kept consistent using one \conceptmetamodel.
+We have explained how multiple metamodels can be kept consistent using one \conceptmetamodel.
 This allows, theoretically, the definition of one large \conceptmetamodel that contains all \commonalities for all \concretemetamodels.
 It would at first sight be similar to a \ac{SUMM}, as introduced by \textcite{atkinson2010a}.
 However, it would be less complex than a \ac{SUMM}, which is able to express all information about the software system and thus contains the union of all \concretemetamodels.
@@ -352,7 +352,7 @@ Consider the \conceptmetamodel for component-based design in \autoref{fig:qualit
 It contains the \commonality \texttt{Component}, which is represented by an equally named \metaclass in \ac{PCM},
 as well as in the \commonality \texttt{Class} in the \conceptmetamodel for object-oriented design, conforming to the relations proposed by \textcite{langhammer2015a}.
 This induces a tree structure with \commonalities as inner nodes and \metaclasses of \concretemetamodels as leaves.
-With such a composition structure, a \emph{«manifests»} relation may not only exist between a %concrete and a concept \metamodel but also between two \conceptmetamodels.
+With such a composition structure, a \emph{«manifests»} relation may not only exist between a %concrete and a concept metamodel but also between two \conceptmetamodels.
 \commonality of a \conceptmetamodel and a \metaclass in a \concretemetamodel but also between two \commonalities.
 However, a concrete or \conceptmetamodel that is lower in the hierarchy is supposed to represent how a \metaclass or \commonality in the higher one manifests, which is why we call it a \emph{manifestation}.
 %Due to that, we call concrete and \conceptmetamodels that contain \metaclasses or \commonalities with a \emph{«manifests»} relation to another \conceptmetamodel a \emph{manifestation} of that \conceptmetamodel.
@@ -383,25 +383,25 @@ However, This still induces a tree structure between \metaclasses and \commonali
 % \end{figure}
 
 %Since we only assume a tree of \commonalities,  rather than a tree of \conceptmetamodels, 
-A \metamodel may have several \commonalities in different \conceptmetamodels with different other \metamodels.
-For example, in \autoref{fig:quality:composed_commonalities_example}, the UML \metamodel contains a \texttt{Class} and a \texttt{Component} \metaclass, which have two different \commonalities in two different \conceptmetamodels.
+A metamodel may have several \commonalities in different \conceptmetamodels with different other metamodels.
+For example, in \autoref{fig:quality:composed_commonalities_example}, the UML metamodel contains a \texttt{Class} and a \texttt{Component} \metaclass, which have two different \commonalities in two different \conceptmetamodels.
 
 %We currently assume that all concept metamodels and relations to their manifestations can be represented as a tree.
 % In general, %, this will not be possible, 
 % the assumption of having a tree of \conceptmetamodels may not be satisfiable if
-% \metamodels have several \commonalities with different \metamodels.
+% metamodels have several \commonalities with different metamodels.
 % In fact, we can relax that assumption: 
 % The essential requirement is that each change is only propagated across one path between two models, which is inherently given in a tree.
-% If the \commonalities of two \conceptmetamodels manifest in disjoint sets of elements of the same manifestation, that manifestation can be---virtually---separated into two \metamodels, for which the network forms a tree again.
+% If the \commonalities of two \conceptmetamodels manifest in disjoint sets of elements of the same manifestation, that manifestation can be---virtually---separated into two metamodels, for which the network forms a tree again.
 % In consequence, if we consider the transformations as directed edges from a \conceptmetamodel to its manifestations, we only have to require a \ac{DAG}, % induced by these edges, 
 % as long as the manifestations of all \commonalities are disjoint.
 % %If we consider the transformations as directed edges from a \conceptmetamodel to its manifestations, we only have to require a \ac{DAG} induced by these edges, as long as the \conceptmetamodels represent disjoint sets of elements of their manifestations.
 % %This relaxation is possible due to the fact that the essential requirement is to have only one path between two models across which a change can be propagated.
-% %If different \conceptmetamodels relate to disjoint parts of their manifestations, these manifestations can be virtually separated into different \metamodels, which then form a tree again.
+% %If different \conceptmetamodels relate to disjoint parts of their manifestations, these manifestations can be virtually separated into different metamodels, which then form a tree again.
 % \autoref{fig:dag_example} exemplifies this relaxation: % on our running example:
 % If the UML is also considered a manifestation of component-based design by providing the \texttt{Component} \metaclass, the network does not constitute a tree because of the relations between the UML and the \conceptmetamodels for component-based design and object-oriented design.
-% However, it forms a \ac{DAG} and the redundant paths to the UML \metamodel are unproblematic, because the relation to object-oriented design affects the part of the UML \metamodel considering classes (\emph{Class}), whereas the relation to component-based design affects the part of the UML \metamodel considering components (\emph{Comp}). 
-% The elements in these parts of the UML \metamodel are disjoint.
+% However, it forms a \ac{DAG} and the redundant paths to the UML metamodel are unproblematic, because the relation to object-oriented design affects the part of the UML metamodel considering classes (\emph{Class}), whereas the relation to component-based design affects the part of the UML metamodel considering components (\emph{Comp}). 
+% The elements in these parts of the UML metamodel are disjoint.
 
 \subsection{Transformation Operationalization}
 \label{sec:approach:operationalization}
@@ -410,7 +410,7 @@ To actually keep models consistent, the specification of a hierarchy of \concept
 Two options for operationalization can be distinguished:
 
 \begin{description}[leftmargin=\parindent]
-    \item[\Conceptmetamodels as additional \metamodels:] The specified \conceptmetamodels are actually instantiated and the transformations are executed as they are defined between the \conceptmetamodels and their manifestations. In consequence, instances of the \conceptmetamodels have to be maintained.
+    \item[\Conceptmetamodels as additional metamodels:] The specified \conceptmetamodels are actually instantiated and the transformations are executed as they are defined between the \conceptmetamodels and their manifestations. In consequence, instances of the \conceptmetamodels have to be maintained.
     \item[Transformations between \concretemetamodels:] The \conceptmetamodels and the relations between them and their manifestations are used to derive bidirectional transformations between the \concretemetamodels. For example, from the \conceptmetamodel for object-oriented design in \autoref{fig:quality:commonalities_example}, a bidirectional transformation between Java and UML is derived.
 \end{description}
 
@@ -418,8 +418,8 @@ A drawback of the first option is that additional models have to be managed and 
 In consequence, the user has to version these models although they should be transparent to him or her, as long as no appropriate framework abstracts from such tasks.
 %Additionally, it is not easily possible to derive the direct relations between two concrete metamodels from such a specification. For example, the direct relation between classes in UML and Java is not accessible but only implicitly expressed by the transitive relation across the concept metamodel for object-oriented design.
 A drawback of the second option is that the types of supported relations that can be described in the transformations are limited.
-First, only relations may be defined that can be composed with any other relation, such that a direct transformation between two \metamodels can be derived.
-Second, it is possible to define $n$-ary relations between more than two \metamodels that cannot be decomposed into binary relations between them, but only into $n$ binary relations between those \metamodels and an additional one~\cite{stevens2017a}.
+First, only relations may be defined that can be composed with any other relation, such that a direct transformation between two metamodels can be derived.
+Second, it is possible to define $n$-ary relations between more than two metamodels that cannot be decomposed into binary relations between them, but only into $n$ binary relations between those metamodels and an additional one~\cite{stevens2017a}.
 In consequence, the first option provides higher expressiveness.
 
 While the first option can be realized without an additional language by just defining the \conceptmetamodels and the transformations with existing languages, the second option requires a mechanism that generates the transformations between the \concretemetamodels from those between the \conceptmetamodels and their manifestations.
@@ -429,8 +429,8 @@ While the first option can be realized without an additional language by just de
 \label{sec:approach:benefits}
 
 We suppose the \commonalities approach to provide two kinds of benefits:
-First, we expect that it improves understandability of relations between \metamodels, because common concepts are not encoded in transformations implicitly but modelled explicitly.
-This is even a benefit if instances of only two \metamodels shall be kept consistent.
+First, we expect that it improves understandability of relations between metamodels, because common concepts are not encoded in transformations implicitly but modelled explicitly.
+This is even a benefit if instances of only two metamodels shall be kept consistent.
 Second, it reduces problems that can occur if several bidirectional transformations are combined into a network of transformations to keep multiple models consistent.
 
 % Two types of benefits:
@@ -456,13 +456,13 @@ Second, it reduces problems that can occur if several bidirectional transformati
         \subcaption{Tree}
         \label{fig:quality:topologies:tree}
     \end{minipage}
-    \caption{Extremes of transformation network topologies: nodes represent \metamodels, edges represent transformations (\conceptmetamodels in a tree of \commonalities in dark gray), adapted from \cite{klare2018docsym}}
+    \caption{Extremes of transformation network topologies: nodes represent metamodels, edges represent transformations (\conceptmetamodels in a tree of \commonalities in dark gray), adapted from \cite{klare2018docsym}}
     \label{fig:quality:topologies}
 \end{figure}
 
 Networks of transformations can have two extremes of topologies, as depicted in \autoref{fig:quality:topologies}.
-If transformations between all \metamodels are defined, the network forms a dense graph (see \autoref{fig:quality:topologies:full}).
-In contrast, if there exists exactly one path of transformations between each pair of \metamodels, the network forms a tree (see \autoref{fig:quality:topologies:tree}).
+If transformations between all metamodels are defined, the network forms a dense graph (see \autoref{fig:quality:topologies:full}).
+In contrast, if there exists exactly one path of transformations between each pair of metamodels, the network forms a tree (see \autoref{fig:quality:topologies:tree}).
 Several properties for such %transformation 
 networks have been identified by \textcite{gleitze2017a} and \textcite{klare2018docsym}.
 Two essential properties %, defined in \cite{klare2018docsym}, 
@@ -475,17 +475,17 @@ If a class in Java and UML realizes a \ac{PCM} component, it shall have the same
 If transformations realize the three relations between \ac{PCM}, UML and Java, and the one between \ac{PCM} and Java adds that suffix whereas the one between \ac{PCM} and UML omits it, the constraints can never be fulfilled.
 %If the three relations between Java, UML and \ac{PCM} are defined in transformations and the one between \ac{PCM} and Java adds that suffix whereas the one between \ac{PCM} and UML omits it, the constraints can never be fulfilled.
 In that case, the transformations are considered incompatible.
-Incompatibility may arise whenever more than one transformation path between two \metamodels exists.
+Incompatibility may arise whenever more than one transformation path between two metamodels exists.
 In consequence, compatibility cannot be guaranteed in dense network, whereas it is inherently high if the network forms a tree.
-\emph{Modularity} means that any subset of the \metamodels can be used without loosing consistency because of missing transformations.
-Modularity is high if any \metamodel can be removed from the network and the remaining transformations still define consistency between all remaining \metamodels.
-In consequence, modularity is high in a dense network, because all \metamodels are directly related, while it is low if the network is a tree, because inner nodes cannot be removed without their children not being related by a transformation anymore.
-Since redundant paths between \metamodels improve modularity but reduce compatibility, these properties are inherently contradicting.
+\emph{Modularity} means that any subset of the metamodels can be used without loosing consistency because of missing transformations.
+Modularity is high if any metamodel can be removed from the network and the remaining transformations still define consistency between all remaining metamodels.
+In consequence, modularity is high in a dense network, because all metamodels are directly related, while it is low if the network is a tree, because inner nodes cannot be removed without their children not being related by a transformation anymore.
+Since redundant paths between metamodels improve modularity but reduce compatibility, these properties are inherently contradicting.
 
-The \commonalities approach improves both these properties due to the fact that additional \metamodels are introduced in the specification.
+The \commonalities approach improves both these properties due to the fact that additional metamodels are introduced in the specification.
 The transformations between \metaclasses in \concretemetamodels and \commonalities in \conceptmetamodels induce a tree, thus compatibility is high.
-Additionally, only the leaves of the tree are \concretemetamodels, which are actually used to describe a system and whose instances are modified, whereas the inner nodes only represent auxiliary \metamodels, exemplarily marked in \autoref{fig:quality:topologies:tree}. 
-In consequence, taking an arbitrary subset of \concretemetamodels removes only leaves and can thus be done without removing any transformations that are necessary to keep instances of the remaining \metamodels consistent.
+Additionally, only the leaves of the tree are \concretemetamodels, which are actually used to describe a system and whose instances are modified, whereas the inner nodes only represent auxiliary metamodels, exemplarily marked in \autoref{fig:quality:topologies:tree}. 
+In consequence, taking an arbitrary subset of \concretemetamodels removes only leaves and can thus be done without removing any transformations that are necessary to keep instances of the remaining metamodels consistent.
 This constitutes a major benefit of the \commonalities approach as compared to ordinary networks of transformations.
 
 
