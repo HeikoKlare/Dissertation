@@ -3,9 +3,386 @@
 }
 \label{chap:correctness_evaluation}
 
+\todo{Discuss that the formalism is proven correct. We only valide the error classification and the prevention strategies.}
+
+\section{Decomposition}
+\begin{copiedFrom}{SoSym MPM4CPS}
+
+We have conducted a case study to evaluate correctness and applicability of our approach.
+The evaluation focuses on the appropriate operationalization of the formal approach, which is proven correct, and its practical applicability in terms of providing an appropriate level of conservativeness. This defines our contribution \ref{contrib:evaluation}.
+
+
+
+\subsection{Goals}
+
+\paragraph{Correctness}
+Correctness of our approach means that it is able to classify a given set of consistency relations as compatible or otherwise does not reveal a result.
+This especially means that it operates conservatively.
+The formal approach presented in \autoref{chap:formal:approach} is proven correct by \autoref{theorem:redundancycompatibility}, \autoref{theorem:treecompatibility} and \autoref{corollary:transitiveredundancycompatibility}, such that we do not need to further evaluate its correctness.
+For that reason, the correctness evaluation focuses on the operationalized approach presented in \autoref{chap:prevention:compatibility} and \autoref{chap:prevention:compatibility:redundancies}.
+We investigate whether the operationalized approach reveals expected results, indicating that the mapping of our formalism to QVT-R is correct, and especially that it operates conservatively.
+
+\paragraph{Applicability}
+Since the approach defines a fully automated algorithm, which does not require further input apart from the QVT-R relations to check, applicability may only be restricted by inadequate outputs, which are correct but not useful for the user.
+In consequence, we consider applicability of our approach especially in terms of the practicality regarding its degree of conservativeness.
+If the approach is not able to identify compatibility in too many cases, in which relations are actually compatible, applicability would be limited.
+For that reason, we aimed to identify in how many cases the approach is not able to prove compatibility although compatibility is given, and what the reasons for those results are.
+It is of special interest whether those are conceptual issues of the formal approach or a limitation of the operationalization that may be fixed by other realization approaches.
+
+% \begin{itemize}
+%     \item Correctness: Focused on operationalized approach, since formal approach is proven correct: Show that algorithm reveals expected results, which indicates that the mapping of the formalism to QVT-R is correct and conservative as expected and that the implementation is correct.
+%     \item Applicability: Show practical applicability of the overall approach, especially regarding the degree of conservativeness. Applicability is restricted if the approach does not reveal a result although the relation are compatible in too many cases.
+%     We will also consider the reasons for those non-results, i.e. whether it is a conceptual issue of the formal approach or a limitation of the operationalization.
+% \end{itemize}
+
+\subsection{Methodology}
+\label{sec:evaluation:methodology}
+
+To empirically evaluate correctness and applicability of our approach, we developed a prototypical implementation and applied it to exemplary case studies.
+We give an overview of that prototype in the subsequent subsection.
+\autoref{tab:scenarios} summarizes the case studies to which we applied the approach.
+Each of those scenarios consists of three or four metamodels and especially comprises primitive data types and operations.
+They were specifically developed to evaluate our approach by defining as many kinds of relations that can be expressed with QVT-R as possible, thus also reflecting edge cases.
+
+\begin{table}
+    \centering
+    \renewcommand{\arraystretch}{1.2}%
+    %\rowcolors{2}{white}{gray!15}
+    \setlength\tabcolsep{4 pt}
+    \begin{tabular}{L{0.5cm} L{7.5cm} C{2cm}}
+        \toprule
+        \textbf{\#} & \textbf{Scenario Description} & \textbf{Compatible} \\
+        \midrule
+        1 & Three equal String attributes of three metamodels & \cmark\\
+        2 & Six equal String attributes of three metamodels & \cmark\\
+        3 & Concatenation of two String attributes & \cmark\\
+        4 & Double concatenation of four String attributes & \cmark\\
+        5 & Substring in a String attribute & \cmark\\
+        6 & Substring in a String attribute with precondition & \cmark\\
+        7 & Precondition with all primitive datatypes & \cmark\\
+        8 & Absolute value of Integer attribute with precondition & \cmark\\ 
+        9 & Transitive equality for three Integer attributes & \cmark\\
+        10 & Inequalities for three Integer attributes & \cmark\\
+        11 & Contradictory equalities for three Integer attributes & \xmark\\
+        12 & Contradictory inequalities for three Integer attributes & \xmark\\
+        13 & Constant property template items & \cmark\\
+        14 & Linear equations with three Integer attributes & \cmark\\ 
+        15 & Contradictory linear equations for three Int. attributes & \xmark\\
+        16 & Emptiness of various OCL sequence and set literals & \xmark\\
+        17 & Equal String attributes for four metamodels & \cmark\\
+        18 & Transitive inclusions in sequences & \cmark\\
+        19 & Comparison of role names in three metamodels & \cmark\\
+        \bottomrule
+    \end{tabular}
+    \caption{Example scenarios of consistency relations and their compatibility property, from \cite{pepin2019ma}}
+    \label{tab:scenarios}
+\end{table}
+
+%%
+%% Description of scenarios, definition of ground truth
+%%
+We developed 14 compatible and four incompatible transformations, according to our \autoref{def:compatibility} for compatibility.
+Thus, we know the ground truth regarding compatibility of transformations for each scenario by construction.
+Applying our prototypical implementation to those scenarios classifies them as compatible (\emph{positives}) or makes no statement about compatibility (\emph{negatives}), i.e., they could either be compatible or not.
+Considering which of the results are actually correct gives us insights on correctness and applicability.
+
+%%
+%% Correctness interpretation of metrics
+%%
+The approach is correct, which especially means that it operates conservatively, if it does not classify any transformation networks as compatible although they are not.
+This means that no \emph{false positives} are allowed to occur or otherwise the approach would, per definition, be incorrect.
+In other words, the \emph{precision} of the approach has to be 1:
+\begin{align*}
+    \formulaskip &
+    Precision = \frac{\mathtext{true positives}}{\mathtext{true positives + false positives}}
+\end{align*}
+%If there are any false positives, the approach is, by definition, not correct.
+
+%%
+%% Applicability interpretation of metrics
+%%
+Applicability of the approach depends on the degree of conservativeness, i.e., in how many cases it does not identify a transformation network as compatible although it is.
+This is reflected by the number of \emph{false negatives} and, when compared to the \emph{true positives} known as the \emph{recall}, gives insights on the degree of conservativeness:
+\begin{align*}
+    &
+    Recall = \frac{\mathtext{true positives}}{\mathtext{true positives + false negatives}}
+\end{align*}
+A high recall value indicates high applicability of the approach in terms of not being too conservative.
+
+%\begin{itemize}
+    %\item Apply a prototypical implementation of the approach to exemplary case studies.
+    %\item Scenarios are summarized in \autoref{tab:scenarios}, composed of 3 or 4 metamodels, primitive data types and operations.
+    %\item Scenarios only reflect supported QVT-R and OCL constructs, for which an analysis is implemented yet.
+    %\item Define ground truth manually, labeling the inputs with being compatible or not, according to manually checking the definition.
+    %\item We consider positives as relation sets classified as compatible and negatives as those for which no statement about compatibility is made (they may be incompatible, but could also be compatible -- conservativeness)
+    %\item Evaluate results regarding precision (must be 1 if approach is correct): $\frac{true positives}{true positives + false positives}$ -- if there are any false positives, the approach is not correct
+    %\item Evaluate results regarding recall: $\frac{true positives}{true positives + false negatives}$ -- false negatives are which are not classified although they are compatible, i.e. they are those which are not identified as compatible due to the approach being conservative.
+    %\item High recall indicates high applicability, as there are few scenarios in which compatibility is not identified.
+%\end{itemize}
+
+
+\subsection{Prototypical Implementation}
+\label{sec:evaluation:prototype}
+
+The decomposition procedure presented in Sections \ref{chap:prevention:compatibility} and~\ref{chap:prevention:compatibility:redundancies} resulted in the implementation of a prototype, which is available on GitHub~\cite{decompositionGithub}. The formal approach of this paper addresses a common problem in the development of cyber-physical systems: inconsistencies lead to the development of incompatible artifacts, which in turn can lead to unexpected behavior. Therefore, the practicality of our approach matters. A tool for proving compatibility could be easily integrated into the development process of a transformation network in order to assist developers and domain experts.
+
+\subsubsection{Features}
+
+The implementation of the procedure takes a set of \qvtr transformations as an input and outputs a list of redundant \qvtr relations. This list must be compared to the initial consistency specification. There are two scenarios: either the delivered specification %without redundant relations 
+forms a consistency relation tree or there are still cycles left. % after the procedure. 
+In the former case, compatibility is proven. In the latter case, remaining cycles require the developer's attention. This may be due to incompatibility or the inability of the procedure to prove redundancy.
+
+In addition to the features of the procedure, the prototype provides an input validation. There are two reasons why a consistency specification may cause the procedure not to operate correctly. First, specifications can be composed of not well-formed transformations, i.e., \qvtr transformations that are syntactically incorrect. In this case, the specification is not usable and the procedure immediately exits. There is another scenario: specifications that are well-formed but not valid. For example, this occurs when two transformations have the same name or when a \qvtr domain pattern uses a nonexistent class. Although this scenario is non-blocking, i.e., the decomposition procedure still produces a result, the output must be interpreted with caution. To assist the developer, the procedure displays semantic errors in the specification at the beginning of the parsing. In the end, the procedure is intended to be non-intrusive, i.e., it is does not alter any artifact and can be used at any moment during the development process, i.e., by logging its results.
+
+\subsubsection{Implementation}
+
+Technical choices are mostly driven by the support of model-driven engineering technologies. One important initiative to this end is the \ac{MDA}~\cite{mda}. %, an approach of the Object Management Group. 
+The decomposition procedure makes use of many specifications recommended by the MDA, including \qvtr for the definition of transformations, \ac{EMOF} for metamodels~\cite{mof} and OCL for constraints over metamodels~\cite{ocl}. Eclipse provides an implementation of these languages within the \ac{EMF}~\cite{steinberg2009emf}. As a consequence, metamodels of the decomposition procedure are implemented using \textit{Ecore}, a meta-metamodel that is compliant with \ac{EMOF}. EMF supports a number of model-to-model transformation languages through the \textit{Eclipse MMT} project. In particular, the \textit{QVT Declarative} (QVTd) component provides a parser for QVT-R transformations. As QVT-R relies on OCL, QVTd makes use of \textit{Eclipse OCL}, an implementation of the OCL language.
+
+Regarding the strategy for redundancy testing, the implementation of the decomposition procedure requires the use of an SMT solver. Most SMT solvers are based on SMT-LIB, an initiative that provides a common input/output language for SMT instances. The prototype relies on the Z3 theorem prover, an SMT solver with a Java binding and a large number of theories supported~\cite{z32008}.
+
+% \todo[inline, color=kit-orange100]{footnote/ref > github URL?}
+%% Conservativeness, etc.
+
+% \begin{itemize}
+%     \item \textbf{Prototype}. We developed an implementation of the decomposition procedure using:
+%         \begin{itemize}
+%             \item QVTd, a partial implementation of QVT-R and QVT-C in Eclipse MMT
+%             \item Z3, an automated theorem prover
+%         \end{itemize}
+% \end{itemize}
+
+
+\subsection{Results}
+
+In the following, we present the results of our evaluation regarding the methodology proposed in \autoref{sec:evaluation:methodology} applied to the prototypical implementation introduced in \autoref{sec:evaluation:prototype}.
+The classification results are summarized in \autoref{tab:classificationresults}.
+
+\begin{table}
+    \centering
+    \renewcommand{\arraystretch}{1.4}%
+    \setlength\tabcolsep{4 pt}
+    \begin{tabular}{L{2.2cm} C{3cm} C{2.3cm}}
+        \toprule
+         & \textbf{Classified Compatible} & \textbf{Unclassified} \\
+         \midrule
+         \textbf{Compatible} & 12 & 4\\
+         \textbf{Incompatible} & 0 & 3\\
+         \bottomrule
+    \end{tabular}
+    \caption{Number of scenarios from \autoref{tab:scenarios} regarding actual compatibility and their classification by our approach.}
+    \label{tab:classificationresults}
+\end{table}
+
+\subsubsection{Correctness}
+As discussed before, the correctness of our approach in terms of conservative behavior is proven for the formal approach by construction.
+Since the operationalized approach is based on that formalization, correctness is also given by construction provided that the following requirements are fulfilled:
+\begin{enumerate}
+    \item All relevant QVT-R relations are considered, i.e., all QVT-R relations are represented in the property graph to be considered as consistency relations to be checked.
+    \item Consistency rules in QVT-R are defined using variables, so all constructs referring to these variable have to be considered. This especially means that all  template expressions need to be considered for the property graph construction, namely property template items, preconditions and invariants.
+\end{enumerate}
+
+We ensured that all these relevant elements are considered by construction of the approach discussed in \autoref{chap:prevention:compatibility} and \autoref{chap:prevention:compatibility:redundancies}.
+However, the results of the case study further validate that we did not miss any relevant parts of QVT-R relations.
+In fact, the results summarized in \autoref{tab:classificationresults} show that we have a precision of 1, thus having no incompatible scenarios classified as compatible by error:
+
+\begin{align*}
+    &
+    Precision = \frac{\mathtext{true positives}}{\mathtext{true positives + false positives}} = \frac{12}{12+0} = 1
+\end{align*}
+
+
+\subsubsection{Applicability}
+
+Applicability of the presented approach depends on its degree of conservativeness.
+If it is not able to prove compatibility of compatible transformation networks in too many cases, applicability is reduced.
+In general, the conservative behavior results especially from two reasons:
+\begin{enumerate}
+    \item \autoref{def:leftequalredundancy} for left-equal redundancy, which is used to prove compatibility of a network, may be a too strong requirement for identifying compatibility-preserving consistency relations.
+    \item Consistency relations as defined in \autoref{def:consistencyrelation} are extensional specifications and thus usually enumerate infinite sets of elements, which are impossible to compare programmatically.
+    For that reason, our operationalized approach relies on intensional specifications, which describe how consistent pairs of elements can be derived.
+    These specifications are written in OCL. 
+    However, OCL in general is undecidable, because it can be transformed into first-order logic~\cite{beckert2002ocltranslation}.
+\end{enumerate}
+%%
+%% Discussion of OCL analyzability
+%%
+Especially formulae that contain many quantifiers are hard to analyze.
+For that reason, the number of variables used in a consistency relation is crucial, as these variables are translated to existentially quantified formulae.
+Although not all available OCL constructs might be necessary to describe relevant consistency relations, constructs involving operations on sets and strings are problematic.
+Operation collections are transferred to quantified formulae, which are hard to analyze.
+Reasoning about strings is problematic, because some OCL operations like \texttt{toUpper} and \texttt{toLower} cannot be easily transferred to state-of-the-art SMT solvers like Z3 and thus cannot be considered for detecting redundancy.
+Furthermore, SMT solvers use heuristics, so it not possible to formally evaluate which kinds of relations can be analyzed.
+
+%\begin{itemize}
+    %\item Relations are usually infinite sets of elements, which are impossible to compare programmatically. For that reason, the operationalized approach uses intensional specifications of element instances and consistency relations (written in OCL). In general, it is impossible to ensure that an OCL expression matches a specification -- undecidability: OCL can be transformed to first-order logic~\cite{beckert2002translating}.
+    %\item Limitation also concerns relations that are recurring in practice, e.g. reasoning about strings, such as OCL operations \texttt{toUpper} and \texttt{toLower}, which cannot be easily transferred to state-of-the-art SMT solvers like Z3.
+    %\item SMT solvers use heuristics, so it is not possible to clearly state which kinds of relations can be analyzed and which may not.
+    %\item Problematic are, among others, operations on collections (transferred to quantifiers which are hard to analyze).
+    %\item Number of variables is relevant, because they are existentially quantified, so more 
+%\end{itemize}
+
+%%
+%% Recall results
+%%
+Applying the prototypical implementation of our approach to the scenarios introduced in \autoref{sec:evaluation:methodology} led to the result that twelve of the 15 compatible transformation networks were correctly classified as compatible, whereas three were not.
+This leads to a recall value of 80\%.
+\begin{align*}
+    &
+    Recall = \frac{\mathtext{true positives}}{\mathtext{true positives + false negatives}} = \frac{12}{12+3} = 0.8
+\end{align*}
+%
+% Individual scenario discussion
+%
+% False negatives: Scenarios 8/18/19
+% \begin{itemize}
+%     \item All scenarios were not identified compatible although they are
+%     \item In all cases, the SMT solver returned \emph{unknown} although he should have returned \emph{unsat}, thus an actually redundant consistency relation was not removed and the consistency relation set was not considered compatible by mistake
+%     \item In all cases, set operations were involved
+%     \item More precisely, in scenario 8 a precondition checks that an element is included in the intersection of two set literals, which the solver was not able to check properly
+%     \item In Scenario 18, transitive inclusion of sets was defined, which the solver was not able to check properly
+%     \item Scenario 19 is comparable to scenario 18 but considers role names of classes with equivalent identifiers, which the solver was also not able to check properly.
+% \end{itemize}
+The three scenarios that were not classified, although they are actually compatible, are Scenarios 8, 18 and 19 from \autoref{tab:scenarios}.
+In all cases, the SMT solver returned \emph{unknown}, although it should have returned \emph{unsatisfiable}.
+In consequence, in each case an actually consistent consistency relation was not removed, thus the set of relations was not considered compatible although it is.
+More precisely, in scenario 8, a precondition ensures that an element is included in the intersection of two set literals, which the solver was not able to check properly.
+Scenarios 18 and 19 were problematic due to comparable reasons.
+While in Scenario 18 the transitive inclusion of sets was defined, Scenario 19 considers role names of classes with equivalent identifiers, which both the solver was not able to check properly.
+All observed false negatives were due to reasons of undecidability of the translation of OCL constructs to first-order logic.
+
+%%
+%% Summary: Limitations arise from SMT solver
+%%
+To summarize, we found that basic operations on primitive data types, even with non-trivial constraints involving integer equations and string operations, were treated correctly.
+More complex operations and structures requiring many quantifiers led to unprovability by the SMT solver, especially concerning collection operations and role names.
+%In consequence, the reasons for conservative behavior in all cases were limitations of the chosen SMT solver approach, rather than the concept of either the formalized or the operationalized approach.
+Thus, the approach is especially applicable for consistency relations concerning attributes and primitive types.
+However, this limitation does only concern the chosen SMT solver approach, but neither the concept of operationalization nor of the formal framework behind it.
+We did especially not find a scenario, in which our definition of left-equal redundancy was too strict for proving compatibility.
+
+
+\subsection{Discussion}
+
+%%
+%% Benefits of the approach
+%%
+The presented approach aims to support developers of transformation networks to independently develop individual transformations, i.e., parts of the network, without aligning the consistency relations on which the transformations are based a priori, but allows them to check their compatibility during or after development.
+For that reasons, it provides a benefit by automating a process that currently requires manual effort by either aligning consistency relations with each other or by defining test cases, which are able to validate but not to verify compatibility, i.e., which cannot make any all-quantified statements about compatibility.
+Even if the approach had a high degree of conservativeness, the approach would be beneficial for the combination of independently developed transformation.
+First, there is still a chance that the approach is able to prove compatibility for a given set of relations.
+Second, if the approach is not able to prove compatibility, it may still find some redundant relations and thus reduces the effort for the user to investigate the remaining relations for contradictions.
+It would even be possible to define an interactive approach, combining the removal of redundant relations by proof and by user decision, as we will propose in \autoref{sec:futurework:compatibilityprocess}.
+%
+In the following, we discuss threats to the validity of our evaluation and discuss limitations of both the approach and our evaluation.
+
+%\subsubsection{Algorithmic Degrees of Freedom}
+%Discuss different possibility for decomposition and problem regarding "false" decompositions.
+
+
+\subsubsection{Threats to Validity}
+
+Although we designed our evaluation in a way such that it gives us appropriate insights on correctness and applicability of the approach, there may be limitations regarding its internal and external validity. %, especially arising from the case studies.
+
+%\paragraph{Internal Validity}
+\paragraph{Scenario Selection}
+We developed the scenarios specifically for the evaluation of our approach.
+Due to that reason, they may not be sufficiently representative for actual transformation networks. 
+However, the scenarios were specifically designed to test different aspects of the approach.
+They represent an extensive set of consistency relations and especially different types of relations, also considering edge cases that may be rare in practical scenarios.
+That even provides a benefit regarding practical consistency relation specifications.
+
+\paragraph{Scenario Complexity}
+The scenarios only comprise OCL constructs that are currently supported by our approach.
+This may be a bias, because unsupported constructs are not covered by the evaluation.
+However, the algorithm would not deliver any results in such scenarios anyway, thus applying it to them would not give further insights.
+Additionally, the unsupported constructs are only a limitation of the current implementation and not a conceptual limitation of the approach.
+Finally, the limitation in complexity of the relations may also lead to the fact that we do not cover cases that actually occur in practice but for which our definition for redundancy is too strong to prove compatibility.
+This is an actual limitation that has to be considered in further evaluations.
+
+\paragraph{Scenario Size}
+The considered scenarios are rather small, as they only consider up to four metamodels and only few consistency relations.
+Actual consistency relations will involve larger metamodels and consistency relations.
+However, the inductive characteristics of our approach makes it independent from the number of metamodels and relations to consider.
+One property affected by the scenario size is the performance of the approach, which we discuss in \autoref{sec:evaluation:limitations}.
+
+% In consequence, some of these scenarios may be rare in practice, such that 
+% Scenario selection (artifical): Scenarios were specifically developed to test different aspects of the operationalized approach. Thus, they may not be representative for actual specifications used in transformation networks.
+% But: Scenarios provide an extensive set of relations, concerning different types of relations and as different scenarios as possible. Some of the scenarios may be rare in practice, even giving a benefit explicitly specifying them.
+% Discuss: Especially affects appropriateness of redundancy definition (relations not complex enough)
+
+% Scenario size: Scenarios are rather small (few metamodels and relations). Actual scenarios might involve more metamodels and/or relations
+% But: Inductive character of the approach makes it independent from the number of metamodels and relations.
+% Size may only affect performance.
+
+% Scenarios limited to supported constructs: May be a bias that unsupported QVT-R and OCL operations are not covered by the scenarios.
+% But: Would not make sense, since the algorithm does not deliver any results for such relations.
+% But: Is not a conceptual limitation but only a limitation of the current implementation.
+
+\paragraph{Conclusion}
+In consequence, our evaluation only gives an initial indicator for the applicability of our approach due to the limited set and complexity of scenarios.
+To improve evidence in external validity, applying the approach to further, more practical transformation networks would be beneficial.
+However, acquiring such a networks is difficult.
+At least existing networks contain transformations that are aligned with each other and thus do not allow to validate cases in which consistency relations are actually incompatible.
+It may be possible to reduce that problem by taking existing sets of consistency relations and manually extending them with either redundant or incompatible consistency relations, checking whether the approach is able to correctly remove the added redundant relations or detect incompatibility.
+
+%\paragraph{External Validity}
+
+% Only initial results regarding correctness and applicability due to limited set of scenarios.
+% But: Conservativeness is proven.
+% But: Hard to acquire further transformation networks, especially those in which the transformations were not developed together and are thus aligned. Problem may be reduced by simulated redundancy, i.e., taking a set of compatible consistency relations and adding redundant one, validating whether our approach is able to remove them again and deliver a compatible network.
+
+
+
+\subsubsection{Limitations}
+\label{sec:evaluation:limitations}
+
+Current limitations of our approach especially arise from its operationalization and the limitations of SMT solvers.
+Additionally, we are currently only able to argue for the benefits and performance of our approach, but further evaluation would be necessary to validate these arguments.
+
+\paragraph{Operationalized Approach}
+The operationalized approach has both fundamental and technical limitations.
+First, SMT solvers are limited in a way that they are not able to analyze all types of expressions regarding satisfiability.
+In consequence, even if all kinds of \qvtr respectively OCL constructs can be transformed into appropriate logic formulae, it may not be able to check them for satisfiability, as we have seen in the applicability evaluation.
+Second, we do not yet provide a translation for all kinds of OCL constructs to logic formulae, such that not all \qvtr relations are supported.
+However, this is a technical limitations that can be solved by implementing these translations.
+
+\paragraph{Benefits Evaluation}
+We did not provide an evaluation for the claimed benefits of our approach.
+This is due to two reasons.
+First, we already argued why the approach provides a benefit anyway due to being fully automated and not requiring further input.
+Second, to the best of our knowledge, there are no competitive approaches to compare our approach with.
+In consequence, only an empirical study in which the approach is practically applied would give further insights to its benefits for a user, apart from the obvious benefits given by the automation of a currently manual process.
+%No benefits analyzed: To the best of our knowledge no other approaches to compare with. Claim that automating a process that would have to be performed manually always provides a benefit.
+
+\paragraph{Performance Evaluation}
+We did neither formally evaluate nor measure performance of our approach.
+If the approach required to much time to be executed on a set of transformations, its applicability would be reduced.
+SMT solvers, such as the used Z3 solver, depend on heuristics, which makes their performance unpredictable.
+Thus, it would be important to evaluate performance of the approach in a case study.
+In our case study, %introduced in \autoref{sec:evaluation:methodology}, 
+we did observe any time-consuming scenarios.
+However, transformation networks with more and larger transformations and especially many cycles need to be investigated to make generalizable statements on the performance.
+
+
+\iffalse
+Functional correctness:
+    - Theoretical evaluation based on concepts and definitions of this paper
+    -> Functioning of the procedure, algorithms
+    
+Applicability:
+    - Empirical evaluation based on an implementation of the decomposition procedure
+    - Interpretation of test results + metric achieved results against expected results
+    -> Example scenarios, execution results
+\fi
+
+\end{copiedFrom} % SoSym MPM4CPS
+
+
+
 \begin{copiedFrom}{ICMT}
 
-\section{Case Study}
+\section{Prevention Strategies}
 
 We have systematically constructed the categorization in \autoref{chap:errors} from the potentials for mistakes that are induced by the different specification levels. % we identified (\autoref{sec:process:levels}).
 To further improve evidence regarding completeness and correctness of %the identified mistakes, resulting failures and their dependencies, we validate that 
