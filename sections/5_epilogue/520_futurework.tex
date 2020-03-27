@@ -1,0 +1,79 @@
+\section{Future Work
+    \pgsize{5 p.}
+}
+\label{chap:futurework}
+
+\begin{copiedFrom}{SoSym MPM4CPS}
+
+Based on the presented work, there are plenty of possibilities and necessities for follow-up research.
+In the following, we present an overview of the topics that are most relevant to be considered next from our point of view.
+We first discuss conceptual extensions by considering weaker redundancy notions and processes to use the approach in, as well as its impact on other correctness requirements in terms of consistency repair.
+Afterwards, we shortly discuss the possibility to evaluate alternatives for the realization of our formal approach, as well as ideas for completing our realization.
+
+\subsection{Relaxation of Redundancy Notion}
+In \autoref{sec:formalapproach:redundancy}, we have introduced the notion of \emph{left-equal redundancy}, since an intuitive notion of redundancy is not strong enough to be compatibility-preserving.
+We based the decision for that stronger definition on insights from a counterexample for redundancy being compatibility-preserving.
+However, there might be a weaker notion than left-equal redundancy that is still strong enough to be compatibility-preserving.
+In that case, it would be interesting to investigate application scenarios in which compatibility-preserving relations that are not left-equal redundant occur and how the definition can be appropriately relaxed, such that our approach supports that notion as well.
+
+\subsection{Interactive Process}
+\label{sec:futurework:compatibilityprocess}
+
+Our approach enables a user to check a network of consistency relations regarding compatibility.
+If the approach identifies a given network as compatible, it is actually compatible as the algorithm operates conservatively.
+However, the approach is not able to prove incompatibility. If the approach does not identify a network as compatible, it may be incompatible or not.
+For that reason, we should define a holistic process for the usage of the approach, which integrates further information given by the user into the process of proving compatibility.
+If the algorithm is not able to prove compatibility, it can present the network, in which it removed some redundant relations, to the user.
+The user could then be asked to declare a cycle of relations as compatible, for which the algorithm is not able to prove it, or which are actually not compatible, but whose restriction of relations regarding consistency according to other relations is intended.
+Afterwards, the algorithm could proceed with finding further redundant relations to prove compatibility, based on the decision of the user.
+As a result, the approach would be applicable to more cases in which compatibility is intentionally not given or in which the algorithm on its own is not able to prove it.
+
+% Process (framework) based on the approach: User can currently get the result that a network is compatible. If the approach does not find a solution, the network may be compatible or not. There should be a process that presents the user the information about how far reduction of the network was possible, for which cycles redundancy could not be proven. Finally, the user may be able to manually mark relations are compatible (i.e. there may be a relation that introduces restrictions on the condition elements of other relations for which consistent models can be created, but this is intended). This could also be integrated into the approach, such as a cycles manually declared as compatible could be resolved by removing the most general relation and proceeding with the algorithm.
+
+\subsection{Impact on Consistency Repair}
+In \autoref{sec:compatibility:networkproperties}, we introduced different levels at which a transformation network can be incorrect~\cite{klare2019icmt}.
+While the approach in this paper is concerned with the correctness of consistency relations, %at the \emph{modularization level}, the \emph{operationalization level} is concerned with the consistency repair routines that ensure consistency according to consistency relations.
+correctness can also be considered at the level of consistency repair routines that ensure consistency according to the relations.
+Correctness of consistency relations is a necessary requirement for consistency repair routines to work properly, as otherwise, for example, non-terminating loops that try to fulfill consistency relations that can never be fulfilled may occur.
+Based on the formal notion of compatibility presented in this article, we will evaluate in future work how compatibility affects correctness of consistency repair routines, and whether all remaining correctness issues can be avoided by construction, as proposed in \cite{klare2019icmt}.
+This would result in a holistic approach based on construction guidelines and our technique to prove compatibility that enables developers to build correct transformation networks.
+
+% Relation to issues in consistency repair: Further issues were identified in \cite{klare2019icmt}: This work is concerned with compatibility of consistency relations. Transformations also contain repair routines that restore consistency. They depend on their relations being compatible, as they may otherwise not be able to find correct solutions (refer to the example where relations require an endlessly large model to be consistent). So now we should research, what the actual remaining problems in the consistency restorers (operationalization level) are if transformations respectively their relations are assumed compatible.
+
+\subsection{Validation of Operationalization Alternatives}
+We have chosen to translate OCL expressions in \qvtr relations into first-order logic formulae and to use an SMT solver, namely Z3, to evaluate Horn clauses of those expressions that represent the potential redundancy in cycles of consistency relations. However, such a theorem prover is not able to evaluate satisfiability of clauses in all cases, as we already discussed in \autoref{sec:evaluation:limitations}. It is possible to implement the approach in \autoref{chap:prevention:compatibility} by means of other formal methods. For example, interactive theorem provers may be able to prove redundancy of consistency relations in more cases. This hypothesis can be evaluated in future work. Another possibility is the use of multiple formal methods in the decomposition procedure. Although this requires translating OCL expressions into multiple languages, some formal methods can sometimes provide proofs where others cannot. Thus, the simultaneous use of different symbolic computation tools can increase the chances of finding redundancy proofs.
+
+% For other implementations:
+%         - Plug in other formal methods into the procedure
+%         - Interactive theorem provers may prove redundancy in more cases
+%             - Tradeoff: no more automation
+
+\subsection{Completion of Operationalized Approach}
+The operationalization of our approach presented in \autoref{chap:prevention:compatibility} and \autoref{chap:prevention:compatibility:redundancies} is currently limited to the parts of QVT-R relations and OCL operations that we presented in those sections. In future work, we will extend the set of supported OCL operations, which the approach is able to translate into first-order logic formulae.
+This will allow us to apply the approach to more sophisticated case studies and provide further evaluation to indicate general applicability of the approach.
+Moreover, SMT solvers come with heuristics (sometimes called \textit{strategies}) to fine-tune their performances. Strategies should be chosen according to the nature of tested SMT instances, i.e.. consistency specifications. Thus, a better integration of the SMT solver can improve the realization of the current approach for proving compatibility in transformation networks.
+
+% For the implementation of the current procedure:
+%         - [OK] Fine-tune the solving strategy of the SMT solver
+%         - [OK] Further translation of OCL to first-order formulae
+
+\iffalse
+\begin{itemize}
+    \item Process (framework) based on the approach: User can currently get the result that a network is compatible. If the approach does not find a solution, the network may be compatible or not. There should be a process that presents the user the information about how far reduction of the network was possible, for which cycles redundancy could not be proven. Finally, the user may be able to manually mark relations are compatible (i.e. there may be a relation that introduces restrictions on the condition elements of other relations for which consistent models can be created, but this is intended). This could also be integrated into the approach, such as a cycles manually declared as compatible could be resolved by removing the most general relation and proceeding with the algorithm.
+    \item Relation to issues in consistency repair: Further issues were identified in \cite{klare2019icmt}: This work is concerned with compatibility of consistency relations. Transformations also contain repair routines that restore consistency. They depend on their relations being compatible, as they may otherwise not be able to find correct solutions (refer to the example where relations require an endlessly large model to be consistent). So now we should research, what the actual remaining problems in the consistency restorers (oprationalization level) are if transformations respectively their relations are assumed compatible.
+\end{itemize}
+
+    For the implementation of the current procedure:
+        - Fine-tune the solving strategy of the SMT solver
+        - Further translation of OCL to first-order formulae
+        
+    For other implementations:
+        - Plug in other formal methods into the procedure
+        - Interactive theorem provers may prove redundancy in more cases
+            - Tradeoff: no more automation
+        
+    Integration into cyber-physical systems?
+    Integration into Vitruvius, relation with other ideas developed in \cite{klare2018docsym}?
+\fi
+
+\end{copiedFrom} % SoSym MPM4CPS
