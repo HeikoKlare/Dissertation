@@ -1,0 +1,43 @@
+\newcommand{\hdistance}{19em}
+\newcommand{\vdistance}{2em}
+\newcommand{\classwidth}{6em}
+
+\begin{tikzpicture}
+
+% Employee
+\umlclassvarwidth{employee}{}{Employee\sameheight}{
+name
+}{\classwidth}
+
+% Person
+\umlclassvarwidth[, right=\hdistance of employee.north, anchor=north]{person}{}{Person\sameheight}{
+name
+}{\classwidth}
+
+% Resident
+\umlclassvarwidth[, below=\vdistance of employee.south, anchor=north]{resident}{}{Resident\sameheight}{
+name
+}{\classwidth}
+
+
+% CONSISTENCY RELATIONS
+\draw[consistency relation] ([yshift=1em]employee.east) -- node[pos=0, above right] {$e$} node[pos=0.5, above] {$\consistencyrelation{CR}{1}$} node[pos=1, above left] {$p$} ([yshift=1em]person.west);
+\draw[consistency relation, -] ([yshift=1em]$(person.west)!0.8!(person.west-|employee.east)$) |- node[pos=1, above right] {$l$} ([yshift=1em]resident.east);
+
+\draw[consistency relation 2] ([yshift=-1em]employee.east) -- node[pos=0, below right] {$e$} node[pos=0.5, below] {$\consistencyrelation{CR}{2}$} node[pos=1, below left] {$p$} ([yshift=-1em]person.west);
+
+\draw[consistency relation 2] (person.south) |- node[pos=0, below right] {$p$} node[pos=0.6, above] {$\consistencyrelation{CR}{3}$} node[pos=1, below right] {$r$} ([yshift=-1em]resident.east);
+
+\node[consistency related element, below left=2.5em and 1em of resident.west, anchor=north west] (relation1) {
+$\begin{aligned}
+    \consistencyrelation{CR}{1} =\; & \setted{\tupled{(e,r),p} \mid e.name = r.name.toUpper \land e.name  = p.name}
+\end{aligned}$
+};   
+\node[consistency related element 2, below=0.3em of relation1.south west, anchor=north west] { 
+$\begin{aligned}
+    \consistencyrelation{CR}{2} =\; & \setted{\tupled{e,p} \mid e.name = p.name}\\
+    \consistencyrelation{CR}{3} =\; & \setted{\tupled{p,r} \mid r.name = p.name.toLower}
+\end{aligned}$
+};
+
+\end{tikzpicture}
