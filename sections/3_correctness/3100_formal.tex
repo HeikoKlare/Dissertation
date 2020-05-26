@@ -1,8 +1,211 @@
-\chapter{A Formal Proof of Correctness Requirements
-    \pgsize{25 p.}
-}
-
+%\chapter{A Formal Proof of Correctness Requirements
+%    \pgsize{25 p.}
+%}
 \todo{Restructure into formalization of correctness (containing compatibility, interoperability etc.) and formal proof of proving correctness. Or maybe move that to prevention section?}
+
+\section{A Basic Notion of Consistency}
+
+\subsection{Intensional vs. Extensional Specification}
+\mnote{Intensional / extensional consistency}
+When we consider a set of models, we would intuitively say that it is consistent if it fulfills some kind of constraints.
+Defining these constraints to derive or check whether a given set of models is consistent constitutes an \emph{intensional specification} of consistency, because the set that contains all consistent models is intensionally represented by these constraints and can be derived from it.
+We can consider a set of constraints as a predicate, i.e. a Boolean-valued function $I$, which indicates whether a model set $\modelset{m}$ fullfils the constraints $I: \metamodelsetinstanceset{M} \mapsto \setted{true, false}$. Then we can say that:
+\begin{align*}
+    \modelset{m} \consistenttomath I \equivalentperdefinition I(\modelset{m}) = true
+\end{align*}
+On the contrary, one can also enumerate the consistent sets of models, thus a set of models is considered consistent if it is contained in that enumeration.
+This constitutes an \emph{extensional specification} of consistency.
+Given such an enumeration $E = \setted{\modelset{m} \mid \modelset{m} \mathtext{is consistent}}$, we can say that:
+\begin{align*}
+    \modelset{m} \consistenttomath E \equivalentperdefinition \modelset{m} \in E
+\end{align*}
+
+\mnote{Equivalence intensional / extensional specifications}
+It is easy to see that both kinds of specifications are equivalent. For each intensional specification the extensional one can be derived by enumerating all models that fulfill the constraints:
+\begin{align*}
+    E = \setted{\modelset{m} \mid I(\modelset{m}) = true}
+\end{align*}
+An extensional specification could also be transferred to an intensional one by defining constraints that are fulfilled by exactly the enumerated instances:
+\begin{align*}
+    I(\modelset{m}) \mapsto 
+    \begin{cases} 
+        true, & \modelset{m} \in E\\
+        false, & \modelset{m} \not\in E\\
+    \end{cases}
+\end{align*}
+For us, however, it will only be relevant that an intensional specification can be transformed into an extensional one.
+
+\mnote{Extensional specifications for theoretical considerations}
+A developer who defines consistency, usually wants to use an intensional specification, as tools like transformation languages usually allow the specification of constraints rather than enumerating consistent instances. This is due to the fact that he or she cannot explicitly enumerate all consistent models but only define constraints that allow to derive them.
+However, from a theoretical perspective we prefer to consider extensional specifications, because they allow to apply set theory.
+Due to the fact that each intensional specification can be transformed into an extensional one, we can make theoretical statements about extensional specifications that also hold for intensional ones.
+
+
+\subsection{Modular Consistency Specification}
+
+\mnote{Extensional specifications are relations}
+An extensional specification of consistency enumerates all sets of models that are considered consistent to each other, i.e., it specifies a relation between the models.
+Since it is easier if the considered models are identifiable with an index, we will consider tuples rather than sets of models throughout the thesis.
+
+\begin{definition}[\ModelLevelConsistencyRelation]
+    Given a tuple of metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$, a \emph{\modellevelconsistencyrelation} $\consistencyrelation{CR}{}$ is a relation for instances of the metamodels $\consistencyrelation{CR}{} \subseteq \metamodeltupleinstanceset{M} = \metamodelinstanceset{M}{1} \times \dots \times \metamodelinstanceset{M}{n}$.
+
+    We consider a tuple of models $\tupled{\model{m}{1}, \dots, \model{m}{n}} \in \metamodeltupleinstanceset{M} \consistenttomath \consistencyrelation{CR}{}$ if and only if $\tupled{\model{m}{1}, \dots, \model{m}{n}} \in \consistencyrelation{CR}{}$.
+    Otherwise, we call $\tupled{\model{m}{1}, \dots, \model{m}{n}} \mathtext{inconsistent to} \consistencyrelation{CR}{}$.
+\end{definition}
+
+\mnote{Start with coarse-grained model-level relations}
+Given a tuple of models, we consider that tuple of models consistent if it is contained in the consistency relation.
+This conforms to definition such as the one proposed by \autoref{stevens2010sosym}.
+We explicitly denote this kind of consistency relation as \emph{model-level}, because we will later need a more fine-grained notion of consistency relations at the level of \metaclasses and need to distinguish between the two.
+
+\mnote{Modular notions of consistency}
+If a single relation describes consistency between all relevant models, consistency is directly defined by means of model tuples being in that relations. We call such a relation a \emph{monolithic relation}.
+However, if we have a \emph{modular} notion of consistency, i.e., a relation does only define consistency between some of the relevant models and the global notion of consistency is a defined by a combination of several such relations, we need an explicit definition for that notion.
+For the sake of simplicity, we focus on binary relations as a modular representation of consistency, but this definition could also be generalized to relations of arbitrary arity.
+
+\begin{definition}[Consistency]
+    Let $\metamodeltuple{M} =  \tupled{\metamodelsequence{M}{n}}$ be metamodels and let $\consistencyrelation{CR}{} \subseteq \metamodelinstanceset{M}{i} \times \metamodelinstanceset{M}{j}$ be a binary \modellevelconsistencyrelation for any two metamodels $\metamodel{M}{i}, \metamodel{M}{j} \in \setted{\metamodelsequence{M}{n}}$.
+    For a given tuple of models $\modeltuple{m} \in \metamodeltupleinstanceset{M}{} = \metamodelinstanceset{M}{1} \times \dots \times \metamodelinstanceset{M}{n}$, we say that this model set is \emph{consistent to} $\consistencyrelation{CR}{}$ if and only if the instances of $\metamodel{M}{i}$ and $\metamodel{M}{j}$ are in that relation:
+    \begin{align*} 
+        &
+        \modeltuple{m} \consistenttomath \consistencyrelation{CR}{} \equivalentperdefinition \\
+        & \formulaskip
+        \exists \model{m}{i} \in \metamodelinstanceset{M}{i}, \model{m}{j} \in \metamodelinstanceset{M}{j} : \model{m}{i} \in \modelset{m} \land \model{m}{j} \in \modelset{m} \land \tupled{\model{m}{i}, \model{m}{j}} \in \consistencyrelation{CR}{}
+    \end{align*}
+    For a set of binary \modellevelconsistencyrelations $\consistencyrelationset{CR}$ for metamodels $\metamodeltuple{M}$, we say that a given tuple of models $\modeltuple{m} \in \metamodeltupleinstanceset{M}{}$ is \emph{consistent to} $\consistencyrelationset{CR}$ if and only if the it is consistent to each consistency relation in that set:
+    \begin{align*} 
+        &
+        \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \equivalentperdefinition \\
+        & \formulaskip
+        \forall \consistencyrelation{CR}{} \in \consistencyrelationset{CR} : \modeltuple{m} \consistenttomath \consistencyrelationset{CR}
+    \end{align*}
+\end{definition}
+
+\mnote{Examplary binary relations}
+The definition states that given a set of \modellevelconsistencyrelations the models must be consistent to all of these relations to consider them consistent to the set.
+Consider, for example, the relations $\consistencyrelation{CR}{1} = \setted{\tupled{\model{m}{1}, \model{m}{2}}}$, $\consistencyrelation{CR}{2} = \setted{\tupled{\model{m}{2},\model{m}{3}}}$, $\consistencyrelation{CR}{3} = \setted{\tupled{\model{m}{1}, \model{m}{3}}}$ with $\model{m}{i} \in \metamodelinstanceset{M}{i}$ for metamodels $\metamodel{M}{i}$. The then model tuple $\tupled{\model{m}{1}, \model{m}{2}, \model{m}{3}}$ is consistent to these relations, because it is consistent to each of the binary relations.
+These consistency relations are equivalent to a monolithic relations $\consistencyrelation{CR}{} = \setted{\tupled{\model{m}{1}, \model{m}{2}, \model{m}{3}}}$, because a model tuple $\modeltuple{m}$ is consistent to $\consistencyrelation{CR}{}$ exactly when it is consistent to $\setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR}{2}, \consistencyrelation{CR}{3}}$.
+
+
+\subsection{Expressiveness of Consistency Specifications}
+
+\mnote{Modular and monolithic specification are not equivalent}
+Although in that exemplary case the binary relations are equivalent to a monolithic relations, such an equivalence is not always given. In general, two interesting insights come along with that definition of consistency based on modular relations. First, expressiveness of defining consistency modularly by a set of relations is not equal to defining one monolithic relations between all models. Second, a modular definition of consistency can easily contain contradictions, which may lead to an empty set of consistent models.
+
+\mnote{Binary relations reduce expressiveness}
+It is easy to see that a combination of binary relations is not able to express the same consistency relations as one monolithic relations.
+For example, the monolithic relation $\consistencyrelation{CR}{} = \setted{\tupled{\model{m}{1}, \model{m}{2}, \model{m}{3}'}, \tupled{\model{m}{1}, \model{m}{2}', \model{m}{3}}, \tupled{\model{m}{1}', \model{m}{2}, \model{m}{3}}}$ cannot be expressed by binary relations.
+The binary relations necessarily need to contain $\tupled{\model{m}{1}, \model{m}{2}}$, because $\tupled{\model{m}{1}, \model{m}{2}, \model{m}{3}'} \in \consistencyrelation{CR}{}$ and $\tupled{\model{m}{2}, \model{m}{3}}$, because $\tupled{\model{m}{1}', \model{m}{2}, \model{m}{3}} \in \consistencyrelation{CR}{}$. However, this would mean that $\tupled{\model{m}{1}, \model{m}{2}, \model{m}{3}}$ is considered consistent to the binary relations although it not consistent to the modular relation $\consistencyrelation{CR}{}$.
+Thus, using sets of binary relations in contrast to a monolithic relation reduces expressiveness.
+\textcite{stevens2017a} discusses this property as \emph{binary-definable} in detail and proposed restrictions to binary relations that may be sufficient and still practical for expressing consistency, such as a notion of \emph{binary-implemented} relations.
+However, we reasonably assume that relations need to be specified modularly anyway, thus we have to accept that this restrictions in expressiveness exists.
+
+\mnote{Binary relations may be contradictory}
+Additionally, it is easy to define multiple binary relations of which each can be fulfilled by certain models, but for which no tuple of models exists that is consistent to all of them. Consider the relations $\consistencyrelation{CR}{1} = \setted{\tupled{\model{m}{1}, \model{m}{2}}}$, $\consistencyrelation{CR}{2} = \setted{\tupled{\model{m}{2}, \model{m}{3}}}$, $\consistencyrelation{CR}{3} = \setted{\model{m}{1}, \model{m}{3}'}$.
+Although for each of these relations a consistent set of models exists, which is exactly the one defined in each relation, no tuple of models exists that fulfills their combination.
+This example already demonstrates the worst case, in which no consistent models exist for a set of relations.
+In other cases, it may be possible that only for some models that are consistent according to one or some of the relations no model tuple exists that is consistent for all models.
+Consider the relations $\consistencyrelation{CR}{1} = \setted{\tupled{\model{m}{1}, \model{m}{2}}}$, $\consistencyrelation{CR}{2} = \setted{\tupled{\model{m}{2}, \model{m}{3}}, \tupled{\model{m}{2}, \model{m}{3}}'}$, $\consistencyrelation{CR}{3} = \setted{\model{m}{1}, \model{m}{3}'}$.
+In this case, the tuple $\tupled{\model{m}{1}, \model{m}{2}, \model{m}{3}'}$ would be considered consistent to the relations, but although $\tupled{\model{m}{2}, \model{m}{3}} \in \consistencyrelation{CR}{2}$ there exists not $\model{m}{1} \in \metamodelinstanceset{M}{1}$ so that $\tupled{\model{m}{1}, \model{m}{2}, \model{m}{3}}$ is consistent to all these relations.
+
+\mnote{Sets of relations can forbid models}
+It is easy to see that one monolithic relation may be equally represented by an arbitrary number of sets of binary relations by simply adding model pairs to these binary relations that are never consistent to the other relations, like we have seen for the pair $\tupled{\model{m}{2}, \model{m}{3}}$ in the previous example.
+This means that the combination of relations can lead to the situation that some models are actually forbidden (like $\model{m}{3}$ in the example before) due to the combination of consistency relations.
+We will later discuss how far this behavior is or should be expected.
+
+\mnote{Preserving consistency}
+While the previous discussion only considered when models are considered consistent, it is of especial interest to ensure that consistency of models is preserved.
+Informally speaking, this means that some mechanism must ensure that after a change to a tuple of models that is consistent according to some relations the models are updated in a way that the resulting tuple of models is consistent again. We call such a mechanism a \emph{consistency preservation rule}.
+
+\mnote{Monolithic and modular consistency preservation}
+Like consistency relations, such consistency preservation rules can be realized in an either monolithic or modular way.
+A monolithic consistency preservation rules takes a tuple of models that is consistent to a consistency relation and a change to these models and returns another tuple of models that is consistent again.
+In a modular specification of consistency preservation rules, a set of such rules is given which are able to preserve consistency of a subset of the given models according to modular consistency relations.
+In our case, we consider such rules for two models, each of them restoring consistency according to a binary consistency relation.
+We will later discuss if and how an execution order of such consistency preservation rules can be determined.
+
+
+
+\section{Notions of Correctness}
+
+Before we consider consistency preservation rules and their interaction in detail, we first discuss different notions of \emph{correctness} for them.
+This is important because there are different correctness dimension, for which we have to make clear which of them are important for us.
+
+% \begin{definition}[Monolithic \ModelLevelConsistencyPreservationRule]
+%     Given two metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$ and a \modellevelconsistencyrelation between them $\consistencyrelation{CR}{} \subseteq \metamodelinstanceset{M}{1} \times \dots \times \metamodelinstanceset{M}{n}$.
+%     A \emph{monolithic \modellevelconsistencypreservationrule} is a function:
+%     \begin{align*}
+%         \consistencypreservationrule{\consistencyrelation{CR}{}} : (\metamodeltupleinstanceset{M}, \metamodelinstanceset{M}{2}, \change{\metamodel{M}{1}}) \rightarrow \change{\metamodel{M}{2}}
+%     \end{align*}
+%     It that takes two consistent models and a change in the first one and returns a change in the second one.
+%     We call a \modellevelconsistencypreservationrule \emph{correct} w.r.t. $\consistencyrelation{CR}{}$ if the resulting models when applying the input and output change are consistent to $\consistencyrelation{CR}{}$ again:
+%     \begin{align*}
+%         &
+%         \forall \model{m}{1} \in \metamodelinstanceset{M}{1}, \model{m}{2} \in \metamodelinstanceset{M}{2} :
+%         \tupled{\model{m}{1}, \model{m}{2}} \in \consistencyrelation{CR}{} \Rightarrow\\
+%         & \formulaskip
+%         \forall \change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}} :
+%         \exists \change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}} :\\
+%         & \formulaskip
+%         \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) = \change{\metamodel{M}{2}} 
+%         \land \tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}(\model{m}{2})} \in \consistencyrelation{CR}{}
+%     \end{align*}
+% \end{definition}
+
+
+
+Keeping multiple models consistent by means of transformations imposes either a single multidirectional transformation or a combination of several bi- or multidirectional transformations.
+Each of these transformations is able to take a consistent tuple of models and a change to them and to return a new consistent tuple of models.
+
+
+
+\section{Notions of Correctness}
+
+\mnote{Correctness implicitly covered by definitions}
+\textcite{stevens2010sosym} proposes an explicit notion of \emph{correctness} for transformations. This is based on the fact that her definition of a transformation does only specify that for two given model, which may be inconsistent because one was modified, an update of the other model is returned.
+The requirement that the originally modified model and the one returned by the transformation have to conform to some consistency relations is specified externally as a notion of \emph{correctness}.
+We directly relate a consistency preservation rule that restores consistency to an according consistency relation, thus a consistency preservation rule that follows our definition is correct by construction in terms of the correctness definition by \citeauthor{stevens2010sosym}.
+The same applies to the consistency preservation application function, which we consider \emph{correct} if it fulfills its definition, as that definition already covers all requirements to that function.
+
+\mnote{Different notions of correctness}
+In general, correctness can be considered in two ways: First, an artifact may be correct if it simply follows its definition.
+While for consistency relations, changes and the generic \modellevelconsistencypreservationrule generalization function correctness can be canonically achieved, this is not that simple for a consistency preservation rule and the consistency preservation application function, as they have to fulfill some constraints with respect to consistency relations they rely on.
+Second, an artifact may be correct if it fulfills some, maybe only implicitly known specification. For example, a consistency relation between UML and Java may only be considered correct if it fulfills some \enquote{natural} notion of consistency, as people know how elements have to be related because they represent similar things, such as classes, or because a standard like the UML~\cite{uml} prescribes that.
+
+\mnote{Correctness regarding global specifications}
+In this work we do not consider the latter correctness notion with respect to external, maybe not formally specified artifacts, which is part of separate research on validation.
+However, when considering consistency of multiple models it may be standing to reason that a modular specification of consistency and its preservation has to be correct with regards to some global, monolithic specification. More precisely, there may be a multiary relation putting several metamodels into relation, which the developers at least implicitly know, and a set of binary relations somehow has to respect that multiary relation, i.e., be \emph{correct} with respect to that relation.
+The same can be imagines for consistency preservation. One may define a multidirectional transformation for a multiary relation, taking a tuple of changes to consistent models and retuning a new tuple of changes, which applied to the models delivers a consistent set of models again. In fact, this would be a realization of the behavior of the consistency preservation application function without relying on modular \modellevelconsistencypreservationrules.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/correctness/formal/correctness_notions.png}
+    \caption{Different notions of correctness for transformations and networks}
+    \label{fig:correctness:correctnessnotions}
+\end{figure}
+
+\mnote{Drawbacks of global specification notions}
+Considering consistency this way has two drawbacks:
+\begin{description}
+    \item[Validation Artifacts:] The artifacts to check correctness against, i.e., the global, multiary consistency relation as well as an appropriate multidirectional transformation, do usually not exist. If they existed, they could directly be used to preserve consistency. Thus is impossible to validate a set of consistency relations and preservation rules against such a global specification.
+    \item[Modular Knowledge:] This notion of correctness requires that the developers have some global knowledge that represents a monolithic, multiary consistency relation and their preservation rules. Usually, this will not be the case, so there is even no implicit notion of the necessary artifacts to validate the modular specifications against, not to be mention an explicit representation.
+\end{description}
+
+\todo{Add an image for that relation}
+
+
+Overall Goals:
+\begin{itemize}
+    \item Define correctness of a transformation network: termination in consistent state
+\end{itemize}
+
+Central Insights:
+\begin{itemize}
+    \item Correctness is not the problem, optimality is the problem
+    \item We can only check dynamically whether a consistent state was reached due to Halting Problem. We cannot guarantee to always find a consistent state
+\end{itemize}
+
 
 Allgemeine Definition Transformationsnetzwerke:
 \begin{itemize}
@@ -19,16 +222,7 @@ Allgemeine Definition Transformationsnetzwerke:
     \item Korrektheit eines Netzwerkes definieren: Die Ausführungsfunktion erzeugt eine Transformationssequenz, die angewendet auf eine Änderung für alle Änderungen ein korrektes Ergebnisse produziert, d.h. die Modelle sind konsistent bzgl. allen Konsistenzrelationen.
 \end{itemize}
 
-An intuitive way of describing consistency for an arbitrary number of metamodels is to specify all tuples of models that are considered consistent to each other, i.e., to specify a relation between the models. 
 
-\begin{definition}[\ModelLevelConsistencyRelation]
-    Given a tuple of metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$, a \emph{\modellevelconsistencyrelation} $\consistencyrelation{CR}{}$ is a relation for instances of the metamodels $\consistencyrelation{CR}{} \subseteq \metamodeltupleinstanceset{M} = \metamodelinstanceset{M}{1} \times \dots \times \metamodelinstanceset{M}{n}$.
-    We consider a tuple of models $\tupled{\model{m}{1}, \dots, \model{m}{n}} \in \metamodeltupleinstanceset{M}$ \emph{consistent to $\consistencyrelation{CR}{}$} if and only if $\tupled{\model{m}{1}, \dots, \model{m}{n}} \in \consistencyrelation{CR}{}$.
-    Otherwise, we call $\tupled{\model{m}{1}, \dots, \model{m}{n}}$ \emph{inconsistent to $\consistencyrelation{CR}{}$}.
-\end{definition}
-
-Given a tuple of models, we consider that tuple of models consistent if it is contained in the consistency relation.
-We explicitly denote this kind of consistency relation as \emph{model-level}, because we will later need a more fine-grained notion of consistency relations at the level of \metaclasses and need to distinguish between the two.
 
 \todo{Das folgende drückt eine Definition entsprechend der Annahme der modularen Spezifikation aus. Wir stellen es später in Bezug zu globalen Konsistenzrelationen und anderen Spezifikationsmöglichkeiten, Stichwort MX}
 
@@ -43,9 +237,28 @@ Accordingly, a multidirectional transformation~\cite{cleve2019dagstuhl} could be
 
 \section{A Modular Notion of Consistency}
 
+In the following, we only consider binary consistency relations. Having several consistency relations to define how several metamodels are related, we need to define a notion of consistency based on several consistency relations.
 
+We define the following ingredients necessary to handle a network of transformations:
+\begin{description}
+    \item[Consistency Preservation Rules:] We need binary rules that restore consistency after a model of a pair was modified. These are the binary, modular transformations of the networks
+    \item[Orchestration Function:] We need a function that is able to decide in which order transformation have to be executed after a change.
+    \item[Application Function:] We need a function that is able to apply the rules in the order delivered by the orchestration function. 
+\end{description}
 
-In the following, we only consider binary consistency relations. Having several consistency relations to define how several metamodels are related, we need to define a notion of consistency based on several consistency relationsl
+We explicitly distinguish the orchestration and the application to be able to make more fine-grained statements about the responsibilities for the orchestration and its actual execution.
+The process is depicted in \autoref{fig:formal:executionprocess}. Given models to are consistent according to some consistency relations and changes to them, the orchestration delivers an order of consistency preservation rules (CPRs) for that networks, which is used to parametrize the application function that executes these rules in the given order.
+The result is, in the best case, a tuple of models that is consistent to the relations again.
+However, we will see that this is not always possible. Thus, we will especially discuss relevant properties of the artifacts, such as correctness and optimality that reflect how and when this process can be executed successfully.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/correctness/formal/execution_process.png}
+    \caption{Execution process in network and artifacts}
+    \label{fig:formal:executionprocess}
+\end{figure}
+
+First of all, we start with a definition of consistency in a network of transformations.
 
 \begin{definition}[Consistency]
     Let $\metamodeltuple{M} =  \tupled{\metamodelsequence{M}{n}}$ be metamodels and let $\consistencyrelation{CR}{} \subseteq \metamodelinstanceset{M}{i} \times \metamodelinstanceset{M}{j}$ be a binary \modellevelconsistencyrelation for any two metamodels $\metamodel{M}{i}, \metamodel{M}{j} \in \setted{\metamodelsequence{M}{n}}$.
@@ -97,7 +310,12 @@ In the following, we only consider binary consistency relations. Having several 
 
 \begin{definition}[\ModelLevelConsistencyPreservationRule]
     Given two metamodels $\metamodel{M}{1}, \metamodel{M}{2}$ and a binary \modellevelconsistencyrelation between them $\consistencyrelation{CR}{} \subseteq \metamodelinstanceset{M}{1} \times \metamodelinstanceset{M}{2}$.
-    A \emph{\modellevelconsistencypreservationrule} $\consistencypreservationrule{\consistencyrelation{CR}{}} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \change{\metamodel{M}{1}}) \rightarrow \change{\metamodel{M}{2}}$ for that consistency relation is a function that takes two consistent models and a change in the first one and returns a change in the second one, such that the resulting models when applying both changes are consistent again:
+    A \emph{\modellevelconsistencypreservationrule} is a function:
+    \begin{align*}
+        \consistencypreservationrule{\consistencyrelation{CR}{}} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \change{\metamodel{M}{1}}) \rightarrow \change{\metamodel{M}{2}}
+    \end{align*}
+    It that takes two consistent models and a change in the first one and returns a change in the second one.
+    We call a \modellevelconsistencypreservationrule \emph{correct} w.r.t. $\consistencyrelation{CR}{}$ if the resulting models when applying the input and output change are consistent to $\consistencyrelation{CR}{}$ again:
     \begin{align*}
         &
         \forall \model{m}{1} \in \metamodelinstanceset{M}{1}, \model{m}{2} \in \metamodelinstanceset{M}{2} :
@@ -130,47 +348,347 @@ The definition could also be given for an arbitrary number of metamodels, but we
     A \modellevelconsistencypreservationrule generalization function $\cprgeneralizationfunction{\consistencypreservationrule{\consistencyrelation{CR}{}}}$ is a function:
     \begin{align*}
         &
-        \cprgeneralizationfunction{\consistencypreservationrule{\consistencyrelation{CR}{}}} : (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}} \Rightarrow (\metamodeltupleinstanceset{M}, \changetuple{\metamodeltuple{M}})
+        \cprgeneralizationfunction{\consistencypreservationrule{\consistencyrelation{CR}{}}} : (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}}) \rightarrow (\metamodeltupleinstanceset{M}, \changetuple{\metamodeltuple{M}})
     \end{align*}
     It generalizes $\consistencypreservationrule{\consistencyrelation{CR}{}}$ such that it can be applied to changes in $\metamodeltuple{M}$ instead of $\metamodel{M}{i}$, i.e. it applies the change delivered by $\consistencypreservationrule{\consistencyrelation{CR}{}}$ for the relevant models to the given change tuple:
     \begin{align*}
         &
-        \forall \modeltuple{m} = \tupled{\model{m}{1}, \dots, \model{m}{i}, \dots, \model{m}{k}, \dots, \model{m}{n}} \in \metamodeltupleinstanceset{M}:\\
-        &
-        \forall \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{i}}, \dots, \change{\metamodel{M}{k}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} : \\
+        \cprgeneralizationfunction{\consistencypreservationrule{\consistencyrelation{CR}{}}}(\modeltuple{M}, \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{i}}, \dots, \change{\metamodel{M}{k}}, \dots, \change{\metamodel{M}{n}}}) = \\
         & \formulaskip
-        \exists \change{\metamodel{M}{k}}' \in \changeuniverse{\metamodel{M}{k}} : \change{\metamodel{M}{j}}' = \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{i}, \model{m}{k}, \change{\metamodel{M}{i}})\\
-        & \formulaskip
-        \land \cprgeneralizationfunction{\consistencypreservationrule{\consistencyrelation{CR}{}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{k}}, \dots, \change{\metamodel{M}{k}}' \concatfunction \change{\metamodel{M}{j}}, \dots, \change{\metamodel{M}{n}}})
+        (\modeltuple{m}, \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{k}}, \dots, \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{i}, \model{m}{k}, \change{\metamodel{M}{i}}) \concatfunction \change{\metamodel{M}{j}}, \dots, \change{\metamodel{M}{n}}})
     \end{align*}
+    % \begin{align*}
+    %     &
+    %     \forall \modeltuple{m} = \tupled{\model{m}{1}, \dots, \model{m}{i}, \dots, \model{m}{k}, \dots, \model{m}{n}} \in \metamodeltupleinstanceset{M}:\\
+    %     &
+    %     \forall \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{i}}, \dots, \change{\metamodel{M}{k}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} : \\
+    %     & \formulaskip
+    %     \exists \change{\metamodel{M}{k}}' \in \changeuniverse{\metamodel{M}{k}} : \change{\metamodel{M}{j}}' = \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{i}, \model{m}{k}, \change{\metamodel{M}{i}})\\
+    %     & \formulaskip
+    %     \land \cprgeneralizationfunction{\consistencypreservationrule{\consistencyrelation{CR}{}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{k}}, \dots, \change{\metamodel{M}{k}}' \concatfunction \change{\metamodel{M}{j}}, \dots, \change{\metamodel{M}{n}}})
+    % \end{align*}
     This function is universally defined and must not be defined individually for a specific \modellevelconsistencypreservationrule.
 \end{definition}
 
-\begin{definition}[Consistency Preservation Application Function]
-    \todo{Define for transformations instead?}
+% \begin{definition}[Consistency Preservation Application Function]
+%     \todo{Define for transformations instead?}
+%     Let $\consistencypreservationruleset{}$ be a set of consistency preservation rules for a set of consistency relations $\consistencyrelationset{CR}$ on metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$.
+%     A consistency preservation application function $\consistencyappfunction{\consistencypreservationruleset{}}$ for these rules is function:
+%     \begin{align*}
+%         &
+%         \consistencyappfunction{\consistencypreservationruleset{}} : (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}}) \rightarrow (\metamodeltupleinstanceset{M})
+%     \end{align*}
+%     The function takes a consistent tuple of models and a tuple of changes that was performed on them and returns a consistent tuple of models by acquiring changes from the consistency preservation rules in $\consistencypreservationruleset{}$. Thus, it has to fulfill the following conditions:
+%     \begin{align*}
+%         &
+%         \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \forall \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} :
+%         \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \Rightarrow \\
+%         & \formulaskip
+%         \exists \modeltuple{m'} \in \metamodeltupleinstanceset{M} :
+%         \modeltuple{m'} = \consistencyappfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \land \modeltuple{m'} \consistenttomath \consistencyrelationset{CR} \\
+%         & \formulaskip
+%         \land \exists \consistencypreservationrule{1}, \dots, \consistencypreservationrule{m} \in \consistencypreservationruleset{} : 
+%         \exists \changetuple{\metamodeltuple{M}}' = \tupled{\change{\metamodel{M}{1}}', \dots, \change{\metamodel{M}{n}}'} \in \changeuniverse{\metamodeltuple{M}} :\\
+%         & \formulaskip \formulaskip 
+%         \cprgeneralizationfunction{\consistencypreservationrule{1}} \concatfunction \dots \concatfunction \cprgeneralizationfunction{\consistencypreservationrule{m}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}')\\
+%         & \formulaskip \formulaskip
+%         \land \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \dots, \change{\metamodel{M}{n}}'(\model{m}{n})} = \modeltuple{m'}
+%     \end{align*}
+% \end{definition}
+
+To execute transformations in a network, we need some instance that decides which transformations are executed in which order.
+We call this an \emph{orchestration function} as it is responsible for orchestrating the execution of transformations.
+
+\begin{definition}[Consistency Preservation Orchestration Function]
     Let $\consistencypreservationruleset{}$ be a set of consistency preservation rules for a set of consistency relations $\consistencyrelationset{CR}$ on metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$.
-    A consistency preservation application function $\consistencyappfunction{\consistencypreservationruleset{}}$ for these rules is function:
+    A consistency preservation orchestration function $\consistencyorcfunction{\consistencypreservationruleset{}}$ for these rules is a function:
     \begin{align*}
         &
-        \consistencyappfunction{\consistencypreservationruleset{}} : (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}}) \rightarrow (\metamodeltupleinstanceset{M})
+        \consistencyorcfunction{\consistencypreservationruleset{}} : (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}}) \rightarrow \consistencypreservationruleset{}^{< \mathbb{N}}
     \end{align*}
-    The function takes a consistent tuple of models and a tuple of changes that was performed on them and returns a consistent set of models by acquiring changes from the consistency preservation rules in $\consistencypreservationruleset{}$. Thus, it has to fulfill the following conditions:
+    $\consistencypreservationruleset{}^{< \mathbb{N}}$ denotes all finite sequences of consistency preservation rules in $\consistencypreservationruleset{}$, i.e., $\consistencypreservationruleset{}^{< \mathbb{N}} = \emptyset \cup \consistencypreservationruleset{}^1 \cup \consistencypreservationruleset{}^2 \cup \dots$.
+\end{definition}
+
+According to this definition, the orchestration functions returns any sequence of \modellevelconsistencypreservationrules. This especially includes that rules may occur more than once in that sequence and that applying that sequence to a models and changes to them does not guarantee that the resulting models are consistent.
+This degree of freedom is on purpose, because unfortunately it is not always possible to find an orchestration of transformations that results in a consistent state.
+
+It is obvious that we can define consistency preservation rules for which the orchestration function cannot find an execution order that returns a consistent tuple of models after certain changes. Consider the example in \autoref{fig:formal:noexecutionorder}. There exists no execution order for any input value that terminates. The transformations will always increase the value, although the defined relations could be fulfilled for the input value, but the transformations never find that solution.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/correctness/formal/divergence_example.png}
+    \caption{Example for divergence}
+    \label{fig:formal:noexecutionorder}
+\end{figure}
+
+Although we will discuss restrictions to relations and transformations that reduce the chance that no solution can be found, it will not be possible to ensure that such a solution can always be found. This is due to the reason that transformations can perform arbitrary changes given that transformations are Turing complete, which should not be restricted, because it is unclear which restrictions could be made without forbidding scenarios that should actually we supported. Thus, we assume that transformations are Turing complete.
+
+We explicitly allow the orchestration function to return a sequence that will, if applied to models and changes to them, not deliver a consistent tuple of models. As discusses, this is supposed to reflect cases in which no such sequence can be calculated.
+However, it may be useful to have some notion of \emph{optimality} that ensures that if a sequence that delivers a consistent result exists, the orchestration function is supposed to find it.
+Formally, this notion looks as follows.
+
+\begin{definition}[Optimal Consistency Preservation Orchestration Function]
+    Let $\consistencypreservationruleset{}$ be a set of consistency preservation rules for a set of consistency relations $\consistencyrelationset{CR}$ on metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$.
+    We say that an orchestration function $\consistencyorcfunction{\consistencypreservationruleset{}}$ for these rules is \emph{optimal} if it always returns a sequence that delivers a consistent set of models if possible, i.e.,
     \begin{align*}
         &
         \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \forall \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} :
         \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \Rightarrow \\
         & \formulaskip
-        \exists \modeltuple{m'} \in \metamodeltupleinstanceset{M} :
-        \modeltuple{m'} = \consistencyappfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \land \modeltuple{m'} \consistenttomath \consistencyrelationset{CR} \\
-        & \formulaskip
-        \land \exists \consistencypreservationrule{1}, \dots, \consistencypreservationrule{m} \in \consistencypreservationruleset{} : 
-        \exists \changetuple{\metamodeltuple{M}}' = \tupled{\change{\metamodel{M}{1}}', \dots, \change{\metamodel{M}{n}}'} \in \changeuniverse{\metamodeltuple{M}} :\\
-        & \formulaskip \formulaskip 
-        \cprgeneralizationfunction{\consistencypreservationrule{1}} \concatfunction \dots \concatfunction \cprgeneralizationfunction{\consistencypreservationrule{m}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}')\\
-        & \formulaskip \formulaskip
-        \land \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \dots, \change{\metamodel{M}{n}}'(\model{m}{n})} = \modeltuple{m'}
+        \bigl[ \bigl(
+            \exists \consistencypreservationrule{1}, \dots, \consistencypreservationrule{m} \in \consistencypreservationruleset{} : 
+            \exists \changetuple{\metamodeltuple{M}}' = \tupled{\change{\metamodel{M}{1}}', \dots, \change{\metamodel{M}{n}}'} \in \changeuniverse{\metamodeltuple{M}} :\\
+            & \formulaskip \formulaskip
+            \cprgeneralizationfunction{\consistencypreservationrule{1}} \concatfunction \dots \concatfunction \cprgeneralizationfunction{\consistencypreservationrule{m}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}')\\
+            & \formulaskip \formulaskip
+            \land \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \dots, \change{\metamodel{M}{n}}'(\model{m}{n})} \consistenttomath \consistencyrelationset{CR} \bigr) \\
+            & \formulaskip
+            \Rightarrow \bigl(        
+            \exists \consistencypreservationrule{1}', \dots, \consistencypreservationrule{m}' \in \consistencypreservationruleset{} : 
+            \exists \changetuple{\metamodeltuple{M}}'' = \tupled{\change{\metamodel{M}{1}}'', \dots, \change{\metamodel{M}{n}}''} \in \changeuniverse{\metamodeltuple{M}} :\\
+            & \formulaskip \formulaskip
+            \consistencyorcfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \tupled{\consistencypreservationrule{1}', \dots, \consistencypreservationrule{m}'} \\
+            & \formulaskip \formulaskip
+            \land \cprgeneralizationfunction{\consistencypreservationrule{1}'} \concatfunction \dots \concatfunction \cprgeneralizationfunction{\consistencypreservationrule{m}'}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}'')\\
+            & \formulaskip \formulaskip
+            \land \tupled{\change{\metamodel{M}{1}}''(\model{m}{1}), \dots, \change{\metamodel{M}{n}}''(\model{m}{n})} \consistenttomath \consistencyrelationset{CR}
+        \bigr) \bigr]
     \end{align*}
 \end{definition}
+
+Unfortunately, optimality is a property that we cannot request from an orchestration function. Optimality would mean that the orchestration function can decide whether there is sequence of transformations that leads to consistent models and thus terminate.
+Due to Turing-completeness of the network this would mean that the orchestration function can decide whether a Turing machine halts, which is proven impossible.
+Thus, our only goal can be to achieve optimality as far as possible in terms of reducing the degree of conservativeness, i.e., reduce the cases in which no sequence is found although it exists.
+
+We can define a measure for the optimality of an orchestration function:
+\begin{align*}
+    &
+    Optimality_{\consistencyorcfunction{\consistencypreservationruleset{}}} = \frac{\mathtext{\# of model / delta pairs for which the function finds an order that terminate consistently}}{\mathtext{\# of model / delta pairs for which an order that terminates consistently exists}}
+\end{align*}
+
+In fact, both these numbers usually infinite, an there is an infinite number of possible models and deltas. However, it does finally not matter for us what the actually value is, but only how to improve that value.
+\todo{We have to map that value to compatibility, which reduces the number of potential false orders.}
+
+The orchestration function does only give us an order and it is intuitively clear how to perform consistency preservation based on given rules and an orchestration function. However, we need to make this process explicit, for which we define an \emph{application function} that is able to perform consistency preservation based on given \modellevelconsistencypreservationrules, and orchestration function and the actual models and changes.
+
+Finally, either the orchestration function or an application function must also be able to reflect the cases in which no execution order of \modellevelconsistencypreservationrules can be found that restores consistency. From a theoretical perspective it does not make a difference whether the orchestration or the application function makes that decision. Finally, the orchestration function could also directly be encoded into the application function from a theoretical perspective.
+However, from a practical perspective we may want to be able to find an execution order although there is no order that results in a consistent state, to be able to find out where the problem is to restore consistency.
+
+\todo{Property for orchestration: if no consistent solution found than there is no further transformation that could be executed without alternation or because no transforamtion is applicable (undefined for current state, e.g. because of monotony)}
+
+Since we do not make any statements about resulting in consistent states yet, we simply foresee this case in the definition of the application case to be able to return $\bot$ indicating that no solution is found for the given models and changes.
+So we first give a basic definition for such a function without explicitly specifying in which cases the function is expected to return a result other than $\bot$.
+
+\begin{definition}[Consistency Preservation Application Function]
+    \todo{Define for transformations instead?}
+    Let $\consistencypreservationruleset{}$ be a set of consistency preservation rules for a set of consistency relations $\consistencyrelationset{CR}$ on metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$ and $\consistencyorcfunction{\consistencypreservationruleset{}}$ an orchestration function for the consistency preservation rules.
+    A consistency preservation application function $\consistencyappfunction{\consistencypreservationruleset{}}$ for these rules is a partial function:
+    \begin{align*}
+        &
+        \consistencyappfunction{\consistencyorcfunction{\consistencypreservationruleset{}}} : (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}}) \rightarrow \metamodeltupleinstanceset{M} \cup \setted{\bot}
+    \end{align*}
+    The function takes a consistent tuple of models and a tuple of changes that was performed on them and returns a changed tuple of models by acquiring changes from the consistency preservation rules in $\consistencypreservationruleset{}$. It is partial, because it is allowed to return $\bot$ especially for inconsistent input models but potentially also in other cases. It has to fulfill the following conditions:
+    \begin{align*}
+        &
+        \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \forall \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} :
+        \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \Rightarrow \\
+        & \formulaskip
+        \big( \consistencyappfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \bot \\
+        & \formulaskip 
+        \lor
+            \exists \modeltuple{m'} \in \metamodeltupleinstanceset{M} : 
+            \consistencyappfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \modeltuple{m'} \land\\
+            & \formulaskip \formulaskip
+            \exists \consistencypreservationrule{1}, \dots, \consistencypreservationrule{m} \in \consistencypreservationruleset{} : %\\
+            %& \formulaskip \formulaskip
+            \exists \changetuple{\metamodeltuple{M}}' = \tupled{\change{\metamodel{M}{1}}', \dots, \change{\metamodel{M}{n}}'} \in \changeuniverse{\metamodeltuple{M}} :\\
+            & \formulaskip \formulaskip
+            \consistencyorcfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \tupled{\consistencypreservationrule{1}, \dots, \consistencypreservationrule{m}} \\
+            & \formulaskip \formulaskip
+            \land \cprgeneralizationfunction{\consistencypreservationrule{1}} \concatfunction \dots \concatfunction \cprgeneralizationfunction{\consistencypreservationrule{m}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}')\\
+            & \formulaskip \formulaskip
+            \land \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \dots, \change{\metamodel{M}{n}}'(\model{m}{n})} = \modeltuple{m'}
+        \big)
+    \end{align*}
+    We say that $\consistencyappfunction{\consistencyorcfunction{\consistencypreservationruleset{}}}$ is \emph{correct} if its result is either $\bot$ or consistent to $\consistencyrelation{CR}{}$:
+    \begin{align*}
+        &
+        \consistencyappfunction{\consistencypreservationruleset{}} \mathtext{is correct} \equivalentperdefinition \\
+        & \formulaskip
+        \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \forall \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} :
+        \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \Rightarrow \\
+        & \formulaskip
+        \consistencyappfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \bot \lor \consistencyappfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \consistenttomath \consistencyrelationset{CR}
+    \end{align*}
+\end{definition}
+
+% The definition of the application function basically ensures that the function either returns $\bot$ or executes the \modellevelconsistencypreservationrules given by the orchestration function to retrieve a changes tuple of models.
+% Actually, we want to have a notion of \emph{correctness}, because the function should not return a tuple of models that is not consistent.
+
+% \begin{definition}[Correct Consistency Preservation Application Function]
+%     Let $\consistencypreservationruleset{}$ be a set of consistency preservation rules for a set of consistency relations $\consistencyrelationset{CR}$ on metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$ and $\consistencyorcfunction{\consistencypreservationruleset{}}$ an orchestration function for the consistency preservation rules.
+%     We say that:
+%     \begin{align*}
+%         &
+%         \consistencyappfunction{\consistencypreservationruleset{}} \mathtext{is correct} \equivalentperdefinition \\
+%         & \formulaskip
+%         \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \forall \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} :
+%         \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \Rightarrow \\
+%         & \formulaskip
+%         \consistencyappfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \bot \lor \consistencyappfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \consistenttomath \consistencyrelationset{CR}
+%     \end{align*}
+% \end{definition}
+
+\mnote{Achieving a correct application function}
+The definition of the application function basically ensures that the function either returns $\bot$ or executes the \modellevelconsistencypreservationrules given by the orchestration function to retrieve a changes tuple of models.
+It is considered \emph{correct} if it ensures that its result is either $\bot$ or a consistent model tuple by executing the \modellevelconsistencypreservationrules given by the orchestration function.
+% A correct application function thus has to ensure that its result is either $\bot$ or a consistent model tuple by executing the \modellevelconsistencypreservationrules given by the orchestration function.
+In consequence, the application function can be realized by simply executing the result of the orchestration function and check whether the resulting model tuple is consistent or not and return an appropriate result.
+Such a realization is generic and does not depend on the actual consistency preservation rules and orchestration function but represents a generic behavior.
+Additionally, this gives an implementation of that function the ability to present a faulty result to the user, which eases finding out why no consistent state was reached.
+
+\mnote{Correctness is not crucial}
+Finally, correctness is not crucial, because correctness can easily be achieved by performing any execution of transformations and just ensuring that we terminate at some point in time and then decide whether the resulting models are consistent or not and appropriately deliver the result.
+
+\mnote{How to define an orchestration function that is as optimal as possible?}
+The remaining difficulty is how to define an orchestration function that fulfills the definition, i.e., to find a finite sequence of transformations, and also one that improves optimality, as an \emph{optimal} function can never be given.
+Although the definition of the orchestration function proposes a closed description of that function, in practice such a function will not have a closed form but will be realized as an algorithm that dynamically decides which transformation to execute next.
+Therefore the arising problem is that the length of the sequence to execute is not known a priori. Therefore, we need some abortion criterion. When a consistent result is found, this criterion is easy. But since we do not know whether a sequence exist, we need an abortion criterion that is reasonable and does not cut off the process although a consistent solution could be found, thus reducing optimality.
+A simple realization for that algorithm to deliver a finite sequence of transformations would be to define a fixed termination criterion, such as a specific number of transformation executions. However, there is no upper bound for the number of executed transformations necessary to achieve consistency. Still, a fixed number (even 0) could be defined for the number of executed transformations to fulfill the definition. Hence, optimality would be 0 then as a consistent result is never reached. We therefore discuss in the following how to define an appropriate orchestration function and how to optimize it.
+
+\textbf{Overall Goal:} Find correct orchestration function that improves optimality.
+
+There are two ways to improve optimality of the orchestration function:
+\begin{enumerate}
+    \item Optimize the orchestration function, i.e., find a good order (probably this is not possible), at least find an order that helps the developer to find problems
+    \item Optimize the input, i.e., define requirements to the transformations and their relations representing the input to optimize optimality
+\end{enumerate}
+\todo{We need an example for that}
+
+Both goes hand in hand, because restrictions to the input can never lead to an orchestration function that always terminates without leading to unsupported relevant cases.
+
+This conform to two approaches:
+\begin{enumerate}
+    \item Dynamic decision about selected transformation and abortion criteria
+    \item Constructive restrictions that ensure that appropriate order is (easily) found
+\end{enumerate}
+
+\todo{Application function can be generically defined, orchestration maybe not? We actually want to ensure that both are generic and none of them has to be defined for a specific project.}
+
+
+%%% THIS VERSION MAKES ORCHESTRATION ON ITS OWN AND DEFINES THE REQUIREMENTS FOR THAT. IT MAY REQUIRE THE RESULT OT BE CONSISTENT OR NOT
+% \begin{definition}[Consistency Preservation Application Function]
+%     \todo{Define for transformations instead?}
+%     Let $\consistencypreservationruleset{}$ be a set of consistency preservation rules for a set of consistency relations $\consistencyrelationset{CR}$ on metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$.
+%     A consistency preservation application function $\consistencyappfunction{\consistencypreservationruleset{}}$ for these rules is a partial function:
+%     \begin{align*}
+%         &
+%         \consistencyappfunction{\consistencypreservationruleset{}} : (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}}) \rightarrow (\metamodeltupleinstanceset{M})
+%     \end{align*}
+%     The function takes a consistent tuple of models and a tuple of changes that was performed on them and returns a changed tuple of models by acquiring changes from the consistency preservation rules in $\consistencypreservationruleset{}$. It is partial, because it is only defined for consistent input model tuples and may not return a result for all possible changes to any model. It has to fulfill the following conditions:
+%     \begin{align*}
+%         &
+%         \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \forall \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} :
+%         \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \Rightarrow \\
+%         & \formulaskip
+%         \exists \modeltuple{m'} \in \metamodeltupleinstanceset{M} :
+%         \modeltuple{m'} = \consistencyappfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \\
+%         %\land \modeltuple{m'} \consistenttomath \consistencyrelationset{CR} \\
+%         & \formulaskip
+%         \land \exists \consistencypreservationrule{1}, \dots, \consistencypreservationrule{m} \in \consistencypreservationruleset{} : 
+%         \exists \changetuple{\metamodeltuple{M}}' = \tupled{\change{\metamodel{M}{1}}', \dots, \change{\metamodel{M}{n}}'} \in \changeuniverse{\metamodeltuple{M}} :\\
+%         & \formulaskip \formulaskip 
+%         \cprgeneralizationfunction{\consistencypreservationrule{1}} \concatfunction \dots \concatfunction \cprgeneralizationfunction{\consistencypreservationrule{m}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}')\\
+%         & \formulaskip \formulaskip
+%         \land \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \dots, \change{\metamodel{M}{n}}'(\model{m}{n})} = \modeltuple{m'}
+%     \end{align*}
+% \end{definition}
+
+
+% It is obvious that we can define consistency preservation rules for which no execution order can be specified that returns a consistent tuple of models after certain changes. Consider the example in \autoref{fig:formal:noexecutionorder}. There exists no execution order for any input value that terminates. The transformations will always increase the value, although the defined relations could be fulfilled for the input value, but the transformations never find that solution.
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=\textwidth]{figures/correctness/formal/divergence_example.png}
+%     \caption{Example for divergence}
+%     \label{fig:formal:noexecutionorder}
+% \end{figure}
+
+% Although we will discuss restrictions to relations and transformations that reduce the chance that no solution can be found, it will not be possible to ensure that such a solution can always be found. This is due to the reason that transformations can perform arbitrary changes given the transformations Turing-completeness, which should not be restricted, because it is unclear which restrictions could be made without forbidding scenarios that should actually we supported. Thus, we assume that transformations are Turing complete.
+
+% Finally, this makes it necessary that a function that applies \modellevelconsistencypreservationrules may not find an execution order that returns a consistent model, thus is should be able to also return $\bot$ as an indicator for that situation.
+
+% We first give a basic definition for such a function without further specifying in which cases the function is expected to return a result other than $\bot$.
+
+% \begin{definition}[Consistency Preservation Application Function]
+%     \todo{Define for transformations instead?}
+%     Let $\consistencypreservationruleset{}$ be a set of consistency preservation rules for a set of consistency relations $\consistencyrelationset{CR}$ on metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$.
+%     A consistency preservation application function $\consistencyappfunction{\consistencypreservationruleset{}}$ for these rules is function:
+%     \begin{align*}
+%         &
+%         \consistencyappfunction{\consistencypreservationruleset{}} : (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}}) \rightarrow (\metamodeltupleinstanceset{M})
+%     \end{align*}
+%     The function takes a consistent tuple of models and a tuple of changes that was performed on them and returns a changed tuple of models by acquiring changes from the consistency preservation rules in $\consistencypreservationruleset{}$. Thus, it has to fulfill the following conditions:
+%     {\setlength{\mathindent}{0em}
+%     \begin{align*}
+%         &
+%         \consistencyappfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = 
+%         \begin{cases}
+%             \modeltuple{m'}, & \begin{array}{l@{}}
+%                 \exists \changetuple{\metamodeltuple{M}}' = \tupled{\change{\metamodel{M}{1}}', \dots, \change{\metamodel{M}{n}}'} \in \changeuniverse{\metamodeltuple{M}} :\\
+%                 \exists \consistencypreservationrule{1}, \dots, \consistencypreservationrule{m} \in \consistencypreservationruleset{} : \\
+%                 \cprgeneralizationfunction{\consistencypreservationrule{1}} \concatfunction \dots \concatfunction \cprgeneralizationfunction{\consistencypreservationrule{m}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}') \\
+%                 \land \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \dots, \change{\metamodel{M}{n}}'(\model{m}{n})} = \modeltuple{m'} 
+%             \end{array} \\
+%             \bot, & otherwise
+%         \end{cases}
+%     \end{align*}
+%     }
+% \end{definition}
+
+% \begin{definition}[Consistency Preservation Application Function]
+%     \todo{Define for transformations instead?}
+%     Let $\consistencypreservationruleset{}$ be a set of consistency preservation rules for a set of consistency relations $\consistencyrelationset{CR}$ on metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$.
+%     A consistency preservation application function $\consistencyappfunction{\consistencypreservationruleset{}}$ for these rules is function:
+%     \begin{align*}
+%         &
+%         \consistencyappfunction{\consistencypreservationruleset{}} : (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}}) \rightarrow (\metamodeltupleinstanceset{M})
+%     \end{align*}
+%     The function takes a consistent tuple of models and a tuple of changes that was performed on them and returns a changed tuple of models by acquiring changes from the consistency preservation rules in $\consistencypreservationruleset{}$. Thus, it has to fulfill the following conditions:
+%     {\setlength{\mathindent}{1em}
+%     \begin{align*}
+%         &
+%         \consistencyappfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = 
+%         \begin{cases}
+%             \modeltuple{m'}, & \begin{array}{l@{}}
+%                 \exists \changetuple{\metamodeltuple{M}}' = \tupled{\change{\metamodel{M}{1}}', \dots, \change{\metamodel{M}{n}}'} \in \changeuniverse{\metamodeltuple{M}} :\\
+%                 \exists \consistencypreservationrule{1}, \dots, \consistencypreservationrule{m} \in \consistencypreservationruleset{} : \\
+%                 \cprgeneralizationfunction{\consistencypreservationrule{1}} \concatfunction \dots \concatfunction \cprgeneralizationfunction{\consistencypreservationrule{m}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}') \\
+%                 \land \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \dots, \change{\metamodel{M}{n}}'(\model{m}{n})} = \modeltuple{m'} 
+%             \end{array} \\
+%             \bot, & otherwise
+%         \end{cases}
+%     \end{align*}
+%     }
+% \end{definition}
+
+
+
+% \begin{definition}[Correct Consistency Preservation Application Function]
+%     Let $\consistencyappfunction{\consistencypreservationruleset{}}$ be a consistency preservation application function for a set of \modellevelconsistencypreservationrules $\consistencypreservationruleset{}$ for a set of \modellevelconsistencyrelations $\consistencyrelationset{CR}$.
+%     We say that:
+%     \begin{align*}
+%         &
+%         \consistencyappfunction{\consistencypreservationruleset{}} \mathtext{is correct} \equivalentperdefinition \\
+%         & \formulaskip
+%         \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \forall \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} :
+%         \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \Rightarrow \\
+%         & \formulaskip
+%         \consistencyappfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \consistenttomath \consistencyrelationset{CR}
+%     \end{align*}
+% \end{definition}
+
+
 
 Now it is obvious that the consistency preservation rules can actually do anything to achieve consistency, including returning always the same set of models that is consistent, although that may not be expected. We will discuss later which reasonable assumptions can be made to the behavior to on the hand not restrict the possibilities of the transformation developer and on the other hand be able to ensure some properties of the transformations and their execution.
 
@@ -193,6 +711,7 @@ Essential problem: One transformation may restore consistency between A and B an
 
 Alternative to an app function: Define a \emph{well-definedness} property for a set of transformations, requiring that they can be executed in any order to always terminate consistently. However, this is a very strict requirement, which can usually not be fulfilled, so we do not further investigate that.
 \todo{Give simple example why that does not work.}
+
 
 Best-behaved app function: Whenever there is a sequence of CPRs, the app function finds item. This is still not possible due to Turing-completeness. The function would need to decide whether the network terminates or not.
 
@@ -248,7 +767,7 @@ However, this is hard restriction to transformations. It leads to the fact that 
     \label{fig:formal:monotonycounterexample}
 \end{figure}
 
-One could now argue that there are binary relations in the example, which may never be fulfilled at all. We will later discuss how far relations that cannot be fulfilled should be restricted. However, in general, this is wanted behavior, because in general it may be necessary that transformations produce intermediate states that are not yet consistent with each other. Otherwise this would means that each transformation is always able to directly deliver a state that is consistent to all other relations, which is especially not possible, because other transformations may add further information to the models. More precisely, a relation may consider a model consistent to all other models that contain any additional information not affected by the transformation. For example, a UML class model may be considered consistent to all Java models with any implementation of the specified methods, thus to an infinite number of models. Now saying that it should not be allowed that the transformation selects one with an empty implementation because that is not consistent to another relations induced by another transformation, such as the relationship to a component model, does not make any sense. Thus having those relation elements that may be considered locally consistent but will never occur in a globally consistent tuple of models does not make sense.
+One could now argue that there are binary relations in the example, which may never be fulfilled at all. We will later discuss how far relations that cannot be fulfilled should be restricted. However, in general, this is wanted behavior, because in general it may be necessary that transformations produce intermediate states that are not yet consistent with each other. Otherwise this would means that each transformation is always able to directly deliver a state that is consistent to all other relations, which is especially not possible, because other transformations may add further information to the models. More precisely, a relation may consider <a model consistent to all other models that contain any additional information not affected by the transformation. For example, a UML class model may be considered consistent to all Java models with any implementation of the specified methods, thus to an infinite number of models. Now saying that it should not be allowed that the transformation selects one with an empty implementation because that is not consistent to another relations induced by another transformation, such as the relationship to a component model, does not make any sense. Thus having those relation elements that may be considered locally consistent but will never occur in a globally consistent tuple of models does not make sense.
 In the example, we can see that such an inconsistent intermediate state is passed through and afterwards a consistent tuple of models is reached if not requiring monotony.
 In consequence, requiring monotony from transformations is a too strict requirement, because it is necessary to run through states that may be changed later on.
 
@@ -279,7 +798,8 @@ Thus, systematically avoiding divergence is not possible.
 In consequence, we propose to dynamically deal with alternation / divergence.
 To detect alternations, the execution can simply track if a state way already processed. Apart from spatial problems, this does always work.
 Finding divergence is not that easy, because it is generally not possible to define an upper bound for the number of executions of a single transformation.
-Consider the example in \autoref{fig:formal:noupperboundexample}.
+This is due to the reason that, again, this conflicts with the Halting problem.
+We can see this at the simple example in \autoref{fig:formal:noupperboundexample}.
 
 \begin{figure}
     \centering
@@ -333,33 +853,6 @@ Thus, there arise two questions:
 
 
 
-\section{Notions of Correctness}
-
-\todo{Start with this without the formalization and use informal terms to motivate the definitions.}
-\mnote{Correctness implicitly covered by definitions}
-\textcite{stevens2010sosym} proposes an explicit notion of \emph{correctness} for transformations. This is based on the fact that her definition of a transformation does only specify that for two given model, which may be inconsistent because one was modified, an update of the other model is returned.
-The requirement that the originally modified model and the one returned by the transformation have to conform to some consistency relations is specified externally as a notion of \emph{correctness}.
-We directly relate a consistency preservation rule that restores consistency to an according consistency relation, thus a consistency preservation rule that follows our definition is correct by construction in terms of the correctness definition by \citeauthor{stevens2010sosym}.
-The same applies to the consistency preservation application function, which we consider \emph{correct} if it fulfills its definition, as that definition already covers all requirements to that function.
-
-\mnote{Different notions of correctness}
-In general, correctness can be considered in two ways: First, an artifact may be correct if it simply follows its definition.
-While for consistency relations, changes and the generic \modellevelconsistencypreservationrule generalization function correctness can be canonically achieved, this is not that simple for a consistency preservation rule and the consistency preservation application function, as they have to fulfill some constraints with respect to consistency relations they rely on.
-Second, an artifact may be correct if it fulfills some, maybe only implicitly known specification. For example, a consistency relation between UML and Java may only be considered correct if it fulfills some \enquote{natural} notion of consistency, as people know how elements have to be related because they represent similar things, such as classes, or because a standard like the UML~\cite{uml} prescribes that.
-
-\mnote{Correctness regarding global specifications}
-In this work we do not consider the latter correctness notion with respect to external, maybe not formally specified artifacts, which is part of separate research on validation.
-However, when considering consistency of multiple models it may be standing to reason that a modular specification of consistency and its preservation has to be correct with regards to some global, monolithic specification. More precisely, there may be a multiary relation putting several metamodels into relation, which the developers at least implicitly know, and a set of binary relations somehow has to respect that multiary relation, i.e., be \emph{correct} with respect to that relation.
-The same can be imagines for consistency preservation. One may define a multidirectional transformation for a multiary relation, taking a tuple of changes to consistent models and retuning a new tuple of changes, which applied to the models delivers a consistent set of models again. In fact, this would be a realization of the behavior of the consistency preservation application function without relying on modular \modellevelconsistencypreservationrules.
-
-\mnote{Drawbacks of global specification notions}
-Considering consistency this way has two drawbacks:
-\begin{description}
-    \item[Validation Artifacts:] The artifacts to check correctness against, i.e., the global, multiary consistency relation as well as an appropriate multidirectional transformation, do usually not exist. If they existed, they could directly be used to preserve consistency. Thus is impossible to validate a set of consistency relations and preservation rules against such a global specification.
-    \item[Modular Knowledge:] This notion of correctness requires that the developers have some global knowledge that represents a monolithic, multiary consistency relation and their preservation rules. Usually, this will not be the case, so there is even no implicit notion of the necessary artifacts to validate the modular specifications against, not to be mention an explicit representation.
-\end{description}
-
-\todo{Add an image for that relation}
 
 
 
