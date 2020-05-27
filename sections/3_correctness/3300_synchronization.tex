@@ -1,0 +1,131 @@
+\chapter{Constructing Synchronizing Transformations
+   \pgsize{20 p.}
+}
+\label{chap:synchronizing}
+
+\todo{Vermeidbarkeit hängt insb. auch von der verwendeten Sprache ab. Z.B. sind Mappings / QVT-R analyisierbar, aber Reactions / QVT-O nicht.}
+
+\begin{copiedFrom}{ICMT}
+
+To ensure that a network of \acp{BX} operates properly, potential mistakes %, as identified in the previous section, 
+must be avoided.
+%\todoHeiko{Klarmachen, dass wir hier keine vollumfänglichen Lösungsstrategien präsentieren, sondern das, was man im Prinzip auf den Ebenen tun muss. Nur für die unterste Ebene gibt es ein Konzept}
+We evaluate our categorization regarding correctness and completeness %for that 
+in a case study that combines independently developed transformations.
+In that case study, we classify occurring failures with our categorization and trace them back to a causal mistake.
+To identify whether such a classification is correct, we need to be able to fix the mistake and validate that the failure disappears.
+%To investigate whether the classification of revealed mistakes is correct, we need to be able to fix them. %the classification of a mistake was correct and if another mistake was potentially hidden by the fixed one.
+%Therefore, we do not provide complete solution strategies, but instead discuss how mistakes at the different levels can be avoided in general as our contribution \ref{contrib:avoidance}.
+Therefore, we discuss general strategies to avoid mistakes at the different levels as our contribution \ref{contrib:avoidance} and apply them in the evaluation.
+%, we discuss how mistakes at the different levels can be avoided in general, but do not provide complete solutions % solution strategies
+%in this work.
+
+%At the system level, mistakes can only be avoided by careful requirements elicitation. 
+%Since occurring mistakes on that level represent non-conformance with a usually informal notion of consistency, such mistakes cannot be automatically avoided or detected.
+At the global level, mistakes occur due to non-conformance with an informal notion of consistency and %cannot be detected automatically but 
+can only be avoided by careful requirements elicitation. 
+We therefore have to assume that global level mistakes are reliably avoided by the developers.
+Analytic approaches~\cite{klare2018docsym}
+can ensure that specifications at the modularization and operationalization level are free of faults.
+%This can be applied on both the modularization and the operationalization level.
+Nevertheless, %under the assumption that transformations are developed independently, 
+the drawback of such an approach is that it works a-posteriori, when transformations are combined to a network. %, so transformations would have to be adapted %after their specification 
+%when they are combined to a network
+We, in contrast, want to achieve avoidance of interoperability issues a-priori, so that transformations can be developed independently and combined afterwards.
+It is easy to see that mistakes at the modularization level cannot be avoided a-priori. 
+%If modular transformations are developed independently, 
+Ensuring that transformations are non-contradictory %, i.e. that they rely on the same notion of a global consistency specification, 
+would require developers to have knowledge about the other transformations, which breaks the assumption of independent development.
+%This breaks our assumption that developers have restricted domain knowledge, each defining one modular consistency specification.
+%
+Finally, mistakes regarding element matching at the operationalization level are domain-independent. 
+This enables the development of generic mechanisms to ensure interoperability at the operationalization level by construction, without knowing about other transformations.
+
+In the following, we discuss one strategy to avoid mistakes at the modularization and one to avoid those at the operationalization level.
+Developers can use these strategies to build networks that are free of faults, or can use them to fix mistakes if failures occur.
+
+% MOVED TO BEGINNING OF SECTION
+% We evaluate our categorization in a case study combining independently developed transformations. 
+% For that, we need to fix mistakes in order to investigate whether their classification was correct. %the classification of a mistake was correct and if another mistake was potentially hidden by the fixed one.
+% Therefore, we do not provide complete solution strategies, but instead discuss how mistakes at the different levels can be avoided in general as our contribution \ref{contrib:avoidance}.
+
+%We therefore assume that mistakes on modularization level are avoided as well and investigate, under this assumption, whether the operationalization can be develop interoperable by construction.
+
+% \begin{itemize}
+%     \item Problems on all three levels must be avoided
+%     \item On all levels, possibility to use model checking for finding faults when combining a set of transformations (cf. \cite{klare2018docsym}
+%     \item Detecting mistakes on level 1 is hard, because one would have to compare the specification against a natural, usually unspecified notion of consistency
+%     \item Drawback: works a-posteriori, so transformations would have to be adapted afterwards to be used together
+%     \item Therefore: approach for a-priori avoidance of interoperability issues necessary
+%     \item Problem: on level 2 no a-priori avoidance of problems possible, or overall knowledge from level 1 necessary -> breaks our assumption of independent development
+%     \item But: On level 3 possibility to develop mechanisms and patterns to ensure interoperability on that level by construction, because it only concerns the operationalization of specifications. In contrast to the consistency specifications, which are domain specific, the operationalization follows a generic pattern for which generic interoperability solutions can be derived
+%     \item We assume interoperability on level 2 for our approach so that there are no interactions between mistakes on the level 2 and 3 (no precise enough)
+% \end{itemize}
+
+\end{copiedFrom} % ICMT
+
+
+\section{Ensuring Interoperability of Executed Transformations 
+    \pgsize{15 p.}
+}
+Goal: Avoidance strategies for interoperability mistakes, i.e. achieving synchronization of transformations (MA Torsten / Timur)
+\label{chap:prevention:interoperability}
+
+\begin{copiedFrom}{ICMT}
+
+% FORMERLY: \subsection{Matching Elements in Operationalizations}
+\subsection{Matching Elements}
+\label{chap:prevention:interoperability:matching}
+
+To avoid failures due to mistakes at the operationalization level, transformations must respect that other transformations may have already created elements.
+In the binary case, this is unnecessary.
+A single incremental \ac{BX} can assume that elements are either created by the user, %and then are input of the transformations
+or were created by the transformation itself.
+To identify corresponding elements, transformation languages usually use trace models, which are created by the transformations.
+When \acp{BX} are combined to networks, %elements may also be created by other transformations.
+%In consequence, 
+direct trace links may be missing because a sequence of other transformations created the elements and trace links only indirectly across elements in other models.
+%Thus, it is necessary to establish direct trace links between corresponding elements.´
+In this scenario, corresponding elements can be matched by information at three levels:
+%Such element matching can be performed on three levels:
+\begin{enumerate}
+    \item \emph{Explicit unique}: The information that elements correspond is unique and represented explicitly, e.g., within a trace model. %Existing transformation languages usually use this technique.
+    \item \emph{Implicit unique}: The information that elements correspond is unique, but represented implicitly, e.g., in terms of key information within the models such as element names. %types and element names.
+    \item \emph{Non-unique}: If no unique information exists, heuristics must be used, e.g. based on ambiguous information or transitive resolution of indirect trace links.
+\end{enumerate}
+\todo{Give examples for each case to show that they actually occur}
+
+Indirect trace links, which link elements transitively across other models, usually exist for elements that correspond, because other transformations have already created them.
+Nevertheless, indirect trace links cannot be used to unambiguously identify such elements.
+An element can correspond to multiple elements in another model, which is why most transformation languages offer tagging of trace links with additional information to identify the correct element.
+%For example, a component in an architecture description could be mapped to two classes in an object-oriented design, one providing the component implementation and one providing utilities.
+%The relevant corresponding element can be retrieved if the traces are tagged with the information that one class is the implementation and one is a utility.
+For example, a language may tag trace links with the transformation rule they were instantiated in.
+This is helpful in the bidirectional case, but when links are resolved transitively, these tags have been created by other, independently developed transformations, and are thus unknown.
+%If such tags would be considered, transformations would depend on tags of other transformations and could thus not be developed independently anymore.
+Therefore, resolving indirect trace links is only a heuristic, but does not unambiguously retrieve corresponding elements.
+
+% Explain how to match rules on three different levels, what the levels can provide etc.
+
+% \begin{enumerate}
+%     \item Direct Correspondences
+%     \item Key information
+%     \item Heuristics: Indirect correspondences, potentially ambiguous information
+% \end{enumerate}
+
+Finally, it is up to the transformation engine or the transformation developer %, depending on the provided abstraction level, 
+to ensure that elements are correctly matched.
+In contrast to the bidirectional case, direct trace links cannot be assumed in case of networks of \acp{BX}.
+Therefore, key information within the models must always be considered to identify matching elements.
+Whenever direct trace links or unique key information exists, relevant elements can be unambiguously matched.
+In all other cases, heuristics must be used, which potentially leads to failures.
+
+\end{copiedFrom} % ICMT
+
+
+
+\section{Orchestrating the Execution of Transformation Networks \pgsize{15 p.}}
+Unability to find always terminating orchestration (Turing completeness, Halting problem). Relate to or define restriction of having unique choices in all transformations. Otherwise, propose engineering strategy for execution order by induction (Pdf Joshua)
+
+
+
