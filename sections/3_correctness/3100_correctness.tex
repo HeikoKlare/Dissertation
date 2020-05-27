@@ -1,15 +1,21 @@
 \chapter{Correctness in Transformation Networks
     \pgsize{20 p.}
 }
-\todo{Restructure into formalization of correctness (containing compatibility, interoperability etc.) and formal proof of proving correctness. Or maybe move that to prevention section?}
+\todo{Planned structure:
+Introduce consistency, preservation, app function Informally
+Discuss notions of correctness and identify what we are interested in
+Provide an appropriate formalism to describe that
+Derive research questions from the formalization (compatibility, sychronization, orchestration, probability of errors)
+}
 
-\section{A Basic Notion of Consistency}
+\section{Notions of Consistency and its Preservation}
 
 \subsection{Intensional vs. Extensional Specification}
+
 \mnote{Intensional / extensional consistency}
 When we consider a set of models, we would intuitively say that it is consistent if it fulfills some kind of constraints.
 Defining these constraints to derive or check whether a given set of models is consistent constitutes an \emph{intensional specification} of consistency, because the set that contains all consistent models is intensionally represented by these constraints and can be derived from it.
-We can consider a set of constraints as a predicate, i.e. a Boolean-valued function $I$, which indicates whether a model set $\modelset{m}$ fullfils the constraints $I: \metamodelsetinstanceset{M} \mapsto \setted{true, false}$. Then we can say that:
+We can consider a set of constraints as a predicate, i.e. a Boolean-valued function $I$, which indicates whether a model set $\modelset{m}$ fulfills the constraints $I: \metamodelsetinstanceset{M} \mapsto \setted{true, false}$. Then we can say that:
 \begin{align*}
     \modelset{m} \consistenttomath I \equivalentperdefinition I(\modelset{m}) = true
 \end{align*}
@@ -40,6 +46,150 @@ A developer who defines consistency, usually wants to use an intensional specifi
 However, from a theoretical perspective we prefer to consider extensional specifications, because they allow to apply set theory.
 Due to the fact that each intensional specification can be transformed into an extensional one, we can make theoretical statements about extensional specifications that also hold for intensional ones.
 
+
+\subsection{Modular vs. Monolithic Consistency Specification}
+
+Compare the two approaches
+\todo{Das folgende drückt eine Definition entsprechend der Annahme der modularen Spezifikation aus. Wir stellen es später in Bezug zu globalen Konsistenzrelationen und anderen Spezifikationsmöglichkeiten, Stichwort MX}
+
+\subsubsection{A Monolithic Notion of Consistency}
+
+Having one consistency relation for an arbitrary number of metamodels constitutes a \emph{monolithic} notion of consistency, as it describes consistency for an arbitrary number of metamodels as a whole.
+Accordingly, a multidirectional transformation~\cite{cleve2019dagstuhl} could be defined that takes a consistent tuple of models and any change to them and then returns a consistent tuple of models again, which then reflects the performed change.
+
+\todo{Define correctness based on a networks adhering to the behavior of a multidirectional transformation}
+
+\subsubsection{A Modular Notion of Consistency}
+
+In the following, we only consider binary consistency relations. Having several consistency relations to define how several metamodels are related, we need to define a notion of consistency based on several consistency relations.
+
+\subsection{Consistency and its Preservation}
+
+Discuss how consistency is preserved based on a notion of consistency (relations)
+
+Allgemeine Definition Transformationsnetzwerke:
+\begin{itemize}
+    \item Definition Transformation aus Relation und Wiederherstellungsroutinen; Routinen nehmen n Modelle und n Deltasequenzen (eine pro Modell) und liefern n Deltasequenzen zurück.
+    \item Im Allgemeinen könnte eine Transformation beliebige dieser Deltasequenzen modifizieren. Wir verlangen jedoch, dass eine Transformation nur Deltas anhängt, also die Sequenzen länger werden
+    \item Genauer beschränken wir auch, welche Sequenzen eine Transformation sehen und ändern darf, genau gesagt darf sie die Sequenzen von zwei Modellen sehen und eine davon verlängern.
+    \item Hier kommt bereits der Unterschied zu bisherigen Transformationen, denn die sehen nur Deltas an einem Modell und erzeugen Deltas an dem anderen. Das ist bei uns schon gänzlich anders. Bidirektionale Transformationen unterstützen das im Übrigen auch nicht, sondern sind nur Spezifikationen, aus denen sich Wiederherstellungsroutinen für beide Richtungen ableiten lassen (siehe Stevens 2010)
+    \item Relationen in erster Instanz auf Modellebene (also bzgl. ganzer Modelle, nicht einzelner Modellelemente) definieren
+    \item Direkt als multidirektionale Transformation definieren, also beliebig viele geändert Ein- und Ausgabemodelle (oder jeweils nur eins?)
+    \item Korrektheit einer Transformation (nach Stevens) definieren!
+    \item Versuchen den Konkatenationsoperator zu definieren ohne dass er alle Metamodelle referenzieren muss (also Transformation wählt aus einer großen Eingabemenge relevanten Modelle aus, ändert relevante und dann fügt der Operator sie in die große Menge ein)
+    \item Definition Transformationsnetzwerk als Tupel aus Metamodellen, Transformationen und einer Ausführungsfunktion. 
+    \item Die Ausführungsfunktion führt für eine gegebene Änderung eine Auswahl der Transformationen nacheinander aus.
+    \item Korrektheit eines Netzwerkes definieren: Die Ausführungsfunktion erzeugt eine Transformationssequenz, die angewendet auf eine Änderung für alle Änderungen ein korrektes Ergebnisse produziert, d.h. die Modelle sind konsistent bzgl. allen Konsistenzrelationen.
+\end{itemize}
+
+We define the following ingredients necessary to handle a network of transformations:
+\begin{description}
+    \item[Consistency Preservation Rules:] We need binary rules that restore consistency after a model of a pair was modified. These are the binary, modular transformations of the networks
+    \item[Orchestration Function:] We need a function that is able to decide in which order transformation have to be executed after a change.
+    \item[Application Function:] We need a function that is able to apply the rules in the order delivered by the orchestration function. 
+\end{description}
+
+We explicitly distinguish the orchestration and the application to be able to make more fine-grained statements about the responsibilities for the orchestration and its actual execution.
+The process is depicted in \autoref{fig:formal:executionprocess}. Given models to are consistent according to some consistency relations and changes to them, the orchestration delivers an order of consistency preservation rules (CPRs) for that networks, which is used to parametrize the application function that executes these rules in the given order.
+The result is, in the best case, a tuple of models that is consistent to the relations again.
+However, we will see that this is not always possible. Thus, we will especially discuss relevant properties of the artifacts, such as correctness and optimality that reflect how and when this process can be executed successfully.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/correctness/formal/execution_process.png}
+    \caption{Execution process in network and artifacts}
+    \label{fig:formal:executionprocess}
+\end{figure}
+
+\todo{Monolithic notion can be seen as a degraded transformation network only having one transformation, thus no orchestration, not incompatibility.
+Finally, even with multiary transformation, we want to be able to combine them to networks}
+
+
+
+
+\section{Notions of Correctness for Consistency}
+
+Before we consider consistency preservation rules and their interaction in detail, we first discuss different notions of \emph{correctness} for them.
+This is important because there are different correctness dimension, for which we have to make clear which of them are important for us.
+
+% \begin{definition}[Monolithic \ModelLevelConsistencyPreservationRule]
+%     Given two metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$ and a \modellevelconsistencyrelation between them $\consistencyrelation{CR}{} \subseteq \metamodelinstanceset{M}{1} \times \dots \times \metamodelinstanceset{M}{n}$.
+%     A \emph{monolithic \modellevelconsistencypreservationrule} is a function:
+%     \begin{align*}
+%         \consistencypreservationrule{\consistencyrelation{CR}{}} : (\metamodeltupleinstanceset{M}, \metamodelinstanceset{M}{2}, \change{\metamodel{M}{1}}) \rightarrow \change{\metamodel{M}{2}}
+%     \end{align*}
+%     It that takes two consistent models and a change in the first one and returns a change in the second one.
+%     We call a \modellevelconsistencypreservationrule \emph{correct} w.r.t. $\consistencyrelation{CR}{}$ if the resulting models when applying the input and output change are consistent to $\consistencyrelation{CR}{}$ again:
+%     \begin{align*}
+%         &
+%         \forall \model{m}{1} \in \metamodelinstanceset{M}{1}, \model{m}{2} \in \metamodelinstanceset{M}{2} :
+%         \tupled{\model{m}{1}, \model{m}{2}} \in \consistencyrelation{CR}{} \Rightarrow\\
+%         & \formulaskip
+%         \forall \change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}} :
+%         \exists \change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}} :\\
+%         & \formulaskip
+%         \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) = \change{\metamodel{M}{2}} 
+%         \land \tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}(\model{m}{2})} \in \consistencyrelation{CR}{}
+%     \end{align*}
+% \end{definition}
+
+
+
+Keeping multiple models consistent by means of transformations imposes either a single multidirectional transformation or a combination of several bi- or multidirectional transformations.
+Each of these transformations is able to take a consistent tuple of models and a change to them and to return a new consistent tuple of models.
+
+
+
+\mnote{Correctness implicitly covered by definitions}
+\textcite{stevens2010sosym} proposes an explicit notion of \emph{correctness} for transformations. This is based on the fact that her definition of a transformation does only specify that for two given model, which may be inconsistent because one was modified, an update of the other model is returned.
+The requirement that the originally modified model and the one returned by the transformation have to conform to some consistency relations is specified externally as a notion of \emph{correctness}.
+We directly relate a consistency preservation rule that restores consistency to an according consistency relation, thus a consistency preservation rule that follows our definition is correct by construction in terms of the correctness definition by \citeauthor{stevens2010sosym}.
+The same applies to the consistency preservation application function, which we consider \emph{correct} if it fulfills its definition, as that definition already covers all requirements to that function.
+
+\mnote{Different notions of correctness}
+In general, correctness can be considered in two ways: First, an artifact may be correct if it simply follows its definition.
+While for consistency relations, changes and the generic \modellevelconsistencypreservationrule generalization function correctness can be canonically achieved, this is not that simple for a consistency preservation rule and the consistency preservation application function, as they have to fulfill some constraints with respect to consistency relations they rely on.
+Second, an artifact may be correct if it fulfills some, maybe only implicitly known specification. For example, a consistency relation between UML and Java may only be considered correct if it fulfills some \enquote{natural} notion of consistency, as people know how elements have to be related because they represent similar things, such as classes, or because a standard like the UML~\cite{uml} prescribes that.
+
+\mnote{Correctness regarding global specifications}
+In this work we do not consider the latter correctness notion with respect to external, maybe not formally specified artifacts, which is part of separate research on validation.
+However, when considering consistency of multiple models it may be standing to reason that a modular specification of consistency and its preservation has to be correct with regards to some global, monolithic specification. More precisely, there may be a multiary relation putting several metamodels into relation, which the developers at least implicitly know, and a set of binary relations somehow has to respect that multiary relation, i.e., be \emph{correct} with respect to that relation.
+The same can be imagines for consistency preservation. One may define a multidirectional transformation for a multiary relation, taking a tuple of changes to consistent models and retuning a new tuple of changes, which applied to the models delivers a consistent set of models again. In fact, this would be a realization of the behavior of the consistency preservation application function without relying on modular \modellevelconsistencypreservationrules.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/correctness/formal/correctness_notions.png}
+    \caption{Different notions of correctness for transformations and networks}
+    \label{fig:correctness:correctnessnotions}
+\end{figure}
+
+\mnote{Drawbacks of global specification notions}
+Considering consistency this way has two drawbacks:
+\begin{description}
+    \item[Validation Artifacts:] The artifacts to check correctness against, i.e., the global, multiary consistency relation as well as an appropriate multidirectional transformation, do usually not exist. If they existed, they could directly be used to preserve consistency. Thus is impossible to validate a set of consistency relations and preservation rules against such a global specification.
+    \item[Modular Knowledge:] This notion of correctness requires that the developers have some global knowledge that represents a monolithic, multiary consistency relation and their preservation rules. Usually, this will not be the case, so there is even no implicit notion of the necessary artifacts to validate the modular specifications against, not to be mention an explicit representation.
+\end{description}
+
+\todo{Add an image for that relation}
+
+
+Overall Goals:
+\begin{itemize}
+    \item Define correctness of a transformation network: termination in consistent state
+\end{itemize}
+
+Central Insights:
+\begin{itemize}
+    \item Correctness is not the problem, optimality is the problem
+    \item We can only check dynamically whether a consistent state was reached due to Halting Problem. We cannot guarantee to always find a consistent state
+\end{itemize}
+
+
+
+
+
+
+\section{A Formal Notion of Transformation Networks}
 
 \subsection{Modular Consistency Specification}
 
@@ -127,136 +277,8 @@ We will later discuss if and how an execution order of such consistency preserva
 
 
 
-\section{Notions of Correctness}
-
-Before we consider consistency preservation rules and their interaction in detail, we first discuss different notions of \emph{correctness} for them.
-This is important because there are different correctness dimension, for which we have to make clear which of them are important for us.
-
-% \begin{definition}[Monolithic \ModelLevelConsistencyPreservationRule]
-%     Given two metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$ and a \modellevelconsistencyrelation between them $\consistencyrelation{CR}{} \subseteq \metamodelinstanceset{M}{1} \times \dots \times \metamodelinstanceset{M}{n}$.
-%     A \emph{monolithic \modellevelconsistencypreservationrule} is a function:
-%     \begin{align*}
-%         \consistencypreservationrule{\consistencyrelation{CR}{}} : (\metamodeltupleinstanceset{M}, \metamodelinstanceset{M}{2}, \change{\metamodel{M}{1}}) \rightarrow \change{\metamodel{M}{2}}
-%     \end{align*}
-%     It that takes two consistent models and a change in the first one and returns a change in the second one.
-%     We call a \modellevelconsistencypreservationrule \emph{correct} w.r.t. $\consistencyrelation{CR}{}$ if the resulting models when applying the input and output change are consistent to $\consistencyrelation{CR}{}$ again:
-%     \begin{align*}
-%         &
-%         \forall \model{m}{1} \in \metamodelinstanceset{M}{1}, \model{m}{2} \in \metamodelinstanceset{M}{2} :
-%         \tupled{\model{m}{1}, \model{m}{2}} \in \consistencyrelation{CR}{} \Rightarrow\\
-%         & \formulaskip
-%         \forall \change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}} :
-%         \exists \change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}} :\\
-%         & \formulaskip
-%         \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) = \change{\metamodel{M}{2}} 
-%         \land \tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}(\model{m}{2})} \in \consistencyrelation{CR}{}
-%     \end{align*}
-% \end{definition}
-
-
-
-Keeping multiple models consistent by means of transformations imposes either a single multidirectional transformation or a combination of several bi- or multidirectional transformations.
-Each of these transformations is able to take a consistent tuple of models and a change to them and to return a new consistent tuple of models.
-
-
-
-\section{Notions of Correctness}
-
-\mnote{Correctness implicitly covered by definitions}
-\textcite{stevens2010sosym} proposes an explicit notion of \emph{correctness} for transformations. This is based on the fact that her definition of a transformation does only specify that for two given model, which may be inconsistent because one was modified, an update of the other model is returned.
-The requirement that the originally modified model and the one returned by the transformation have to conform to some consistency relations is specified externally as a notion of \emph{correctness}.
-We directly relate a consistency preservation rule that restores consistency to an according consistency relation, thus a consistency preservation rule that follows our definition is correct by construction in terms of the correctness definition by \citeauthor{stevens2010sosym}.
-The same applies to the consistency preservation application function, which we consider \emph{correct} if it fulfills its definition, as that definition already covers all requirements to that function.
-
-\mnote{Different notions of correctness}
-In general, correctness can be considered in two ways: First, an artifact may be correct if it simply follows its definition.
-While for consistency relations, changes and the generic \modellevelconsistencypreservationrule generalization function correctness can be canonically achieved, this is not that simple for a consistency preservation rule and the consistency preservation application function, as they have to fulfill some constraints with respect to consistency relations they rely on.
-Second, an artifact may be correct if it fulfills some, maybe only implicitly known specification. For example, a consistency relation between UML and Java may only be considered correct if it fulfills some \enquote{natural} notion of consistency, as people know how elements have to be related because they represent similar things, such as classes, or because a standard like the UML~\cite{uml} prescribes that.
-
-\mnote{Correctness regarding global specifications}
-In this work we do not consider the latter correctness notion with respect to external, maybe not formally specified artifacts, which is part of separate research on validation.
-However, when considering consistency of multiple models it may be standing to reason that a modular specification of consistency and its preservation has to be correct with regards to some global, monolithic specification. More precisely, there may be a multiary relation putting several metamodels into relation, which the developers at least implicitly know, and a set of binary relations somehow has to respect that multiary relation, i.e., be \emph{correct} with respect to that relation.
-The same can be imagines for consistency preservation. One may define a multidirectional transformation for a multiary relation, taking a tuple of changes to consistent models and retuning a new tuple of changes, which applied to the models delivers a consistent set of models again. In fact, this would be a realization of the behavior of the consistency preservation application function without relying on modular \modellevelconsistencypreservationrules.
-
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{figures/correctness/formal/correctness_notions.png}
-    \caption{Different notions of correctness for transformations and networks}
-    \label{fig:correctness:correctnessnotions}
-\end{figure}
-
-\mnote{Drawbacks of global specification notions}
-Considering consistency this way has two drawbacks:
-\begin{description}
-    \item[Validation Artifacts:] The artifacts to check correctness against, i.e., the global, multiary consistency relation as well as an appropriate multidirectional transformation, do usually not exist. If they existed, they could directly be used to preserve consistency. Thus is impossible to validate a set of consistency relations and preservation rules against such a global specification.
-    \item[Modular Knowledge:] This notion of correctness requires that the developers have some global knowledge that represents a monolithic, multiary consistency relation and their preservation rules. Usually, this will not be the case, so there is even no implicit notion of the necessary artifacts to validate the modular specifications against, not to be mention an explicit representation.
-\end{description}
-
-\todo{Add an image for that relation}
-
-
-Overall Goals:
-\begin{itemize}
-    \item Define correctness of a transformation network: termination in consistent state
-\end{itemize}
-
-Central Insights:
-\begin{itemize}
-    \item Correctness is not the problem, optimality is the problem
-    \item We can only check dynamically whether a consistent state was reached due to Halting Problem. We cannot guarantee to always find a consistent state
-\end{itemize}
-
-
-Allgemeine Definition Transformationsnetzwerke:
-\begin{itemize}
-    \item Definition Transformation aus Relation und Wiederherstellungsroutinen; Routinen nehmen n Modelle und n Deltasequenzen (eine pro Modell) und liefern n Deltasequenzen zurück.
-    \item Im Allgemeinen könnte eine Transformation beliebige dieser Deltasequenzen modifizieren. Wir verlangen jedoch, dass eine Transformation nur Deltas anhängt, also die Sequenzen länger werden
-    \item Genauer beschränken wir auch, welche Sequenzen eine Transformation sehen und ändern darf, genau gesagt darf sie die Sequenzen von zwei Modellen sehen und eine davon verlängern.
-    \item Hier kommt bereits der Unterschied zu bisherigen Transformationen, denn die sehen nur Deltas an einem Modell und erzeugen Deltas an dem anderen. Das ist bei uns schon gänzlich anders. Bidirektionale Transformationen unterstützen das im Übrigen auch nicht, sondern sind nur Spezifikationen, aus denen sich Wiederherstellungsroutinen für beide Richtungen ableiten lassen (siehe Stevens 2010)
-    \item Relationen in erster Instanz auf Modellebene (also bzgl. ganzer Modelle, nicht einzelner Modellelemente) definieren
-    \item Direkt als multidirektionale Transformation definieren, also beliebig viele geändert Ein- und Ausgabemodelle (oder jeweils nur eins?)
-    \item Korrektheit einer Transformation (nach Stevens) definieren!
-    \item Versuchen den Konkatenationsoperator zu definieren ohne dass er alle Metamodelle referenzieren muss (also Transformation wählt aus einer großen Eingabemenge relevanten Modelle aus, ändert relevante und dann fügt der Operator sie in die große Menge ein)
-    \item Definition Transformationsnetzwerk als Tupel aus Metamodellen, Transformationen und einer Ausführungsfunktion. 
-    \item Die Ausführungsfunktion führt für eine gegebene Änderung eine Auswahl der Transformationen nacheinander aus.
-    \item Korrektheit eines Netzwerkes definieren: Die Ausführungsfunktion erzeugt eine Transformationssequenz, die angewendet auf eine Änderung für alle Änderungen ein korrektes Ergebnisse produziert, d.h. die Modelle sind konsistent bzgl. allen Konsistenzrelationen.
-\end{itemize}
-
-
-
-\todo{Das folgende drückt eine Definition entsprechend der Annahme der modularen Spezifikation aus. Wir stellen es später in Bezug zu globalen Konsistenzrelationen und anderen Spezifikationsmöglichkeiten, Stichwort MX}
-
-\section{A Monolithic Notion of Consistency}
-
-Having one consistency relation for an arbitrary number of metamodels constitutes a \emph{monolithic} notion of consistency, as it describes consistency for an arbitrary number of metamodels as a whole.
-Accordingly, a multidirectional transformation~\cite{cleve2019dagstuhl} could be defined that takes a consistent tuple of models and any change to them and then returns a consistent tuple of models again, which then reflects the performed change.
-
-\todo{Define correctness based on a networks adhering to the behavior of a multidirectional transformation}
-
-
-
-\section{A Modular Notion of Consistency}
-
-In the following, we only consider binary consistency relations. Having several consistency relations to define how several metamodels are related, we need to define a notion of consistency based on several consistency relations.
-
-We define the following ingredients necessary to handle a network of transformations:
-\begin{description}
-    \item[Consistency Preservation Rules:] We need binary rules that restore consistency after a model of a pair was modified. These are the binary, modular transformations of the networks
-    \item[Orchestration Function:] We need a function that is able to decide in which order transformation have to be executed after a change.
-    \item[Application Function:] We need a function that is able to apply the rules in the order delivered by the orchestration function. 
-\end{description}
-
-We explicitly distinguish the orchestration and the application to be able to make more fine-grained statements about the responsibilities for the orchestration and its actual execution.
-The process is depicted in \autoref{fig:formal:executionprocess}. Given models to are consistent according to some consistency relations and changes to them, the orchestration delivers an order of consistency preservation rules (CPRs) for that networks, which is used to parametrize the application function that executes these rules in the given order.
-The result is, in the best case, a tuple of models that is consistent to the relations again.
-However, we will see that this is not always possible. Thus, we will especially discuss relevant properties of the artifacts, such as correctness and optimality that reflect how and when this process can be executed successfully.
-
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{figures/correctness/formal/execution_process.png}
-    \caption{Execution process in network and artifacts}
-    \label{fig:formal:executionprocess}
-\end{figure}
+\subsection{Incremental Consistency Preservation}
+\todo{Explicitly discuss incrementality here, although we actually do not need it. So leave it out? No, needed for synchronization definition. But make clear that this is a specialization and discuss generalization.}
 
 First of all, we start with a definition of consistency in a network of transformations.
 
@@ -555,6 +577,9 @@ The remaining difficulty is how to define an orchestration function that fulfill
 Although the definition of the orchestration function proposes a closed description of that function, in practice such a function will not have a closed form but will be realized as an algorithm that dynamically decides which transformation to execute next.
 Therefore the arising problem is that the length of the sequence to execute is not known a priori. Therefore, we need some abortion criterion. When a consistent result is found, this criterion is easy. But since we do not know whether a sequence exist, we need an abortion criterion that is reasonable and does not cut off the process although a consistent solution could be found, thus reducing optimality.
 A simple realization for that algorithm to deliver a finite sequence of transformations would be to define a fixed termination criterion, such as a specific number of transformation executions. However, there is no upper bound for the number of executed transformations necessary to achieve consistency. Still, a fixed number (even 0) could be defined for the number of executed transformations to fulfill the definition. Hence, optimality would be 0 then as a consistent result is never reached. We therefore discuss in the following how to define an appropriate orchestration function and how to optimize it.
+
+
+\todo{Somewhere here things should be moved to orchestration chapter}
 
 \textbf{Overall Goal:} Find correct orchestration function that improves optimality.
 
