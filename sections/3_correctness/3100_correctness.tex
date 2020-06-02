@@ -118,13 +118,29 @@ It is, however, unclear whether $\tupled{\model{m'}{1}, \model{m''}{2}} \in \con
 In fact, we need some method to decide in which order and how often the \glspl{consistency preservation rule} are applied to result in a consistent set of models.
 We call this an \emph{orchestration}.
 
-\todo{VISUALIZE!}
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/correctness/formal/concurrent_consecutive_execution.png}
+    \caption{Scenarios for independently executing consistency preservation rules on input models and consecutively executing them on the results of other rules.}
+    \label{fig:correctness:concurrent_consecutive_execution}
+\end{figure}
+
+\mnote{Unification and orchestration necessary due to conflicting sequences}
+The examples for the two strategies of executing \glspl{consistency preservation rule} are depicted in \autoref{fig:correctness:concurrent_consecutive_execution}. 
+Even if \glspl{consistency preservation rule} were supposed to only modify one model instead of two, like in the examples, the same problems of unification and orchestration would occur as soon as there are two sequences of \glspl{consistency preservation rule} that change the same models.
+
+\mnote{Benefits of consecutive execution}
+In our work, we follow the approach of orchestrating and consecutively executing \glspl{consistency preservation rule}.
+The benefits of this approach are twofold. First, there is no additional logic required for unifying the changes performed by indepedently executed \glspl{consistency preservation rule}. 
+Second, the unification may deliver a model that is not consistent ot any of the \glspl{consistency relation} anymore, whereas consecutive execution at least gives the guarantee that the models are consistent to the last applied \gls{consistency preservation rule}.
+With this approach, the preservation rules can \enquote{negotiate} a solution by reacting to the changes the others performed.
 
 \begin{remark}
 \mnote{Monolithic notions are degraded modular ones}
 Finally, every monolithic notion of consistency and its preservation can be considered a special case of a modular notion. Having only one consistency relation and one function that preserves it degrades the problem by making the necessity to perform an orchestration of functions obsolete.
 \end{remark}
 
+\mnote{Different realization options for consistency preservation rules}
 For now, the introduced \glspl{consistency preservation rule} can be any kind of functions that return consistent models. 
 Their realization may, for example, be transformations that define how to react to certain changes for restoring consistency, or constraint solvers that find consistent models by solving consistency constraints. 
 We do not yet need to consider how these functions are realized to derive consistent models, although, later, we will focus on transformation-based approaches.
@@ -132,12 +148,20 @@ We do not yet need to consider how these functions are realized to derive consis
 
 \subsection{Declarative and Imperative Consistency Specifications}
 
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/correctness/formal/declarative_imperative}
+    \caption{Declarative and imperative specification of consistency relations and consistency preservation rules}
+    \label{fig:correctness:declarative_imperative}
+\end{figure}
+
 \mnote{Only define relation \emph{or} function}
 We discussed that consistency preservation can be considered as functions, called \glspl{consistency preservation rule}, that preserve consistency according to some relations.
 %In practice, consistency preservation is usually specified by means of transformations.
 In practice, however, one will usually not specify both the \gls{consistency relation} itself and also the \gls{consistency preservation rule} that preserves it.
 Instead, usually one artifact is given and the other is implied or derived.
 This leads to the two approaches of \emph{declarative} and \emph{imperative} consistency specifications, depending on whether the specification defines \emph{how} consistency is achieved.
+The relation between the two approaches and \glspl{consistency relation} and \glspl{consistency preservation rule} is depicted in \autoref{fig:correctness:declarative_imperative}.
 
 \mnote{Ambiguity in deriving rules from relations}
 As a first option, a developer may only define relations that specifies consistency. Functions that preserve these relations can be derived from that.
@@ -154,8 +178,6 @@ Given a function $\function{Cp}$, the relation is implied by its fixed-points: $
 If a function preserving consistency does not perform any changes, the models are, by definition, consistent.
 This is called a \emph{imperative} specification, because it declares \emph{how} consistency can be achieved.
 Such an approach is followed by many imperative transformation languages, such as \gls{QVTO} or \gls{VIATRA}.
-
-\todo{VISUALIZE}
 
 
 \subsection{Artifacts in Consistency Preservation}
@@ -180,11 +202,9 @@ However, we will see that this is not always possible. Thus, we will especially 
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{figures/correctness/formal/execution_process.png}
-    \caption{Execution process in network and artifacts}
+    \caption{Execution process and artifacts for a modular consistency specification}
     \label{fig:formal:executionprocess}
 \end{figure}
-
-\todo{Finally, even with multiary transformation, we want to be able to combine them to networks}
 
 
 
