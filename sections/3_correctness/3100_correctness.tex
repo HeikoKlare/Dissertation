@@ -18,6 +18,7 @@ We derive formal correctness notions from that notion of consistency and identif
 
 We begin with a informal discussion of different ways to consider consistency. This especially involves \emph{intensional} and \emph{extensional} notions of consistency as well a \emph{monolithic} and \emph{modular} notions.
 
+
 \subsection{Intensional and Extensional Consistency Notions}
 
 \mnote{Intensional / extensional consistency}
@@ -54,14 +55,14 @@ A developer who defines consistency, usually wants to use an intensional specifi
 However, from a theoretical perspective we prefer to consider extensional specifications, because they allow to apply set theory.
 Due to the fact that each intensional specification can be transformed into an extensional one, we can make theoretical statements about extensional specifications that also hold for intensional ones.
 In the following, we always consider extensional specifications, unless otherwise stated.
-
+So we define the models that are considered consistent in terms of relations, which we also call \emph{\glspl{consistency relation}}.
 
 
 \subsection{Monolithic and Modular Consistency Notions}
 
 \mnote{Intuitive notion of monolithic and modular}
 Consistency, be it specified intensionally or extensionally, can be considered in an either monolithic or modular way.
-Having one single consistency relation for an arbitrary number of models constitutes a \emph{monolithic} notion of consistency.
+Having a single specification of consistency for an arbitrary number of models constitutes a \emph{monolithic} notion of consistency.
 Like discussed for intensional and extensional consistency specification, this can be expressed by a set of models fulfilling constraints or being contained in a relation.
 On the other hand, a \emph{modular} notion of consistency considers several relations between subsets of the relevant models and all together define when models are to be considered consistent.
 
@@ -79,12 +80,11 @@ However, we are interested in whether models are \emph{globally} consistent to a
 In the example, we considered a modular notion based on binary relation. Such a modular notion, however, can also be based on multiple n-ary relations. For reasons of simplicity, we stick to modular notions of binary relations, although the considerations can be easily transferred to n-ary ones.
 
 
-
 \subsection{Consistency Preservation}
 
 \mnote{Consistency preservation keeps models in a relation}
 Consistency preservation is the process of ensuring that models stay consistent.
-Based on a notion of relations that describe when models are to be considered consistent, this process ensures that models stay in that relation. 
+Based on a notion of \glspl{consistency relation} that describe when models are to be considered consistent, this process ensures that models stay in that relation. 
 If models get changed such they that are not in the relation anymore, consistency preservation updates the models such that they, again, are in that relation.
 In consequence, consistency preservation is always relative to relations defining a consistency.
 
@@ -97,11 +97,12 @@ We would require from that function that: $\forall \modelset{m} : \function{Cp}(
 The definition of \emph{is consistent} depends on whether we rely on a monolithic or modular notion of consistency.
 Thus it may require the models to be in one or multiple relations.
 For example, given a monolithic relation $\consistencyrelation{R}{}$, $\function{Cp}$ is supposed to fulfill that: $\forall \modelset{m} : \function{Cp}(\modelset{m}) \in \consistencyrelation{R}{}$.
+Since these functions define how consistency is preserved, we also call them \emph{\glspl{consistency preservation rule}}
 
 \mnote{Modular consistency preservation is not independent}
 Like for the proposed notion of consistency, we can also consider consistency preservation in an either monolithic or modular way.
-With a modular notion of consistency preservation, we may have multiple functions that preserve consistency, each of them for a relation that defines consistency for a subset of the involved models.
-Unlike for the relations defining consistency, which can be evaluated independently to identify whether models are consistently, the functions cannot be evaluated independently.
+With a modular notion of consistency preservation, we may have multiple \glspl{consistency preservation rule} that preserve consistency, each of them for a \gls{consistency relation} that defines consistency for a subset of the involved models.
+Unlike for the relations defining consistency, which can be evaluated independently to identify whether models are consistently, the functions, i.e. \glspl{consistency preservation rule}, cannot be evaluated independently.
 If each function is executed independently, they return new models that may need to be merged. 
 Imagine two functions $\function{Cp}_{1,2}$ and $\function{Cp}_{2,3}$ that preserve consistency for relations $\consistencyrelation{R}{1,2}$ and $\consistencyrelation{R}{2,3}$, respectively.
 Consider the input models $\setted{\model{m}{1}, \model{m}{2}m, \model{m}{3}}$ that are not consistent to $\consistencyrelation{R}{1,2}$ and $\consistencyrelation{R}{2,3}$.
@@ -114,7 +115,7 @@ An intuitive approach is to execute the functions consecutively, thus not taking
 If we consecutively apply the two given functions, we know that $\function{Cp}_{1,2}(\setted{\model{m}{1}, \model{m}{2}}) = \setted{\model{m'}{1}, \model{m'}{2}} \in \consistencyrelation{R}{1,2}$ and 
 $\function{Cp}_{2,3}(\setted{\model{m'}{2}, \model{m}{3}}) = \setted{\model{m''}{2}, \model{m''}{3}} \in \consistencyrelation{R}{2,3}$.
 It is, however, unclear whether $\tupled{\model{m'}{1}, \model{m''}{2}} \in \consistencyrelation{R}{1,2}$, so it may be necessary to execute $\function{Cp}_{1,2}$ again.
-In fact, we need some method to decide in which order and how often the functions are applied to result in a consistent set of models.
+In fact, we need some method to decide in which order and how often the \glspl{consistency preservation rule} are applied to result in a consistent set of models.
 We call this an \emph{orchestration}.
 
 \todo{VISUALIZE!}
@@ -124,32 +125,35 @@ We call this an \emph{orchestration}.
 Finally, every monolithic notion of consistency and its preservation can be considered a special case of a modular notion. Having only one consistency relation and one function that preserves it degrades the problem by making the necessity to perform an orchestration of functions obsolete.
 \end{remark}
 
-\todo{In fact, we did not yet talk about transformation and the "functions" could also be just constraint solvers. Discuss that!}
+For now, the introduced \glspl{consistency preservation rule} can be any kind of functions that return consistent models. 
+Their realization may, for example, be transformations that define how to react to certain changes for restoring consistency, or constraint solvers that find consistent models by solving consistency constraints. 
+We do not yet need to consider how these functions are realized to derive consistent models, although, later, we will focus on transformation-based approaches.
+
 
 \subsection{Declarative and Imperative Consistency Specifications}
 
 \mnote{Only define relation \emph{or} function}
-We discussed that consistency preservation can be considered as functions that preserve consistency according to some relations.
+We discussed that consistency preservation can be considered as functions, called \glspl{consistency preservation rule}, that preserve consistency according to some relations.
 %In practice, consistency preservation is usually specified by means of transformations.
-In practice, however, one will usually not specify both the relation itself and also the function that preserves it.
+In practice, however, one will usually not specify both the \gls{consistency relation} itself and also the \gls{consistency preservation rule} that preserves it.
 Instead, usually one artifact is given and the other is implied or derived.
 This leads to the two approaches of \emph{declarative} and \emph{imperative} consistency specifications, depending on whether the specification defines \emph{how} consistency is achieved.
 
-\mnote{Ambiguous functions can be derived from relations}
+\mnote{Ambiguity in deriving rules from relations}
 As a first option, a developer may only define relations that specifies consistency. Functions that preserve these relations can be derived from that.
 This is called a \emph{declarative} specification, because it only declares when models are consistent but \emph{how} consistency is achieved.
 In general, there is not only a single option how this function can look like.
 It can, for example, calculate the result with minimal differences to the input, according to some defined metrics.
 Or, especially if there is an intensional specification of that relation, the approach may consider the type of input change and calculate an appropriate change according to the constraints in the intensional specification.
-This is the approach that is followed by many declarative transformation languages, such as \ac{QVTR}, or \acp{TGG}.
+This is the approach that is followed by many declarative transformation languages, such as \gls{QVTR}, or \glspl{TGG}.
 
 \mnote{Relations are induced by fixed-points of functions}
-As a second option, a developer can define functions that preserve consistency.
-These functions imply the underlying relations that they preserve.
+As a second option, a developer can define \glspl{consistency preservation rule}.
+These functions imply the underlying \glspl{consistency relation} that they preserve.
 Given a function $\function{Cp}$, the relation is implied by its fixed-points: $\consistencyrelation{R}{} = \setted{\modelset{m} \mid \function{Cp}(\modelset{m}) = \modelset{m}}$.
 If a function preserving consistency does not perform any changes, the models are, by definition, consistent.
 This is called a \emph{imperative} specification, because it declares \emph{how} consistency can be achieved.
-Such an approach is followed by many imperative transformation languages, such as \ac{QVTO} or \ac{VIATRA}.
+Such an approach is followed by many imperative transformation languages, such as \gls{QVTO} or \gls{VIATRA}.
 
 \todo{VISUALIZE}
 
@@ -157,14 +161,14 @@ Such an approach is followed by many imperative transformation languages, such a
 \subsection{Artifacts in Consistency Preservation}
 
 \mnote{Four artifacts for general consistency preservation}
-We have previously seen that consistency can be considered in a monolithic or modular way. We have, however, also mentioned that the monolithic case can be considered as a special case of the modular one.
-For the general case, we thus know from the previous insights that in a consistency preservation process at least relations, in the following called \emph{consistency relations}, functions that preserve consistency, in the following called \emph{consistency preservation rules}, and a function for orchestration the functions, in the following called \emph{orchestration function}, are necessary. Finally, we also need a function that applies the consistency preservation rules in the order that is determined by the orchestration function, which we call the \emph{application function}.
-To summarize, we define the following ingredients necessary to handle consistency preservation:
+We have discussed that consistency can be considered in a monolithic or modular way. We have, however, also mentioned that the monolithic case can be considered as a special case of the modular one.
+For the general case, we thus know from the previous considerations that in a consistency preservation process at least specification that define consistency, called \emph{\glspl{consistency relation}}, functions that preserve consistency, called \emph{\glspl{consistency preservation rule}}, and a function for orchestrating the functions, in the following called \emph{\gls{orchestration function}}, are necessary. Finally, we also need a function that applies the \glspl{consistency preservation rule} in the order that is determined by the orchestration function, which we call the \emph{\gls{application function}}.
+To summarize, we consider the following artifacts necessary to handle consistency preservation:
 \begin{description}
-    \item[Consistency Rules:] Binary (or in general n-ary) relations that specify when models are to be considered consistent.
-    \item[Consistency Preservation Rules:] Functions that that restore consistency for a pair (or in general set) of models after they were modified to an inconsistent state.
-    \item[Orchestration Function:] A function that determined in which order the consistency preservation rules have to be executed when the models became inconsistent.
-    \item[Application Function:] A function that is able to apply the consistency preservation rules in the order determined by the orchestration function. 
+    \item[\Glspl{consistency relation}:] Binary (or in general n-ary) relations that specify when models are to be considered consistent.
+    \item[\Glspl{consistency preservation rule}:] Functions that that restore consistency for a pair (or in general set) of models after they were modified to an inconsistent state.
+    \item[\Gls{orchestration function}:] A function that determined in which order the consistency preservation rules have to be executed when the models became inconsistent.
+    \item[\Gls{application function}:] A function that is able to apply the consistency preservation rules in the order determined by the orchestration function. 
 \end{description}
 
 \mnote{Distinction between orchestration and application}
@@ -184,17 +188,20 @@ However, we will see that this is not always possible. Thus, we will especially 
 
 
 
+%%
+%% CORRECTNESS NOTIONS
+%%
 \section{Notions of Correctness for Consistency}
 
-\todo{Define correctness based on a networks adhering to the behavior of a multidirectional transformation}
+%\todo{Define correctness based on a networks adhering to the behavior of a multidirectional transformation}
 
-\todo{Korrektheit bx Netzwerk: es gib mx, deren Verhalten die bx emulieren müssen. Ist sehr stark, daher abschwächen. Ds muss nur kons. Zustand erreicht werden, egal wie? Einschränkung das original delta nicht geändert wird ist auch für mx künstlich.}
+%\todo{Korrektheit bx Netzwerk: es gib mx, deren Verhalten die bx emulieren müssen. Ist sehr stark, daher abschwächen. Ds muss nur kons. Zustand erreicht werden, egal wie? Einschränkung das original delta nicht geändert wird ist auch für mx künstlich.}
 
-\todo{Modular implies monolithic -> implicit correctness definition by implied relations}
+%\todo{Modular implies monolithic -> implicit correctness definition by implied relations}
 
-
-Before we consider consistency preservation rules and their interaction in detail, we first discuss different notions of \emph{correctness} for them.
-This is important because there are different correctness dimension, for which we have to make clear which of them are important for us.
+\mnote{Different notions of correctness}
+Before we formally define the above introduced artifacts, such as \glspl{consistency relation}, \glspl{consistency preservation rule}, an \gls{orchestration function} and an \gls{application function}, we first discuss different notions of \emph{correctness} for them.
+Since there are different dimensions of correctness, we need to clarify which of them is relevant for us and will be defined in the formalization.
 
 % \begin{definition}[Monolithic \ModelLevelConsistencyPreservationRule]
 %     Given two metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$ and a \modellevelconsistencyrelation between them $\consistencyrelation{CR}{} \subseteq \metamodelinstanceset{M}{1} \times \dots \times \metamodelinstanceset{M}{n}$.
@@ -218,62 +225,141 @@ This is important because there are different correctness dimension, for which w
 % \end{definition}
 
 
+\subsection{Relative Correctness Notions}
 
-Keeping multiple models consistent by means of transformations imposes either a single multidirectional transformation or a combination of several bi- or multidirectional transformations.
-Each of these transformations is able to take a consistent tuple of models and a change to them and to return a new consistent tuple of models.
+\mnote{Intuitive notion of correctness}
+The overall objective regarding correctness of consistency preservation is to find models that are actually consistent.
+Intuitively speaking, artifacts are correct if they fulfill their intended purpose. 
+In our case this means, that consistency relations should consider models consistent whenever they are actually supposed to be considered consistent. 
+\Glspl{consistency preservation rule} should return models that are actually consistent according to a \gls{consistency relation} to be considered correct.
+This also conforms to the notion of correctness for transformations, which represent \glspl{consistency preservation rule}, defined by \textcite{stevens2010sosym}.
+And finally, the orchestration and application functions should execute the \glspl{consistency preservation rule} such that all models are consistent according to all relations afterwards.
+
+\mnote{Correctness is relative}
+Correctness of an artifact is always considered with respect to some other specification, be it formally defined or only an informal notion.
+For example, consistency relations may be supposed to be correct with respect to some informal notion of correctness that is collected by domain experts and requirements engineers.
+A \gls{consistency preservation rule} should always be consistent with respect to a consistency relation. As discussed before, this relation may either be defined explicitly and the preservation rule has to be correct with respect to it, or it may be induced by the fixed points of the preservation rule.
+In the latter case, the \gls{consistency preservation rule} will always be correct by construction.
 
 
+\subsection{Correctness regarding Global Knowledge}
 
-\mnote{Correctness implicitly covered by definitions}
-\textcite{stevens2010sosym} proposes an explicit notion of \emph{correctness} for transformations. This is based on the fact that her definition of a transformation does only specify that for two given model, which may be inconsistent because one was modified, an update of the other model is returned.
-The requirement that the originally modified model and the one returned by the transformation have to conform to some consistency relations is specified externally as a notion of \emph{correctness}.
-We directly relate a consistency preservation rule that restores consistency to an according consistency relation, thus a consistency preservation rule that follows our definition is correct by construction in terms of the correctness definition by \citeauthor{stevens2010sosym}.
-The same applies to the consistency preservation application function, which we consider \emph{correct} if it fulfills its definition, as that definition already covers all requirements to that function.
-
-\mnote{Different notions of correctness}
-In general, correctness can be considered in two ways: First, an artifact may be correct if it simply follows its definition.
-While for consistency relations, changes and the generic \modellevelconsistencypreservationrule generalization function correctness can be canonically achieved, this is not that simple for a consistency preservation rule and the consistency preservation application function, as they have to fulfill some constraints with respect to consistency relations they rely on.
-Second, an artifact may be correct if it fulfills some, maybe only implicitly known specification. For example, a consistency relation between UML and Java may only be considered correct if it fulfills some \enquote{natural} notion of consistency, as people know how elements have to be related because they represent similar things, such as classes, or because a standard like the UML~\cite{uml} prescribes that.
-
-\mnote{Correctness regarding global specifications}
-In this work we do not consider the latter correctness notion with respect to external, maybe not formally specified artifacts, which is part of separate research on validation.
-However, when considering consistency of multiple models it may be standing to reason that a modular specification of consistency and its preservation has to be correct with regards to some global, monolithic specification. More precisely, there may be a multiary relation putting several metamodels into relation, which the developers at least implicitly know, and a set of binary relations somehow has to respect that multiary relation, i.e., be \emph{correct} with respect to that relation.
-The same can be imagines for consistency preservation. One may define a multidirectional transformation for a multiary relation, taking a tuple of changes to consistent models and retuning a new tuple of changes, which applied to the models delivers a consistent set of models again. In fact, this would be a realization of the behavior of the consistency preservation application function without relying on modular \modellevelconsistencypreservationrules.
+\mnote{Correctness of modular w.r.t. monolithic specification}
+We previously distinguished between monolithic and modular notions of consistency.
+In the above considerations, we relate the artifacts of a modular (or in the special case also a monolithic) specification to each other.
+Another notion of correct, however, can also be defined by relating a modular artifact to a corresponding monolithic artifact.
+For example, a set of modular \glspl{consistency relation} may be considered correct with respect to a monolithic relation when it considers the same sets of models consistent.
+For three metamodels $\metamodel{M}{1}, \metamodel{M}{2}, \metamodel{M}{3}$ with three modular consistency relations $\consistencyrelation{R}{1,2}, \consistencyrelation{R}{1,3}, \consistencyrelation{R}{2,3}$ between them, as well as a ternary consistency relation $\consistencyrelation{R}{1,2,3}$, we could say that $\consistencyrelation{R}{1,2}, \consistencyrelation{R}{1,3}, \consistencyrelation{R}{2,3}$ are correct (with respect to $\consistencyrelation{R}{1,2,3}$) if and only if:
+\begin{align*}
+    & \forall \model{m}{1} \in \metamodel{M}{1}, \model{m}{2} \in \metamodel{M}{2}, \model{m}{3} \in \metamodel{M}{3}: \tupled{\model{m}{1}, \model{m}{2}, \model{m}{3}} \in \consistencyrelation{R}{1,2,3} \\
+    & \formulaskip
+    \equivalent \tupled{\model{m}{1}, \model{m}{2}} \in \consistencyrelation{R}{1,2} \land \tupled{\model{m}{1}, \model{m}{3}} \in \consistencyrelation{R}{1,3} \land \tupled{\model{m}{2}, \model{m}{3}} \in \consistencyrelation{R}{2,3}
+\end{align*}
+%
+We may, analogously, define correctness for \glspl{consistency preservation rule}, an \gls{orchestration function}, and an \gls{application function} with respect to a single monolithic \gls{consistency preservation rule} by defining that both deliver the same results for the same inputs or at least return a consistent result in the same cases.
 
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{figures/correctness/formal/correctness_notions.png}
-    \caption{Different notions of correctness for transformations and networks}
+    \caption{Different notions of correctness for consistency and its preservation}
     \label{fig:correctness:correctnessnotions}
 \end{figure}
 
+
+\subsection{Dimensions of Correctness}
+
+\mnote{Two dimension of correctness notions}
+The discussed correctness notions introduce two dimension: First, correctness can be considered between artifacts within a monolithic or modular specification. Second, correctness can be considered between artifacts of a modular specification and corresponding artifacts of a monolithic specification. These dimension and correctness relations are depicted in \autoref{fig:correctness:correctnessnotions}.
+The former dimension is depicted vertically. \Glspl{consistency preservation rule} need to be correct with respect to their \glspl{consistency relation}.
+In the modular case, in addition to each preservation rule being \emph{locally} correct with respect to its relation, the combination of preservation rules by means of an orchestration and application function must also be correct with respect to the combination of all relations.
+The latter dimension is depicted horizontally. Each modular artifact is supposed to be consistent with respect to its corresponding monolithic artifact.
+
 \mnote{Drawbacks of global specification notions}
-Considering consistency this way has two drawbacks:
+Although correctness of modular with respect to monolithic artifacts can be interesting from a theoretical perspective, its practical relevance is limited.
+That notion of correctness assumes that there is some kind of global truth that has to be reflected by a modular specification.
+This, however, has two essential drawbacks:
 \begin{description}
-    \item[Validation Artifacts:] The artifacts to check correctness against, i.e., the global, multiary consistency relation as well as an appropriate multidirectional transformation, do usually not exist. If they existed, they could directly be used to preserve consistency. Thus is impossible to validate a set of consistency relations and preservation rules against such a global specification.
-    \item[Modular Knowledge:] This notion of correctness requires that the developers have some global knowledge that represents a monolithic, multiary consistency relation and their preservation rules. Usually, this will not be the case, so there is even no implicit notion of the necessary artifacts to validate the modular specifications against, not to be mention an explicit representation.
+    \item[Validation Artifacts:] The artifacts to check correctness against, i.e., the global, monolithic \gls{consistency relation} as well as an appropriate monolithic \gls{consistency preservation rule}, do usually not exist. If they existed, they could directly be used to preserve consistency. Thus, it is impossible to validate a set of \glspl{consistency relation} and \glspl{consistency preservation rule} against such a global specification.
+    \item[Modular Knowledge:] This notion of correctness requires that the developers have some global knowledge that represents a monolithic \gls{consistency relation} and its \gls{consistency preservation rule}. As discussed before, we assume  the knowledge about relations between models to usually be distributed across several persons. Thus, there will no be such global knowledge, thus not even an implicit notion of the necessary artifacts to validate the modular specifications against. not to be mention an explicit representation.
 \end{description}
+%
+Since this conflicts with our assumption of distributed knowledge about relations and independently developed, modular specification, we do not further consider this notion of consistency.
+In this thesis, we focus on correctness between the artifacts of a modular consistency specification.
 
-\todo{Add an image for that relation}
+
+\subsection{Correctness of Consistency Relations}
+
+\mnote{Correctness of relations}
+The consistency notion that we consider in the following especially requires that \glspl{consistency preservation rule} and the functions to orchestrate and apply them must be correct with respect to \glspl{consistency relation}.
+This notion, however, does not define when \glspl{consistency relation} are considered \emph{correct}.
+One option is to only consider correctness with respect to monolithic artifacts for the case of \glspl{consistency relation}, as we proposed in previous work~\cite{klare2019icmt}.
+This, however, suffers from the drawbacks discussed before, requiring a global notion of consistency.
+Another notion of correctness would be conformance of the specified relations with what developers expect to be consistent, i.e., a validation of requirements.
+For example, a consistency relation between UML and Java may only be considered correct if it fulfills some \enquote{natural} notion of consistency, as people know how elements have to be related because they represent similar things, such as classes, or because a standard like the UML~\cite{uml} prescribes that.
+In this work, however, we do not consider such a correctness notion with respect to external, maybe not formally specified artifacts, which is part of separate research on requirements engineering and validation.
+
+\mnote{Relations are not correct by construction}
+In consequence, we might say that \glspl{consistency relation} are simply \emph{correct by construction}.
+Thus, relations would normatively define what is to be considered consistent.
+However, a consequence of not assuming a global knowledge of consistency is that different domain experts may have different notions of when models are to be considered consistent.
+Consider for three metamodel $\metamodel{M}{1}, \metamodel{M}{2}, \metamodel{M}{3}$ the three modular \glspl{consistency relation} $\consistencyrelation{R}{1,2} = \setted{\tupled{\model{m}{1},\model{m}{2}}}, \consistencyrelation{R}{1,3} = \setted{\tupled{\model{m}{1},\model{m}{3}}}, \consistencyrelation{R}{2,3} = \setted{\tupled{\model{m}{1},\model{m'}{3}}}$. 
+Then there is no triple of models that is considered consistent to all relations. 
+Although we still do not want to assume a global knowledge about consistency to which the modular one must conform, we might say that these relations are \emph{incompatible}, as we do not want to combine relations that induce an empty set of consistent model tuples.
+Identifying an appropriate notion of \emph{compatibility} and how to check it constitutes a central research question of this work and will be discussed in \autoref{sec:correctness:compatibility}.
+\researchquestion{2.1}{When should independently defined \glspl{consistency relation} be considered \emph{compatible} and how can that compatibility be checked?}
+
+\mnote{Modular relations induce monolithic ones}
+In fact, every set of modular \glspl{consistency relation} induces a monolithic one.
+This monolithic relation $\consistencyrelation{R}{}$ for metamodels $\metamodelsequence{M}{n}$ and pairwise consistency relations $\consistencyrelation{R}{i,j}$ is defined by:
+\begin{align*}
+    \consistencyrelation{R}{} = \setted{\tupled{\model{m}{1}, \dots, \model{m}{n}} \mid \bigwedge\limits_{1 \le i < j < n} \tupled{\model{i}, \model{j}} \in \consistencyrelation{R}{i,j}}
+\end{align*}
+At least if this induced relation if empty, we probably want to consider the modular relations incompatible, because if no models are considered consistent, we cannot describe any system consistently.
 
 
-Overall Goals:
-\begin{itemize}
-    \item Define correctness of a transformation network: termination in consistent state
-\end{itemize}
+% Keeping multiple models consistent by means of transformations imposes either a single multidirectional transformation or a combination of several bi- or multidirectional transformations.
+% Each of these transformations is able to take a consistent tuple of models and a change to them and to return a new consistent tuple of models.
+
+% \mnote{Correctness implicitly covered by definitions}
+% \textcite{stevens2010sosym} proposes an explicit notion of \emph{correctness} for transformations. This is based on the fact that her definition of a transformation does only specify that for two given model, which may be inconsistent because one was modified, an update of the other model is returned.
+% The requirement that the originally modified model and the one returned by the transformation have to conform to some consistency relations is specified externally as a notion of \emph{correctness}.
+% We directly relate a consistency preservation rule that restores consistency to an according consistency relation, thus a consistency preservation rule that follows our definition is correct by construction in terms of the correctness definition by \citeauthor{stevens2010sosym}.
+% The same applies to the consistency preservation application function, which we consider \emph{correct} if it fulfills its definition, as that definition already covers all requirements to that function.
+
+% \mnote{Different notions of correctness}
+% In general, correctness can be considered in two ways: First, an artifact may be correct if it simply follows its definition.
+% While for consistency relations, changes and the generic \modellevelconsistencypreservationrule generalization function correctness can be canonically achieved, this is not that simple for a consistency preservation rule and the consistency preservation application function, as they have to fulfill some constraints with respect to consistency relations they rely on.
+% Second, an artifact may be correct if it fulfills some, maybe only implicitly known specification. For example, a consistency relation between UML and Java may only be considered correct if it fulfills some \enquote{natural} notion of consistency, as people know how elements have to be related because they represent similar things, such as classes, or because a standard like the UML~\cite{uml} prescribes that.
+
+% \mnote{Correctness regarding global specifications}
+% In this work we do not consider the latter correctness notion with respect to external, maybe not formally specified artifacts, which is part of separate research on validation.
+% However, when considering consistency of multiple models it may be standing to reason that a modular specification of consistency and its preservation has to be correct with regards to some global, monolithic specification. More precisely, there may be a multiary relation putting several metamodels into relation, which the developers at least implicitly know, and a set of binary relations somehow has to respect that multiary relation, i.e., be \emph{correct} with respect to that relation.
+% The same can be imagines for consistency preservation. One may define a multidirectional transformation for a multiary relation, taking a tuple of changes to consistent models and retuning a new tuple of changes, which applied to the models delivers a consistent set of models again. In fact, this would be a realization of the behavior of the consistency preservation application function without relying on modular \modellevelconsistencypreservationrules.
+
+% \begin{description}
+%     \item[Validation Artifacts:] The artifacts to check correctness against, i.e., the global, multiary consistency relation as well as an appropriate multidirectional transformation, do usually not exist. If they existed, they could directly be used to preserve consistency. Thus is impossible to validate a set of consistency relations and preservation rules against such a global specification.
+%     \item[Modular Knowledge:] This notion of correctness requires that the developers have some global knowledge that represents a monolithic, multiary consistency relation and their preservation rules. Usually, this will not be the case, so there is even no implicit notion of the necessary artifacts to validate the modular specifications against, not to be mention an explicit representation.
+% \end{description}
+
+%\todo{Add an image for that relation}
+
+% Overall Goals:
+% \begin{itemize}
+%     \item Define correctness of a transformation network: termination in consistent state
+% \end{itemize}
+
+
+
+%%
+%% FORMALIZATION
+%%
+\section{A Formal Notion of Transformation Networks}
 
 Central Insights:
 \begin{itemize}
     \item Correctness is not the problem, optimality is the problem
     \item We can only check dynamically whether a consistent state was reached due to Halting Problem. We cannot guarantee to always find a consistent state
 \end{itemize}
-
-
-
-
-
-
-\section{A Formal Notion of Transformation Networks}
 
 Allgemeine Definition Transformationsnetzwerke:
 \begin{itemize}
