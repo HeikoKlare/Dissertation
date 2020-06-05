@@ -3,22 +3,161 @@
 }
 \label{chap:introduction}
 
+In this thesis, we discuss how multiple artifacts of different tools to develop a software or software-intensive system can be kept consistent.
+We research how multiple specifications for consistency and its preservation can be developed independently, such that their combination operates \emph{correctly} and such that they can be \emph{reused} modularly.
+
+
+
 %%
 %% MOTIVATION
 %%
-\section{Consistency in Software and Systems Engineering}
+\section{Consistency of Multiple Models}
 
-Allgemeine Motivation Konsistenzhaltung, Beziehungen, Transformationen
+\mnote{System complexity is increasing}
+Engineers develop software and software-intensive technical systems of ever increasing scale.
+This leads to a continuous increase in complexity of the artifacts used to describe such systems~\cite{murer2011evolution}.
+Engineers inevitably have to deal with the inherent essential complexity, as a direct consequence of the increasing system sizes.
+Tools, however, are supposed to reduce accidental complexity to allow engineers to focus on handling the essential complexity~\cite{brooks1987NoSilverBullet-Computer, fraser2008NoSilverBulletReloaded-Software}.
+
+\subsection{Consistency in System Engineering}
+
+\mnote{Fragmented information to deal with essential complexity}
+To better handle the essential complexity, engineers usually use multiple tools to describe and analyze different parts or properties of a system under development by different artifacts, in the following denoted as \emph{models}.
+This reduces the information that different roles have to deal with to what is relevant for their development task.
+In classical engineering disciplines like construction, mechanical and electrical engineering, this has been common practice for a long time and is often called \emph{\gls{MBSE}}~\cite{estefan2007MbseSurvey}.
+For example, the development of \glspl{ECU} software in automobiles comprises different tools or standards for specifying the system and software architecture, such as SysML~\cite{sysml} or AUTOSAR~\cite{scheid2015autosar}, for defining the behavior, such as MATLAB/Simulink~\cite{simulink} or ASCET~\cite{ascet}, and for defining the deployment on multi-core hardware architectures, such as Amalthea~\cite{amalthea, wolff2014a}.
+In software engineering, such a development methodology is also getting growing attention, often called \emph{\gls{MDSD}}~\cite{stahl2006a}.
+Such a development process foresees other artifacts beyond code as primary artifacts to describe the system under construction.
+While code only specifies the functionality of a systems, other tools can be used, for example, for defining the software architecture and its deployment, such as the \gls{UML}~\cite{uml}, analyzing and predicting the software performance, such as the Palladio Simulator~\cite{reussner2016a}, and for specifying the requirements, like IBM Rational Doors~\cite{laplante2012RequirementsEngineering-Book}.
+
+\mnote{Information fragmentation increases accidental complexity}
+While this \emph{fragmentation} of information across models in different tools eases dealing with the essential complexity of a system, it increases the accidental complexity.
+Since all these models describe the same system, they usually share an overlap of information in terms of implicit \emph{dependencies} or \emph{redundancies}, which can lead to \emph{inconsistencies} if overlapping information is not modified properly across all dependencies and redundancies.
+On a high level, for example, requirements changes have to be reflected in the software architecture and implementation, and modifications of the software architecture have to be reflected in the code.
+Since systems are usually developed iteratively and incrementally, there is no strict direction in which changes have to be propagated to preserve consistency, but in general any model can be changed and require updates of others.
+
+\mnote{Fragmented information needs to be kept consistent}
+The overlaps of information, for example in the above mentioned tools for \gls{ECU} software development~\cite{giese2010a}, are often not documented explicitly~\cite{mazkatli2017ase}, but only known by engineers.
+Performing the task of updating overlapping information manually is, however, time-consuming and error-prone.
+The automation of checking and of preserving consistency of information is still poorly supported in current development processes for large systems, as a recent survey has shown \owncite{guissouma2018study}.
+Automating that process is, however, necessary to reduce the accidental complexity induced by the fragmentation of information across multiple models.
+
+\mnote{State of research: transformations to preserve consistency}
+A common approach to automate the process of checking and preserving consistency of models are \emph{model transformations}.
+If models shall or cannot be generated anew after each change, especially \emph{incremental} transformations are of interest.
+Such transformation specify how models have to updated after engineers make changes  to one or some of them instead of generating new models.
+Especially \emph{bidirectional} model transformations~\cite{stevens2010sosym}, which specify the relations between two models and routines how consistency of their instances can be restored after changes in any of them, are well researched.
+System development usually involves more than two tools and thus more than two models to be kept consistent.
+The use of transformations to check and preserve consistency between more than two models is, however, less researched~\cite{stevens2020BidirectionalTransformationLargeSoSym}.
+It gained recent attention by a dedicated Dagstuhl seminar~\cite{cleve2019dagstuhl}.
+
+
+\subsection{Modular and Independent Consistency Specification}
+
+\mnote{Multidrectional transformations vs. networks}
+Two general approaches for consistency of multiple, especially more than two, models by means of transformations are \emph{multidirectional} transformations or the combination of multiple transformations to networks of them.
+A single multidirectional transformations is beneficial from a theoretical perspective, because it is not prone to contradictions between the transformations to combine and it provides higher expressiveness~\cite{stevens2020BidirectionalTransformationLargeSoSym}.
+For practical application, however, multidirectional transformations suffer from missing modularity, requiring a single person or team to define the overall relations between all tools.
+It is, however, difficult to think about complex n-ary relations~\cite{stevens2020BidirectionalTransformationLargeSoSym} and, even worse, the knowledge necessary to define such a relation may not even exist~\owncite{klare2018docsym}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/prologue/distributed_knowledge.png}
+    \caption{Different tools and roles involved in an exemplary software development process and distributed knowledge about the relations between models of the different tools}
+    \label{fig:prologue:distributedknowledge}
+\end{figure}
+
+\mnote{Distributed knowledge about consistency}
+Domain experts deal with the tools and corresponding models they require for their tasks in developing a system.
+Usually, each of them is only concerned with a subset of all tools involved in the development of a system.
+For example, a performance engineer may be concerned with an instance of the \gls{PCM} for an architecture-based prediction of the system's performance and knows how this description is reflected in the general software architecture described in the \gls{UML} as well the implementation in Java.
+A software architect may use \gls{UML} models for the architecture specification and how they are related to the implementation.
+Finally, a requirements engineer may use IBM Rational Doors and know how they have to be reflected in the architecture specification and implementation to consider the models consistent.
+These exemplary relations are depicted in \autoref{fig:prologue:distributedknowledge}.
+No matter whether this is how knowledge is actually present at the different roles in a concrete scenario, it emphasizes that knowledge about the relations between tools and their models will usually be distributed across different experts as soon as there are several models involved.
+In large software systems, a single developer cannot know about all model dependencies~\cite{petrenko2008a}.
+In consequence, a process for specifying consistency by means of transformation has to support a kind of \emph{modularity} to foster independent specification of distributed knowledge.
+% Maybe discuss that not only binary is case if covered, but also modular multiary case
+
+\mnote{Reuse of consistency specifications}
+Furthermore, an automation especially proposes benefits if it is used often.
+A specification of consistency and its preservation between common tools, for example, \gls{UML} and a programming language such as Java, can be reused across multiple projects.
+Not each project, however, will use exactly the same tools.
+Considering the example in \autoref{fig:prologue:distributedknowledge}, if the relation between \gls{PCM} and Java was partly expressed indirectly across \gls{UML}, it would not be possible to reuse that specification in another project that only uses \gls{PCM} and Java but omits \gls{UML}.
+Thus parts of specifications, i.e., specification between subsets of the tools in a project, should be reusable, comparable to \gls{COTS}.
+In consequence, a process for specifying consistency by means of transformations has to support \emph{independence} of the modular specifications, such that they can be reused without the others.
+
+\mnote{Context assumptions}
+To support the context induced by the previous considerations, we focus on combinations of transformations, be they binary or n-ary, instead of having only a single n-ary transformations.
+We call such a combination a \emph{transformation network}.
+To summarize the previous considerations, we need to cover the following context assumptions to the specification of the individual transformations of a network:
+\begin{description}
+    \item[Modularity:] Transformations are defined in a modular way, i.e., each transformation does only the specification of consistency and its preservation between a subset of the tools used for a development project.
+    \item[Independence:] Transformations are defined independently, i.e., each transformation can be developed without considering the contents of the other transformations to be combined with.
+\end{description}
+
+
+\subsection{Orchestration of Transformation Networks}
+
+\mnote{Limitations of transformation orchestration strategies}
+Combining several modular and independently developed transformations requires their \emph{orchestration}, i.e., the decision which of the transformations are executed in which order to restore consistency.
+Existing work proposes, for example, to define an execution order explicitly ~\cite{pilgrim2008a, vanhooff2007UniTI-MODELS} or to derive a kind of topologic order~\cite{stevens2020BidirectionalTransformationLargeSoSym}.
+Such approaches either require a manual decision for the orchestration or restrict the execution to specific topologies, such as a directed acyclic graph or tree, which limits the kinds of supported transformation networks.
+In any case, severe assumptions to the individual transformations or the network topology are made.
+%To foster distributed development and partial reuse, arbitrary topologies should be supported (Universality, Reusability).
+
+\mnote{Research gap: universal combination of specifications}
+It is yet unclear, how arbitrary modular and independently developed transformations can be combined in a universal way.
+%This especially concerns the role of the transformation developer.
+It is neither known how a developer can achieve a \emph{correct} transformation network specification, i.e., transformations and an orchestration of them that delivers consistent models when applied, nor how he or she can improve quality attributes of the network such as %\emph{reusability} and 
+\emph{comprehensibility}.
+%For the role of the transformation user, it is yet unknow how to support him in understanding the reasons whenever transformations fail to deliver consistent models.
+
+%\mnote{Two roles: transformation users and developers}
+%Fragmentation addresses challenges of transformations users.
+%Challenges of developers yet addressed for binary case.
+
+\begin{figure}[]
+    \centering
+    \includegraphics[width=\textwidth]{figures/prologue/overall_process.png}
+    \caption[Process of specifying and executing a transformation network]{The process of specifying and executing a transformation network. Different domain experts specify transformations, which are combined to a transformation network by an orchestration mechanism that decides which transformations have to be executed in which order. If an actual system is developed and a developer modified models, the network is applied to these models and the performed changes to produce a consistent system description again. Artifacts defined by transformation developers are marked green, artifacts at runtime are marked blue and the artifacts for orchestration and application developed in this thesis are marked orange. The assumed and envisioned properties are denoted in red.}
+    \label{fig:prologue:processoverview}
+\end{figure}
+
+\mnote{Envisioned properties and process}
+Under the assumption of a modular and independent specification of the individual transformation, we aim at an approach for executing transformation networks that have the following properties:
+\begin{description}
+    \item[Universality:] The approach shall be able to process transformation networks of arbitrary topology. Especially to support the assumption of independent development, there should be no restriction regarding specific kinds of topologies to be supported.
+    %It must be possible to combine arbitrary specifications. This means that the approach should not restrict which specifications can be combined, especially not which topology, induced by the specifications (such as only a tree) should be supported. In fact, requirements that all specifications have to fulfill may be defined, but apart from that the usability of one specification should not depend on the existence or non-existence of another.
+    \item[Correctness:] The approach shall operate correctly. If the approach applies transformations to preserve consistency of models, the result must be consistent or indicate an error.
+    %\item[Reusability:] The approach shall improve reusability. This means that the individual transformations shall be reusable independently.
+    \item[Comprehensibility:] The approach shall improve comprehensibility. If the transformations are not able to produce models that are actually consistent, it should support the user in finding the reason for that.
+\end{description}
+The envisioned process and artifacts as well as the required properties are depicted in \autoref{fig:prologue:processoverview}.
+
+\mnote{Thesis contributions}
+In this thesis, we contribute to support the process of building transformation networks that have the defined properties by providing a formal foundation for transformation networks of arbitrary topology and defining a formal notion of correctness for them.
+We discuss how correctness of a universal approach to orchestrate and apply the transformations of a network network can be achieved by construction or at least by analysis, and which properties the different involved artifacts, such as transformations and their orchestration, have to fulfill for that.
+The proposed strategy to orchestrate transformations improves comprehensibility in cases when it is not able to execute transformations such that they deliver consistent models.
+Additionally, we classify which kinds of errors can occur when the artifacts are not defined correctly.
+We also analyze how topologies of networks affect the desired properties and propose an approach of defining transformations that resolves trade-offs between the envisioned properties.
+
+\mnote{Towards a detailed problem statement}
+In the following, we first discuss the addressed problem in more detail by considering a specific scenario and generalizing some of the problems to give a first impression of the issues we have to address.
+Afterwards, we derive our general research goal and define several questions arising from that.
+After more precisely specifying the context and assumptions that we make, we give a detailed overview of our contributions.
 
 
 
 %%
 %% PROBLEM DESCRIPTION -> RESEARCH GAP
 %%
-\section{Problems in Modular Consistency Specification}
+\section{Consistency Specification Problems}
 
 \subsection{A Problem Scenario}
 Realitätsnahe Problemstellung. Szenario von Joshua gemischt mit meinen Szenarien.
+
+Beispiel muss doppelte Spezifikation enthalten und auch die Begründung dafür (COTS, doppelt definiert, müssen wir mit klarkommen).
 
 \subsection{A Generalization of Problems}
 Probleme verallgemeinern vom konkreten in abstrakteres Szenario
@@ -178,7 +317,18 @@ Diskussion: Erreichen der Modularität auch evaluieren? Ist per Konstruktion geg
 
 * Transformations are developed independently
 * No global knowledge exists
+* Define the process and roles (either here or in properties chapter):
+** Domain expert
+** Transformation developer
+** Transformation user
+** Multiplicities
+** Refer to Dagstuhl report with Mattias
 
+* We call the users of transformation "engineers" (do we?) and the developers "domain experts"?
+
+* Only structural dependencies
+
+* No semi-automatism (we will discuss why and how that affects correctness)
 
 
 %%
@@ -210,21 +360,21 @@ Diskussion: Erreichen der Modularität auch evaluieren? Ist per Konstruktion geg
 
 %\todoConference{The problem the research intends to solve, the target audience of this research, and a motivation of why the problem is important and needs to be solved.}
 
-\acl{MDSD} proposes the usage of models as primary artifacts of the %software 
-development process~\cite{stahl2006a}. 
-Those models describe different system properties for the interests of specific stakeholders, known as \emph{multi-view modelling}, or at different abstraction levels, representing refinements. In both cases, the models describe the same system and are thus not disjoint but contain redundant or dependent information. 
+%\acl{MDSD} proposes the usage of models as primary artifacts of the %software 
+%development process~\cite{stahl2006a}. 
+%Those models describe different system properties for the interests of specific stakeholders, known as \emph{multi-view modelling}, or at different abstraction levels, representing refinements. In both cases, the models describe the same system and are thus not disjoint but contain redundant or dependent information. 
 %\todoErik{Wieder: Die beschreiben ja keine Abstraktion, die sind eine Abstraktion. \enquote{Domains of the system} klingt auch komisch, ich weiß zwar, was Du meinst, aber nenne es nicht \enquote{domain}, sondern lieber \enquote{properties}}
-Developers must be aware of those dependencies to ensure that models are modified consistently. 
+%Developers must be aware of those dependencies to ensure that models are modified consistently. 
 %Otherwise, the deployed software, which is derived from those models, will potentially not operate correctly.
 %\todoErik{Lenkt den Fokus etwas zu stark auf Korrektheit, die wir nicht formal beweisen. Es geht ja nicht nur darum, daß die Software nicht korrekt arbeitet -- möglicherweise tut sie das ja, obwohl die Modelle inkonsistent sind, und das Problem tritt erst bei der Wartung/Evolution auf.}
 
-In large software systems, a single developer cannot know about all dependencies~\cite{petrenko2008a}, %which can be formulated as \emph{consistency constraints} and 
-in the following referred to as \emph{consistency relations}, which inevitably leads to inconsistencies. 
-Therefore, automated mechanisms that preserve consistency according to those consistency relations are necessary. 
-For that purpose, incremental, bidirectional model transformations %or specialized model synchronization approaches 
-are commonly used. However, most research considers \emph{binary transformations}, restricted to pairs of models, and does not explicitly consider consistency between more than two models~\cite{stevens2017a}, which we refer to as \emph{multi-model consistency}.
+%In large software systems, a single developer cannot know about all dependencies~\cite{petrenko2008a}, %which can be formulated as \emph{consistency constraints} and 
+%in the following referred to as \emph{consistency relations}, which inevitably leads to inconsistencies. 
+%Therefore, automated mechanisms that preserve consistency according to those consistency relations are necessary. 
+%For that purpose, incremental, bidirectional model transformations %or specialized model synchronization approaches 
+%are commonly used. However, most research considers \emph{binary transformations}, restricted to pairs of models, and does not explicitly consider consistency between more than two models~\cite{stevens2017a}, which we refer to as \emph{multi-model consistency}.
 %In general, keeping more than two models consistent is currently not researched well.
-Model transformations can either be specified imperatively or declaratively. They differ in who operalizationalizes the preservation of constraints that have to hold, in the first case the transformation developer and in the second case an automated mechanism of the transformation language. This is why we do not explicitly distinguish these approaches, as all problems apply to both approaches and only different roles have to deal with them. 
+%Model transformations can either be specified imperatively or declaratively. They differ in who operalizationalizes the preservation of constraints that have to hold, in the first case the transformation developer and in the second case an automated mechanism of the transformation language. This is why we do not explicitly distinguish these approaches, as all problems apply to both approaches and only different roles have to deal with them. 
 % Model transformations can either be specified imperatively, such that the transformation developer has to define how to react to a change, or declaratively, such that the transformation developers only the constraints that have to hold and an automated mechanism derives an imperative operationalization from that.
 % We will not explicitly distinguish these approaches, as the identified problems and our solution proposals apply to both. The only difference is that in imperative approaches the transformation developer has to deal with them and in declarative approaches the developer of the transformation language has to consider them when defining the generation of the operalizalization.
 
@@ -261,12 +411,12 @@ We refer to this as \emph{specification trade-offs}.
 \end{figure}
 
 %Although specific approaches for expressing multiary relations, rather than using combinations of binary relations, could be developed, there are some reasons for adhering to binary transformations.
-Instead of developing approaches to express multiary consistency relations, there are reasons to adhere to binary transformations, and to research their combinability.
-As stated by \textcite{stevens2017a}, %there are especially strong practical reasons, as 
-it is hard enough to think about binary relations. %between pairs of models.
+%Instead of developing approaches to express multiary consistency relations, there are reasons to adhere to binary transformations, and to research their combinability.
+%As stated by \textcite{stevens2017a}, %there are especially strong practical reasons, as 
+%it is hard enough to think about binary relations. %between pairs of models.
 %Defining multiary relations would require a knowledge about the relations between all metamodels used to describe a system.
-Additionally, each domain expert, who specifies transformations, %in practice, 
-will usually only have knowledge about the relations between two or at most a rather limited set of metamodels. %, but not of all involved metamodels. %, which would be necessary to define multiary relations.
+%Additionally, each domain expert, who specifies transformations, %in practice, 
+%will usually only have knowledge about the relations between two or at most a rather limited set of metamodels. %, but not of all involved metamodels. %, which would be necessary to define multiary relations.
 %Thus, it is a natural goal to make the modular specification of consistency based on binary transformations possible.
 %In the proposed thesis, 
 We therefore plan to make the following contributions to research on multi-model consistency preservation:
@@ -289,15 +439,15 @@ We therefore plan to make the following contributions to research on multi-model
 % In those virtual metamodels, dependencies between metamodels, which we refer to as \emph{consistency relations}, are made explicit by representing common concepts, whereas in model transformations, which we refer to as \emph{consistency preservation specifications}, they are specified implicitly. 
 % The envisioned benefit is an inversion of the above mentioned properties. 
 
-Throughout this paper, we use a simplified notation for metamodels and heir consistency relations to ease their illustration. 
-We consider metamodels to be sets of elements and consistency relations to be sets of symmetric, binary relations between those elements.
-To ease the representation of combinations of consistency relations, we define the concatenation operation for two consistency relations $R_1$ and $R_2$ as:
-\begin{equation*}
-    R_1 \concat R_2 \coloneqq \{(x,y)\, |\, \exists t: x\, R_1\, t\, R_2\, y \}.
-\end{equation*}
-This is the subset of the transitive closure of two relations that contains only the relations transitively defined over $R_1$ and $R_2$.
-It can be also expressed as the natural join of $R_1$ and $R_2$ with an additional projection that removes the common elements of both relations.
-The operator is commutative since the relations are assumed symmetric.
+%Throughout this paper, we use a simplified notation for metamodels and heir consistency relations to ease their illustration. 
+%We consider metamodels to be sets of elements and consistency relations to be sets of symmetric, binary relations between those elements.
+%To ease the representation of combinations of consistency relations, we define the concatenation operation for two consistency relations $R_1$ and $R_2$ as:
+%\begin{equation*}
+%    R_1 \concat R_2 \coloneqq \{(x,y)\, |\, \exists t: x\, R_1\, t\, R_2\, y \}.
+%\end{equation*}
+%This is the subset of the transitive closure of two relations that contains only the relations transitively defined over $R_1$ and $R_2$.
+%It can be also expressed as the natural join of $R_1$ and $R_2$ with an additional projection that removes the common elements of both relations.
+%The operator is commutative since the relations are assumed symmetric.
 
 % \todoErik{Würd ich bei so einem kurzen Paper weglassen. (Ich würde es auch oft bei langen Papern weglassen. :-))}
 % In this paper, we first discuss related work in \autoref{sec:relatedwork}. 
@@ -348,22 +498,22 @@ The operator is commutative since the relations are assumed symmetric.
 %%
 %% Scope: Building large systems of many models
 %%
-The scale of modern software systems and their embedding into cyber-physical systems leads to a high and even increasing complexity of systems to be built. 
-To handle that complexity, different roles operate on appropriate extracts and abstractions of the system under construction described by different models or views.
-Such a fragmentation of information across different models is common at a high level, i.e., mechanical, electrical and software engineers usually use different models and associated tools to describe a system in their domain.
-Additionally, different models can be used on a low level by engineers from the same domain, such as software engineers using different models for architecture specification, behavior development and deployment.
-For example, the development of \acp{ECU} software in automotives comprises different tools or standards for specifying the system and software architecture, such as SysML~\cite{sysml} or AUTOSAR~\cite{scheid2015autosar}, for defining the behavior, such as MATLAB/Simulink~\cite{simulink} or ASCET~\cite{ascet}, and for defining the deployment on multi-core hardware architectures, such as Amalthea~\cite{amalthea, wolff2014a}.
-Since all these models describe the same system, they usually share an overlap of information in terms of dependencies or redundancies, which can lead to inconsistencies if overlapping information is not modified properly in all models.
-Recent research investigated such dependencies between ASCET and SysML~\cite{giese2010a}, as well as Amalthea and how to resolve them~\cite{mazkatli2017ase,mazkatli2016ma}.
+%The scale of modern software systems and their embedding into cyber-physical systems leads to a high and even increasing complexity of systems to be built. 
+%To handle that complexity, different roles operate on appropriate extracts and abstractions of the system under construction described by different models or views.
+%Such a fragmentation of information across different models is common at a high level, i.e., mechanical, electrical and software engineers usually use different models and associated tools to describe a system in their domain.
+%Additionally, different models can be used on a low level by engineers from the same domain, such as software engineers using different models for architecture specification, behavior development and deployment.
+%For example, the development of \acp{ECU} software in automotives comprises different tools or standards for specifying the system and software architecture, such as SysML~\cite{sysml} or AUTOSAR~\cite{scheid2015autosar}, for defining the behavior, such as MATLAB/Simulink~\cite{simulink} or ASCET~\cite{ascet}, and for defining the deployment on multi-core hardware architectures, such as Amalthea~\cite{amalthea, wolff2014a}.
+%Since all these models describe the same system, they usually share an overlap of information in terms of dependencies or redundancies, which can lead to inconsistencies if overlapping information is not modified properly in all models.
+%Recent research investigated such dependencies between ASCET and SysML~\cite{giese2010a}, as well as Amalthea and how to resolve them~\cite{mazkatli2017ase,mazkatli2016ma}.
 
 %%
 %% General solution: incremental BX combined to a network
 %%
 %For resolving inconsistencies, different approaches have been developed.
-Incremental model transformations are a common approach to resolve such inconsistencies by enabling developers to explicitly specify how inconsistencies can be resolved (semi-)automatically. 
-Especially bidirectional model transformations~\cite{stevens2010sosym}, which specify the relations between two metamodels and routines how consistency of their instances can be restored, are well suited and well researched.
-Relating more than two metamodels can either be achieved by defining a multi-directional transformation between all of them or by specifying bidirectional transformations %transformations between pairs of metamodels, i.e., bidirectional transformations, 
-between pairs of them in a modular way and combine them to a network that is able to check and preserve consistency between several models.
+%Incremental model transformations are a common approach to resolve such inconsistencies by enabling developers to explicitly specify how inconsistencies can be resolved (semi-)automatically. 
+%Especially bidirectional model transformations~\cite{stevens2010sosym}, which specify the relations between two metamodels and routines how consistency of their instances can be restored, are well suited and well researched.
+%Relating more than two metamodels can either be achieved by defining a multi-directional transformation between all of them or by specifying bidirectional transformations %transformations between pairs of metamodels, i.e., bidirectional transformations, 
+%between pairs of them in a modular way and combine them to a network that is able to check and preserve consistency between several models.
 %In consequence, a more reasonable option is to specify transformations between pairs of metamodels, i.e., bidirectional transformations, in a modular way and combine them to a network that is able to check and preserve consistency between several models.
 %\begin{example}
 \autoref{fig:prologue:three_persons_example} exemplifies these different possibilities at the example of relation of transformations between three simple metamodels for persons, employees and residents.
