@@ -70,8 +70,8 @@ It is, however, difficult to think about complex n-ary relations~\cite{stevens20
 \mnote{Distributed knowledge about consistency}
 Domain experts deal with the tools and corresponding models they require for their tasks in developing a system.
 Usually, each of them is only concerned with a subset of all tools involved in the development of a system.
-For example, a performance engineer may be concerned with an instance of the \gls{PCM} for an architecture-based prediction of the system's performance and knows how this description is reflected in the general software architecture described in the \gls{UML} as well the implementation in Java.
-A software architect may use \gls{UML} models for the architecture specification and how they are related to the implementation.
+For example, a performance engineer may be concerned with an instance of the \gls{PCM}, which represents a component-based architecture description of the system, to perform an architecture-based prediction of the system's performance and knows how this description is reflected in the system implementation in Java.
+A software architect may use \gls{UML} models for the architecture specification and know how they are related to the implementation as well as to the component-based performance models in \gls{PCM}.
 Finally, a requirements engineer may use IBM Rational Doors and know how they have to be reflected in the architecture specification and implementation to consider the models consistent.
 These exemplary relations are depicted in \autoref{fig:prologue:distributedknowledge}.
 No matter whether this is how knowledge is actually present at the different roles in a concrete scenario, it emphasizes that knowledge about the relations between tools and their models will usually be distributed across different experts as soon as there are several models involved.
@@ -154,16 +154,152 @@ After more precisely specifying the context and assumptions that we make, we giv
 %%
 \section{Consistency Specification Problems}
 
-\subsection{A Problem Scenario}
-Realitätsnahe Problemstellung. Szenario von Joshua gemischt mit meinen Szenarien.
+To get an impression of problems arising from the combination of modular transformations, we introduce an exemplary scenario from a software engineering process.
+We motivate why we expect the necessity to have multiple executions of the same transformations and discuss some of the issues that can occur in that context.
+Afterwards, we generalize that scenario and derive a more precise problem statement.
 
-Beispiel muss doppelte Spezifikation enthalten und auch die Begründung dafür (COTS, doppelt definiert, müssen wir mit klarkommen).
+\mnote{Software engineering scenario}
+Let us consider an extract of a software engineering scenario, in which three roles using three different tools are involved, according to \autoref{fig:prologue:distributedknowledge}. 
+A software developers implements the system with an object-oriented programming language such as Java.
+An architect manages the object-oriented architecture of the system with \gls{UML}. 
+Finally, a performance engineer uses a component-based representation of the architecture with the \gls{PCM} containing an abstract behavior description at the architecture level to predict the system's performance and help to evaluate different design decisions.
 
-\subsection{A Generalization of Problems}
-Probleme verallgemeinern vom konkreten in abstrakteres Szenario
+\mnote{Contents of \gls{PCM}}
+In \gls{PCM}, the basic entities are components, interfaces and datatypes.
+Components are units of reuse that define which interfaces they provide or require and contain abstract service specifications for the operations of the interfaces they provide.
+This allows to assemble a systems of components by connecting components through their interfaces, such that every required interface of one component is provided by a defined other component.
+For the consistency relations between the three languages \gls{PCM}, \gls{UML} and Java, we use the ones proposed by \textcite{langhammer2017a} between \gls{PCM} and object-oriented design, be it \gls{UML} or Java, and the intuitive notion of consistency between \gls{UML} and Java.
 
-\subsection{Problem Statement and Research Gap}
-Abschließend das Problem Statement erfassen.
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/prologue/scenario_consistency_relations.png}
+    \caption[Consistency relation for \gls{PCM} and \gls{UML}/Java]{Extract of consistency relations between a component-based architecture description in \gls{PCM} and the object-oriented design in \gls{UML}/Java according to \cite{langhammer2017a}.}
+    \label{fig:prologue:scenario_consistency_relations}
+\end{figure}
+
+\mnote{Consistency relations between \gls{PCM}, \gls{UML} and Java}
+Although there are several degrees of freedom to relate \gls{UML} and Java, the extracts that we consider follow a simple one-to-one mapping.
+The relevant relations between \gls{PCM} and object-oriented design are depicted in \autoref{fig:prologue:scenario_consistency_relations}.
+This involves a one-to-one mapping between interfaces and the realization of \gls{PCM} components as classes. 
+Provided interfaces in \gls{PCM} are realized by interface implementations. 
+Required interfaces are realized by a field with the type of the interface and constructor parameters that ensure that the required interfaces are set on instantiation of the component.
+
+
+\subsection{Correctness of Transformation Networks}
+
+\subsubsection*{Orchestration Problem}
+
+% 1. Orchestration problem
+\mnote{Most changes require each transformation to be executed once}
+When we consider transformations between \gls{PCM} and \gls{UML}, as well as between \gls{UML} and Java, they may transfer each modification to the other model.
+For example, adding a \gls{PCM} component creates a class in \gls{UML}, which then creates a class in Java.
+Although in most cases each transformation only needs to be executed once to propagate the information to all other models, there can be situations that require transformation to be executed repeatedly.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/prologue/scenario_duplicate_execution.png}
+    \caption[Example for transformation orchestration]{Duplicate transformation execution after adding a field representing a required interface to a Java class.}
+    \label{fig:prologue:scenario_duplicate_execution}
+\end{figure}
+
+\mnote{Scenario with multiple execution of same transformation}
+In the process depicted in \autoref{fig:prologue:scenario_duplicate_execution}, we assume a system description that contains at least one component and class, respectively, and one interface.
+If a developer adds a field to the Java class having the type of the interface, the transformation between \gls{UML} and Java transfers this field to the corresponding \gls{UML} class.
+The transformation between \gls{UML} and \gls{PCM} detects that the interface is also represented as an architectural interface in the \gls{PCM} model, thus the field is supposed to represent a required interface in the architectural model.
+In consequence, the transformation adds a required interface to the \gls{PCM} component.
+Since the consistency relations prescribe each required interface to be represented as a constructor parameter, the transformation also adds a constructor parameter to the class in the \gls{UML} model.
+This finally requires the transformation between \gls{UML} and Java to be executed again, since the Java code does not yet contain the constructor parameter introduced by the transformation between \gls{PCM} and \gls{UML}.
+
+\mnote{Orchestration problem}
+The example demonstrates that, in general, it is necessary to execute each transformation in a network more than once to achieve a consistent state of the models.
+This is always the case if at least two transformations modify the same model, because then the first transformation may need to react the changes of second one again, like in the example to transformation between \gls{UML} and Java needs to react to the one between \gls{PCM} and \gls{UML}, because both modified the \gls{UML} model.
+The determination how often and in which order transformations have to be executed is what we call the \emph{orchestration problem}.
+
+\subsubsection*{Synchronization Problem}
+% 2. Synchronization problem
+\mnote{Transformation between \gls{PCM} and Java}
+We yet considered that we only have a chain of two transformations, one between \gls{PCM} and \gls{UML} and another between \gls{UML} and Java.
+There may, however, also be an overlap of information between \gls{PCM} and Java that cannot be represented in \gls{UML}, which require to also define a transformation between \gls{PCM} and Java.
+This is especially the case for behavioral properties, which cannot be expressed in UML class models, for example, the functionality defined by Java method implementations and the abstract service specifications in \gls{PCM}.
+In consequence, the graph induced by the transformation contains a cycle.
+
+\mnote{Transformation may contain redundancies}
+Instead of only having a transformation for that overlapping information of \gls{PCM} and Java that cannot be expressed across \gls{UML}, the transformation may also contain the relations already expressed across \gls{UML}.
+The reasons for that can be independent development and reusability.
+Independent development leads to the situation that the developer of the transformation between \gls{PCM} and Java does not know what the transformations to \gls{UML} already express.
+So even if the developer has that information, he may want to express it again to foster reusability, i.e., to use the transformation between \gls{PCM} and Java in projects in which no \gls{UML} is used or when the transformation is not supposed for a specific network of transformations, comparable to \gls{COTS}.
+In consequence, we need to face the situation that multiple transformations propagate the same information, i.e., they contain redundancies.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/prologue/scenario_synchronization.png}
+    \caption[Example for transformation synchronization]{Two transformations propagating the same information to Java.}
+    \label{fig:prologue:scenario_synchronization}
+\end{figure}
+
+\mnote{Two transformation paths for Java class creation}
+\autoref{fig:prologue:scenario_synchronization} depicts a scenario, in which a user creates a \gls{PCM} component.
+The transformations, in consequence, create a \gls{UML} class and finally, both the transformation between \gls{UML} and Java and the one between \gls{PCM} and Java define the creation of an appropriate Java class.
+These transformation now have to consider that there may be another transformation that already created that class.
+Otherwise, there is the risk of creating a duplicate of that class or of overwriting the already created on.
+
+\mnote{Synchronization problem}
+Such a problem can always occur if two sequences of transformations propagate the same information to the same model, like here to Java.
+In consequence, transformations have to properly deal with that case.
+We call this the \emph{synchronization problem}.
+
+\subsubsection*{Contradiction Problem}
+% 3. Contradiction problem
+
+\mnote{Equivalence of redundancies}
+We have seen that it may be necessary to redundantly define the same consistency relations in different transformations.
+We have, however, implicitly assumed that these repetitions of the same relations are true redundancies, i.e., express the relations equally.
+This, in turn, requires all developers to have the same \emph{notion of consistency} between the languages.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/prologue/scenario_contradiction.png}
+    \caption[Example for transformation contradictions]{Contradicting consistency relations between components in \gls{PCM} and classes in \gls{UML} and Java.}
+    \label{fig:prologue:scenario_contradiction}
+\end{figure}
+
+\mnote{Contradicting component and class name relations}
+The example in \autoref{fig:prologue:scenario_contradiction} informally depicts exemplary specifications for the relation between components and classes.
+It is supposed to express that for each a component or class appropriate elements in the other models have to exist with the given name relation.
+The constraints for their names can, however, obviously not be fulfilled at the same time.
+While the class representations are supposed to have the same name and the \gls{PCM} is also supposed to have the same name as the \gls{UML} class, it is supposed to have the name of the Java class with an \enquote{Impl} suffix, as proposed by \textcite{langhammer2017a}.
+
+\mnote{Differnt notions of consistency}
+Such a situation can occur if the developers of the different transformations have different notions of consistency.
+In this case, the performance engineering, who knows about the relation between \gls{PCM} and Java according to the scenario presented in \autoref{fig:prologue:distributedknowledge}, and the software architect, who knows about the relation between \gls{PCM} and \gls{UML} as well as between \gls{UML} and Java have different notions about how to represent components in object-oriented design.
+
+\mnote{Non-terminate or inconsistent termination due to contradictions}
+If the experts encode the defined relations in transformations that try to preserve them and execute them after any of the elements is added to a model, the transformations will either terminate in an inconsistent state or never terminate at all.
+Executing the transformation for a finite number of times would always result in an inconsistent state, if not removing the element just added by the user.
+
+\mnote{Contradiction problem}
+In consequence, it is important to avoid or detect situations in which transformations with such contradicting constraints are combined to a network.
+We call this the \emph{contradiction problem}
+
+\subsubsection*{Problem Statement}
+
+We have discussed three kinds of issues, which can prohibit that a transformation network terminates consistently: orchestration, synchronization and contradiction.
+These problems only exemplify correctness issues in transformation networks. 
+In fact, it is even not systematically known which issues can occur.
+Thus we derive the following general problem statement:
+
+\begin{problemstatement}
+    It is unknown how to correctly combine modular and independently developed transformations to networks to achieve consistent results.
+\end{problemstatement}
+
+
+\subsection{Quality of Transformation Networks}
+
+
+\begin{problemstatement}
+    It is unknown how to systematically mitigate trade-off decisions between correctness and quality properties, such as reusability and evolvability, of transformation networks.
+\end{problemstatement}
+
 
 
 %%
@@ -316,26 +452,18 @@ Overall Goal: We want to known how we can systematically improve the quality of 
 
 * Transformations are developed independently
 * No global knowledge exists
-* Define the process and roles (either here or in properties chapter):
-** Domain expert
-** Transformation developer
-** Transformation user
-** Multiplicities
-** Refer to Dagstuhl report with Mattias
-
-* We call the users of transformation "engineers" (do we?) and the developers "domain experts"?
-
-* Only structural dependencies
 
 * No semi-automatism (we will discuss why and how that affects correctness)
 
+
+* Only structural dependencies, no functional ones (maybe later?)
 
 %%
 %% CONTRIBUTIONS
 %%
 \section{Contributions}
 
-
+Name contributions, map them to RQ and map them to Problem Statements.
 
 %%
 %% OUTLINE
