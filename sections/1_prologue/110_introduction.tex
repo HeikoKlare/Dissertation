@@ -184,10 +184,12 @@ This involves a one-to-one mapping between interfaces and the realization of \gl
 Provided interfaces in \gls{PCM} are realized by interface implementations. 
 Required interfaces are realized by a field with the type of the interface and constructor parameters that ensure that the required interfaces are set on instantiation of the component.
 
-
+%% CORRECTNESS
 \subsection{Correctness of Transformation Networks}
 
-\subsubsection*{Orchestration Problem}
+The central goal of (software) engineering, and thus also the construction of transformation networks as part of the engineering process, is to achieve \emph{correctness}.
+
+\subsubsection*{Orchestration Challenge}
 
 % 1. Orchestration problem
 \mnote{Most changes require each transformation to be executed once}
@@ -210,12 +212,12 @@ In consequence, the transformation adds a required interface to the \gls{PCM} co
 Since the consistency relations prescribe each required interface to be represented as a constructor parameter, the transformation also adds a constructor parameter to the class in the \gls{UML} model.
 This finally requires the transformation between \gls{UML} and Java to be executed again, since the Java code does not yet contain the constructor parameter introduced by the transformation between \gls{PCM} and \gls{UML}.
 
-\mnote{Orchestration problem}
+\mnote{Orchestration challenge}
 The example demonstrates that, in general, it is necessary to execute each transformation in a network more than once to achieve a consistent state of the models.
 This is always the case if at least two transformations modify the same model, because then the first transformation may need to react the changes of second one again, like in the example to transformation between \gls{UML} and Java needs to react to the one between \gls{PCM} and \gls{UML}, because both modified the \gls{UML} model.
-The determination how often and in which order transformations have to be executed is what we call the \emph{orchestration problem}.
+The determination how often and in which order transformations have to be executed is what we call the \emph{orchestration challenge}.
 
-\subsubsection*{Synchronization Problem}
+\subsubsection*{Synchronization Challenge}
 % 2. Synchronization problem
 \mnote{Transformation between \gls{PCM} and Java}
 We yet considered that we only have a chain of two transformations, one between \gls{PCM} and \gls{UML} and another between \gls{UML} and Java.
@@ -243,12 +245,12 @@ The transformations, in consequence, create a \gls{UML} class and finally, both 
 These transformation now have to consider that there may be another transformation that already created that class.
 Otherwise, there is the risk of creating a duplicate of that class or of overwriting the already created on.
 
-\mnote{Synchronization problem}
+\mnote{Synchronization challenge}
 Such a problem can always occur if two sequences of transformations propagate the same information to the same model, like here to Java.
 In consequence, transformations have to properly deal with that case.
-We call this the \emph{synchronization problem}.
+We call this the \emph{synchronization challenge}.
 
-\subsubsection*{Contradiction Problem}
+\subsubsection*{Contradiction Challenge}
 % 3. Contradiction problem
 
 \mnote{Equivalence of redundancies}
@@ -258,7 +260,7 @@ This, in turn, requires all developers to have the same \emph{notion of consiste
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{figures/prologue/scenario_contradiction.png}
+    \includegraphics[width=0.6\textwidth]{figures/prologue/scenario_contradiction.png}
     \caption[Example for transformation contradictions]{Contradicting consistency relations between components in \gls{PCM} and classes in \gls{UML} and Java.}
     \label{fig:prologue:scenario_contradiction}
 \end{figure}
@@ -277,15 +279,15 @@ In this case, the performance engineering, who knows about the relation between 
 If the experts encode the defined relations in transformations that try to preserve them and execute them after any of the elements is added to a model, the transformations will either terminate in an inconsistent state or never terminate at all.
 Executing the transformation for a finite number of times would always result in an inconsistent state, if not removing the element just added by the user.
 
-\mnote{Contradiction problem}
+\mnote{Contradiction challenge}
 In consequence, it is important to avoid or detect situations in which transformations with such contradicting constraints are combined to a network.
-We call this the \emph{contradiction problem}
+We call this the \emph{contradiction challenge}
 
 \subsubsection*{Problem Statement}
 
 \mnote{No systematic knowledge on correctness issues}
-We have discussed three kinds of issues, which can prohibit that a transformation network terminates consistently: orchestration, synchronization and contradiction.
-These problems only exemplify correctness issues in transformation networks. 
+We have discussed three kinds of issues, which can prohibit that a transformation network terminates consistently, and derived according challenges: orchestration, synchronization and contradiction.
+These challenges only exemplify the relevant correctness issues in transformation networks. 
 In fact, it is even not systematically known which issues can occur.
 Thus we derive the following general problem statement:
 
@@ -293,13 +295,110 @@ Thus we derive the following general problem statement:
     It is unknown how to correctly combine modular and independently developed transformations to networks to achieve consistent results.
 \end{problemstatement}
 
-
+%% QUALITY PROPERTIES
 \subsection{Quality of Transformation Networks}
 
+\mnote{Quality properties of networks}
+Like in ordinary (software) engineering, besides the primary goal of producing \emph{correct} artifacts, there are several quality properties that need to be improved.
+They can range from properties relevant for developers, such as reusability and evolvability, to properties relevant for users, such as performance, scalability and reliability.
+This similarly applies to transformation networks as artifacts of the (software) engineering process.
+
+\subsubsection*{Properties and Topology Challenge}
+
+\mnote{Focus on development properties}
+In this thesis, we will focus on further properties regarding the development of a transformation network, such as reusability and evolvability, rather than properties of its usage, such as scalability.
+Reusability is of most importance, because transformation may be used in different contexts within different networks of other transformations.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/prologue/scenario_topologies.png}
+    \caption[Example for network topologies]{Different topologies of transformation networks for \gls{PCM}, \gls{UML} and Java}
+    \label{fig:prologue:scenario_topologies}
+\end{figure}
+
+\mnote{Topology extremes: tree and dense graphs}
+Consider the two networks depicted in \autoref{fig:prologue:scenario_topologies}.
+The networks contain transformation between \gls{PCM} and \gls{UML} as well as between \gls{UML} and Java. 
+One of them additionally contains a transformation between \gls{PCM} and Java.
+They can be considered as representatives of extremes of transformation networks:
+the graph induced by transformations may on the one end be a tree, and on the other be a dense graph.
+
+\mnote{Topologies affect properties}
+It is easy to see that properties are directly affected by the network topology.
+A dense graph has to benefit of high reusability, because any subset of languages can be used for a development project without loosing consistency.
+In the example, the tree network is not applicable in development projects using \gls{UML}, because then \gls{PCM} and Java cannot be kept consistent.
+Additionally, a dense graph profits from universality, because arbitrary relations can be expressed, whereas a tree requires that of three language there is always one that can express the overlap of the two others.
+If there are overlaps between \gls{PCM} and Java that cannot be expressed across \gls{UML}, like discussed for behavioral specifications, a tree cannot be defined.
+On the other hand, a tree has the benefit of inherent correctness guarantees.
+There are no two paths of transformations between the same two language.
+Thus, no changes cab be propagated across two paths to the same model, avoiding synchronization problems, and no contradictions can occur.
+This already avoids two of the three introduced challenges regarding correctness.
+
+\mnote{Topologies induce trade-offs}
+While each topology improves certain properties, it degrades others at the same time.
+In other words, topologies induce trade-offs between different properties.
+For example, a tree improved correctness, but degrades reusability in comparison to a dense graph.
+Finding out how to use this knowledge to mitigate trade-offs and improve different properties at the same time is our \emph{properties and topologies challenge}.
+
+\subsubsection*{Language Challenge}
+
+\mnote{Language support for specific topology}
+We have seen that topologies directly influence properties of a transformation network.
+We will see that with an appropriate strategy of building networks with a specific topology, we can mitigate trade-offs.
+Currently, however, there is no known approach that supports building transformation networks of specific topologies.
+Research approaches did consider approaches and languages for single transformations or for specific composition purposes, such as transformations between the same two languages~\cite{wagelaar2010a,wagelaar2011a}, or chains of transformations~\cite{pilgrim2008a, vanhooff2007UniTI-MODELS}.
+
+\mnote{Language challenge}
+To relieve the developer from the task of following the strategy to a network of transformations to improve different properties, a suited language should be provided.
+Finding how such a language should be designed constitutes our \emph{language challenge}.
+
+\subsubsection*{Integration Challenge}
+
+\mnote{Transformations assume models of specific formalisms}
+Finally, we always assumed that models are developed and thus present in a format to which transformations can be applied.
+Transformation languages have to assume a specific formalism of the languages between they transform~\cite{klare2017models}, thus the models have to follow that formalism.
+This is especially problematic for code, which will be relevant for almost every development project.
+Although there are tools that wrap code in a specific formalism, such as JaMoPP~\cite{heidenreich2009a,heidenreich2010a} for using Java code in the Eclipse Modeling Framework, recognizing incremental updates of code are still poorly supported.
+
+\mnote{Models are often implicit}
+Models are often contained implicitly in code.
+This mostly concerns domain models for the software to be developed, but also models of code, such as the Java code representation in the Java Development Tools of the Eclipse Framework~\cite{EclispeJDT}, which has capabilities of recognizing incremental updates.
+
+\mnote{Lifting artifacts to models}
+Lifting such implicit models into a format according to formalisms that allow the application of transformations and transformation languages enables projects using such artifacts to apply transformation techniques to preserve consistency.
+For all projects containing such artifacts, this can be seen as a preliminary for applying transformation network, as otherwise only the parts of the projects present in an appropriate formalism can be kept consistent.
+In consequence, it can be seen as a \emph{completeness} property of the network.
+We denote this as the \emph{integration challenge}.
+
+\subsubsection*{Problem Statement}
+
+\mnote{Impact of topologies and usability for mitigating trade-offs unknown}
+We have discussed that topologies affect different correctness and quality properties of transformation network and that they impose trade-offs between them.
+It is unclear how that insight can be used to systematically improve different properties by building transformation networks of specific topologies.
+Thus we derive the following problem statement:
 
 \begin{problemstatement}
     It is unknown how to systematically mitigate trade-off decisions between correctness and quality properties, such as reusability and evolvability, of transformation networks.
 \end{problemstatement}
+
+
+\subsection{Challenges Overview}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/prologue/challenges.png}
+    \caption[Problem Statements and Challenges]{The two central identified problem statements and challenges identified for them}
+    \label{fig:prologue:challenges}
+\end{figure}
+
+\mnote{Summary of problems statements and challenges}
+We have discussed several issues regarding the construction of transformation networks.
+We summarize the problem statements and challenges in \autoref{fig:prologue:challenges}.
+We made two central problem statements, one regarding the correctness of networks and one regarding the improvement of quality properties.
+Each of these problems is driven by three challenges.
+We identified orchestration, synchronization and contradiction to be central challenges for constructing \emph{correct} transformation networks.
+For the improvement of quality properties, we emphasized that the relation between properties and topologies challenges the identification of a topology to mitigate property trade-offs and to define an appropriate language for that.
+To achieve completeness of a network, we identified the integration challenge to integrate all kinds of artifacts into a transformation-based consistency process.
 
 
 
@@ -415,11 +514,11 @@ Overall Goal: We want to know what \emph{correctness} means for transformation n
 Overall Goal: We want to known how we can systematically improve the quality of transformation networks. We want to find out which properties are relevant when building transformation networks and how they are affected by different topologies. We use this to systematically derive a proper construction approach achieving a specific topology that resolves trade-offs between quality properties. Second by including models that were not explicitly modelled as such before to allow their integration into a transformation-based consistency process.
 
 \begin{researchquestions}{2}
-	\item \researchquestion{rq:quality}{How can quality properties of transformation networks be systmatically improved?}
+	\item \researchquestion{rq:quality}{How can quality properties of transformation networks be systematically improved?}
     \begin{subresearchquestions}
         \item \researchquestion{rq:quality:properties}{What are relevant properties and topologies of transformation networks?} % EV: Argumentation
 		\item \researchquestion{rq::topology}{How can topologies of transformation networks improve quality properties of transformation networks?} % EV: Argumentation
-		\item \researchquestion{rq:quality:language}{How can a specialied language support the specification of a network topology that improves quality properties?} % EV: Proof-of-concept and case study
+		\item \researchquestion{rq:quality:language}{How can a specialized language support the specification of a network topology that improves quality properties?} % EV: Proof-of-concept and case study
 		\item \researchquestion{rq:quality:process}{How can software development artifacts be integrated into a transformation-based development process?} % EV: Case study
 	\end{subresearchquestions}
 \end{researchquestions}
@@ -462,6 +561,9 @@ Overall Goal: We want to known how we can systematically improve the quality of 
 
 * Only structural dependencies, no functional ones (maybe later?)
 
+
+* Focus on development, rather than usage -> motivate comprehensibility with developer, not with user
+
 %% CONTRIBUTIONS
 \subsection{Contributions}
 
@@ -471,7 +573,7 @@ Name contributions, map them to RQ and map them to Problem Statements.
 %%
 %% OUTLINE
 %%
-\section{Outline}
+\section{Thesis Outline}
 
 
 
