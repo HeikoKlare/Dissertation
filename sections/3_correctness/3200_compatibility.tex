@@ -131,6 +131,98 @@ In consequence of that, we improve the \emph{applicability} of a tree-based spec
 
 \begin{copiedFrom}{SoSym MPM4CPS}
 
+% INTRODUCTION
+
+\begin{figure}
+    \centering
+    \input{figures/prologue/three_persons_example}
+    % {\color{consistencycolor2}\begin{align*}
+    %     R_{PER} = &
+    %         \setted{\tupled{p,e,r} \mid \\
+    %         & p.firstname + "\text{\textvisiblespace}" + p.lastname = e.name = r.name\\
+    %         & \land p.address = r.address%\\
+    %         %& 
+    %         \land p.income = e.salary\\
+    %         & \land e.socsecnumber = r.socsecnumber
+    %     }
+    % \end{align*}}
+    % \vspace{-2em}
+    % {\color{consistencycolor1}\begin{align*}
+    %     R_{PE} = &
+    %         \setted{\tupled{p,e} \mid %\\
+    %         %& 
+    %         p.firstname + "\text{\textvisiblespace}" + p.lastname = e.name\\
+    %         & \land p.income = e.salary
+    %     }\\
+    %     R_{PR} = &
+    %         \setted{\tupled{p,r} \mid %\\
+    %         %& 
+    %         p.firstname + "\text{\textvisiblespace}" + p.lastname r.name\\
+    %         & \land p.address = r.address
+    %     }\\
+    %     R_{ER} = &
+    %         \setted{\tupled{e,r} \mid %\\
+    %         %& 
+    %         e.name = r.name\\
+    %         & \land e.socsecnumber = r.socsecnumber
+    %     }\\
+    %     R'_{ER} = &
+    %         \setted{\tupled{e,r} \mid %\\
+    %         %& 
+    %         e.name.toLower = r.name\\
+    %         & \land e.socsecnumber = r.socsecnumber
+    %     }
+    % \end{align*}}
+    % \vspace{-1em}
+    \caption{Three simple metamodels for persons, employees and residents, one ternary relation $R_{PRE}$ between them and three binary relations $R_{PE}, R_{PR}, R_{ER}$ for each pair of them, with $R'_{ER}$ as an alternative for $R_{ER}$.}
+    \label{fig:prologue:three_persons_example}
+\end{figure}
+
+%%
+%% Problem: Cycles
+%%
+Such a network of bidirectional transformations may contain cycles of transformations.
+\autoref{fig:prologue:three_persons_example} exemplifies why it may be unavoidable to have such cycles. 
+There is no pair of binary relations, such that it is equivalent to the ternary relation $R_{PER}$, because each pair of metamodels shares unique information that is not represented in the third one. %, namely address, income and social security number.
+An essential issue with such cycles is that they impose the possibility of defining contradictory constraints, such that the relations cannot be fulfilled at the same time.
+In such a case, the relations are considered \emph{incompatible}.
+Consider the three binary relations $R_{PE}, R_{PR}, R'_{ER}$ in \autoref{fig:prologue:three_persons_example}.
+These relation cannot always be fulfilled, because $R'_{ER}$ requires the resident name to be lowercase, whereas the other relations relate the names as they are and thus allow the lowercase names.
+In consequence, for a resident with a non-lowercase name it is not possible to find a consistent person and employee.
+However, in a transformation network, compatibility of the relations defined by the transformations is a necessary requirement for their repair routines to properly restore consistency~\cite{klare2019icmt}.
+
+In this article, we consider the relations defined by bidirectional transformations.
+We clarify the notion of \emph{compatibility} of these relations and develop an approach to prove compatibility of relations in a given network of transformations.
+To achieve this, we formally define a notion of consistency, based on fine-grained consistency relations, as well as compatibility.
+Building on this formalism, we are able to derive an inductive, formal approach for proving compatibility of relations by identifying those that are redundant.
+The essential idea is that if consistency relations have a specific kind of tree structure, we are able to show that they are inherently compatible.
+Furthermore, we show that adding redundant relations to such a tree preserves compatibility.
+In consequence, reducing an arbitrary network of relations to a tree by removing redundant relations proves compatibility.
+Finally, we present an operationalized approach based on that formal approach for \qvtr to prove compatibility of a network of \qvtr relations.
+That approach transforms \qvtr relations into first-oder logical formulae and finds redundant relations by applying an SMT solver.
+% We propose an approach that is able to prove that transformations are compatible, on the example of QVT-R. The approach represents the transformation rules as a graph of metamodel elements with consistency relations between them. Its goal is to find an equivalent set of trees of consistency relations, which are compatible due to the inherent absence of cycles. To achieve that, it decomposes the graph into independent subsets and then removes redundant consistency relations within existing cycles. To prove redundancy of a relation, cycles of relations are transformed into logical expressions and evaluated with an SMT solver. 
+More detailed, we make the following contributions:
+\begin{description}[leftmargin=\parindent]
+    \item[\contributionlabel{contrib:formalization}{Compatibility Formalization}{C1}:] We formalize a notion of consistency and precisely define \emph{compatibility} of relations in a network of transformation.
+    \item[\contributionlabel{contrib:formalapproach}{Formal Approach}{C2}:] We define a formal, inductive approach for proving compatibility of relations based on a notion of redundancy and relation trees. % and proving that such trees are compatible and that redundancy preserves compatibility.
+    \item[\contributionlabel{contrib:operationalizedapproach}{Operationalized Approach}{C3}:] We propose an approach that applies the formalism to %transformation languages. %and thus enables proving compatibility of transformations defined in a transformation language. 
+    %We especially discuss the approach application to 
+    \qvtr and show how a translation to logical formulae and the usage of SMT solver can be used to prove compatibility.
+    \item[\contributionlabel{contrib:evaluation}{Applicability Evaluation}{C4}:] While correctness of the approach is given by construction and proven on the formalism, we apply the approach to case studies to show applicability of the approach. 
+\end{description}
+It is, in general, not possible to prove that transformations are incompatible if the language used to describe consistency relations has sufficient expressiveness and is thus undecidable, such as \qvtr.
+On the other hand, it is possible to prove that transformations are compatible.
+Our approach is designed to operate conservatively, thus in cases it claims compatibility, the transformations actually are compatible.
+However, there may be cases in which relations are compatible but the approach is not able to prove that.
+    
+The main benefit that our approach imposes is that it enables domain experts to define transformations independently and %allows them 
+to automatically detect their compatibility both during development as well as afterwards when combining them to a network.
+This relieves them from the necessity to align the transformations with each other a priori and ensuring compatibility manually.
+
+\todoDiss{Discuss different benefits / scenarios more clearly, especially second benefit / application scenario: User define relations and wants on-the-fly feedback on compatibility to other existing relations, rather then a posteriori checking}
+
+% CONSISTENCY CHAPTER
+
 In this section, we precisely define our notion of consistency, and motivate and formally introduce the term \emph{compatibility}.
 We first discuss properties of transformation networks %in comparison to a single transformation 
 with an intuitive notion of compatibility, based on considerations in existing work.
