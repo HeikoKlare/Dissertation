@@ -9,6 +9,10 @@
 
 \todo{Add somewhere (best at definition of binary): We consider binary transformation, but, finally, even with multiary transformation, we want to be able to combine them to networks}
 
+\todo{Discuss hippocraticness (although it may not be necessary)}
+
+\todo{Authoritative Modelle (bzw. eher authoritative Regionen) diskutieren (Verweis Stevens)}
+
 In this chapter, we will first discuss a rather informal notion of consistency and its preservation. It is supposed to discuss the different dimensions in which consistency and its preservation can be considered to then discuss how \emph{correctness} can be reasonably defined.
 After identifying the correctness notion that is relevant in the context of our work, we define a suitable formal notion of consistency.
 We then formally define correctness for that notion of consistency.
@@ -906,6 +910,7 @@ Although we define these artifacts specifically for one transformation network, 
 
 \mnote{Correctness of transformation networks}
 Correctness of a transformation network is given by correctness of both the individual transformation as well as the application function, according to \autoref{def:synchronizingtransformationcorrectness} and \autoref{def:applicationfunctioncorrectness}.
+We will say that the transformations ensure \emph{local consistency}, because they are able to achieve consistency locally for two models, whereas the application function achieves \emph{global consistency} by applying the individual transformations in a ways such that all models are consistent according to all transformation afterwards.
 
 \begin{definition}[Transformation Network Correctness]
     \label{def:transformationnetworkcorrectness}
@@ -924,67 +929,22 @@ We have already indicated that we will show that the application function has to
 Additionally, we already suggested that the consistency relations of the transformations are considered correct by definition, as there is no other specification to which they have to be correct, but we will discuss a notion of \emph{compatibility} to reflect when those relations contain unintended contradictions.
 
 \mnote{Outlook: achieving correct transformation networks}
-In the following chapters, we will thus define such a notion of compatibility, discuss how correctness of the individual transformations can be achieved and finally how a correct and appropriate application function to perform the orchestration can be defined.
-In summary, these following contributions together allow to define a \emph{correct} transformation network.
+In the following chapters, we will thus define such a notion of compatibility, discuss how correctness of the individual synchronizing transformations can be achieved and finally how a correct and appropriate application function to perform the orchestration can be defined.
+In summary, these following contributions together will allow to develop what we defined as a \emph{correct} transformation network.
 
 
 
 
+% \section{Summary}
 
-
-
-\mnote{Achieving a correct application function}
-The definition of the application function basically ensures that the function either returns $\bot$ or executes the \modellevelconsistencypreservationrules given by the orchestration function to retrieve a changes tuple of models.
-It is considered \emph{correct} if it ensures that its result is either $\bot$ or a consistent model tuple by executing the \modellevelconsistencypreservationrules given by the orchestration function.
-% A correct application function thus has to ensure that its result is either $\bot$ or a consistent model tuple by executing the \modellevelconsistencypreservationrules given by the orchestration function.
-In consequence, the application function can be realized by simply executing the result of the orchestration function and check whether the resulting model tuple is consistent or not and return an appropriate result.
-Such a realization is generic and does not depend on the actual consistency preservation rules and orchestration function but represents a generic behavior.
-Additionally, this gives an implementation of that function the ability to present a faulty result to the user, which eases finding out why no consistent state was reached.
-
-\mnote{Correctness is not crucial}
-Finally, correctness is not crucial, because correctness can easily be achieved by performing any execution of transformations and just ensuring that we terminate at some point in time and then decide whether the resulting models are consistent or not and appropriately deliver the result.
-
-\mnote{How to define an orchestration function that is as optimal as possible?}
-The remaining difficulty is how to define an orchestration function that fulfills the definition, i.e., to find a finite sequence of transformations, and also one that improves optimality, as an \emph{optimal} function can never be given.
-Although the definition of the orchestration function proposes a closed description of that function, in practice such a function will not have a closed form but will be realized as an algorithm that dynamically decides which transformation to execute next.
-Therefore the arising problem is that the length of the sequence to execute is not known a priori. Therefore, we need some abortion criterion. When a consistent result is found, this criterion is easy. But since we do not know whether a sequence exist, we need an abortion criterion that is reasonable and does not cut off the process although a consistent solution could be found, thus reducing optimality.
-A simple realization for that algorithm to deliver a finite sequence of transformations would be to define a fixed termination criterion, such as a specific number of transformation executions. However, there is no upper bound for the number of executed transformations necessary to achieve consistency. Still, a fixed number (even 0) could be defined for the number of executed transformations to fulfill the definition. Hence, optimality would be 0 then as a consistent result is never reached. We therefore discuss in the following how to define an appropriate orchestration function and how to optimize it.
-
-
-\todo{Somewhere here things should be moved to orchestration chapter}
-
-\textbf{Overall Goal:} Find correct orchestration function that improves optimality.
-
-There are two ways to improve optimality of the orchestration function:
-\begin{enumerate}
-    \item Optimize the orchestration function, i.e., find a good order (probably this is not possible), at least find an order that helps the developer to find problems
-    \item Optimize the input, i.e., define requirements to the transformations and their relations representing the input to optimize optimality
-\end{enumerate}
-\todo{We need an example for that}
-
-Both goes hand in hand, because restrictions to the input can never lead to an orchestration function that always terminates without leading to unsupported relevant cases.
-
-This conform to two approaches:
-\begin{enumerate}
-    \item Dynamic decision about selected transformation and abortion criteria
-    \item Constructive restrictions that ensure that appropriate order is (easily) found
-\end{enumerate}
-
-\todo{Application function can be generically defined, orchestration maybe not? We actually want to ensure that both are generic and none of them has to be defined for a specific project.}
-
-
-\section{Summary}
-
-Central Insights:
-\begin{itemize}
-    \item In networks, we need compatible consistency relations -> first RQ
-    \item In networks, we need synchronizing rather than bidirectional transformations -> second RQ
-    \item In networks, we need orchestration functions -> third RQ
-    \item Correctness is not the problem, optimality is the problem
-    \item We can only check dynamically whether a consistent state was reached due to Halting Problem. We cannot guarantee to always find a consistent state
-\end{itemize}
-
-
+% Central Insights:
+% \begin{itemize}
+%     \item In networks, we need compatible consistency relations -> first RQ
+%     \item In networks, we need synchronizing rather than bidirectional transformations -> second RQ
+%     \item In networks, we need orchestration functions -> third RQ
+%     \item Correctness is not the problem, optimality is the problem
+%     \item We can only check dynamically whether a consistent state was reached due to Halting Problem. We cannot guarantee to always find a consistent state
+% \end{itemize}
 
 
 
@@ -1103,213 +1063,39 @@ Central Insights:
 
 
 
-Now it is obvious that the consistency preservation rules can actually do anything to achieve consistency, including returning always the same set of models that is consistent, although that may not be expected. We will discuss later which reasonable assumptions can be made to the behavior to on the hand not restrict the possibilities of the transformation developer and on the other hand be able to ensure some properties of the transformations and their execution.
-
-\todo{First restriction: Input delta of APP only contains changes to one model -> no synchronisation}
-\todo{Second restriction: Input delta is not rejected}
-\todo{Third restriction: Generated deltas are monotone}
-
-From a theoretical perspective, it is always possible to a specify consistency relations according to the definition, as it is just a subset of elements.
-It is also always possible to define a consistency preservation rule for a consistency relation according to its definition, as can simply return any any element of the relation.
-\todo{This is not true: the source model may not be in the relation, then its not possible, at least with the current definition. With a synchronizing transformation, any modification can be made to both models, then its fine.}
-The generalization function is generic, so it can always be applied.
-Finally, the consistency preservation application function is an artifact that cannot be easily specified according to the definition for a given set of consistency preservation rules.
-It is always possible to have a set of consistency preservation rules for which no application function can be defined that returns a consistent result for at least one input model and change tuple, as there is not sequence of consistency preservation rules that achieves that.
-\todo{Example!}
-Even worse, the problem to define such a function is Turing-complete, which makes it impossible to decide whether such a function exists.
-\todo{Show Turing-completeness}
-Consequence: From a theoretical perspective, this function is the crucial part!
-
-Essential problem: One transformation may restore consistency between A and B and another between A and C. If then a transformation restores consistency between B and C, the resulting B' and C' may not be consistent A anymore.
-
-Alternative to an app function: Define a \emph{well-definedness} property for a set of transformations, requiring that they can be executed in any order to always terminate consistently. However, this is a very strict requirement, which can usually not be fulfilled, so we do not further investigate that.
-\todo{Give simple example why that does not work.}
-
-
-Best-behaved app function: Whenever there is a sequence of CPRs, the app function finds item. This is still not possible due to Turing-completeness. The function would need to decide whether the network terminates or not.
-
-Only achievable app function is a best-effort (i.e. conservative) function: A function that either returns a consistent set of models or that does return bottom. Not making a statement about how often a correct result is returned in comparison to how often it is possible.
-
-This approach is conservative. The question is then, how high the degree of conservativeness is. In the worst case, a function that always returns bottom would fulfill the definition, but that is not what we want. We want to reduce conservativeness.
-
-Goal: Find a solution in as many cases as possible, abort in the others (conservatively). There are two subgoals to achieve that:
-1. Function must be correct, i.e. always terminate (no endless sequence of CPR) and terminate in a consistent state
-2. Function must be as less conservative as possible
-
-It is clear that we cannot give a closed function for APP that just by a given change returns a sequence of CPR that results in a consistent state. APP has to be calculated dynamically during execution. Therefore we consider it as an algorithm in the following.
-
-
-\subsection{Achieving a Correct Application Function}
-\todo{These problem cannot occur if a function fulfills the definition, because it always finds a sequence. So the question is how to fulfill the definition.}
-
-It is easy to achieve that the APP function only terminates in a consistent state, because knowing the relations allows to check whether all relations are fulfilled. 
-\todo{Need to define that a transformation may not be able to process a specific change? Then there could be inconsistent terminiation because a transformation cannot be executed anymore.}
-
-Problems due to which the function does not terminate: Alternation and Divergence
-
-Alternation: Run through same state twice
-Divergence: Always produce new states without reaching a consistent state
-
-Two possibilities to avoid problems:
-1. Make assumptions to transformations that avoid them
-2. Detect them dynamically and abort
-
-
-\subsubsection{Avoiding Alternation / Divergence}
-
-Making assumptions that avoid them is rather hard, as we will show in the following.
-
-\paragraph{Idea:} Require monotony to avoid alternation
-
-We would have to relax the definition of transformation to be monotone, because if a transformation is monotone, it may only append information, but this is not always possible, as can be seen in the following example. A monotone transformation must be able to return bottom if it cannot make further changes to restore consistency to the relation.
-
-\begin{definition}[Monotone Transformation]
-    Transformation gets models M and deltas D and produces new deltas D'. Taking the union of the original models M and the new models D'(M), then D(M) must be a subset of that, because other elements would have been added and removed afterwards or elements would have been changes once by D and again in a different way by D'.
-
-    Generally, monotony could also mean that only the same complete model state is not passed twice. \todo{Why dont we do that?}
-\end{definition}
-
-This would mean that each transformation only appends changes, i.e., if an element was added/removed, the transformation may not do the inverse. The same applies to attribute/reference changes: if an attribute/reference was already changes it may not be changed again.
-This way, it is by design impossible to pass through the same state again. Actually, if a monotone transformation returns bottom, the network has to terminate with a failure.
-However, this is hard restriction to transformations. It leads to the fact that in some networks that actually have a simple solution no solution is found at all. This can be easily seen at the example in \autoref{fig:formal:monotonycounterexample}. In the example adding "aa" to the left model, any execution order of the transformations leads to the situation that a previous change must be revoked to result in a consistent state. However, it is possible to derive a consistent state for that input change.
-
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{figures/correctness/formal/monotony_counterexample.png}
-    \caption{Counterexample for monotony}
-    \label{fig:formal:monotonycounterexample}
-\end{figure}
-
-One could now argue that there are binary relations in the example, which may never be fulfilled at all. We will later discuss how far relations that cannot be fulfilled should be restricted. However, in general, this is wanted behavior, because in general it may be necessary that transformations produce intermediate states that are not yet consistent with each other. Otherwise this would means that each transformation is always able to directly deliver a state that is consistent to all other relations, which is especially not possible, because other transformations may add further information to the models. More precisely, a relation may consider <a model consistent to all other models that contain any additional information not affected by the transformation. For example, a UML class model may be considered consistent to all Java models with any implementation of the specified methods, thus to an infinite number of models. Now saying that it should not be allowed that the transformation selects one with an empty implementation because that is not consistent to another relations induced by another transformation, such as the relationship to a component model, does not make any sense. Thus having those relation elements that may be considered locally consistent but will never occur in a globally consistent tuple of models does not make sense.
-In the example, we can see that such an inconsistent intermediate state is passed through and afterwards a consistent tuple of models is reached if not requiring monotony.
-In consequence, requiring monotony from transformations is a too strict requirement, because it is necessary to run through states that may be changed later on.
-
-\begin{theorem}
-    An application function for monotone transformations either returns a consistent model or produce a sequence of CPRs returning delta that return models of always growing size (i.e. it diverges).
-\end{theorem}
-
-
-\paragraph{Divergence cannot be avoided}
-
-There are rather equal network, one that terminates after a long time and one that never terminates. 
-Consider the example. The relations are defined in a way such that for any allocation for any of them a consistent tuple of models can be found. However, the transformations are not able to find it because they make "bad" choices from a set of choices that are conflicting. 
-This can be seen in the example in \autoref{fig:formal:divergenceexample}.
-
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{figures/correctness/formal/divergence_example.png}
-    \caption{Example for divergence}
-    \label{fig:formal:divergenceexample}
-\end{figure}
-
-Thus, systematically avoiding divergence is not possible. 
-
-
-
-\paragraph{Detecting Alternation / Divergence}
-
-In consequence, we propose to dynamically deal with alternation / divergence.
-To detect alternations, the execution can simply track if a state way already processed. Apart from spatial problems, this does always work.
-Finding divergence is not that easy, because it is generally not possible to define an upper bound for the number of executions of a single transformation.
-This is due to the reason that, again, this conflicts with the Halting problem.
-We can see this at the simple example in \autoref{fig:formal:noupperboundexample}.
-
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{figures/correctness/formal/no_upper_bound_example.png}
-    \caption{Example for no upper bound}
-    \label{fig:formal:noupperboundexample}
-\end{figure}
-
-Depending on the value X, the transformations have to be executed X times to result in a consistent state. This value can be arbitrarily chosen, thus an arbitrary number of executions may be necessary to terminate in a consistent state.
-
-From an engineering perspective, this is still unwanted behavior. We claim that a transformation network that takes thousands of executions of the same transformation to find a consistent state works not as expected and if running into a failure would expose severe problems to find the reasons for that failures.
-Thus, we propose to simply abort the execution after some time to be sure not to run in an endless loop.
-
-Finally, this problem is comparable to ordinary programming, because there the same situations regarding alternation and divergence can occur that result in non-termination of a program.
-As we all know, it is impossible to systematically avoid that, but just possible to carefully develop the program and apply best practices to avoid such situations.
-
-In the following, we propose measures to reduce the number of cases in which problematic cases can occur.
-In a case study, we will see that using such measures already resolves most of the problems that can occur.
-Additionally, we propose an orchestration strategy that improves the possibility to find errors in case something goes wrong.
-
-\textbf{Central insight:} Alternation / Divergence cannot be avoided systematically (like in ordinary programming), if not restricting transformations in a way that may not be reasonable.
-
-
-
-
-\subsection{Reducing Conservativeness of the Application Function}
-
-Goal: Find a solution in as many cases as possible, abort in the others (conservatively). There are two approaches to achieve that: 
-1. Reduce the number of cases in which there is no solution by adding assumptions to the relations and transformations (restrict input of app function)
-2. Improve the ability to find a solution if it exists (improve capabilities of app function)
-Secondary goal: In cases, in which no solution is found, support the user in understanding why no solution was found.
-
-
-Regarding 1: Reduce problematic cases
-
-
-1. reduce cases in which there is no such solution
-1.1. On relation level: Only sets, so analysis possible.
-Ensure that relations are defined in a way such that they do not allow a locally correct set of CPRs that has no APP solution. If there is a pair of models (or elements of a fine-grained relation) in a relation, a CPR may return it. But if there is no consistent tuple of models containing these two, it does not make any sense to consider these elements (even worse, if we have monotony, adding these elements makes the network unsolvable). For that reason, we need compatibility. Avoids both alternation and divergence
-1.2. On transformation level: Hard to perform analyses
-Require monotony to avoid alternation
-Give some example why divergence cannot easily be avoided, thus terminate at some point
-2. find the solution in as many cases as possible -> reasonable orchestration strategy
-Focus on engineering solution 
-
-
-Thus, there arise two questions:
-- Although theoretically easy, how to practically define a CPR that is synchronizing?
-- How to define an APP function and which requirements does that impose?
-
-
-
-
-
-
-
-
-
-
-
-
-Two levels of correctness:
-\begin{enumerate}
-    \item Local correctness: a consistency relation is correct to the global relation and the CPR is to the relation, i.e. given two models and changes in them, the transformation can produce a change that restores consistency regarding the global consistency relation of these two models (i.e. there are some other models with which these two models would be consistent regarding the global specification) --> a network is locally correct, if this property is fulfilled
-    \item Global correctness: the binary relations together are equal to the global one and the execution function is able to find consistency models after a change to initially consistent models --> network is globally correct, if this property is fulfilled
-\end{enumerate}
-Potentiell ist lokale Korrektheit (zumindest einer CPR zu ihrer CR per Konstruktion) herstellbar -- das war auch das Ergebnis bisheriger Studien --, eventuell auch von einer CR zu einer globalen CR, obwohl die ja eigentlich meist nicht existiert, daher nehmen wir das als gegeben an.
-Dann zeigen, dass die globale Beziehung der Relationen nicht äquivalent ist zu den einzelnen lokalen, daher kommt hier zusätzliche Komplexität rein (Kompatibilitätsbegriff).
-Final muss noch die Ausführungsfunktion korrekt sein, hier aber Problem der Turing-Vollständigkeit. 
-Daher Einschränkungen an Transformationen finden bzw. ingenieurmäßige Ausführungsreihenfolge festlegen, die möglichst oft richtige Lösungen findet und sonst konservativ mit einem Fehler terminiert.
-
-
-\textbf{On top of ordinary bx correctness:}
-\begin{itemize}
-    \item Transformations need to be synchronizing
-    \item Consistency relations need to fulfill a notion of correctness
-    \item Exkurs:
-    \begin{itemize}
-    \item Is compatibility a subclass of correctness? Is every correct set of relations compatible as well?
-    \item Problematisch: unser Konsistenzbegriff für Relationen (feingranulare Relationen) schließt keine Modelle aus, der Konsistenzbegriff hier aber schon. Wie realisiere ich die feingranularen Relationen, die dafür sorgen, dass nur genau ein Tupel von Modellen konsistent ist?
-    \item Wir müssen bei der Ableitung unseres Kompatibilitätsbegriffes erklären, dass bei uns der vollständige Ausschluss bestimmter Modelle nicht Teil einer feingranularen Konsistenzrelation sein darf, sondern Teil einer weiteren Spezifikation, die angibt, welche Modelle überhaupt valide sind. Denn so ist es in Transformationssprachen tatsächlich auch.
-    \end{itemize}
-    \item Execution function needs to be defined, which potentially induces requirements to the transformations.
-\end{itemize}
-
-
-Annahmen:
-\begin{itemize}
-    \item Nutzeränderungen dürfen nicht rückgängig gemacht werden.
-    \item Nutzeränderungen lassen sich so feingranular zerlegen, dass, falls durch die Erzeugung/Änderung eine Konsistenzrelation verletzt wird, es in jeder unabhängigen Teilmenge von Konsistenzrelationen eine verletzte Konsistenzrelation gibt, für die die geänderten Elemente einem Condition Elemente entsprechen, es also insbesondere keine Teilmenge der geänderten Element gibt, die bereits dieses Condition Element sind. Ansonsten ist durch unsere Kompatibilitäts-Definition nicht sichergestellt, dass eine konsistente Modellmenge gefunden werden kann.
-\end{itemize}
-
-Voraussetzungen:
-\begin{itemize}
-    \item Relationen müssen korrekt sein, d.h. sie müssen bzgl. einer globalen (meist eher implizit bekannten) n-ären Relation zwischen allen Modellen identisch sein. Eine n-äre Relation lässt sich nicht immer zerlegen (siehe Stevens), aber wir nehmen das an.
-    \item Die einzelne Transformation muss bzgl. ihrer Relation korrekt sein, d.h. sie muss bei Änderungen in beiden Modellen ein zur Relation konsistentes Modell liefern.
-\end{itemize}
+%Now it is obvious that the consistency preservation rules can actually do anything to achieve consistency, including returning always the same set of models that is consistent, although that may not be expected. We will discuss later which reasonable assumptions can be made to the behavior to on the hand not restrict the possibilities of the transformation developer and on the other hand be able to ensure some properties of the transformations and their execution.
+
+
+%Two levels of correctness:
+%\begin{enumerate}
+    %\item Local correctness: a consistency relation is correct to the global relation and the CPR is to the relation, i.e. given two models and changes in them, the transformation can produce a change that restores consistency regarding the global consistency relation of these two models (i.e. there are some other models with which these two models would be consistent regarding the global specification) --> a network is locally correct, if this property is fulfilled
+    %\item Global correctness: the binary relations together are equal to the global one and the execution function is able to find consistency models after a change to initially consistent models --> network is globally correct, if this property is fulfilled
+%\end{enumerate}
+%Potentiell ist lokale Korrektheit (zumindest einer CPR zu ihrer CR per Konstruktion) herstellbar -- das war auch das Ergebnis bisheriger Studien --, eventuell auch von einer CR zu einer globalen CR, obwohl die ja eigentlich meist nicht existiert, daher nehmen wir das als gegeben an.
+%Dann zeigen, dass die globale Beziehung der Relationen nicht äquivalent ist zu den einzelnen lokalen, daher kommt hier zusätzliche Komplexität rein (Kompatibilitätsbegriff).
+%Final muss noch die Ausführungsfunktion korrekt sein, hier aber Problem der Turing-Vollständigkeit. 
+%Daher Einschränkungen an Transformationen finden bzw. ingenieurmäßige Ausführungsreihenfolge festlegen, die möglichst oft richtige Lösungen findet und sonst konservativ mit einem Fehler terminiert.
+
+
+% \textbf{On top of ordinary bx correctness:}
+% \begin{itemize}
+    %\item Transformations need to be synchronizing
+    %\item Consistency relations need to fulfill a notion of correctness
+    %\item Exkurs:
+    % \begin{itemize}
+    % %\item Is compatibility a subclass of correctness? Is every correct set of relations compatible as well?
+    % \item Problematisch: unser Konsistenzbegriff für Relationen (feingranulare Relationen) schließt keine Modelle aus, der Konsistenzbegriff hier aber schon. Wie realisiere ich die feingranularen Relationen, die dafür sorgen, dass nur genau ein Tupel von Modellen konsistent ist?
+    % \item Wir müssen bei der Ableitung unseres Kompatibilitätsbegriffes erklären, dass bei uns der vollständige Ausschluss bestimmter Modelle nicht Teil einer feingranularen Konsistenzrelation sein darf, sondern Teil einer weiteren Spezifikation, die angibt, welche Modelle überhaupt valide sind. Denn so ist es in Transformationssprachen tatsächlich auch.
+    % \end{itemize}
+    %\item Execution function needs to be defined, which potentially induces requirements to the transformations.
+% \end{itemize}
+
+
+% Voraussetzungen:
+% \begin{itemize}
+%     \item Relationen müssen korrekt sein, d.h. sie müssen bzgl. einer globalen (meist eher implizit bekannten) n-ären Relation zwischen allen Modellen identisch sein. Eine n-äre Relation lässt sich nicht immer zerlegen (siehe Stevens), aber wir nehmen das an.
+%     \item Die einzelne Transformation muss bzgl. ihrer Relation korrekt sein, d.h. sie muss bei Änderungen in beiden Modellen ein zur Relation konsistentes Modell liefern.
+% \end{itemize}
 
 Ebenen der Korrektheit:
 \begin{itemize}
@@ -1320,63 +1106,57 @@ Ebenen der Korrektheit:
     \item Korrektheit der Anwendungsfunktion: Die Anwendungsfunktion muss die Transformationen in einer 
 \end{itemize}
 
-Annahme an Transformationen:
-\begin{itemize}
-    \item Muss eine Transformation mit jedem beliebigen Delta umgehen können müssen? Eine Einschränkung auf Monotonie würde dies verhindern. Bzw. wir müssten zeigen, dass es Konsistenzrelationen gibt, die unter der Anforderung an Monotonie nicht wiederhergestellt werden können. Bspw. fügt eine andere Transformation 3 Elemente hinzu, wo zwei mit dem anderen entsprechend der Konsistenzrelationen korrelieren und somit keine Witness-Struktur aufgebaut werden kann, die Konsistenz beweist. Das lässt sich durch Hinzufügen weiterer Elemente potentiell nicht auflösen (siehe Beispiele im SoSym-Paper).
-\end{itemize}
 
-\todo{Überlegen, wo hier die Definition von (undirektionalen Relationen) rein muss.}
-Präzisere Eigenschaften:
-\begin{itemize} 
-    \item Synchronisationseigenschaft: Eine Transformation kann mit Änderungen an mehreren Modellen umgehen, d.h. gegeben zwei konsistente Modelle + Änderungen an beiden resultiert in zwei Modellen, die konsistent bzgl. der Relation(en) zwischen den Metamodellen sind
-    \item 
-\end{itemize}  
+% \todo{Überlegen, wo hier die Definition von (undirektionalen Relationen) rein muss.}
+% Präzisere Eigenschaften:
+% \begin{itemize} 
+%     \item Synchronisationseigenschaft: Eine Transformation kann mit Änderungen an mehreren Modellen umgehen, d.h. gegeben zwei konsistente Modelle + Änderungen an beiden resultiert in zwei Modellen, die konsistent bzgl. der Relation(en) zwischen den Metamodellen sind
+%     \item 
+% \end{itemize}  
 
-\begin{itemize}
-    \item Kompatibilität entsprechend Modularisierungsebene
-    \item Synchronisation auf Operationalisierungsebene: Abwägen, dass eine Transformation verschiedene Zustände sehen könnte, auf denen sie ausgeführt wird. Aber letztendlich muss sie damit klarkommen, dass zwei Modelle geändert wurden. 
-\end{itemize}
+% \begin{itemize}
+%     \item Kompatibilität entsprechend Modularisierungsebene
+%     \item Synchronisation auf Operationalisierungsebene: Abwägen, dass eine Transformation verschiedene Zustände sehen könnte, auf denen sie ausgeführt wird. Aber letztendlich muss sie damit klarkommen, dass zwei Modelle geändert wurden. 
+% \end{itemize}
 
-TODO:
-\begin{itemize}
-    \item Authoritative Modelle (bzw. eher authoritative Regionen) diskutieren (Verweis Stevens)
-\end{itemize}
+%TODO:
+%\begin{itemize}
+    %\item Authoritative Modelle (bzw. eher authoritative Regionen) diskutieren (Verweis Stevens)
+%\end{itemize}
 
 
 
-\section{Local Correctness}
+% \section{Local Correctness}
 
-Simple solution: we define a transformation which normatively implies a relation, thus it is correct by construction. From a theoretical perspective this is easy to reach, from a practical it is not.
-However, in contrast to our definition of synchronizing transformations, ordinary transformations are only able to process changes in one model and update the other accordingly. Together with the assumption that both models were consistent before does not fit with our scenario, because if one model is modified, the other may be modified as well by another transformation across another path, before a transformation is executed. Thus, both models may have been modified.
-We consider the following situation: Models A and B were consistent. Model A was changed an we have the changes at hand. Additionally, B was modified because there were other changes propagated through the network. 
-We distinguish all cases of modifications to B that may have violated a consistency relation between A and B (according to our fine-grained consistency notion) and consider what we have to do there (e.g. find-or-create-pattern).
-Put empirical analysis here.
-
-
-\section{Correct APP function}
-
-We make the following approach: Always assume there is a solution and start executing the transformation (for now in any order). Finally, the network has to terminate at a fixed point. We investigate, what the reasons may be that it does not try to avoid them.
-
-These reasons can lie in the relations:
-- relations cannot be completely unfulfillable, as the empty models are always consistent, thus there can always be CPRs that result in a consistent set of models
-- however, if relations contain pairs that can never be in any consistent model tuple they improve proneness to errors, because a CPR may return that pair, which will never fit to any result of any other transformation. Thus, this should not be allowed -> compatibility
-
-These reasons can also lie in the transformations:
-- Transformations can make choices and they make choices that are always incompatible to other (refer to example)
-
-Essentially there are two problems: alternation and divergence
+% Simple solution: we define a transformation which normatively implies a relation, thus it is correct by construction. From a theoretical perspective this is easy to reach, from a practical it is not.
+% However, in contrast to our definition of synchronizing transformations, ordinary transformations are only able to process changes in one model and update the other accordingly. Together with the assumption that both models were consistent before does not fit with our scenario, because if one model is modified, the other may be modified as well by another transformation across another path, before a transformation is executed. Thus, both models may have been modified.
+% We consider the following situation: Models A and B were consistent. Model A was changed an we have the changes at hand. Additionally, B was modified because there were other changes propagated through the network. 
+% We distinguish all cases of modifications to B that may have violated a consistency relation between A and B (according to our fine-grained consistency notion) and consider what we have to do there (e.g. find-or-create-pattern).
+% Put empirical analysis here.
 
 
+% \section{Correct APP function}
 
-\subsection{Other thought}
-If each element occurs in each relation only once (so always 1:1 mappings) and if we have compatibility, then any transformation order would return exactly the one model tuple that fits.
-However: In that case we would have confluence, every information must directly be available in B from A without a transitive propagation over C. This is not what we want. So there must in general be more than one option a transformation is fine with that to reflect the information that another transformation may add or change.
+% We make the following approach: Always assume there is a solution and start executing the transformation (for now in any order). Finally, the network has to terminate at a fixed point. We investigate, what the reasons may be that it does not try to avoid them.
+
+% These reasons can lie in the relations:
+% - relations cannot be completely unfulfillable, as the empty models are always consistent, thus there can always be CPRs that result in a consistent set of models
+% - however, if relations contain pairs that can never be in any consistent model tuple they improve proneness to errors, because a CPR may return that pair, which will never fit to any result of any other transformation. Thus, this should not be allowed -> compatibility
+
+% These reasons can also lie in the transformations:
+% - Transformations can make choices and they make choices that are always incompatible to other (refer to example)
+
+% Essentially there are two problems: alternation and divergence
 
 
-\todo{Hippocraticness is not necessary but needs to be discussed}
+% \subsection{Other thought}
+% If each element occurs in each relation only once (so always 1:1 mappings) and if we have compatibility, then any transformation order would return exactly the one model tuple that fits.
+% However: In that case we would have confluence, every information must directly be available in B from A without a transitive propagation over C. This is not what we want. So there must in general be more than one option a transformation is fine with that to reflect the information that another transformation may add or change.
 
-Goal:
-- Find a solution in as much cases as possible, abort in the others (conservatively)
-- To do so: reduce cases in which there is no such function
-- To do so: ensure that relations are defined in a way such that they do not allow a locally correct set of CPRs that has no APP solution. If there is a pair of models (or elements of a fine-grained relation) in a relation, a CPR may return it. But if there is no consistent tuple of models containing these two, it does not make any sense to consider these elements (even worse, if we have monotony, adding these elements makes the network unsolvable). For that reason, we need compatibility.
-- 
+
+%\todo{Hippocraticness is not necessary but needs to be discussed}
+
+% Goal:
+% - Find a solution in as much cases as possible, abort in the others (conservatively)
+% - To do so: reduce cases in which there is no such function
+% - To do so: ensure that relations are defined in a way such that they do not allow a locally correct set of CPRs that has no APP solution. If there is a pair of models (or elements of a fine-grained relation) in a relation, a CPR may return it. But if there is no consistent tuple of models containing these two, it does not make any sense to consider these elements (even worse, if we have monotony, adding these elements makes the network unsolvable). For that reason, we need compatibility.
