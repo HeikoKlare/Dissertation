@@ -3,12 +3,42 @@
 }
 \label{chap:foundations}
 
-\begin{copiedFrom}{SoSym MPM4CPS}
+\section{Modeling}
 
-\section{Notation and Assumptions}
+\subsection{Models and Model Theory}
+What are models? -> Stachowiak
 
-In this section, we introduce basic terminology, notations and assumptions that we make throughout the article.
-We give an overview of the used notation and elements in \autoref{tab:notation}.
+\subsection{Model-Driven Software Engineering}
+Describe what MDSD is supposed to be
+
+
+\section{Modeling Formalisms and Frameworks}
+
+\subsection{Meta-Object Facility}
+Discuss \gls{MOF}, especially \gls{EMOF} and how it is used to model things;
+Discuss levels of UML;
+Say why MOF is the relevant formalism for us which we base our considerations on.
+
+\subsection{EMF and Ecore}
+Discuss \gls{EMF}, Ecore and the relation EMOF
+
+\subsection{The \vitruv Framework}
+Discuss what the \vitruv framework is, say that we use it for validation purposes.
+
+
+\section{Model Transformations}
+
+\subsection{Bidirectional Transformations}
+
+\todo{Introduce Transformations}
+
+Compare multidirectional transformations with networks of transformations.
+Refer for other consistency approaches to related work.
+
+\subsection{Transformation Languages}
+
+
+\section{Notation}
 
 \begin{table}
 \centering
@@ -17,44 +47,16 @@ We give an overview of the used notation and elements in \autoref{tab:notation}.
 %\setlength\tabcolsep{4 pt}
 \begin{tabular}{R{4.8cm} L{5cm}}
 \toprule
-\multicolumn{2}{c}{Notations}\\
+%\multicolumn{2}{c}{Notations}\\
 $\set{S}{} = \setted{a, b, \ldots}$ 
     & Notation for a set $\set{S}{}$ of elements\\
 $\tuple{T}{} = \tupled{a, b, \ldots}$ 
     & Notation for a tuple $\tuple{T}{}$ of elements\\
-\midrule
-\multicolumn{2}{c}{Properties and Classes}\\
-$P$                 
-    & Property (attribute or reference) \\
-$\metamodelinstances{P} = \setted{p_1, p_2, \dots}$     
-    & Property values of a property $P$ \\
-$\class{C}{} = \tupled{P_1, \dots, P_n}$
-    & Class \\
-$\metamodelinstances{C} = \setted{o = \tupled{p_1, \dots, p_n} \mid p_i \in \metamodelinstances{P_i}}$ 
-    & Instances (objects) of a class $\class{C}{}$\\
-$\object{o}{} \in \metamodelinstances{C}$
-    & Object of a class $\class{C}{}$ \\
-\midrule
-\multicolumn{2}{c}{(Meta-)Models}\\
-$\metamodel{M}{} = \setted{\class{C}{1}, \dots, \class{C}{m}}$
-    & Metamodel\\
-$\metamodelinstances{M} = \setted{m \mid m \subseteq \bigcup_{\class{C}{} \in \metamodel{M}{}} \metamodelinstances{C}}$
-    & Instances of a metamodel\\
-$\metamodelset{M} = \setted{\metamodel{M}{1}, \dots, \metamodel{M}{k}}$
-    & Set of metamodels\\
-$\metamodelinstances{\metamodelset{M}} = \setted{ \setted{\model{m}{1}, \dots, \model{m}{k}} \mid \model{m}{i} \in \metamodelinstances{\metamodel{M}{i}}}$
-    & Instances of a metamodel set $\metamodelset{M}$\\
-$\model{m}{} \in \metamodelinstances{M}$
-    & Model of metamodel $\metamodel{M}{}$\\
-$\modelset{m} \in \metamodelinstances{\metamodelset{M}}$
-    & Model set of a metamodel set $\metamodelset{M}$\\
 \bottomrule
 \end{tabular}
-\caption{Notations and elements}
-\label{tab:notation}
+\caption{Notations}
+\label{tab:prologue:notation}
 \end{table}
-
-\subsection{Notation}
 
 We usually denote variables representing sets of any kinds of elements in blackboard bold font $\set{S}{}$, those representing tuples of any kinds of elements in gothic font $\tuple{T}{}$ and write the elements of a tuple in angle brackets $\tupled{a, b, \dots}$.
 
@@ -71,87 +73,32 @@ For two tuples $\tuple{t}{1}, \tuple{t}{2}$, we define:
 \end{align*}
 Note that the intersection of tuples is not a tuple but a set, because we are only interested in getting the elements contained in both tuples but do not need to match their order.
 
-Furthermore, we use variables of uppercase letters for all elements at the metamodel level, such as $\metamodel{M}{}$ for a metamodel or $\class{C}{}$ for a class, whereas we use lowercase letters for all elements at the model level, such as $\model{m}{}$ for a model and $\object{o}{}$ for an object.
-If not further specified, we use the same indices on related elements on the metamodel and the model level, such as model $\model{m}{1}$ being an instance of metamodel $\metamodel{M}{1}$.
-
-\subsection{Elements}
-
-In general, we consider metamodels as a composition of meta-classes, which in turn are composed of properties representing attributes or references.
-Models instantiate metamodel and are composed of objects, which are instances of meta-classes and in turn consist of property values, which instantiate properties.
-
-We denote \emph{properties}, which are the information a meta-class consists of, such as attributes or references, as $P$ and the \emph{property values} as instances of a property as $\metamodelinstances{P} = \setted{p_1, p_2, \dots}$ of property $P$. 
-We do not need to further differentiate different types of properties into attributes and references, like it is done in other formalizations, such as the OCL standard~\cite[A.1]{ocl} or the thesis of \citeauthor{kramer2017a}~\cite[2.3.2]{kramer2017a}.
-
-We denote \emph{meta-classes}, in the following shortly called \emph{classes}, as tuples of properties $\class{C}{} = \tupled{P_1, \dots, P_n}$. 
-Instances of a \emph{class} are \emph{objects}, each being a tuple of instances of the properties of the class and we denote all instances of a class $\class{C}{}$ as $\metamodelinstances{C} = \setted{o = \tupled{p_1, \dots, p_n} \mid p_i \in \metamodelinstances{P_i}}$.
-
-We denote a metamodel $\metamodel{M}{} = \setted{\class{C}{1}, \dots, \class{C}{m}}$ as a finite set of classes.
-The instances of a metamodel are sets of objects $\metamodelinstances{M} = \setted{m \mid m \subseteq \bigcup_{\class{C}{} \in \metamodel{M}{}} \metamodelinstances{C}}$.
-Each instance, denoted as a \emph{model}, is a finite set of objects that instantiate the classes in the metamodel.
-For a set of metamodels $\metamodelset{M} = \setted{\metamodel{M}{1}, \dots, \metamodel{M}{k}}$, we denote the set that contains all sets of instances of that metamodels as $\metamodelinstances{\metamodelset{M}} = \setted{ \setted{\model{m}{1}, \dots, \model{m}{k}} \mid \model{m}{i} \in \metamodelinstances{\metamodel{M}{i}}}$.
-
-%We use an extensional definition of metamodels, models and consistency relations, i.e. we enumerate the valid instances of a metamodel or the consistent pairs of models instead of intensionally describing how to derive them.
-%Although actual modeling frameworks, such as EMF, and languages, such as QVT-R, use intensional specifications, the mathematical foundations of our approach are easier to describe in an extensional specification.
-%However, expressiveness is the same, since an intensional specification can be, at least virtually, transformed into an extensional specification by enumerating all elements that fulfill the intensional specification.
-
-%In general, we denote elements at the metamodel level with upper case letters and elements at the instance level with lower case letters. Tuples are denoted in angle brackets $\tupled{t}$.
-
-%We denote models with lower case letters and indices $\model[1]{M}, \model[2]{M}, \ldots$.
-%We denote elements of a model, such as meta-class instances, attributes values or reference instances, with lower case letters $e_1, e_2, f_2, f_2, \ldots$.
-
-%We denote the instantiation relation between metamodels and models, as well as metamodel elements and model elements with instance sets:
-%$\metamodelinstances{M}$ denotes the valid instances of a $\metamodel{M}$.
-%$\metamodelinstances{E}$ denotes the instances of a metamodel element $E$.
 
 
 
-\subsection{Assumptions}
-
-We assume models to be finite, so for each model $\model{m}{}$, we assume that $|\model{m}{}| < \infty$.
-Additionally, our formalism assumes objects to be unique within a model $\model{m}{}$. 
-This is already implicitly covered by the definition of $\metamodelinstances{M}$ for the instances of a metamodel $\metamodel{M}{}$. 
-In practice, it is usually allowed to have the same object, i.e., an element with the same type, attribute and reference values, multiple times within the same model. 
-This is, however, only a matter of identity, which we assume, without loss of generality, to be represented within the objects, whereas identity in practice is given by different objects being placed at specific places in memory.
-
-% Our definition of models does not restrict validity of models apart from being a collection of instances of the classes in the metamodel.
-% It is possible to define further constraints for metamodels that restrict their valid instances.
-% We intentionally do not consider such restrictions of valid models, because even a single transformation 
-
-
-Finally, we assume consistency to be defined in terms of multiple bidirectional transformation, even if more than two metamodels are related.
-We already discussed in \autoref{chap:introduction} why this is a reasonable approach in comparison to defining multi-directional transformations based on complexity and available knowledge, as argued in existing work~\cite{stevens2017a, klare2018docsym}. %reasoned why it useful to consider consistency modularly by composing binary (or multiary) relations. 
-%First, it is often hard enough to think about relations between two metamodels and the task of defining multiary relations would, in consequence, be overly complex.
-%Additionally, domain experts often only know about the relations between some of the metamodels used to develop a system, but not about all of them, so composition of relations is mandatory~\cite{klare2018docsym}.
 
 
 
-\todoDiss{Discuss valid models, why we do not consider them and prove that invariants + consistency relations can express any consistency relation.
-A single relation can consider constraints on the single models, but combination (even within one transformation) can easily contradict constraints of a model.}
-
-\end{copiedFrom} % SoSym MPM4CPS
-
-
-
-\begin{copiedFrom}{ICMT}
+% \begin{copiedFrom}{ICMT}
 
 %%% Define what a transformation networks is
-\section{Assumptions and Terminology from ICMT}
-\label{chap:properties:terminology}
+% \section{Assumptions and Terminology from ICMT}
+% \label{chap:properties:terminology}
 
-We shortly clarify our assumptions and introduce a terminology for consistency %and its preservation % based on definitions of models, consistency and consistency preservation 
-that we %later 
-use to explain our classification.
-%Short introduction of transformations (not deeply necessary on ICMT) -- leave out, put to assumptions
-%\subsection{Assumptions}
-%\label{sec:foundations:assumptions}
-%We consider incremental \acp{BX} for preserving consistency between models.
-%Furthermore, we 
-We assume that consistency of more than two types of models is specified using networks of \acp{BX} rather than multidirectional approaches for two reasons:
-First, it is easier to think about binary than about $n$-ary relations~\cite{stevens2017a}.
-Second, a domain expert usually only knows about consistency relations within a subset of all model types used to develop a system, so modularizing transformations is inevitable.
-It was also the result of a Dagstuhl seminar that \enquote{it seems likely that networks of bidirectional transformations suffice for specifying multidirectional transformations}~\cite[p. 7]{cleve2019dagstuhl}.
-Finally, we investigate of a subset of problems that can actually occur, as in a concrete scenario $n$-ary relations may exist that cannot be expressed by sets of binary relations.
-Although we limit our considerations to the assumed scenarios, most of our findings could also be extended to a modularization into smaller $n$-ary relations rather than binary relations.
+% We shortly clarify our assumptions and introduce a terminology for consistency %and its preservation % based on definitions of models, consistency and consistency preservation 
+% that we %later 
+% use to explain our classification.
+% %Short introduction of transformations (not deeply necessary on ICMT) -- leave out, put to assumptions
+% %\subsection{Assumptions}
+% %\label{sec:foundations:assumptions}
+% %We consider incremental \acp{BX} for preserving consistency between models.
+% %Furthermore, we 
+% We assume that consistency of more than two types of models is specified using networks of \acp{BX} rather than multidirectional approaches for two reasons:
+% First, it is easier to think about binary than about $n$-ary relations~\cite{stevens2017a}.
+% Second, a domain expert usually only knows about consistency relations within a subset of all model types used to develop a system, so modularizing transformations is inevitable.
+% It was also the result of a Dagstuhl seminar that \enquote{it seems likely that networks of bidirectional transformations suffice for specifying multidirectional transformations}~\cite[p. 7]{cleve2019dagstuhl}.
+% Finally, we investigate of a subset of problems that can actually occur, as in a concrete scenario $n$-ary relations may exist that cannot be expressed by sets of binary relations.
+% Although we limit our considerations to the assumed scenarios, most of our findings could also be extended to a modularization into smaller $n$-ary relations rather than binary relations.
 
 %Furthermore, we focus on consistency preservation rather than only consistency checking.
 %Therefore, we follow a \emph{normative} approach, which means that we always assume that a specification of consistency defines when models are consistent rather than having another, maybe information notion of consistency that has to be met and potentially validated.
@@ -180,7 +127,7 @@ Although we limit our considerations to the assumed scenarios, most of our findi
 %\subsection{Terminology}
 %
 %\subsection{Models}
-\label{sec:foundations:models}
+% \label{sec:foundations:models}
 %\todoHeiko{Nicht Metamodelle, sondern Model Sets sagen? Diese Mengen sind ja eigentlich keine Metamodelle, sondern werden von einem Metamodell induziert. Oder auch model type?}
 %
 %We provide short definitions for models and the specification of consistency, on which we build our classification to clearly separate the issues that we investigate.
@@ -188,22 +135,22 @@ Although we limit our considerations to the assumed scenarios, most of our findi
 %\subsubsection{Models and Metamodels}
 %Our definition of models follows the one used by \textcite{stevens2017a}. 
 
-\begin{definition}[Model]
-A model $M = \{e_1, e_2, \ldots\}$ is a finite set of not further defined elements, such as objects, attribute and reference values.
-\end{definition}
+% \begin{definition}[Model]
+% A model $M = \{e_1, e_2, \ldots\}$ is a finite set of not further defined elements, such as objects, attribute and reference values.
+% \end{definition}
 
-The exact representation of the model contents is not relevant for our work, which is why we use this lightweight definition. 
-It allows us to transfer the insights to arbitrary models, such as models that are conform to the \ac{EMOF}~\cite{mof}.
+% The exact representation of the model contents is not relevant for our work, which is why we use this lightweight definition. 
+% It allows us to transfer the insights to arbitrary models, such as models that are conform to the \ac{EMOF}~\cite{mof}.
 
-\begin{definition}[Model Type]
-A model type $\mathcal{M} = \{M_1, M_2, \dots\}$ is the (usually but not necessarily infinite) set of all models $M_1, M_2, \dots$ that are instances of $\mathcal{M}$.
-\end{definition}
+% \begin{definition}[Model Type]
+% A model type $\mathcal{M} = \{M_1, M_2, \dots\}$ is the (usually but not necessarily infinite) set of all models $M_1, M_2, \dots$ that are instances of $\mathcal{M}$.
+% \end{definition}
 
-%So for a model type $\mathcal{M}$, a model $M$ is considered an instance of $\mathcal{M}$ iff $M \in \mathcal{M}$.
-In the following, let a model $M_i$ be always an instance of model type $\mathcal{M}_i$.
-This definition constitutes an \emph{extensional description} of models and does not explicitly consider actual instantiation relations between classes and objects, attributes and their values etc., other than containment in the respective model type. 
-We also use the term \emph{metamodel} when referring to an abstract syntax of classes, attributes and associations, as defined in the OCL standard~\cite[A.1]{ocl}. 
-A metamodel constitutes an \emph{intensional description} of models, from which the model type could be derived by enumerating all valid instances, i.e., all models with arbitrary instantiations of classes, their attributes and associations.
+% %So for a model type $\mathcal{M}$, a model $M$ is considered an instance of $\mathcal{M}$ iff $M \in \mathcal{M}$.
+% In the following, let a model $M_i$ be always an instance of model type $\mathcal{M}_i$.
+% This definition constitutes an \emph{extensional description} of models and does not explicitly consider actual instantiation relations between classes and objects, attributes and their values etc., other than containment in the respective model type. 
+% We also use the term \emph{metamodel} when referring to an abstract syntax of classes, attributes and associations, as defined in the OCL standard~\cite[A.1]{ocl}. 
+% A metamodel constitutes an \emph{intensional description} of models, from which the model type could be derived by enumerating all valid instances, i.e., all models with arbitrary instantiations of classes, their attributes and associations.
 %In fact, common definitions of metamodels require abstract specifications of elements and their relations, which can be instantiated. Our definition rather covers a description of models sets, which is appropriate for our case.
 
 %\subsection{Consistency}
@@ -212,83 +159,83 @@ A metamodel constitutes an \emph{intensional description} of models, from which 
 %In addition to models, we define the basic terms \emph{consistency specification}, % expressing the consistency constraints that have to hold, 
 %and \emph{consistency preservation specification}: % , expressing the rules to preserve consistency after changes.
 
-\begin{definition}[Consistency Specification]
-\label{def:consistency_specification}
-A \emph{consistency specification} $\mathit{CS}$ for model types $\mathcal{M}_1, \ldots, \mathcal{M}_n$ is a relation $\mathit{CS} \subset \mathcal{M}_1 \times \ldots \times \mathcal{M}_n$ between models that are consistent. 
-% the tuples of instances of model types $\mathcal{M}_1 \times \ldots \times \mathcal{M}_n$ that are consistent.
-We denote a binary consistency specification for model types $\mathcal{M}_i$ and $\mathcal{M}_j$ as $\mathit{CS}_{i,j}$.
-\end{definition}
+% \begin{definition}[Consistency Specification]
+% \label{def:consistency_specification}
+% A \emph{consistency specification} $\mathit{CS}$ for model types $\mathcal{M}_1, \ldots, \mathcal{M}_n$ is a relation $\mathit{CS} \subset \mathcal{M}_1 \times \ldots \times \mathcal{M}_n$ between models that are consistent. 
+% % the tuples of instances of model types $\mathcal{M}_1 \times \ldots \times \mathcal{M}_n$ that are consistent.
+% We denote a binary consistency specification for model types $\mathcal{M}_i$ and $\mathcal{M}_j$ as $\mathit{CS}_{i,j}$.
+% \end{definition}
 
-%\todoHeiko{In der Relation zu sein heißt konsistent zu sein. D.h. wenn ich keine Einschränkungen bzgl. Konsistenz mache (alle Modelle sind konsistent zueinadner), enthält die Relation alle möglichen Paare von Modellen}
+% %\todoHeiko{In der Relation zu sein heißt konsistent zu sein. D.h. wenn ich keine Einschränkungen bzgl. Konsistenz mache (alle Modelle sind konsistent zueinadner), enthält die Relation alle möglichen Paare von Modellen}
 
-%This way of defining consistency between models by enumerating consistent instances is comparable to \cite{stevens2017a}.
-Enumerating consistent instances to define consistency is comparable to \cite{stevens2017a}.
-%Enumerating consistent models is not practically applicable in contrast to constructive approaches that define how to construct consistent models, but it eases expressing properties of consistency. % mathematical statements about consistency.
-If there are no restrictions on when models are consistent, %all models are always consistent by definition, and 
-$\mathit{CS}$ % the consistency specification 
-contains all tuples of models.
-We denote restrictions for models to be in $\mathit{CS}$ as \emph{consistency constraints}.
-It would, in theory, also be possible to define $\mathit{CS}$ on an infinite number of model types. However, for ease of understanding and because of missing practical examples, we decided to fix the number of model types in a consistency specification.
+% %This way of defining consistency between models by enumerating consistent instances is comparable to \cite{stevens2017a}.
+% Enumerating consistent instances to define consistency is comparable to \cite{stevens2017a}.
+% %Enumerating consistent models is not practically applicable in contrast to constructive approaches that define how to construct consistent models, but it eases expressing properties of consistency. % mathematical statements about consistency.
+% If there are no restrictions on when models are consistent, %all models are always consistent by definition, and 
+% $\mathit{CS}$ % the consistency specification 
+% contains all tuples of models.
+% We denote restrictions for models to be in $\mathit{CS}$ as \emph{consistency constraints}.
+% It would, in theory, also be possible to define $\mathit{CS}$ on an infinite number of model types. However, for ease of understanding and because of missing practical examples, we decided to fix the number of model types in a consistency specification.
 
-We primarily consider binary consistency specifications, which are the binary relations that define consistency pairs of models, %, which only specify consistent instances of two model types.
-and also binary specifications for consistency preservation, which are functions that restore consistency between two models after one of them was modified. 
-% We also consider binary specifications for consistency preservation, which concern the modification of one model and the update of it and a model of another type. 
-In the following, we introduce such consistency preservation specifications.
-%To simplify the composition of such functions between more than two model types, 
-Each consistency preservation specification concerns modifications in instances of two model types.
-However, instead of defining such a function on two model types, we define it on an arbitrary number of model types, but restrict modifications to instances of two of them.
-In consequence, a set of binary consistency preservation specifications for an arbitrary number of model types can be defined, whose signatures of input and output are all equal.
-This leads to a rather verbose definition of consistency preservation specifications, but eases the composition of such functions between more than two model types.
-If the function only considered the two involved model types, the composition definition would have to properly consider matching function signatures, whereas our definition allows the composition of all functions with each other.
-%Therefore, we define them on an arbitrary number of model types, but restrict modifications to two of them.
-A consistency preservation specification expects and returns a tuple of pairs, each representing a change by containing an original and a modified model.
-The original models in a tuple are always consistent, but a specification may update the modified models. % may be updated by the specification.
+% We primarily consider binary consistency specifications, which are the binary relations that define consistency pairs of models, %, which only specify consistent instances of two model types.
+% and also binary specifications for consistency preservation, which are functions that restore consistency between two models after one of them was modified. 
+% % We also consider binary specifications for consistency preservation, which concern the modification of one model and the update of it and a model of another type. 
+% In the following, we introduce such consistency preservation specifications.
+% %To simplify the composition of such functions between more than two model types, 
+% Each consistency preservation specification concerns modifications in instances of two model types.
+% However, instead of defining such a function on two model types, we define it on an arbitrary number of model types, but restrict modifications to instances of two of them.
+% In consequence, a set of binary consistency preservation specifications for an arbitrary number of model types can be defined, whose signatures of input and output are all equal.
+% This leads to a rather verbose definition of consistency preservation specifications, but eases the composition of such functions between more than two model types.
+% If the function only considered the two involved model types, the composition definition would have to properly consider matching function signatures, whereas our definition allows the composition of all functions with each other.
+% %Therefore, we define them on an arbitrary number of model types, but restrict modifications to two of them.
+% A consistency preservation specification expects and returns a tuple of pairs, each representing a change by containing an original and a modified model.
+% The original models in a tuple are always consistent, but a specification may update the modified models. % may be updated by the specification.
 
-\begin{definition}[Consistency Preservation Specification]
-\label{def:consistency_preservation_specification}
-% A consistency preservation specification $CPS_{CS}$ is a function for a consistency specification $CS$ that expects a tuple of original models, and one model having a modified state regarding one of the original ones, and maps it to a new set of models:
+% \begin{definition}[Consistency Preservation Specification]
+% \label{def:consistency_preservation_specification}
+% % A consistency preservation specification $CPS_{CS}$ is a function for a consistency specification $CS$ that expects a tuple of original models, and one model having a modified state regarding one of the original ones, and maps it to a new set of models:
+% % \begin{align*}
+% %     CPS_{CS} : (\mathcal{M}_1), \ldots, \mathcal{M}_n, \mathcal{M}_i) \mapsto (\mathcal{M}_1, \times \ldots \times \mathcal{M}_n), i \in \{1, \ldots, n\}
+% % \end{align*}
+% % For a consistency specification $CS_{i, j}$, a \emph{consistency preservation specification} $CPS_{CS_{i.j}}$ is a function between a tuple of model pairs, each containing one original and one modified model of the same model type, and maps it to a new tuple of model pairs.
+% % \begin{align*}
+% %     CPS_{CS} : ((\mathcal{M}_1, \mathcal{M}_1), \ldots, (\mathcal{M}_n, \mathcal{M}_n) \mapsto ((\mathcal{M}_1, \mathcal{M}_1), \ldots, (\mathcal{M}_n, \mathcal{M}_n)
+% % \end{align*}
+% % so that for $M_1, \ldots, M_n$ with $(M_i, M_j) \in CS_{i,j}$ and modified instances $M'_i, M'_j$:
+% % \begin{align*}
+% %     & \forall M'_k \in \mathcal{M}_k, k \in \{1, \dots, n\}\backslash\{i\}:\\
+% %     & \hspace{1em} ((M_1, M''_1), \ldots, (M_n, M''_n)) = CPS_{CS_{i,j}}((M_1, M'_1), \ldots, (M_n, M'_n)) \\
+% %     & \hspace{2em} \Rightarrow CS_{i,j}(M''_i, M''_j) \land \forall k \in \{1, \dots, n\}\backslash\{i, j\} : M'_k = M''_k
+% %     %
+% % \end{align*}
+% For a binary consistency specification $\mathit{CS}_{i, j}$, a \emph{consistency preservation specification} $\mathit{CPS}_{\mathit{CS}_{i,j}}$ is a partial function defined if $(M_i, M_j) \in \mathit{CS}_{i,j}$
+% that maps a tuple of model pairs, each containing an original model $M_k \in \mathcal{M}_k$ and a modified model $M'_k \in \mathcal{M}_k$, to a new tuple of model pairs:
 % \begin{align*}
-%     CPS_{CS} : (\mathcal{M}_1), \ldots, \mathcal{M}_n, \mathcal{M}_i) \mapsto (\mathcal{M}_1, \times \ldots \times \mathcal{M}_n), i \in \{1, \ldots, n\}
+%     \mathit{CPS}_{\mathit{CS}_{i,j}}: \hspace{0.3em} & \big( (\mathcal{M}_1, \mathcal{M}_1), \ldots, (\mathcal{M}_n, \mathcal{M}_n) \big) \rightarrow \big( (\mathcal{M}_1, \mathcal{M}_1), \ldots, (\mathcal{M}_n, \mathcal{M}_n) \big), \\[0.5em]
+%     & \hspace{-3.1em} \big( (M_1, M'_1), \ldots, (M_i, M'_i), \ldots, (M_j, M'_j), \ldots, (M_n, M'_n) \big) \\
+%     & \hspace{-3.1em} \mapsto \begin{cases}
+%         \big( (M_1, M'_1), \ldots, (M_i, M''_i), \ldots, (M_j, M''_j), \ldots, (M_n, M'_n) \big) & (M_i, M_j) \in \mathit{CS}_{i,j} \\
+%         \mathit{undefined} & \mathit{otherwise}
+%     \end{cases}
 % \end{align*}
-% For a consistency specification $CS_{i, j}$, a \emph{consistency preservation specification} $CPS_{CS_{i.j}}$ is a function between a tuple of model pairs, each containing one original and one modified model of the same model type, and maps it to a new tuple of model pairs.
+% so that
 % \begin{align*}
-%     CPS_{CS} : ((\mathcal{M}_1, \mathcal{M}_1), \ldots, (\mathcal{M}_n, \mathcal{M}_n) \mapsto ((\mathcal{M}_1, \mathcal{M}_1), \ldots, (\mathcal{M}_n, \mathcal{M}_n)
+%     (M''_i, M''_j) \in \mathit{CS}_{i,j}
 % \end{align*}
-% so that for $M_1, \ldots, M_n$ with $(M_i, M_j) \in CS_{i,j}$ and modified instances $M'_i, M'_j$:
-% \begin{align*}
-%     & \forall M'_k \in \mathcal{M}_k, k \in \{1, \dots, n\}\backslash\{i\}:\\
-%     & \hspace{1em} ((M_1, M''_1), \ldots, (M_n, M''_n)) = CPS_{CS_{i,j}}((M_1, M'_1), \ldots, (M_n, M'_n)) \\
-%     & \hspace{2em} \Rightarrow CS_{i,j}(M''_i, M''_j) \land \forall k \in \{1, \dots, n\}\backslash\{i, j\} : M'_k = M''_k
-%     %
-% \end{align*}
-For a binary consistency specification $\mathit{CS}_{i, j}$, a \emph{consistency preservation specification} $\mathit{CPS}_{\mathit{CS}_{i,j}}$ is a partial function defined if $(M_i, M_j) \in \mathit{CS}_{i,j}$
-that maps a tuple of model pairs, each containing an original model $M_k \in \mathcal{M}_k$ and a modified model $M'_k \in \mathcal{M}_k$, to a new tuple of model pairs:
-\begin{align*}
-    \mathit{CPS}_{\mathit{CS}_{i,j}}: \hspace{0.3em} & \big( (\mathcal{M}_1, \mathcal{M}_1), \ldots, (\mathcal{M}_n, \mathcal{M}_n) \big) \rightarrow \big( (\mathcal{M}_1, \mathcal{M}_1), \ldots, (\mathcal{M}_n, \mathcal{M}_n) \big), \\[0.5em]
-    & \hspace{-3.1em} \big( (M_1, M'_1), \ldots, (M_i, M'_i), \ldots, (M_j, M'_j), \ldots, (M_n, M'_n) \big) \\
-    & \hspace{-3.1em} \mapsto \begin{cases}
-        \big( (M_1, M'_1), \ldots, (M_i, M''_i), \ldots, (M_j, M''_j), \ldots, (M_n, M'_n) \big) & (M_i, M_j) \in \mathit{CS}_{i,j} \\
-        \mathit{undefined} & \mathit{otherwise}
-    \end{cases}
-\end{align*}
-so that
-\begin{align*}
-    (M''_i, M''_j) \in \mathit{CS}_{i,j}
-\end{align*}
-%holds
-%\begin{align*}
-    %$(M''_1, \ldots, M''_n) \in CS$
-%\end{align*}
-% Furthermore, it holds that for models $M_1, \ldots, M_n$ with $(M_1, \ldots, M_n) \in CS$ and a modified instance $M'_i$ of model $M_i$ that 
-% \begin{align*}
-%     CPS_{CS}(M_1, \ldots, M_n, M'_i) \in CS
-% \end{align*}
-\end{definition}
-%\todoHeiko{Normativ klar machen: Wir definieren, was konsistent ist. Wenn wir CPS angeben, die alle auf leere Modelle abbilden, ist das valide}
+% %holds
+% %\begin{align*}
+%     %$(M''_1, \ldots, M''_n) \in CS$
+% %\end{align*}
+% % Furthermore, it holds that for models $M_1, \ldots, M_n$ with $(M_1, \ldots, M_n) \in CS$ and a modified instance $M'_i$ of model $M_i$ that 
+% % \begin{align*}
+% %     CPS_{CS}(M_1, \ldots, M_n, M'_i) \in CS
+% % \end{align*}
+% \end{definition}
+% %\todoHeiko{Normativ klar machen: Wir definieren, was konsistent ist. Wenn wir CPS angeben, die alle auf leere Modelle abbilden, ist das valide}
 
-\noindent\textit{Remark:} %We assume a normative approach for defining consistency, so it is up to the developer to provide reasonable specifications. 
-A specification that always maps to empty models would be valid regarding our definition.
-It is up to the developer to provide reasonable specifications. 
+% \noindent\textit{Remark:} %We assume a normative approach for defining consistency, so it is up to the developer to provide reasonable specifications. 
+% A specification that always maps to empty models would be valid regarding our definition.
+% It is up to the developer to provide reasonable specifications. 
 
 %\noindent\textit{Remark:} %We assume a normative approach for defining consistency, so it is up to the developer to provide reasonable specifications. 
 %A specification that always maps to empty models would be valid regarding our definition.
@@ -315,53 +262,31 @@ It is up to the developer to provide reasonable specifications.
 % %\end{align*}
 % \end{definition}
 
-We are interested in consistency preservation specifications that can be executed in arbitrary order, so that they finally terminate in a consistent state regarding all consistency specifications, comparable to a fixed-point iteration.
-Therefore, it is essential for all specifications to be hippocratic~\cite{stevens2010sosym}, so that no changes are performed when models are already consistent.
-Let $\mathcal{CPS}$ be a set of preservation specifications %\mathit{CPS}_1, \dots, \mathit{CPS}_k$ 
-for consistency specifications $\mathcal{CS}$. % = \{CS_1, \dots, CS_l\}$, 
-We denote the set of consistent model tuples regarding $\mathcal{CS}$ as $\mathfrak{M}_{\mathcal{CS}} = \{(M_1, \dots, M_n) \mid %\forall i, j, 0 \leq i,j \leq n : 
-\forall \mathit{CS}_{i,j} \in \mathcal{CS} : (M_i, M_j) \in \mathit{CS}_{i, j}\}$.
-We want to achieve that:
-\begin{align*}
-    & \forall (M_1, \dots, M_n) \in \mathfrak{M}_{\mathcal{CS}} : %\{(M_1, \dots, M_n) \mid \forall CS_{i,j} \in \mathcal{CS} \Rightarrow (M_i, M_j) \in CS_{i, j}\} : \\ %0 \leq i,j \leq n : \exists CS_{i,j} \in \mathcal{CS} \Rightarrow (M_i, M_j) \in CS_{i, j}\} : \\
-    % & \hspace{1em} 
-    \forall M'_1 \in \mathcal{M}_1, \dots, M'_n \in \mathcal{M}_n : \exists \mathit{CPS}_1, \dots, \mathit{CPS}_k \in \mathcal{CPS} : \\
-    %& \forall M_1, \dots, M_n \mid \big( \forall CS_{i,j} \in \mathcal{CS} : (M_i, M_j) \in CS_{i, j} \big) : \\ % (i,j) \mid 1 \leq i, j \leq n
-    %& \exists p \in \mathbb{N}: (CPS_1 \circ \dots \circ CPS_k)^p \big( (M_1, M'_1), \dots, (M_n, M'_n) \big) = \big( (M_1, M''_1), \dots, (M_n, M''_n) \big) \\
-    & \hspace{1em} \mathit{CPS}_1 \circ \dots \circ \mathit{CPS}_k \big( (M_1, M'_1), \dots, (M_n, M'_n) \big) = \big( (M_1, M''_1), \dots, (M_n, M''_n) \big) \\
-    & \hspace{2em} \land \forall \mathit{CS}_{i,j} \in \mathcal{CS} : (M''_i, M''_j) \in \mathit{CS}_{i, j} %\forall (i,j) \mid 1 \leq i, j \leq n : CS_{i, j}(M''_i, M''_j)
-\end{align*}
+% We are interested in consistency preservation specifications that can be executed in arbitrary order, so that they finally terminate in a consistent state regarding all consistency specifications, comparable to a fixed-point iteration.
+% Therefore, it is essential for all specifications to be hippocratic~\cite{stevens2010sosym}, so that no changes are performed when models are already consistent.
+% Let $\mathcal{CPS}$ be a set of preservation specifications %\mathit{CPS}_1, \dots, \mathit{CPS}_k$ 
+% for consistency specifications $\mathcal{CS}$. % = \{CS_1, \dots, CS_l\}$, 
+% We denote the set of consistent model tuples regarding $\mathcal{CS}$ as $\mathfrak{M}_{\mathcal{CS}} = \{(M_1, \dots, M_n) \mid %\forall i, j, 0 \leq i,j \leq n : 
+% \forall \mathit{CS}_{i,j} \in \mathcal{CS} : (M_i, M_j) \in \mathit{CS}_{i, j}\}$.
+% We want to achieve that:
+% \begin{align*}
+%     & \forall (M_1, \dots, M_n) \in \mathfrak{M}_{\mathcal{CS}} : %\{(M_1, \dots, M_n) \mid \forall CS_{i,j} \in \mathcal{CS} \Rightarrow (M_i, M_j) \in CS_{i, j}\} : \\ %0 \leq i,j \leq n : \exists CS_{i,j} \in \mathcal{CS} \Rightarrow (M_i, M_j) \in CS_{i, j}\} : \\
+%     % & \hspace{1em} 
+%     \forall M'_1 \in \mathcal{M}_1, \dots, M'_n \in \mathcal{M}_n : \exists \mathit{CPS}_1, \dots, \mathit{CPS}_k \in \mathcal{CPS} : \\
+%     %& \forall M_1, \dots, M_n \mid \big( \forall CS_{i,j} \in \mathcal{CS} : (M_i, M_j) \in CS_{i, j} \big) : \\ % (i,j) \mid 1 \leq i, j \leq n
+%     %& \exists p \in \mathbb{N}: (CPS_1 \circ \dots \circ CPS_k)^p \big( (M_1, M'_1), \dots, (M_n, M'_n) \big) = \big( (M_1, M''_1), \dots, (M_n, M''_n) \big) \\
+%     & \hspace{1em} \mathit{CPS}_1 \circ \dots \circ \mathit{CPS}_k \big( (M_1, M'_1), \dots, (M_n, M'_n) \big) = \big( (M_1, M''_1), \dots, (M_n, M''_n) \big) \\
+%     & \hspace{2em} \land \forall \mathit{CS}_{i,j} \in \mathcal{CS} : (M''_i, M''_j) \in \mathit{CS}_{i, j} %\forall (i,j) \mid 1 \leq i, j \leq n : CS_{i, j}(M''_i, M''_j)
+% \end{align*}
 
-This means that there is always a sequence of consistency preservation specification applications, potentially with multiple applications of the same specification, that ensures that the modified models in all tuples are consistent after applying it.
+% This means that there is always a sequence of consistency preservation specification applications, potentially with multiple applications of the same specification, that ensures that the modified models in all tuples are consistent after applying it.
 
 %\todoHeiko{Zunächst mal die Konkatenierung erklären. Wir nehmen an, dass in einer korrekten Spezifikation eine Konkatenation existiert, die für eine beliebige Änderung wieder ein konsistentes Modell ausspuckt. Dafür ist die Ausführungsreihenfolge der Spezifikationen egal. Da man in der Praxis nicht nur wissen muss, dass die Modelle nach einer ausreichend langen Ausführung der Spezifikationen konsistent sind, sondern auch terminieren muss, wird die hippocraticness Eigenschaft \cite{stevens2007a} vorausgesetzt, nach der Transformationen nichts tun, wenn die Modelle bereits konsistent sind. Cf. Fixpunktiteration} 
 
-Declarative transformation languages are usually well suited to define consistency specifications according to \autoref{def:consistency_specification}, 
-from which a consistency preservation specification is %, in the best case automatically, 
-derived. 
-Imperative transformation languages can be used to define consistency preservation specifications according to \autoref{def:consistency_preservation_specification}. 
+% Declarative transformation languages are usually well suited to define consistency specifications according to \autoref{def:consistency_specification}, 
+% from which a consistency preservation specification is %, in the best case automatically, 
+% derived. 
+% Imperative transformation languages can be used to define consistency preservation specifications according to \autoref{def:consistency_preservation_specification}. 
 
-\end{copiedFrom} % ICMT
+% \end{copiedFrom} % ICMT
 
-
-
-\section{Types of Consistency}
-
-Discuss which types of consistency may exist (from Ellwangen retreat), how far they can be checked and what the mismatch is between pragmatic types of consistency and their verifyability.
-
-\todo{Derive limitations: for which types does our approach work?}
-
-
-\section{Transformational Consistency of Multiple Models}
-
-\todo{Introduce Transformations}
-
-Compare multidirectional transformations with networks of transformations.
-Refer for other consistency approaches to related work.
-
-
-\section{Assumptions / Limitations}
-
-For ease of understanding, we restrict us to binary consistency preservation rules, although one could define the same for multiary ones. 
-
-\section{Running Example}
