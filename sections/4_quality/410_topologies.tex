@@ -1,0 +1,207 @@
+\chapter{Classifying Transformation Networks
+    \pgsize{15 p.}
+}
+\label{chap:properties}
+
+We started with assumptions directly leading to dense graphs, so we tried to find universal, correct and comprehensible strategy.
+Now we turn around: We look at topologies and find how they influence all properties. Then start with inherent correct and comprehensible specifications.
+
+Story:
+
+Properties: Modularity, Independence, Universality, Correctness, Comprehensibility (last property has two dimension: comprehensibility of transformations and comprehensibility of their execution errors)
+Modularity, independence, correctness and comprehensibility directly induced by specific topologies
+Universality not given for trees, has to be ensures for dense graphs (depends on orchestration strategy, see existing work)
+Trade-off between Modularity/Independence (inherent in dense graph) and Correctness/Comprehensibility (inherent in tree)
+
+1. We require modularity/independence by assumption -> dense graphs by assumption --> find how to achieve correctness and comprehensibility (in previous part)
+2. Lets start with trees and try to find a way of achieving modularity and independence by properly specifying trees.
+
+
+\section{Properties of Transformation Networks}
+
+\begin{copiedFrom}{DocSym}
+
+Even if independently developed transformations are interoperable, as discussed before, higher-level challenges remain when considering the way in which transformations express relations or occur if compatibility between the transformations is not given.
+%Those challenges cannot be solved simultaneously, but induce trace-off decisions that have to be made regarding the way in which transformations are specified. %, as not all of them can be solved simultaneously.
+%Depending on the topology of transformations that preserve the consistency, those challenges are addressed differently, which will be discussed afterwards. %in the subsequent section.
+We present already identified challenges in the following. % and discuss them regarding the combination of binary transformations. % as the state-of-the-art for multi-model consistency preservation.
+
+% \compactsubsection{Uniqueness}
+% Each consistency relation should only have to be specified once to reduce effort and the risk of contradictory specifications.
+% In terms of transformations, this means that there should only be one path in the graph induced by the transformations to propagate information from one model to another.
+% Using existing transformation languages, not knowing which relations have already been realized in which transformations can lead to duplication.
+% This is especially the case, if one transformation is only the subsumption of others, like in \autoref{fig:binary_combination_example}. %of components and classes defined by
+% %mapping \ac{PCM} to \ac{UML} components, \ac{UML} components to \ac{UML} classes, and those classes to Java classes. 
+% \todo{Das folgende ist eigentlich schon im vorigen Abschnitt diskutiert worden}
+% If the relation \ref{fig:Example:R3} between \ac{ADL} and Java is specified additionally to the transitive relation over \ac{UML}, the transformations derived from it must ensure that after creating an \ac{ADL} component only one Java class is created, that all necessary trace links are created, and that additional constraints, such as the convention to append \enquote{Impl} to the name, are consistently defined.
+
+\begin{description}[leftmargin=\parindent]
+\item[Compatibility]
+Transformations preserve consistency, but also have to be consistent among themselves, i.e., they have to adhere to the same consistency relations, referred to as \emph{compatibility}.
+%Contradictory specifications can, for example, arise from inconsistent realizations of the same consistency relations.
+If, in our example in \autoref{fig:prologue:binary_combination_example}, the relation \ref{fig:prologue:binary_combination_example:R3} between \ac{ADL} and Java is realized in addition to the transitive relation $\mbox{\ref{fig:prologue:binary_combination_example:R1}} \concat \mbox{\ref{fig:prologue:binary_combination_example:R2}}$ over \ac{UML}, both relations must contain the same name attribute mapping.
+If the \ac{ADL} to Java transformation adds an \enquote{Impl} suffix~\cite{langhammer2017a}, whereas the transformations over \ac{UML} omit that, they are \emph{incompatible}.
+This can lead to propagation cycles due to alternating values, and to results depending on the transformation execution order. %depends on the transformation execution order. %, which means that the result depends on the execution order of the transformations. % (e.g. the propagation from \ac{PCM} to Java or from \ac{UML} to Java), the result differs (in the example the name of the class)
+%\end{inparaenum}
+While \emph{compatibility} concerns problems due to the realization of contradictory consistency relations, %the realization of the same consistency relations by different transformations, 
+\emph{interoperability} concerns potentially unexpected behavior although all transformations follow to the same consistency relations.
+%\todoErik{Ich finde diese Numerierungen immer ein bißchen affig, wenn man sich später nicht auf die Zahlen bezieht. \enquote{On the one hand \ldots on the other hand} sagt dasselbe aus.}
+%A direct implication of inconsistent specifications is the non-uniqueness of the specifications.
+
+
+\item[Modularity]
+The development of different systems requires the usage of different metamodels to describe them.
+%One benefit of binary transformations is that they can be reused in different projects and especially different contexts with different selections of metamodels.
+Therefore, transformations should be modular, so that an arbitrary selection of metamodels and transformations between them can be used within a concrete project.
+If, in our example, transformations are specified transitively across \ac{UML}, it is impossible to use only the \ac{ADL} and Java in a concrete project, omitting the \ac{UML}. 
+%This property is especially contradictory to the \emph{uniqueness} property when using transitively executed transformations.
+
+\item[Comprehensibility]
+Maintainability of artifacts, including transformations, depends on their comprehensibility.
+Comprehensibility can be seen as the number of transformations to consider if a specific consistency relation shall be understood.
+Realizing consistency relations in transitive transformations can, for example, reduce comprehensibility, as a developer has to consider a set of transformations to understand a single consistency relation. 
+%To ensure %\emph{uniqueness} and 
+%transformation consistency %require consistency preservation to be only defined once between two metamodels, which
+%it can be necessary to define transitive transformations %across other metamodels 
+%to avoid redundant specifications.
+%This can reduce comprehensibility as a developer has to consider a set of transformations to understand a single consistency relation. %, which is why this is a contradictory challenge to those others.
+%\todoErik{Sie kann dadurch aber auch erhöht werden, weil die einzelnen Transformationen weniger komplex werden (divide et impera)} % Ja, das stimmt möglicherweise im Einzelfall. Aber dafür muss ein Transformationsentwickler im Allgemeinen auch potentiell wieder andere Domänen verstehen, was nicht so vorteilhaft ist.
+
+\item[Evolvability]
+Whenever new transformations shall be defined, e.g. because a new metamodel shall be used and transformations for it have to be defined, the effort should be as low as possible.
+This concerns the number of transformations to define and how many metamodels are involved in the transformations for one consistency relation if it is expressed transitively.
+\end{description}
+
+%\subsection{Trade-off Solutions}
+
+\begin{figure}[b]
+    \centering
+    \begin{minipage}[b]{0.4\columnwidth}
+        \centering
+        \input{figures/properties/topologies_full.tex}
+        \subcaption{Dense graph}
+        \label{fig:properties:topologies:full}
+    \end{minipage}
+    \hspace{2em}
+    \begin{minipage}[b]{0.4\columnwidth}
+        \centering
+        \input{figures/properties/topologies_tree.tex}
+        \vspace{1em}
+        \subcaption{Tree}
+        \label{fig:properties:topologies:tree}
+    \end{minipage}
+    \caption{Extreme examples for transformation topologies}
+    \label{fig:properties:topologies}
+\end{figure}
+
+
+\section{Topologies of Transformation Networks}
+
+%As discussed during the presentation of the challenges in the previous section, 
+We will focus on compatibility and modularity, as they are crucial for the applicability of transformations. %, whereas comprehensibility and development effort can be seen as usability problems. %, so we focus on those former two challenges.
+Defining binary transformations %to express consistency preservation 
+for a set of metamodels leads to a trade-off solution regarding those challenges, as they cannot be solved simultaneously.
+The intuitive way to define transformations %preservation of consistency relations is achieved by expressing each relation in a transformation.
+is to express each relation between two metamodels in one transformation, which leads to a dense graph of transformations. % between the metamodels.
+In the extreme case, if all pairs of metamodels have non-empty consistency relations, the graph is complete, as shown in \autoref{fig:properties:topologies:full}.
+In that case, modularity is high because each metamodel can be excluded without any drawback, %, comprehensibility is rather high as each relation is expressed directly between the involved metamodels, %(although it may be additionally expressed transitively), 
+but relations are likely to be incompatible, as, in the worst case, each relation is specified over $(n-1)!$ transformation paths if $n$ metamodels are involved.
+While comprehensibility is high, as each relation is explicitly expressed, adding a metamodel requires to define up to $n-1$ transformations, implying high evolution effort.
+%Finally, this also implies a high development effort, as adding a metamodel requires to define transformations to all existing ones.
+
+Another extreme case is to have each consistency relation only defined over a single path in the transformations graph, which results in a tree of transformations, as shown in \autoref{fig:properties:topologies:tree}.
+In that case, compatibility of transformations is inherently given, as each relation is only defined once, but modularity is reduced, as only metamodels being leaves can be omitted.
+Comprehensibility is low, as each relation may be defined in a path of up to $n-1$ transformations, but evolvability is rather good, as each relation must only be defined once. %, but in a way such that the tree structure is maintained. %requires a critical investigation about how to express the consistency relations to maintain the tree structure.
+We summarize that impact of the topology in \autoref{tab:properties:topology_impact}.
+
+%In the following sections, we discuss our proposed solutions on how to deal with those trade-offs.
+\begin{table}
+    \centering
+    \begin{tabular} {L{8em} C{6em} C{5em}}
+        \toprule
+        \textbf{Challenge} & \textbf{Dense Graph} & \textbf{Tree}\\
+        \midrule
+    %    Uniqueness & - - & ++\\
+        Compatibility & - & ++\\
+        Modularity & ++ & -\\
+        Comprehensibility & + & -\\
+        Evolvability & - & +\\
+        \bottomrule
+    \end{tabular}
+    \caption{Challenge fulfillment by transformation topology}
+    \label{tab:properties:topology_impact}
+    \vspace{-1.5em}
+\end{table}
+
+A tree topology has the drawback that it is not always applicable.
+It requires that the transformation developers
+%\todoErik{whom?}
+find a subset of all consistency relations between the metamodels that induces a tree and whose transitive closure contains all other relations.
+%This is necessary, because the transitive relations in the tree must also cover the direct relations between the metamodels that are omitted.
+In general, such a subset cannot be found.
+Of three metamodels, there must always be one containing the overlapping information of the two others, as only then the transitive closure of two consistency relations subsumes the third. 
+In the example in \autoref{fig:properties:tree_generation}, it is necessary that two relations are contained in the transitive closure of the others to get a tree that covers all relations.
+%An example for such a relation is given in the graphic.
+
+\begin{figure}[b]
+    \centering
+    \input{figures/properties/tree_generation.tex}
+    \caption{Reducing a consistency relation graph to a tree}
+    \label{fig:properties:tree_generation}
+\end{figure}
+
+In practice, the used topology will potentially be a mixture between those extremes.
+The natural way to foster the independent development of transformations %to specify consistency preservation 
+would be to define one transformation for each consistency relation, resulting in a dense graph with a high potential for incompatible transformations.
+To deal with that, mechanisms that analyze compatibility between transformations could be researched.
+Nevertheless, high expressiveness of transformation languages allows only conservative approximations. % without reducing the expressiveness of transformation languages, this easily leads to problems similar to those in static code analysis, which rely on approximations, due to the Halting problem.
+In our thesis, we will therefore investigate approaches that result in tree-like specifications that directly imply compatibility between the transformations, but with increased \emph{applicability} and \emph{modularity}. %of  try to achieve a tree of transformations, as this directly implies consistency between the transformations, but with increased modularity and with applicability.
+
+
+% In our thesis, we will investigate which kinds of topologies are applicable in different case studies and how the underlying consistency relations influence that.
+% We will analyze how this can be used to combine the topology extremes reasonably by decomposing the consistency relations of a complete system to solve certain challenges for individual system parts.
+% We then plan to develop methods to deal with the identified challenges.
+% First, we want to support the 
+
+% In our thesis, we will analyze several case studies regarding the occurring consistency relations and their impact on the challenges when expressing them in binary transformations.
+% We will derive guidelines from that on how to define transformations in which context, depending on the kinds of consistency relations existing between the metamodels, e.g. regarding the composability of fully connected transformation graphs in a higher-level tree.
+
+
+%Different dimension: Restriction of relations that can be defined with one topology
+
+
+% Problems with or drawbacks of transitive approaches:
+% \begin{enumerate}
+% %% Redundanz: Möglicherweise unnötig, mehr Aufwand als nötig
+%     \item \textbf{Duplication}: Overlapping consistency relations may be specified between different pairs of metamodels inducing an undirected cycle, which means that the same consistency relation is realized by different consistency preservation specifications. 
+%     Simple case regarding the running example: Assume a consistency preservation specifications between \ac{PCM} and \ac{UML}, as well as between \ac{UML} and Java defining the mapping between classes and components having equals name. Additionally, for example to use the \ac{PCM} and Java without \ac{UML} or due to missing knowledge about existing relations, this relation is implemented between \ac{PCM} and Java as well. In this case, the creation of a \ac{PCM} component is propagated to the Java code due to the consistency preservation specification across \ac{UML} and also due to the direct specification. The engine executing the change propagation has to ensure that the Java class is not created twice and that potentially necessary trace links have to be created between all models correctly.
+% %% Wenn redundant, dann muss man es noch richtig machen
+%     \item \textbf{Specification Consistency}: Due to the above mentioned fact that consistency relations may specified in duplicate, it is also necessary that those specifications are consistent. Regarding the simple, above mentioned example, it may be possible that the consistency preservation specification between \ac{PCM} and Java defines the mapping between class and component differently with an additional suffix ``Impl'' attached to the Java class name, as proposed by \citeauthor{langhammer2017a}. In that case, the consistency preservation specifications are not consistent. This can lead to two further problems, depending on the implementation:
+%     \begin{enumerate}
+%         \item Propagation cycles: Due to alternating values, the propagation of a modification by consistency preservation specifications does never end
+%         \item Confluence race conditions: Depending on which propagation is executed first (e.g. the propagation from \ac{PCM} to Java or from \ac{UML} to Java), the result differs (in the example the name of the class)
+%     \end{enumerate}
+% %% Manchmal verliert man den zusätzlichen Aufwand sogar und ich kann meinen eigenen Aufwand nicht wiederverwenden 
+% %%%% Auch aus Sprach-Evolutionssicht gut
+%     \item \textbf{Modularity}: To avoid inconsistencies between the specification and confluence problems, each consistency relation should ideally be only realized by one consistency preservation specification. This has the drawback that all \modelinglanguages have to be used in a project that wants to use the consistency preservation mechanisms. Leaving out single \modelinglanguages would result in missing models across which consistency is preserved.
+% %% und wenn jemand anders es macht kann ich es vielleicht noch nicht einmal wiederverwenden
+%     \item \textbf{Comprehensibility}: Since the avoidance of inconsistencies and confluence problems requires consistency to be defined not directly between two metamodels but transitively across several ones, it is hard to understand the consistency relations realized by the consistency preservation specifications. All defined specifications have to be understood by the specification developer.
+% \end{enumerate}
+
+
+
+% \subsection{Increasing Transformation Consistency}
+
+% The intuitive definition of consistency preservation is to define transformations for all existing consistency relations.
+% While the resulting topology of transformations leads to high modularity, this induces highly interdependent specifications as several transformations are covered by the transitive closure of others, which easily leads to inconsistencies between those specifications.
+
+% In our thesis, we will therefore investigate, how far contradictions in transformations can be automatically detected.
+% In the best case, static checks of the transformation specifications can be used to detect inconsistencies.
+% Otherwise, at least during runtime, inconsistencies should be detected.
+
+% We will analyze which kind of consistency guarantees can be made between the transformations based on the provided operators.
+% This will potentially result in a subset of supported operators for which guarantees can be given or analyzed, whereas others have to be excluded.
+
+\end{copiedFrom} % DocSym
+
+

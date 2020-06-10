@@ -5,6 +5,37 @@
 
 \todo{Vermeidbarkeit hängt insb. auch von der verwendeten Sprache ab. Z.B. sind Mappings / QVT-R analyisierbar, aber Reactions / QVT-O nicht.}
 
+
+\begin{copiedFrom}{DocSym}
+
+\section{Binary Transformation Interoperability}
+
+Multi-model consistency preservation can be a achieved by combining binary transformations to graphs, %of transformations, 
+with the transformations being executed transitively.
+Since all binary transformations are developed independently of each other, it is necessary that they interoperate properly in a \emph{non-intrusive} way, thus without the necessity for the developer to understand and modify them, which we refer to as \emph{black-box combination}.
+
+Even under the assumption that, in contrast to our introductory motivation, all specifications are free of contradictions, it is easy to see that problems arise when combining binary transformations by transitively executing them.
+For example, consider the relations in \autoref{fig:prologue:binary_combination_example}.
+If a component is added to the \ac{ADL}, causing a \ac{UML} class creation due to \ref{fig:prologue:binary_combination_example:R1}, which in turn causes a Java class creation due to \ref{fig:prologue:binary_combination_example:R2}, the transformation for relation \ref{fig:prologue:binary_combination_example:R3} does not know that an appropriate class was already created, if the transformations are treated as black boxes.
+Consequently, the transformation will create the same class again, which may override the existing one, depending on the implementation and execution order.
+A simple solution for this example would be to have all transformations use a common trace model and check for existing elements before creating them in a transformation.
+Nevertheless, independently developed transformations will usually not assume that %this only applies if the transformation considers possibly preexisting transformation results, which it will not do in general if it does not assume other transformations to create corresponding elements.
+other transformations may already have created corresponding elements.
+Additionally, the trace model must allow the transformation engine to retrieve transitive traces.
+However, it is unclear if transitive resolution of traces can always be performed, as it can depend on whether the transitive trace belongs the considered consistency relation or another.
+%If, in another scenario, the transformation in the example was actually supposed to create an additional class, it would have to ignore the existing trace.
+
+As can be seen in the example, especially the correct handling of trace information in interdependent transformations has to be researched.
+This applies not only to element creations, but also other change types, such as attribute or reference changes, especially if they are multi-valued.
+In our thesis, we will therefore apply transitively executed binary transformations in different case studies to identify these and potential further problems.
+We then want to come up with a catalog of such problems %preventing the black-box combination of transformations 
+together with solution patterns for them.
+For example, to avoid duplicate element creations, a simple pattern could be to always check for already existing traces for that consistency relation in the transformations.
+In consequence, the integration of those patterns into a transformation language or the application of them as a transformation developer is supposed to achieve black-box combinability of the transformations.
+
+\end{copiedFrom} % DocSym
+
+
 \begin{copiedFrom}{ICMT}
 
 To ensure that a network of \acp{BX} operates properly, potential mistakes %, as identified in the previous section, 
@@ -121,12 +152,6 @@ Whenever direct trace links or unique key information exists, relevant elements 
 In all other cases, heuristics must be used, which potentially leads to failures.
 
 \end{copiedFrom} % ICMT
-
-
-
-\section{Orchestrating the Execution of Transformation Networks \pgsize{15 p.}}
-Unability to find always terminating orchestration (Turing completeness, Halting problem). Relate to or define restriction of having unique choices in all transformations. Otherwise, propose engineering strategy for execution order by induction (Pdf Joshua)
-
 
 
 Insight: Synchronizing transformations (and thus correctness of local consistency) can be achieved by construction.
