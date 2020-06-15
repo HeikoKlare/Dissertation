@@ -1,22 +1,122 @@
 \chapter{Models, Consistency and Processes
     \pgsize{10 p.}
 }
+\label{chap:networks}
 
-\section{Consistency Types}
+\section{Consistency Notions and Preservation}
 
-Discuss which types of consistency may exist (from Ellwangen retreat), how far they can be checked and what the mismatch is between pragmatic types of consistency and their verifiability.
+In the following, we clarify different notions of how consistency is prescribed, which types of consistency can be distinguished and how these types induce different processes of checking and enforcing them.
+This lead to the restriction of our work to normative specifications of preservation for structural consistency relations .
 
-Structural, behavioral, quality
+\subsection{Normative and Descriptive Consistency}
 
-Map to decidability (Turing completeness)
+\mnote{Different notions of consistency}
+We have yet informally considered consistency as the absence of some kind of contradictions in different models.
+It is, however, unclear when to consider information in models contradictory.
+Consistency can be considered \emph{normatively} or \emph{descriptively}, depending on whether a notion of consistency already exists.
 
-Discuss pragmatic distinction vs. decidability distinction
+\mnote{Normative consistency}
+With a normative (or \emph{prescriptive}) notion of consistency, we consider models consistent whenever we want them to be consistent.
+Thus, if someone specifies consistency, e.g., in terms of a transformation, models are considered consistent when they adhere to that specification.
+No matter what this person defines as consistent is actually considered as consistent, i.e., the transformation \emph{prescribes} consistency.
+Such a specification can always be considered \emph{correct}, because there is no external specification to which it has to adhere.
+For example, when an architecture specification, be it in \gls{UML}, \gls{PCM} or some other language, is considered consistent to its realization is code is usually not predefined, so a transformation normatively defines how consistency is considered.
 
-\todo{Derive limitations: for which types does our approach work?}
+\mnote{Descriptive consistency}
+Following a descriptive notion of consistency, we assume that consistency is already defined and we have to adhere to that definition.
+Thus, if somebody specifies a transformation, it has to following that existing definition of consistency. 
+The transformation does only \emph{describe} consistency.
+Such an existing specification may not always exist explicitly, but can exist implicitly.
+Such a specification may not be \emph{correct}, because it has to adhere to the existing definition of consistency.
+For example, there is (for most constructs) a common understanding of when \gls{UML} class models and Java code are considered consistent (although not explicitly represented), so any transformation has to describe that existing notion of consistency.
+
+\mnote{We use a normative notion}
+In this thesis, we always assume a normative notion of consistency.
+This does explicitly not mean that we exclude cases like consistency between \gls{UML} and Java code, but we do assume that a specification of that consistency is normative.
+If there is an existing notion of consistency, we do not consider whether the specification is correct with respect to that notion.
+It is subject to other research, e.g., general requirements engineering or especially transformation validation~\cite{add}, to check that notion of correctness.
+\todo{add cite for transformation validation}
 
 
 
-\section{Consistency Specification Processes}
+\subsection{Structural and Behavioral Consistency}
+\label{chap:networks:notionsandprocesses:types}
+
+\mnote{Execution semantics as distinction}
+In addition to the distinction between normative and descriptive consistency, we can distinguish different types of consistency.
+From a pragmatic perspective, we can say that we at least differentiate between \emph{structural} and \emph{behavioral} consistency relations.
+While structural consistency concerns everything that has no execution semantics, behavioral consistency concerns semantics and thus also, for example, method bodies.
+Structural consistency can thus be checked without executing the model, comparable to the distinction between \emph{static} and \emph{dynamic} semantics of models, as introduced in \autoref{chap:foundations:modeling:models}.
+For example, having the same classes and method signatures in a \gls{UML} model and Java code would be considered a structural relation, whereas the equivalence of a \gls{UML} state machine and its Java code implementation would be considered a behavioral relation, because they need to have the same execution semantics.
+Thus, the mechanisms for checking these different types of consistency are supposed to be different.
+
+\mnote{No strict separation}
+The distinction between structural and behavioral relations is, however, not strict.
+If, for whatever reasons, two Java code representations shall be kept consistent, although they need to be semantically equivalent, the consistency relation reduces to a structural relation because exactly the same elements have to be contained.
+In consequence, one might argue that structural consistency relations are a special case of behavioral relations for which we do not need to consider the execution semantics of the model but only its static structure.
+
+\mnote{Decidability as distinction}
+From a theoretical perspective, we can distinguish between decidable consistency and undecidable consistency relations.
+While structural consistency relations do not consider execution semantics and are thus decidable, behavioral consistency relations will usually be undecidable, because as soon as we have Turing-complete descriptions of behavior, we cannot decide their semantic equivalence. \todo{add cite?}
+An approach that checks behavioral consistency can be further distinguished regarding the statements he is able to make regarding consistency relations:
+\begin{properdescription}
+    \item[Universally quantified:] The approach can validate that a consistency relation holds for all instances of the modeled system. This can, for example, be achieved with verification techniques, model checking and other analyses. An exemplary application scenario is the equivalence of decidable behavior descriptions.
+    \item[Existentially quantified:] The approach can validate that a consistency relation holds at least for some instances of the modeled system. This can, for example, be achieved with tests. In the best case, the test cases cover a representative subset of the possible instances. An exemplary application scenario is the equivalence of undecidable behavior descriptions.
+    \item[Statistical:] The approach can make statistical statements about the consistency relations, such as the probability for a relation to hold in an instance. This can, for example, be achieved by simulation. An exemplary application is consistency between quality requirements and the system realization, such as the fulfillment of a performance requirement in the implementation.
+\end{properdescription}
+While universally quantified statements can only be made about decidable consistency relations, existentially quantified and statistical statements can be made about both decidable and undecidable consistency relation, although preferable used for undecidable relations.
+
+\mnote{Structural relation supposed to be decomposable}
+At a Dagstuhl seminar regarding multidirectional transformation~\cite{cleve2019dagstuhl} different consistency relation scenarios were considered, in which more than two models were related.
+A central insight was that probably relations between more than two models can be decomposed into binary relations as long as the relations are structural.
+Whether two or more models fulfill a behavioral requirement, however, may not easily decomposed into multiple binary relations between model pairs.
+
+
+
+\subsection{Checking and Preserving Consistency}
+
+\mnote{Checking and preserving consistency}
+Based on a specification of consistency and potentially its preservation, consistency between different models can be checked and potentially enforced during the development of a system.
+Basically, we can distinguish whether an process is only \emph{checking} or also \emph{preserving} consistency.
+Some consistency relation may only be checked and have to be manually ensured, whereas other can be automatically or semi-automatically be enforced.
+
+\mnote{Enforcing structural and checking behavioral relations}
+Behavioral consistency relations are usually hard to enforce but can, in the best case, only be checked.
+This also includes relations that define quality properties of behavior, such as performance of a behavior specification regarding performance requirements.
+On the contrary, structural consistency relations can often also be enforced, at least collecting some additional information from the developer.
+
+\mnote{Efficiency and granularity of checking and enforcing relation types}
+In addition, structural consistency relations can and should usually be checked and enforced more often, because they can be checked in a rather fine-grained way and more efficiently, in the extreme case even just-in-time.
+Behavioral relations may also be long-running analyses or simulations and may only make sense to checked at specific founds in time, indicated by the developer, at least those for which only existentially quantified or statistical statements can be made.
+For example, adding a class or method in \gls{UML} can and should directly lead to the creation of an appropriate class or method in Java.
+Adding an architectural component can directly lead to the creation of an implementing class.
+On the contrary, whether Java code fulfills some behavioral consistency relation to another model usually makes sense less often, as it requires more coarse-grained modifications to achieve consistency and checking may take more time because of complex analyses or simulations to run.
+The developer may explicitly indicate when a development state is reached at which behavioral consistency relations can be checked.
+For behavioral relations about which universally quantified statements can be made, such as a security analysis, it may be up to the scenario whether checks should be performed just-in-time or only at specific points in time.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/prologue/process_structure_behavior.png}
+    \caption{Proposed process for continuously preserving structural and explicitly checking behavioral consistency}
+    \label{fig:prologue:network:process_structure_behavior}
+\end{figure}
+
+\mnote{Fine-grained preservation of structural relations}
+In consequence, the distinction between structural and behavioral consistency relation is also relevant for the processes of checking and preserving consistency.
+While structural consistency relations may be preserved often in a fine-grained way, behavioral consistency relations may be checked less often.
+We depict the proposed process in \autoref{fig:prologue:network:process_structure_behavior}.
+In the best case, a consistency mechanism can give hints to potential behavioral consistency violations more often.
+For example, a performance-relevant modification of the implementation could lead to a hint for the developer that performance may be affected by his modification with the information about the previous analysis result, such that he can guess whether his modification will violate the requirement.
+Given the information that a response time requirement of 10 milliseconds was fulfilled during the last check by an actual response time of 1 millisecond could help the developer to decide that his modification will not violate that requirement.
+
+\mnote{We focus on structural relations}
+In this thesis, we are interested in processes that continuously preserve and not only check consistency.
+This is why we explicitly focus on structural consistency relations in this thesis, although the insights might be transferable to behavioral relations as well.
+As another consequence, those structural relations that we consider are supposed be decomposable into binary relations, as discussed in \autoref{chap:networks:notionsandprocesses:types}.
+
+
+
+\section{Consistency Specification Process}
 
 \subsection{Roles}
 * Define the process and roles:
