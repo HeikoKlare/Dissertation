@@ -1,0 +1,33 @@
+% From Dagrep 18491
+\begin{tikzpicture}[
+	mmrelated/.style={color=gray},
+	mmref/.style={mmrelated, -latex, font=\scriptsize\itshape, dashed},
+	process/.style={-latex, font=\scriptsize}
+]
+	\node[draw] (mx_req) {*X-Req};
+	\node[draw, right=6em of mx_req] (mx_script) {*X-Script};
+	\node[mmrelated, draw, circle, above=6em of mx_script] (mm1) {MM1};
+	\node[mmrelated, draw, circle, below=6em of mx_script] (mm2) {MM2};
+	\node[draw, circle, above right=2em and 6em of mx_script] (m1) {M1};
+	\node[draw, circle, below right=2em and 6em of mx_script] (m2) {M2};
+	\node[draw, circle, right=2em of m2] (m*) {M*};
+	\node[draw, circle] at (mm2-|m*) (mm*) {MM*};
+		
+	\node[label=270:{\small Domain Expert}, left=6em of mx_req] (domain_expert) {\includegraphics[width=1.5em]{persongeneric.png}};
+	\node[label=270:{\small MX Developer}] at ([yshift=-1.6em]$(mx_req)!0.5!(mx_script)$) (mx_developer) {\includegraphics[width=1.5em]{persongeneric.png}};
+	\node[label={[align=center]270:\small Tool User\\ (M1 or M2)}] at ([yshift=-1.6em, xshift=2em]mx_script.east) (mx_developer) {\includegraphics[width=1.5em]{persongeneric.png}};
+	
+	\draw[process] (domain_expert) -- node[above, align=center] {Requirements\\ Engineering} (mx_req);
+	\draw[process] (mx_req) -- node[above] {Formalization} (mx_script);
+	\draw[process] (mx_script) -- node[above] {Execution} ($(m1)!0.5!(m2)$);
+	\draw[process,latex-latex] (m1) -- (m2);
+	\draw[process,latex-latex] (m1) -- (m*);
+	
+	\draw[mmref] (mx_req) -- node[above left] {refers to} (mm1);
+	\draw[mmref] (mx_req) to[bend right=40] node[below left] {refers to} (mm2);
+	\draw[mmref] (mx_script) -- node[left] {refers to} (mm1);
+	\draw[mmref] (mx_script) -- node[left, pos=0.75] {refers to} (mm2);
+	\draw[mmref] (m1) -- node[above right] {conforms to} (mm1);
+	\draw[mmref] (m2) to[bend left=30] node[below right] {conforms to} (mm2);
+	\draw[mmref] (m*) -- node[left] {conforms to} (mm*);
+\end{tikzpicture}
