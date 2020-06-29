@@ -3,38 +3,33 @@
 }
 \label{chap:correctness_evaluation}
 
-\gqm{Functionality}{The analysis can be used to find contradictions in specifications}
-{Does the analysis find contradictions if they exist?}
-{Recall: Ratio of true positives to true positives + false negatives}
-\qm{Does the analysis find contradictions although they do not exist?}
-{Precision: Ratio of true positives to true+false positives}
-\qm{Does the analysis find non-contradictions although they exist?}
-{Ratio of false negatives to false+true negatives}
-
-\gqm{Functionality}{The techniques to avoid mistakes by construction actually avoid interoperabililty issues}
-{Are the identified failures that can occur complete?}
-{Ratio of number of identified failures to total number of failures}
-\qm{Are the relations of identified mistakes to identified failures correct?}
-{Ratio of failures resolved by fixing the identified mistake to all failures}
-\qm{Does the application of avoidance techniques lead to interoperable transformations?}
-{Ratio of changes that are propagated correctly to those that are not propagated correctly}
-
-\gqm{Applicability}{The techniques can be applied independently to single transformations}
-{Are there cases in which information about other transformations are necessary to solve issues?}
-{Ratio of number of fixes that require information about other transformation to total number of fixes with user interactions\\
-Ratio of number of fixes that require information about other transformation to total number of fixes without user interactions}
-
-
 \todo{Discuss that the formalism is proven correct. We only valide the error classification and the prevention 
 strategies.
 Additional goal: Find how likely specific kinds of errors are to know how relevant the different error categories are.
 }
 
 We have shown that we cannot define an orchestration that is always correct and optimal. However, we presented techniques to optimize as far as possible.
-We evaluate here, in how many cases this is sufficient in practice. To do so, we have the case study (Torsten / Timur) were we identified issues. We map them to our approaches and show that at least in this case study almost all problems would have been detected with them.
+We evaluate here, in how many cases this is sufficient in practice. To do so, we have the case study (Torsten / Timur) where we identified issues. We map them to our approaches and show that at least in this case study almost all problems would have been detected with them.
+
+\begin{itemize}
+    \item Correctness notion argued, nothing to evaluate: could be evaluated in user study that assumptions for that notion regarding the process are reasonable, but out of scope
+    \item Compatibility (Correctness and Usefulness/Conservativeness): evaluated regarding correctness and degree of conservativeness in dedicated case study in first section. Dedicated case study because other transformation language (QVT-R) with focus on relations. Open question how to extract the relations from other transformation specifications. Operational (imperative) specifications lack explicit relation specification. Maybe derive them from fixed points, but unclear how to evaluate them. In worst case, can only be applied to declarative languages (threat to validity / limitation in evaluation)
+    \item Errors and Synchronization (Completeness, Correctness, Relevance): Case study in which we identified errors when combining independently developed transformations and check whether the classification is correct. We correct the mistakes according to the categorization and especially applied the patterns for making the transformation synchronizing to find whether that solves the problem of transformations not being correct in the context of a network. Additionally, we want to find how often specific types of errors occurs to have an indicator for their severity and how relevant the errors we solve by our synchronization pattern are.
+    \item Orchestration (Usefulness): Regarding orchestration, we have proven the proposed strategy to be correct. We, however, provide a scenario-based discussion to evaluate the usefulness of the strategy to find the cause for a network not being able to resolve a change.
+\end{itemize}
+
+\section{Compatibility}
+
+Positive: Compatibility is proven
+Negative: Non-compatibility may be proven (or not)
+
+\gqm{}{The analysis can be used to find contradictions in specifications}
+{Correctness: Is compatibility always given if the analysis finds it?}
+{Precision: Ratio of true positives to true positives + false positives (false positives have to be 0)}
+\qm{Usefulness (Conservativeness): How often does the analysis not prove compatibility although it is given? (how conservative is it?)}
+{Recall: Ratio of true positives to true positives + false negatives (false negatives indicate conservative case)}
 
 
-\section{Decomposition}
 \begin{copiedFrom}{SoSym MPM4CPS}
 
 We have conducted a case study to evaluate correctness and applicability of our approach.
@@ -410,252 +405,31 @@ Applicability:
 
 
 
+\section{Errors and Synchronization}
+
+Case study in which we identified errors when combining independently developed transformations and check whether the classification is correct. We correct the mistakes according to the categorization and especially applied the patterns for making the transformation synchronizing to find whether that solves the problem of transformations not being correct in the context of a network. Additionally, we want to find how often specific types of errors occurs to have an indicator for their severity and how relevant the errors we solve by our synchronization pattern are.
+
+\gqm{Classification}{The relation between mistakes, faults and failures in the classification is correct}
+{Completeness: Can all occuring failes be classified according to the classification?}
+{Identified failures ratio: Ration between number of occured failures and classified failues}
+\qm{Correctness: Are identified failures caused by mistakes they are related to according to the classification?}
+{Resolved failures ratio: Ration of resolved failures to total failures}
+\qm{Relevance: How relevant are specific types of mistakes, how often do they occur at all?}
+{Number of occurences of each type of mistake in relation to number of all mistakes occurences}
+
+\gqm{Synchronization}{The techniques to avoid mistakes by construction actually avoid interoperabililty issues}
+{Correctness: Does the application of synchronization techniques lead to correct synchronizing transformations?}
+{Ratio of changes that are propagated correctly after applying the techniques to those that are not propagated correctly}
+\qm{Relevance: Does the application of synchronization techniques resolve any incorrectnesses?}
+{Ration of changes that are propagated correctly after applying the techniques to those that were propagated correctly before}
+
+% \gqm{Applicability}{The techniques can be applied independently to single transformations}
+% {Are there cases in which information about other transformations are necessary to solve issues?}
+% {Ratio of number of fixes that require information about other transformation to total number of fixes with user interactions\\
+% Ratio of number of fixes that require information about other transformation to total number of fixes without user interactions}
+
+
 \begin{copiedFrom}{ICMT}
-
-    \todo{Unterschied Klassifizierung/Kategorisierung: Klassifizierung benötigt Klassifizierungsdimension, Kategorisierung nicht}
-
-\begin{copiedFrom}{ICMT}
-%FORMERLY: \section{Issues in Networks of Bidirectional Transformations}
-%\label{sec:classification}
-
-In this section, we %first identify and 
-categorize potential \emph{failures} that can occur when executing \acp{BX} in a network to preserve consistency.
-We then consider \emph{mistakes} that a developer can make and that lead to \emph{faults} in the specifications of consistency and its preservation.
-\todo{Heißt der folgende Satz nicht, dass auf jeder Ebene genau ein Typ von Fehler auftreten kann?}
-We derive them from the specification levels introduced in \autoref{chap:properties:levels}, as each kind of mistake is specific for one of those levels.
-We finally relate the mistakes to the failures that can occur while executing the operationalization of a faulty consistency specification.
-That categorization forms our contribution \ref{contrib:issues}.
-In the following, we only discuss failures and their causing mistakes, but no strategies to solve or avoid them.
-Such strategies are discussed in \autoref{chap:prevention}.
-%The identification and categorization in this section is based on argumentation. To show the correctness of identified mistakes, failures and their dependencies, we provide an appropriate evaluation in \autoref{sec:evaluation}.
-
-%\todoHeiko{Introduce mistake, fault, failure} 
-
-% \begin{itemize}
-%     \item Define three essential abstraction levels in the development process
-%     \item Levels depend on each other, so \emph{fulfillment} on one level is mandatory to investigate the next level
-%     \item Mistakes on all levels may introduce failures in the execution of the operationalization of consistency constraint preservation
-%     \item We summarize potential failures, identify their causes (mistakes and faults) and then categorize and relate them
-% \end{itemize}
-
-\section{Potential Failures}
-\label{chap:errors:failures}
-
-Mistakes in the specification of consistency, no matter on which of the specification levels, % (\autoref{sec:process:levels}),
-can lead to failures when executing the preservation of consistency according to that specification. % on an actual system. 
-Before identifying the causal mistakes, we first categorize the types of potential failures into three categories. We depict them in \autoref{fig:correctness:categorization}.
-
-\begin{figure}
-    \centering
-    \input{figures/correctness/categorization.tex}
-    \caption{Categorization and Dependencies of Mistakes, Faults and Failures}
-    \label{fig:correctness:categorization}
-\end{figure}
-
-First, consistency preservation can fail by \textbf{resulting in an inconsistent state}. This can either occur \emph{deterministically} or \emph{non-deterministically}, if the result depends on the execution order of the consistency preservation specifications.
-
-Second, consistency preservation can fail by \textbf{not terminating}. This can either manifest in an \emph{alternating loop}, when a feature, e.g., an attribute, alternates between two or more values, or in a \emph{diverging loop}, when at least one feature value diverges, e.g., a number counting up or a string being repeatedly appended.
-
-Third, consistency preservation can result in \textbf{duplications}. \emph{Multiple instantiation} can occur because different consistency preservation specifications instantiate an element multiple times, although all of them represent the same element. % and thus should be the same. 
-For example, an element is created by transformations $\mathcal{M}_1 \rightarrow \mathcal{M}_2 \rightarrow \mathcal{M}_3$ and another is created by transformation $\mathcal{M}_1 \rightarrow \mathcal{M}_3$, although there should be only one element.
-\emph{Multiple referencing} can occur due to the same reason because an element is inserted into a reference or attribute list several times, although it should be inserted only once. 
-%Such duplications are a special kind of termination in inconsistent states.
-
-
-% If mistakes are made during the specification of consistency, no matter on which of the levels introduced in \autoref{sec:process:levels}, this can finally lead to failures in the consistency preservation executed on an actual system. Before identifying the causing mistakes, we first give an overview on the types of failures that may occur and separate them into three categories.\\[-0.7em]
-
-% \compactsubsection{Termination in inconsistent states}
-% \begin{enumerate}[topsep=4pt]
-%     \item \emph{Deterministic:} The consistency preservation process can deterministically terminate in a state that is not consistent. % wrt. the defined consistency specification.
-%     \item \emph{Non-deterministic:} Consistency preservation can non-deterministically terminate in an inconsistent state, depending on the execution order of the binary consistency preservation specifications. %in which the partial consistency preservation rules are executed.
-% \end{enumerate}
-
-% \compactsubsection{Non-termination}
-% \begin{enumerate}[resume, topsep=4pt]
-%     \item \emph{Alternating loops:} Consistency preservation can be non-terminating, alternating between two or more values in at least one feature (e.g. a number or a String alternating between two values).
-%     \item \emph{Diverging loops:} Consistency preservation can be non-terminating, having at least one feature with a diverging value (e.g. a number counting up or down, a String being always appended).
-% \end{enumerate}
-
-% \compactsubsection{Duplications}
-% \begin{enumerate}[resume, topsep=4pt]
-%     \item \emph{Multiple instantiation:} An element can be instantiated multiple times by different consistency preservation specifications, although all of them represent the same element and thus should be the same. E.g. an element is created by transforamtions $\mathcal{M}_1 \rightarrow \mathcal{M}_2 \rightarrow \mathcal{M}_3$ and another is created by transformations $\mathcal{M}_1 \rightarrow \mathcal{M}_3$, although the same element is meant.
-%     \item \emph{Multiple referencing:} An element may also be inserted into a non-containment reference or an attribute list several times, although the same element is meant, within the same situations as multiple instantiation can occur.
-% \end{enumerate}
-
-
-\section{Mistakes and Faults}
-\label{chap:errors:mistakes}
-
-%\todoErik{Ich dachte immer, \enquote{Mistakes} machen nur Menschen}
-Developers or the transformation engine can make different kinds of mistakes on each of the specification levels, which lead to faults in the specification and finally to different kinds of failures during consistency preservation.
-In the following, we derive mistakes and faults from the specification levels, depicted in \autoref{fig:correctness:categorization}.
-
-\subsection{Global Level}
-Regarding global consistency specifications for a set of model types, two basic mistakes can be made. 
-These mistakes concern compliance of the defined consistency specification with the actual notion of consistency between the involved model types.
-First, a specification can be incomplete (\emph{underspecified}), which means that some consistency constraints are missed. 
-As a result, the consistency specification according to \autoref{def:consistency_specification} would contain more tuples of models than are actually consistent to each other. 
-%%As a result, if one would define the consistency specification according to \autoref{def:consistency_specification}, more tuples of models would be in the relation than are actually consistent to each other. 
-%Incomplete consistency specifications can lead to \emph{false positives}, when investigating whether a given tuple of models is consistent or not.
-Another potential mistake are too restricted (\emph{overspecified}) consistency specifications, which means that additional, faulty consistency constraints are considered. 
-As a result, actually consistent tuples of models would be missing in the consistency specification according to \autoref{def:consistency_specification}. 
-%As a result, if one would define the consistency specification according to \autoref{def:consistency_specification}, actually consistent tuples of models would not be in the relation. 
-%This %, in contrast, 
-%can lead to \emph{false negatives}, because actually consistent models are identified as inconsistent.
-
-\begin{figure}[bt]
-    \centering
-%    \includegraphics[angle=-90, width=\textwidth]{figures/levels_overview.pdf}
-    \input{figures/correctness/mistakes_specification_levels.tex}
-    \caption{Examples for Mistakes on Different Specification Levels}
-    \label{fig:correctness:mistakes_specification_levels}
-\end{figure}
-
-\subsection{Modularization Level}
-When developers modularize the global consistency specification by defining binary consistency specifications, these modular specifications can be non-compliant with the global one. 
-Two kinds of mistakes, similar to those at the global level, can be distinguished, regarding compliance of modular and global specifications. %, but regarding compliance of modular and global specifications rather than between the global specification and the actual notion of consistency.
-First, modular consistency specifications can be incomplete (\emph{underspecified}), so that there are global constraints which are not covered by them. 
-The modular consistency specifications $\mathit{CS}_{1,2}$, $\mathit{CS}_{2,3}$ and $\mathit{CS}_{1,3}$ in \autoref{fig:correctness:mistakes_specification_levels} are incomplete iff
-%For three model types $\mathcal{M}_1, \mathcal{M}_2$ and $\mathcal{M}_3$ with a global consistency specification $\mathit{CS}$, the binary specifications $\mathit{CS}_{1,2}$, $\mathit{CS}_{2,3}$ and $\mathit{CS}_{1,3}$, as depicted in \autoref{fig:levels_overview} are underspecified iff 
-%\todoHeiko{Hier die Grafik aus dem Level-Kapitel übernehmen}
-\begin{align*}
-    & \exists M_1, M_2, M_3 : \\
-    & \hspace{1em} (M_1, M_2) \in \mathit{CS}_{1,2} \land (M_2, M_3) \in \mathit{CS}_{2,3} \land (M_1, M_3) \in \mathit{CS}_{1,3} \land (M_1, M_2, M_3) \not\in \mathit{CS}
-\end{align*}
-This finally leads to \emph{false positives} when investigating whether a given tuple of models is consistent regarding the global specification. %as actually inconsistent models (regarding the global specification) are identified as consistent. %investigating whether a given set of models is consistent regarding the global specification or not, because actually inconsistent models regarding $\mathit{CS}$ are consistent according to all modular relations $\mathit{CS}_{1,2}$, $\mathit{CS}_{2,3}$ and $\mathit{CS}_{1,3}$.
-%This finally leads to \emph{false positives} when investigating whether a given set of models is consistent regarding the global specification or not, because actually inconsistent models regarding $CS$ are consistent according to all modular relations $\mathit{CS}_{1,2}$, $\mathit{CS}_{2,3}$ and $\mathit{CS}_{1,3}$.
-%\todoHeiko{Das folgende eher zu Avoidance Strategy? Überlapp vorhanden?}
-%Such incomplete specifications can especially occur if constraints between two types of models are not expressed at all (so the consistency specification covers all model pairs), but are only transitively defined over two or more other relations. 
-%For example, if $\mathit{CS}_{1,3}$ shall be omitted and transitively expressed across $\mathit{CS}_{1,2}$ and $\mathit{CS}_{2_3}$, the following must hold:
-% \begin{align*}
-%     & \forall M_1 \in \mathcal{M}_1 : \forall M_2 \in \mathcal{M}_2 : \forall M_3 \in \mathcal{M}_3 : \\
-%     & \hspace{1em} \mathit{CS}(M_1, M_2, M_3) \iff \mathit{CS}_{1,2}(M_1, M_2) \land \mathit{CS}_{2,3}(M_2, M_3)
-% \end{align*}
-%\begin{align*}
-    %& \forall M_1, M_2, M_3 : (M_1, M_2, M_3) \in \mathit{CS} \Leftrightarrow (M_1, M_2) \in \mathit{CS}_{1,2} \land (M_2, M_3) \in \mathit{CS}_{2,3}
-%\end{align*}
-%If this transitive relation misses or is even unable to express certain direct constraints, inconsistent models would be idenitified as consistent. %\todoHeiko{Das transitive muss man wohl an einem Beispiel erklären, am besten Ref. zu Intro}
-Modular consistency specifications cannot only be incomplete because of an actual specification mistake, but also because of $n$-ary relations on the global level that cannot be expressed by a set of binary relations.
-We excluded that case by our assumption made in \autoref{chap:properties:levels}, as otherwise a modularization into binary relations would not be possible at all.
-If such cases have to be supported, the modularization would have to be extended to also consider $n$-ary relations.
-
-Second, a modular specification can be too restricted (\emph{overspecified}) regarding the global consistency specification if additional constraints are added. 
-The modular consistency specifications in \autoref{fig:correctness:mistakes_specification_levels} are overspecified iff
-\begin{align*}
-    & \exists M_1, M_2, M_3 : \\
-    & \hspace{1em} (M_1, M_2, M_3) \in \mathit{CS} \land \big[ (M_1, M_2) \not\in \mathit{CS}_{1,2} \lor (M_2, M_3) \not\in \mathit{CS}_{2,3} \lor (M_1, M_3) \not\in \mathit{CS}_{1,3} \big]
-\end{align*}
-In \autoref{fig:correctness:mistakes_specification_levels}, omitting the dashed relation in $\mathit{CS}_{2,3}$ would lead to such an overspecifiation.
-Overspecifications lead to additional constraints regarding the global specification, but also, and more severe, to contradicting constraints regarding other modular specifications.
-In case of contradictions, the modular consistency specifications cannot be fulfilled at the same time.
-In such a case, the graph of consistency relations %, as shown in \autoref{fig:mistakes_specification_levels}, 
-would contain no cylces, i.e. sets of models that are consistent to each other.
-We have discussed an example for such contradicting specifications %in the motivating example 
-in \autoref{chap:properties:levels}, where constraints for transferring an employee name contradicted. % contains contradicting constraints for transferring the name. % to other types of models.
-%In this case, when several binary specifications are combined to keep multiple models consistency, the resulting fault are incompatible binary specifications in the sense that different relations cannot hold at the same time because they are based on different global consistency specifications.
-Such mistakes lead to \emph{false negatives} as actually consistent models (regarding the global specification) are identified as inconsistent. %, when investigating whether a given set of models is consistent regarding the global specification or not, because actually consistent models regarding $\mathit{CS}$ are not consistent according to the modular relations $\mathit{CS}_{1,2}$, $\mathit{CS}_{2,3}$ and $\mathit{CS}_{1,3}$.
-
-%\begin{itemize}
-    %\item inadequate structure
-    %\item missing knowledge about other modular relation
-%\end{itemize}
-
-\subsection{Operationalization Level}
-The types of mistakes that can be made at the operationalization level are different from those at the other levels, because this level does not concern the definition of consistency specifications (\autoref{def:consistency_specification}), but of consistency \emph{preservation} specifications (\autoref{def:consistency_preservation_specification}).
-Such specifications are faulty if no composition of them exists that returns a consistent tuple of models for each possible change. % it does not lead to a consistent state after making modifications to a consistent tuple of models.
-In \autoref{fig:correctness:mistakes_specification_levels}, an exemplary application of a single consistency preservation specification is depicted that leads to models that are not consistent according to the (global and modular) consistency specifications.
-%If no concatenation of CPSs exists that finally returns a consistent set of models for each possible change, the specifications are faulty.
-Let $\mathcal{CPS}$ be a set of consistency preservation specifications  %, e.g. $\mathcal{CPS} := \{\mathit{CPS}_{1}, \ldots, \mathit{CPS}_{m}\}$
-for the binary consistency specifications $\mathcal{CS}$ % := \{\mathit{CS}_{1,2}, \mathit{CS}_{2,3}, \mathit{CS}_{1,3}\}$ %(where there can be more than one consistency preservation specifications for each consistency specification) 
-%in \autoref{fig:mistakes_specification_levels}. %, metamodels $\mathcal{M}_0, \ldots, \mathcal{M}_n$, 
-and
-let $\mathfrak{M}_{\mathcal{CS}}$ be the set of model tuples that are consistent regarding $\mathcal{CS}$ (cf. \autoref{chap:properties:terminology}). 
-The consistency preservation specifications are faulty iff
-% \begin{align*}
-%     & \exists M_0, M'_0 \in \mathcal{M}_0, M_1, M'_1 \in \mathcal{M}_1, M_2, M'_2 \in \mathcal{M}_2 : \forall \mathit{CPS}_0, \ldots, \mathit{CPS}_k \in \mathcal{CPS} : \\
-%     & \hspace{1em} ((M_0, M''_0), (M_1, M''_1), (M_2, M''_2)) = \mathit{CPS}_0 \circ \dots \circ \mathit{CPS}_k((M_0, M'_0), (M_1, M'_1), (M_2, M'_2)) \\
-%     & \hspace{1em} \Rightarrow \exists \mathit{CS}_{i,j} \in \mathcal{CS} : \neg \mathit{CS}_{i,j}(M''_i, M''_j)
-% %    & \exists M_0, M'_0 \in \mathcal{M}_0, \ldots M_n, M'_n \in \mathcal{M}_n : \nexists \mathit{CPS}_0, \ldots, \mathit{CPS}_k \in \mathcal{CPS} : \\
-% %    & \hspace{1em} ((M_0, M''_0), \dots, (M_n, M''n)) := \mathit{CPS}_0 \circ \dots \circ \mathit{CPS}_k((M_0, M'_0), \dots, (M_n, M'_n)) \\
-% %    & \hspace{1em} \land \exists \mathit{CS}_{i,j} \in \mathcal{CS} : \neg \mathit{CS}_{i,j}(M''_i, M''_j)
-% \end{align*}
-\begin{align*}
-    & \exists (M_1, \dots, M_n) \in \mathfrak{M}_{\mathcal{CS}}, (M'_1, \dots, M'_n) \in \mathcal{M}_1 \times \dots \times \mathcal{M}_n: \forall \mathit{CPS}_1, \ldots, \mathit{CPS}_k \in \mathcal{CPS} : \\
-    %& \exists M_1, M'_1 \in \mathcal{M}_1, \dots, M_n, M'_n \in \mathcal{M}_n : \forall \mathit{CPS}_1, \ldots, \mathit{CPS}_k \in \mathcal{CPS} : \\
-    & \hspace{1em} \mathit{CPS}_1 \circ \dots \circ \mathit{CPS}_k \big((M_1, M'_1), \dots, (M_n, M'_n) \big) = \big( (M_1, M''_1), \dots, (M_n, M''_n) \big)\\
-    & \hspace{2em} \land \exists \mathit{CS}_{i,j} \in \mathcal{CS} : (M''_i, M''_j) \notin \mathit{CS}_{i,j}
-%    & \exists M_0, M'_0 \in \mathcal{M}_0, \ldots M_n, M'_n \in \mathcal{M}_n : \nexists \mathit{CPS}_0, \ldots, \mathit{CPS}_k \in \mathcal{CPS} : \\
-%    & \hspace{1em} ((M_0, M''_0), \dots, (M_n, M''n)) := \mathit{CPS}_0 \circ \dots \circ \mathit{CPS}_k((M_0, M'_0), \dots, (M_n, M'_n)) \\
-%    & \hspace{1em} \land \exists \mathit{CS}_{i,j} \in \mathcal{CS} : \neg \mathit{CS}_{i,j}(M''_i, M''_j)
-\end{align*}
-%\todoHeiko{Das ist nicht so schön, weil nicht klar ist, welche CS to welcher CPS gehört und so}
-%This means that there can be changes for which no execution of consistency preservation specifications is able to properly restore consistency. 
-
-In practice, mistakes at the operationalization level occur due to missing identification of equal elements in different consistency preservation specifications. 
-In our motivational example (\autoref{fig:properties:motivational_example}), %consider that an employee is created in the scheduling system for an employee created in the task management system after introducing one in the personnel management system.
-consider that an employee is created in the personnel management system, transformed to the task management system and from that to the scheduling system.
-The additional direct specification between personnel management and scheduling system has to consider the already created employee rather than instantiating a new one.
-%We consider %this case and 
-%options to avoid such problems in \autoref{sec:avoiding:matching}.
-%In our example, if a class is created in Java after creating a UML class for a ADL component through appropriate consistency preservation specifications and the consistency preservation specification between ADL and Java also defines the creation of a class in Java, it is necessary that the already existing class is considered rather than creating a new class. We will consider this case and options to avoid such problems in \autoref{sec:avoiding:matching}.
-
-% \begin{itemize}
-%     \item unknown connection of elements in consistency specifications
-%     \item Really, really make an example here, to distinguish from modularization level!!
-% \end{itemize}
-
-%In the following, we call all mistakes on modularization and operationalization level \emph{interoperability issues}, as they are all concerned with modularized specifications that have to interoperate. 
-
-
-\section{Categorization and Discussion}
-\label{chap:errors:categorization}
-
-\begin{figure}[tb]
-    \centering
-    \input{figures/correctness/failure_examples_employee.tex}
-%    \includegraphics[angle=270, width=\textwidth]{figures/mistakes_examples_employee.pdf}
-    \caption{Consistency Constraints on Metamodel Extract (top), Failure due to Mistake on Modularization Level (left), Failure due to Mistake on Operationalization Level (right)}
-    \label{fig:correctness:mistake_effects_example}
-\end{figure}
-
-%We associated the mistakes presented in the previous section with the specification level they can occur on. Additionally, we summarized potential failures that can occur when executing final consistency preservation specification in the section before.
-Although all failures occur during operationalization, the mistakes that lead to them can also be made at a higher specification level, such as the modularization or global level.
-More importantly, each type of failure can be traced back to specific types of mistakes, or, vice versa, specific mistakes lead to specific kinds of failures.
-\autoref{fig:correctness:mistake_effects_example} shows extracts of the three metamodels from our motivation, as well as consistency constraints between them.
-There are two options for a constraint between personnel data and scheduling system.
-The first option is contradictory to the one defined between personnel data and task management system, as already discussed in \autoref{chap:properties:levels}.
-This demonstrates that contradictory constraints are a typical fault that can result from contradicting modular knowledge, when different persons define such constraints independently.
-If, nevertheless, such a contradictory consistency specification is operationalized to a consistency preservation specification, the propagation of changes may never terminate.
-This is shown in the left scenario in \autoref{fig:correctness:mistake_effects_example}, where
-%Due to the contradicting constraints, 
-the name is replaced repeatedly in an \emph{alternating loop} as indicated by the dashed arrows.
-
-If no mistakes are made on the modularization level, so that no contradictions exist, %which especially means that the consistency specifications are free of contradictions, 
-missing matching of equal elements in the consistency preservation specifications can still lead to duplicate element instantiations.
-With the second option for the constraint in \autoref{fig:correctness:mistake_effects_example}, %no contradicting constraints and thus 
-no mistakes on modularization level exist.
-However, a missing matching of elements %in the consistency preservation specification 
-can lead to the situation shown in the right scenario of \autoref{fig:correctness:mistake_effects_example}, in which two employees are instantiated across different transformation paths.
-%We also demonstrated in the example that missing matching of equal elements in the consistency preservation specifications can lead to duplicate instantiations of elements.
-
-These were two of several causal chains for mistakes and faults to resulting failures.
-We give a full overview of those dependencies in \autoref{fig:correctness:categorization}.
-Missing constraints lead to deterministic inconsistencies, because such inconsistencies are not modelled and thus resolved.
-Additional consistency constraints do not lead to any actual failures, but reduce the set of consistent models. 
-The only consequence is that consistency preservation does not consider models that would actually be consistent.
-Contradicting constraints, which can arise from a faulty modularization, are more severe, as we have seen in the example:
-They can either lead to non-deterministic inconsistencies, e.g., depending on the execution order of consistency preservation specifications, or to loops that alternate or diverge values.
-Finally, the missing element matching at the operationalization level can lead to multiple instantiations, as we have seen in the example, or multiple insertions. %, if elements are added to a multi-valued reference multiple times.
-
-%\todoHeiko{Tun wir das wirklich? Oder nur ein Level?}
-%In the following, we discuss strategies to avoid mistakes at the different levels.
-%Afterwards, we evaluate whether our identified categorizes of mistakes, faults and failures and their dependencies are actually correct.
-
-%Categorize the detected Causes/Mistakes into three categories, which map to the steps identified in the first subsection. Two categories have to be resolved by user and, especially, are only resolvable in the moment when concrete transformations are combined (explain why!). One category can be solved by applying appropriate pattern, explained in the next section. Each category resolution is an assumption of the next (e.g. pattern matching does not make any sense when transformations are incompatible or at least the failures than can occur may differ).
-
-\end{copiedFrom} % ICMT
-
-\section{Prevention Strategies}
 
 We have systematically constructed the categorization in \autoref{chap:errors} from the potentials for mistakes that are induced by the different specification levels. % we identified (\autoref{sec:process:levels}).
 To further improve evidence regarding completeness and correctness of %the identified mistakes, resulting failures and their dependencies, we validate that 
@@ -816,18 +590,35 @@ They would have to be developed in a schema similar to the one proposed by \text
 \end{copiedFrom} % ICMT
 
 
+
+\section{Orchestration}
+
+Correctness of the proposed strategy is proven.
+Usefulness of the strategy to identify the cause for the network failing to resolve a change can, however, not be proven easily.
+Showing it empirically requires high effort.
+We thus provide a scenario-based discussion showing that the strategy is beneficial in reasonable cases.
+
+\gqm{Usefulness}{The orchestration strategy helps to find the cause for the network not being able to resolve a change}
+{Is it easier to find the reasons for the network not being able to resolve a change with the proposed strategy than with other strategies?}
+{Number of transformations to consider as a reason or comparable}
+
+
+
+
 \section{Limitations}
 
 \begin{itemize}
     \item No concurrent editing support. May partially be resolved by synchronizing transformations, however as we do not make assumptions to these current changes (rather than the assumptions we make to the transformations), the changes of two user can be conflicting. This has to be addressed -> future work
 \end{itemize}
 
-
-
-\section{Limitations}
-
 Only binary relations/transformations rather than BX, but can be transferred
 
 Only binary-definable relations (see Stevens): But, like above, insights can be transferred to networks of MX rather than BX
 
 Considered only structural relations (see foundations): Need to investigate behavioral or extra-functional relations. Potentially those are not binary but multiary (see Dagstuhl), so extension to multiary necessary
+
+
+
+\section{Summary}
+
+Summarize central findings and limitations, especially also relevance of errors that we resolve by construction, how many we can potentially (but not evaluated) find by analysis.
