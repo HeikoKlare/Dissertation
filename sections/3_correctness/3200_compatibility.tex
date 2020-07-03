@@ -207,7 +207,7 @@ In consequence of the given scenario and the according insight that transformati
 %%
 %% UNWANTED BEHAVIOR
 %%
-\subsection{Prevention from Finding Proper Solutions}
+\subsection{Prevention from Finding Consistent Solutions}
 
 % Second attempt: Derive incompatibility notion from unwanted behavior
 \begin{figure}
@@ -255,26 +255,53 @@ However, if there was a reasonable series of transformations that returns a cons
 %%
 \subsection{An Informal Notion of Compatibility}
 
-This is a special case of obsolete relation elements, because it actually means that for each pair in a consistency relation in which a model occurs, the model pair cannot occur in a globally consistent model.
-This will also be the starting point for our definition
+\mnote{Models that are never globally consistent are problematic}
+The discussed case that models do not occur in any globally consistent model tuple can be seen as a special case of obsolete relation elements, because it actually means that for each pair in a consistency relation in which a model occurs, the model pair cannot occur in a globally consistent model.
+We found that in a combination of relations a model is problematic if
+\begin{enumerate}
+    \item it is locally consistent to another model, i.e., it occurs in a pair of a binary consistency relation and
+    \item it can never be globally consistent, i.e., it is not contained in any model tuple that is consistent to all consistency relations.
+\end{enumerate}
+The model $\model{m}{1}'$ in \autoref{fig:compatibility:unwanted_behavior} was such a model, as it was locally consistent to $\model{m}{2}$ and $\model{m}{3}'$, but those two are inconsistent.
 
-Derived (informal) notion of compatibility:
-\begin{itemize}
-    \item Models are problematic if
-    \begin{itemize}
-        \item They can be locally consistent (according to one relation) to another model
-        \item They are never globally consistent (not contained in any set of models that is consistent)
-    \end{itemize}
-    \item $A_2$ was such a model only being locally consistent with $B_1$ and $C_2$, but those are inconsistent.
-    \item Case Analysis:
-    \begin{itemize}
-        \item $A_2$ is created by a user: Adapting this model is unwanted, as the user introduced it
-        \item $A_2$ is created by a transformation: Either created because $B_1$ or $C_2$ was introduced. However, there are other $A_X$ to which $B_1$ and $C_2$ are consistent (otherwise they would be in the same situation as $A_2$), so the transformations should better select such a different $A_X$, as $A_2$ will never be consistent
-    \end{itemize}
-    \item As we can see from the example, considering such models does not provide any benefits (because they do never occur in a globally consistent state), but they can easily prevent transformations from finding a consistent state.
-    \item We can derive the following informal notion of incompatibility: For each model in a relation, a globally consistent model tuple must exist
-    \item More precisely, we will define this notion at the level of model elements rather than complete models, as transformations are usually defined in terms of rules that affect only some of the elements of models, such as a limited set of meta-classes and their properties.
-\end{itemize}
+\mnote{Problematic models can be introduced by users or transformations}
+We can distinguish two cases that lead to occurance of such a model like $\model{m}{1}'$:
+\begin{properdescription}
+    \item[User:] The model was created by the user, thus adapting the model is unwanted as the user introduced it. Such a change should be rejected as the model cannot be globally consistent.
+    \item[Transformation:] The model was created by a transformation. In our example, this can either be the case because $\model{m}{2}$ or $\model{m}{3}'$ was created. There is, however, at least $\model{m}{1}''$ to which $\model{m}{2}$ and $\model{m}{3}'$ are consistent, so the transformation should better select that one. If there was not such $\model{m}{1}''$, then $\model{m}{2}$ and $\model{m}{3}'$ would be in the same situation not occuring in any globally consistent model tuple, thus the argumentation could be applied inductively.
+\end{properdescription}
+In consequence, allowing such a model does not provide any benefits and thus should in the best case not occur, as there is no reason to create it but it may prevent transformations from finding consistent states.
+In fact, disallowing the adaptation of the user change is even more reasonable when not concerning the complete model, like proposed with authoritative models by \textcite{stevens2020BidirectionalTransformationLarge-SoSym}, but only the part considered by a specific rule that describes consistency, such as a rule specifying the relation between classes and components, rather than between \gls{PCM} and UML.
+This does also fit the way in which transformation are usually defined, as they consist of rules that relate only limited sets of meta-classes and their properties.
+This is why our coming formalization will base on a more fine-grained notion.
+
+From these insights, we formulate the following, for now informal notion of compatibililty:
+\begin{quote}
+    For every model occuring in a pair of a consistency relation, a globally consistent model tuple containing it must exist.
+\end{quote}
+
+%Derived (informal) notion of compatibility:
+%\begin{itemize}
+    % \item Models are problematic if
+    % \begin{itemize}
+    %     \item They can be locally consistent (according to one relation) to another model
+    %     \item They are never globally consistent (not contained in any set of models that is consistent)
+    % \end{itemize}
+    % \item $A_2$ was such a model only being locally consistent with $B_1$ and $C_2$, but those are inconsistent.
+    % \item Case Analysis:
+    % \begin{itemize}
+    %     \item $A_2$ is created by a user: Adapting this model is unwanted, as the user introduced it
+    %     \item $A_2$ is created by a transformation: Either created because $B_1$ or $C_2$ was introduced. However, there are other $A_X$ to which $B_1$ and $C_2$ are consistent (otherwise they would be in the same situation as $A_2$), so the transformations should better select such a different $A_X$, as $A_2$ will never be consistent
+    % \end{itemize}
+    %\item As we can see from the example, considering such models does not provide any benefits (because they do never occur in a globally consistent state), but they can easily prevent transformations from finding a consistent state.
+    %\item We can derive the following informal notion of incompatibility: For each model in a relation, a globally consistent model tuple must exist
+    %\item More precisely, we will define this notion at the level of model elements rather than complete models, as transformations are usually defined in terms of rules that affect only some of the elements of models, such as a limited set of meta-classes and their properties.
+%\end{itemize}
+
+
+Kompatibilität wird insbesondere interessant, wenn man annimmt, dass eine Nutzeränderung nicht rückgängig gemacht werden können soll. Wenn wir sie dann feingranular zerlegen, ist immer nur ein Element einer Relation betroffen, sodass dann relevant ist, ob wir hierfür Modelle finden könnten, die konsistent sind (wir diskutieren später bzgl. Orchestrierung, dass die Transformationen sie dann tatsächlich auch finden):
+Relationen müssen korrekt sein, d.h. gegeben eine Nutzeränderung muss es überhaupt möglich sein eine konsistente Menge an Modellen zu finden. Wenn Transformationen etwas beliebigen tun dürfen geht das immer. Wir nehmen an, dass eine Nutzeränderung nicht rückgängig gemacht werden soll (bzw. wenn sie rückgängig gemacht werden würde eigentlich die Änderung invalide war, d.h. keine Konsistenz im Netzwerk hergestellt werden kann). Daher sind Relationen nur korrekt, wenn für fixierte Elemente, die durch eine Nutzeränderung entstehen können, eine Modellmenge abgeleitet werden kann, die bzgl. der Relationen konsistent ist. D.h. gegeben einige Elemente muss es eine Modellmenge geben, die in allen Relationen liegt und die diese Elemente enthält (-> Kompatibilitätsbegriff). Wir betrachten in Kapitel ?, wie man Kompatibilität präzise definieren und feststellen/garantieren kann.\\
+Resultat: Gegeben eine Änderung ist es möglich eine Transformation anzugeben, die aus der Änderung ein konsistentes Modell produziert.
 
 \todo{In general, an empty set of consistent models can be intended. Without knowing about "semantics" it is impossible to validate whether restrictions are intended or not. However, we want to identify unintended situations, so we may define situations that we actually do not want to support, because there is a high possibility that the situation is unintended.}
 
@@ -284,10 +311,6 @@ Informal notion reflects intuitive requirements:
     \item We had the example of incompatible name mappings: Having a model with a single person, there is no globally consistent tuple of models, because the (faulty) inversion of firstname and lastname in one the relations leads to the necessity of having the person with inverted firstname and lastname in the model as well. This conflicts the introduced informal notion of compatibility.
     As teasered before, we will precisely define the notion in a more fine-grained way at the level of elements rather than complete models. 
 \end{itemize}
-
-Kompatibilität wird insbesondere interessant, wenn man annimmt, dass eine Nutzeränderung nicht rückgängig gemacht werden können soll. Wenn wir sie dann feingranular zerlegen, ist immer nur ein Element einer Relation betroffen, sodass dann relevant ist, ob wir hierfür Modelle finden könnten, die konsistent sind (wir diskutieren später bzgl. Orchestrierung, dass die Transformationen sie dann tatsächlich auch finden):
-Relationen müssen korrekt sein, d.h. gegeben eine Nutzeränderung muss es überhaupt möglich sein eine konsistente Menge an Modellen zu finden. Wenn Transformationen etwas beliebigen tun dürfen geht das immer. Wir nehmen an, dass eine Nutzeränderung nicht rückgängig gemacht werden soll (bzw. wenn sie rückgängig gemacht werden würde eigentlich die Änderung invalide war, d.h. keine Konsistenz im Netzwerk hergestellt werden kann). Daher sind Relationen nur korrekt, wenn für fixierte Elemente, die durch eine Nutzeränderung entstehen können, eine Modellmenge abgeleitet werden kann, die bzgl. der Relationen konsistent ist. D.h. gegeben einige Elemente muss es eine Modellmenge geben, die in allen Relationen liegt und die diese Elemente enthält (-> Kompatibilitätsbegriff). Wir betrachten in Kapitel ?, wie man Kompatibilität präzise definieren und feststellen/garantieren kann.\\
-Resultat: Gegeben eine Änderung ist es möglich eine Transformation anzugeben, die aus der Änderung ein konsistentes Modell produziert.
 
 
 
