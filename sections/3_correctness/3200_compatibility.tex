@@ -152,18 +152,56 @@ Thus we also want to exclude such cases, because it can prevent a transformation
 %%
 \subsection{Necessity of Obsolete Relation Elements}
 
-First option: Remove "obsolete" relation elements
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{figures/correctness/compatibility/obsolete_relations.png}
     \caption[Example for obsolete elements in consistency relations]{Example for \enquote{obsolete} models pairs in consistency relation $R_1$, which can never occur in a globally consistent set of models}
     \label{fig:compatibility:obsolete_relations}
 \end{figure}
-\begin{itemize}
-    \item A first option might be to say that there should not be model pairs in the relations for which no globally consistent set of models can be found (give an abstract example for that)
-    \item However, in consequence a transformation could not produce such models, which might be necessary as transient (intermediate) states: E.g. a UML and Java code model are consistent when the same classes and interface with the same (in Java potentially empty) methods are present. In fact, a UML model is consistent with all (usually infinite) Java models with the same classes and methods, but with arbitrary method implementation. PCM and UML are consistent when components are realized as classes implementing the provided interfaces and thus their methods. Analogously, each component is represented by a Java class implementing the provided interfaces, but having an implementation that has some default functionality (be it logging or something more component-specific). Forbidding relations elements that can never be globally consistent would forbid that the relation between UML and Java allows Java models with empty method implementations for UML classes representing components. This would, however, require the relation/transformation between UML and Java know about components, which should not be the case due to modularity and independent development. Additionally, even in the concrete setup in which PCM is used, if a method is added to an interface of a class in UML which is a provided interface of its component in UML, the transformations may first create the Java method with an empty body, then propagate the method to the PCM interface and then propagate the default implementation of that method from PCM to Java. In this case, the transient state with the empty method body in Java is passed. Forbidding that would require an appropriate orchestration, i.e., first propagating the information across PCM, which could be defined for this specific case but not automatically decided in general, or the UML-Java transformation would have to consider that the Java implementation may not be empty, which, as discussed, contradicts modularity.
-    \item In general, this case is reflected in \autoref{fig:compatibility:obsolete_relations}, which shows two pairs in $R_1$, which can never occur in a globally consistent model, because the implied global relation is .... and does not contain those model pairs
-\end{itemize}
+
+\mnote{Locally consistent model pairs which are never globally consistent are \enquote{obsolete}}
+A first intuitive option to define incompatibility is the presence of model pairs in the consistency relations, for which no globally consistent model tuple containing them can be found.
+This canonically covers the case, in which the modular relations induce an empty global relation, because for none of the models pairs in each relation a globally consistent model tuple containing them can be found.
+An example for that case is depicted in \autoref{fig:compatibility:obsolete_relations}, in which the relation $\consistencyrelation{R}{1}$ contains the pairs $\tupled{\model{m}{1}, \model{m}{2}'}$ and $\tupled{\model{m}{1}', \model{m}{2}}$, for which neither $\model{m}{3}$ nor $\model{m}{3}'$ is consistent to both other consistency relations, as the induced global relation is $\consistencyrelation{R}{} = \setted{\tupled{\model{m}{1},\model{m}{2},\model{m}{3}},\tupled{\model{m}{1}',\model{m}{2}',\model{m}{3}'}}$.
+Thus, these model pairs may be denoted \enquote{obsolete} as they cannot occur in any globally consistent model tuple.
+
+\mnote{Forbidding obsolete model pairs breaks assumptions}
+While this point of view may be reasonable for the consistency relations only, as we are finally only interested in results that are globally consistent, it induces problems to the process of achieving such a result by means of transformation networks.
+In fact, transformation networks need to allow intermediate states of models, which are only locally consistent, although they can never occur in a globally consistent state.
+This is necessary, because otherwise each transformation would have to consider which model pairs are not only locally consistent but can be globally consistent as well.
+We, however, excluded that by assumption of independent development and modular reuse and let the orchestration of transformations kind of negotiate a consistent result.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/correctness/compatibility/obsolete_relations_scenario.jpg}
+    \caption[Example for obsolete relation elements between PCM, UML and Java]{Example for an \enquote{obsolete} models pair in consistency relations between \gls{PCM}, UML and Java: The empty Java method realization cannot be globally consistent to the UML class model that defines the method in the class interface, because it realizes a \gls{PCM} component, for which the consistency relation requires at least a default implementation.}
+    \label{fig:compatibility:obsolete_relations_scenario}
+\end{figure}
+
+\mnote{Example for obsolete relation necessity}
+Consider the following example, which is also exemplarily depicted in \autoref{fig:compatibility:obsolete_relations_scenario}:
+A UML class model and Java code are considered consistent when the same classes and interfaces with the same (in Java potentially empty) methods are contained.
+In fact, for each UML model a usually infinite number of consistent Java models exists, containing arbitrary implementations of the methods.
+In addition, \gls{PCM} models and UML class models are consistent when components are realized as classes implementing the provided interfaces of the components and thus their methods.
+Analogously, each component is represented by a Java class implementing the provided interface.
+The consistency relation between \gls{PCM} and Java may, however, require that a method within a class that realizes a method of a provided interface of a component has at least some default implementation, be it logging or something more component-specific.
+%The transformation between \gls{UML} and Java may initialize a method added to a class with an empty body or dummy return statement.
+%The transformation between \gls{PCM} and Java may, however, initializes a method within a class that realizes a component with a default implementation, be it logging or something more component-specific.
+If we would now consider model pairs that can never occur in globally consistent model tuples as incompatible and thus forbid them, a UML model could not be considered consistent to a Java model if any method in a class that realizes a component and that is defined by one of its interfaces is realized by a Java method with an empty body.
+The transformation between UML and Java would thus not be allowed to create an empty Java method upon creation of a UML method.
+This would, however, enforce the relation between UML and Java to encode information about components, which both breaks our assumption of independent development, as the UML-Java transformation developer would need to know about that, and of modular reuse, because the transformation is then tied to the scenario in which \gls{PCM} is used as well.
+
+\mnote{Obsolete relations do not induce a proper notion of incompatibility}
+In consequence of the given scenario and the according insight that transformations may need to produce transient states that are only locally consistent to ensure independence of the transformations and their reusability in different contexts, such obsolete consistency relations do not induce a proper notion of incompatibility.
+
+%First option: Remove "obsolete" relation elements
+
+% \begin{itemize}
+%     \item A first option might be to say that there should not be model pairs in the relations for which no globally consistent set of models can be found (give an abstract example for that)
+%     \item However, in consequence a transformation could not produce such models, which might be necessary as transient (intermediate) states: E.g. a UML and Java code model are consistent when the same classes and interface with the same (in Java potentially empty) methods are present. In fact, a UML model is consistent with all (usually infinite) Java models with the same classes and methods, but with arbitrary method implementation. PCM and UML are consistent when components are realized as classes implementing the provided interfaces and thus their methods. Analogously, each component is represented by a Java class implementing the provided interfaces, but having an implementation that has some default functionality (be it logging or something more component-specific). 
+%     Forbidding relations elements that can never be globally consistent would forbid that the relation between UML and Java allows Java models with empty method implementations for UML classes representing components. This would, however, require the relation/transformation between UML and Java know about components, which should not be the case due to modularity and independent development. Additionally, even in the concrete setup in which PCM is used, if a method is added to an interface of a class in UML which is a provided interface of its component in UML, the transformations may first create the Java method with an empty body, then propagate the method to the PCM interface and then propagate the default implementation of that method from PCM to Java. In this case, the transient state with the empty method body in Java is passed. Forbidding that would require an appropriate orchestration, i.e., first propagating the information across PCM, which could be defined for this specific case but not automatically decided in general, or the UML-Java transformation would have to consider that the Java implementation may not be empty, which, as discussed, contradicts modularity.
+%     \item In general, this case is reflected in \autoref{fig:compatibility:obsolete_relations}, which shows two pairs in $R_1$, which can never occur in a globally consistent model, because the implied global relation is .... and does not contain those model pairs
+% \end{itemize}
 
 
 %%
@@ -171,24 +209,54 @@ First option: Remove "obsolete" relation elements
 %%
 \subsection{Prevention from Finding Proper Solutions}
 
-Second attempt: Derive incompatibility notion from unwanted behavior
+% Second attempt: Derive incompatibility notion from unwanted behavior
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{figures/correctness/compatibility/unwanted_behavior.png}
     \caption[Example for the unwanted rejection of a user change]{Example for the rejection of a user change because of consistency relations containing model pairs that are never globally consistent}
     \label{fig:compatibility:unwanted_behavior}
 \end{figure}
-\begin{itemize}
-    \item Considering the example in \autoref{fig:compatibility:unwanted_behavior}, we start with $A_1, B_1, C_1$ and have a user change of $B_1$ to $B_2$. Apart from the input models, only $A_3, B_2, C_2$ are globally consistent. So we would expect the transformations to find the latter models. Because of also having consistency relations to $A_2$ and transformation that locally select $A_2$ (because they do not know that there is no globally consistent state with $A_2$), passing across that model can lead to resulting in $A_1, B_1, C_1$ again. We did not define that requirement yet because it is not essentially necessary, but usually user may not want their changes be undone by a transformation, at least if there was another set of consistent models reflecting their change.
-    \item Thus, we would call this behavior unwanted.
-    \item Note that this scenario is different from the described scenario with empty Java method bodies, because in that case there are models for which an empty Java method body occurs in a globally consistent states (those in which the method does not realize a method of a provided interface of a component). Thus if the corresponding class does not realize a component but an ordinary class, it would be fine that it is consistent to the UML class with an empty body. In contrast, in the case described here, there is no single set of models in which $A_2$ was consistent.
-\end{itemize}
+
+\mnote{Example for transformation execution that reverts a user change}
+To identify a proper notion of incompatibility, we now consider an exemplary transformation scenario from which we can derive such a notion.
+In the example depicted in \autoref{fig:compatibility:unwanted_behavior}, we start with the models $\model{m}{1}$, $\model{m}{2}$ and $\model{m}{3}$, which are consistent to all three consistency relations.
+If a user performs a change of $\model{m}{2}$ to $\model{m}{2}'$, we may assume the following transformation executions:
+The transformation for $\consistencyrelation{R}{2}$ changes $\model{m}{3}$ to $\model{m}{3}'$, the one for $\consistencyrelation{R}{3}$ changes $\model{m}{1}$ to $\model{m}{1}'$ and then the one for $\consistencyrelation{R}{1}$ changes $\model{m}{2}'$ back to $\model{m}{2}$, as that is the only model consistent to $\model{m}{1}'$.
+Now the transformation for $\consistencyrelation{R}{2}$ changes $\model{m}{3}'$ back to $\model{m}{3}$ and finally the one or $\consistencyrelation{R}{1}$ restores $\model{m}{1}$.
+As a result, the transformation network executed the transformations in a way such that the original models are returned, which are actually consistent but reject the user change.
+
+\mnote{Unnecessarily bad local selections can prevent network from finding proper solution}
+Apart from the three given models, only $\model{m}{1}''$, $\model{m}{2}'$ and $\model{m}{3}'$ are consistent.
+Upon the user change of $\model{m}{2}$ to $\model{m}{2}'$, we would actually expect the transformations to find the latter triple of models as a consistent result, as otherwise, like in the above example, the original models are returned, which actually rejects the user change.
+The problem results from the model $\model{m}{1}'$ being present in the consistency relations, but not being consistent in any globally consistent model tuple.
+For each of the transformations the local selection of $\model{m}{1}'$ is fine, as there are models to which it is locally consistent according to each consistency relation on its own.
+
+\mnote{Scenario is different from obsolete relation elements}
+Note that this scenario is different from the case discussed for obsolete relation elements.
+In the scenarios discussed for obsolete relation elements, each model in such an obsolete pair occurs in a globally consistent model tuple, but not both models in that pair together do.
+For example, the Java class with an empty method body actually occurs in a globally consistent model tuple, but not together with the UML class model in which the method is defined in the class interface, although they are locally consistent.
+
+\mnote{Models that do not occur in any globally consistent model tuple are problematic}
+We have seen that it is problematic, when consistency relations define consistency of models that do not occur in any globally consistent model tuple.
+This can easily lead to transformations that do find the expected solutions and unnecessarily reject user changes.
+We did not define a requirement that user changes may not be reverted on purpose, as that behavior may also be expected to express that certain changes are not allowed to be made.
+However, if there was a reasonable series of transformations that returns a consistent tuple of models with reflects the user changes, it should be preferred over one that reverts the user change.
+
+% \begin{itemize}
+%     \item Considering the example in \autoref{fig:compatibility:unwanted_behavior}, we start with $A_1, B_1, C_1$ and have a user change of $B_1$ to $B_2$. Apart from the input models, only $A_3, B_2, C_2$ are globally consistent. So we would expect the transformations to find the latter models. Because of also having consistency relations to $A_2$ and transformation that locally select $A_2$ (because they do not know that there is no globally consistent state with $A_2$), passing across that model can lead to resulting in $A_1, B_1, C_1$ again. We did not define that requirement yet because it is not essentially necessary, but usually user may not want their changes be undone by a transformation, at least if there was another set of consistent models reflecting their change.
+%     \item Thus, we would call this behavior unwanted.
+%     \item Note that this scenario is different from the described scenario with empty Java method bodies, because in that case there are models for which an empty Java method body occurs in a globally consistent states (those in which the method does not realize a method of a provided interface of a component). Thus if the corresponding class does not realize a component but an ordinary class, it would be fine that it is consistent to the UML class with an empty body. In contrast, in the case described here, there is no single set of models in which $A_2$ was consistent.
+% \end{itemize
+
 
 
 %%
 %% COMPATIBILITY NOTION
 %%
-\subsection{An Information Notion of Compatibility}
+\subsection{An Informal Notion of Compatibility}
+
+This is a special case of obsolete relation elements, because it actually means that for each pair in a consistency relation in which a model occurs, the model pair cannot occur in a globally consistent model.
+This will also be the starting point for our definition
 
 Derived (informal) notion of compatibility:
 \begin{itemize}
