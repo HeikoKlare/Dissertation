@@ -1,7 +1,4 @@
-\todo{Say that the following is based on paper with Aurélien}
-
 \section{A Formal Notion of Compatibility}
-Goal: Applies formal framework for extensional specification to actual languages with intensional specification (MA Aurélien)
 
 \todo{Derive that element-level consistency relations induce model-level consistency relations to be conforming with previous formalism}
 
@@ -15,79 +12,80 @@ Goal: Applies formal framework for extensional specification to actual languages
 
 \begin{copiedFrom}{SoSym MPM4CPS}
 
-
-% CONSISTENCY CHAPTER
-
-In this section, we precisely define our notion of consistency, and motivate and formally introduce the term \emph{compatibility}.
-We first discuss properties of transformation networks %in comparison to a single transformation 
-with an intuitive notion of compatibility, based on considerations in existing work.
-We then define consistency based on fine-grained consistency relations and,
+\mnote{Formal notion of fine-grained consistency and compatibility}
+In this section, we precisely define our, yet informally introduced notion of \emph{compatibility}.
+%We first discuss properties of transformation networks %in comparison to a single transformation 
+%with an intuitive notion of compatibility, based on considerations in existing work.
+We define consistency more precisely based on fine-grained consistency relations and,
 finally, derive a compatibility notion from the consistency formalization and its pursued perception.
-This serves as our contribution \ref{contrib:formalization}.
+To distinguish the previously given coarse-grained and the coming fine-grained definition of consistency and consistency relations, we used the \enquote{model-level} prefix in the coarse-grained notion.
+The contents of this and the remaining sections of this chapter are mostly, even literally, taken from our published article on proving compatibility~\owncite{klare2020compatibility-report}.
+
+%This serves as our contribution \ref{contrib:formalization}.
 %An introduction to properties of transformation networks and especially compatibility of transformations, what compatibility means and how the network influences the possibility to give guarantees regarding compatibility.
 
 %\todoHeiko{Discuss extensional definition of relations / constraints and its relation to intensional definitions}
-\subsection{Properties of Transformation Network}
-\label{sec:compatibility:networkproperties}
+% \subsection{Properties of Transformation Network}
+% \label{sec:compatibility:networkproperties}
 
-%% Correctness as a property of single, bidirectional transformations
-Keeping pairs of models consistent by means of incremental, bidirectional transformations has been well researched in recent years~\cite{stevens2010sosym, etzlstorfer2013a, cleve2019dagstuhl}.
-A bidirectional transformation consists of a \emph{relation} that specifies which pairs of models are considered consistent and a pair of directional transformations, denoted as \emph{consistency repair routines}, that take one modified and one originally consistent model and deliver a new model that is consistent to the modified one~\cite{stevens2010sosym}.
-Several well-defined properties of such transformations have been identified.
-The essential \emph{correctness} property states that a consistency repair routine delivers a result such that the models are actually consistent according to the defined relation~\cite{stevens2010sosym}.
-Another important property is \emph{hippocraticness}, which states that a consistency repair routine returns the input model if it was already consistent to the modified one~\cite{stevens2010sosym}.
+% %% Correctness as a property of single, bidirectional transformations
+% Keeping pairs of models consistent by means of incremental, bidirectional transformations has been well researched in recent years~\cite{stevens2010sosym, etzlstorfer2013a, cleve2019dagstuhl}.
+% A bidirectional transformation consists of a \emph{relation} that specifies which pairs of models are considered consistent and a pair of directional transformations, denoted as \emph{consistency repair routines}, that take one modified and one originally consistent model and deliver a new model that is consistent to the modified one~\cite{stevens2010sosym}.
+% Several well-defined properties of such transformations have been identified.
+% The essential \emph{correctness} property states that a consistency repair routine delivers a result such that the models are actually consistent according to the defined relation~\cite{stevens2010sosym}.
+% Another important property is \emph{hippocraticness}, which states that a consistency repair routine returns the input model if it was already consistent to the modified one~\cite{stevens2010sosym}.
 
 %%
 %% Correctness property of transformation networks, not induced by correctness of single transformations
 %%
-When we combine several transformations to a network to achieve consistency between multiple models, those properties of the single transformations are still relevant, as each transformations on its own has to be at least correct to work properly in a network of transformations.
-However, correctness of the single transformations does not induce correctness of the transformation network.
-Taking an arbitrary set of correct transformations and executing them one after another does not necessarily constitute a terminating approach that delivers a result, in which all models are consistent according to the relations of the transformations, because the result of one transformation may violate the relation of another.
-It is possible that the approach does either not terminate, because there is a divergence or alternation in values changed or elements created, or terminates in a state that is not consistent regarding the relations of all transformations~\cite{klare2019icmt}.
-%Consider the example of $R_{PE}, R_{PR}, R'_{ER}$ in \autoref{fig:motivational_example}. A transformation network in which each transformation adds the corresponding element for an added element, such as a resident for an added person by the transformation of $R_{PR}$.
-\todoDiss{Readd}
-%Since the execution of one transformation may lead to a violation of the relation of another transformation, executing each transformation only once can easily lead to termination in an inconsistent state.
-%In consequence, transformations have to be executed in a fixed point iteration manner, until all relations are fulfilled.
-The property of a network to always result in a state in which the models are consistent to all relations of the transformations if they are executed in a specific order, can be seen as a \emph{correctness} property for transformation networks.
-In this work, we focus on that correctness property and do not discuss further quality properties of transformation networks, such as \emph{modularity}, \emph{evolvability} and \emph{comprehensibility}~\cite{klare2018docsym}.
+% When we combine several transformations to a network to achieve consistency between multiple models, those properties of the single transformations are still relevant, as each transformations on its own has to be at least correct to work properly in a network of transformations.
+% However, correctness of the single transformations does not induce correctness of the transformation network.
+% Taking an arbitrary set of correct transformations and executing them one after another does not necessarily constitute a terminating approach that delivers a result, in which all models are consistent according to the relations of the transformations, because the result of one transformation may violate the relation of another.
+% It is possible that the approach does either not terminate, because there is a divergence or alternation in values changed or elements created, or terminates in a state that is not consistent regarding the relations of all transformations~\cite{klare2019icmt}.
+% %Consider the example of $R_{PE}, R_{PR}, R'_{ER}$ in \autoref{fig:motivational_example}. A transformation network in which each transformation adds the corresponding element for an added element, such as a resident for an added person by the transformation of $R_{PR}$.
+% \todoDiss{Readd}
+% %Since the execution of one transformation may lead to a violation of the relation of another transformation, executing each transformation only once can easily lead to termination in an inconsistent state.
+% %In consequence, transformations have to be executed in a fixed point iteration manner, until all relations are fulfilled.
+% The property of a network to always result in a state in which the models are consistent to all relations of the transformations if they are executed in a specific order, can be seen as a \emph{correctness} property for transformation networks.
+% In this work, we focus on that correctness property and do not discuss further quality properties of transformation networks, such as \emph{modularity}, \emph{evolvability} and \emph{comprehensibility}~\cite{klare2018docsym}.
 
 
 %%
 %% Correctness considerable at different levels.
 %%
-A single transformation can only be incorrect in terms of its repair routines, because there are no restrictions regarding its relation that may prevent the repair routine from being able to produce a correct result.
-In previous work, however, we identified that transformation networks can be incorrect at different levels~\cite{klare2019icmt}.
-Networks can also be incorrect at the level of relations rather than repair routines, because multiple relations can be contradictory, i.e., they can relate elements in different ways such that the relations cannot be fulfilled at the same time.
-\todoDiss{Readd}
+% A single transformation can only be incorrect in terms of its repair routines, because there are no restrictions regarding its relation that may prevent the repair routine from being able to produce a correct result.
+% In previous work, however, we identified that transformation networks can be incorrect at different levels~\cite{klare2019icmt}.
+% Networks can also be incorrect at the level of relations rather than repair routines, because multiple relations can be contradictory, i.e., they can relate elements in different ways such that the relations cannot be fulfilled at the same time.
+% \todoDiss{Readd}
 %This especially concerns the \emph{modularization level}, which considers correctness of the binary relations of a set of bidirectional transformations describing when a set of models is consistent, and the \emph{operationalization level}, which considers correctness of the consistency repair routines in terms of producing models that are correct regarding the relations of all bidirectional transformations.
 %For a single transformation, there are no restrictions regarding its relation that may prevent the repair routines from being able to produce a correct result, thus correctness is only considered at the operationalization level. %The correctness definition of \textcite{stevens2010sosym} for a single transformation only concerns the operationalization level, because a single relation is correct by construction. 
 % Considering only a single transformation, its relation is correct by definition, at least if there is no external specification against which the relations have to be correct, thus the definition of \textcite{stevens2010sosym} for correctness only considers the consistency repair routines.
 %However, in case of a transformation network, the different relations may be contradictory, i.e., elements are related in a different way such that the relations cannot be fulfilled at the same time.
-In such a case, the consistency repair routines cannot be result in a state that is consistent according to the relations anymore, thus they may not terminate anymore.
+% In such a case, the consistency repair routines cannot be result in a state that is consistent according to the relations anymore, thus they may not terminate anymore.
 %This is due to the fact that several relations can relate the same elements in a different way, such that they cannot be fulfilled at the same time, i.e. that they are contradictory.
 %In such a case, the iteration will not terminate.
-We call the relations of such transformations \emph{incompatible}.
+% We call the relations of such transformations \emph{incompatible}.
 %We define this informal notion of compatibility more precisely in the remainder of this section.
 
 %%
 %% Compatibility not achievable by construction -> we focus on checking it
 %%
-In consequence, compatibility of relations is a necessary prerequisite for consistency repair routines to produce correct results in transformation networks.
-We also found that correctness of the consistency repair routines can already be achieved by construction, whereas compatibility of the relations cannot be achieved by construction but in the best case be checked for a set of relations.
-In this work, we focus on the possibility to check compatibility of the relations of a set of transformations.
-In the following, we therefore precisely define the notion of compatibility of relations, which excludes contradictions in relations that can prevent consistency repair routines from fulfilling the relation.
+% In consequence, compatibility of relations is a necessary prerequisite for consistency repair routines to produce correct results in transformation networks.
+% We also found that correctness of the consistency repair routines can already be achieved by construction, whereas compatibility of the relations cannot be achieved by construction but in the best case be checked for a set of relations.
+% In this work, we focus on the possibility to check compatibility of the relations of a set of transformations.
+% In the following, we therefore precisely define the notion of compatibility of relations, which excludes contradictions in relations that can prevent consistency repair routines from fulfilling the relation.
 
-\todo{Example!}
+% \todo{Example!}
 
 %%
 %% Tree topology excludes compatibility
 %%
 %\subsection{Network Topology Impacts}
-Finally, the topology of a transformation network directly influences how prone it is to incompatibilities of its relations.
-Contradictions of consistency relations, as exemplified with the relations $R_{PE}, R_{PR}, R'_{ER}$ in \autoref{fig:prologue:three_persons_example}, can only occur if the same classes are related to each other by different (sequences of) transformations in a different way.
-For example, in \autoref{fig:prologue:three_persons_example}, each combination of two relations puts the same classes into relation as the third one.
+% Finally, the topology of a transformation network directly influences how prone it is to incompatibilities of its relations.
+% Contradictions of consistency relations, as exemplified with the relations $R_{PE}, R_{PR}, R'_{ER}$ in \autoref{fig:prologue:three_persons_example}, can only occur if the same classes are related to each other by different (sequences of) transformations in a different way.
+% For example, in \autoref{fig:prologue:three_persons_example}, each combination of two relations puts the same classes into relation as the third one.
 %This can also be a the case if a sequence of transformations introduces this relation, like each combination of two relations in \autoref{fig:motivational_example} relates the same classes as the third relation.
-This means that a transformation network, in which each pair of classes is only related by one sequence of transformations, cannot have contradictory relations and is thus inherently compatible.
+% This means that a transformation network, in which each pair of classes is only related by one sequence of transformations, cannot have contradictory relations and is thus inherently compatible.
 
 
 
@@ -115,16 +113,15 @@ This means that a transformation network, in which each pair of classes is only 
 
 \subsection{A Fine-grained Notion of Consistency}
 
-A common definition of consistency enumerates consistent pairs of models in a relation~\cite{stevens2010sosym}.
+We have yet given a common definition of consistency~\cite{stevens2010sosym} by enumerating consistent pairs of models in a relation (see \autoref{chap:correctness:notions_consistency}).
 However, for our studies on compatibility, we need a more fine-grained notion of consistency.
-Considering transformations languages, such as \qvtr, first, relations are defined at the level of classes and their properties, i.e. how properties of instances of some classes are related to properties of instances of other classes.
-Second, they are defined in an \emph{intensional} way, i.e., constraints specify which elements shall be considered consistent, rather than enumerating all consistent instances, known as an \emph{extensional} specification.
-Both ways have equal expressiveness and especially each intensional specification can be transformed into an extensional one by enumerating all instances that fulfill the constraints.
-Since mathematical statements are easier to make on extensional specifications, we stick to them.
+Considering transformations languages, such as \qvtr, first, relations are defined at the level of classes and their properties, i.e., how properties of instances of some classes are related to properties of instances of other classes.
+Second, they are defined in an \emph{intensional} way, i.e., constraints specify which elements shall be considered consistent, rather than enumerating all consistent instances in an an \emph{extensional} specification.
+We have already discussed that both ways have equal expressiveness and that we stick to extensional specifications for reasons of simplicity, which can be transformed into extensional ones by enumerating all instances that fulfill the constraints.
 However, we reuse the concept of specifying relations at the level of classes and their properties. % rather than complete models.
 This makes it easier to make statements about dependencies between consistency relations.
 For example, two fine-grained consistency relations considering completely independent sets of classes cannot interfere, and thus especially do not introduce any compatibility problems, which is not easy to express when considering relations at the level of complete models.
-Finally, from such a fine-grained specification, a holistic relation at level of models can always be derived by enumerating all models that fulfill all the fine-grained specifications, thus it does not restrict expressiveness in any way and can be seen as a \emph{compositional approach} for defining consistency.
+Finally, from such a fine-grained specification, a holistic relation at the level of models can always be derived by enumerating all models that fulfill all the fine-grained specifications, thus it does not restrict expressiveness in any way and can be seen as a \emph{compositional approach} for defining consistency.
 
 In the following, we start with introducing a fine-grained notion of consistency relations. % based on such fine-grained consistency relations.
 We proceed with considerations on implicit relations, which are induced by a set of consistency relations, such as transitive relations, to finally precisely define a notion of compatibility.
@@ -217,10 +214,10 @@ This implies that the metamodel of such a model has to contain all the classes i
         \formulaskip & 
         \modelset{m} \mathtext{contains} \tupled{\conditionelement{c}{l}, \conditionelement{c}{r}} \equivalentperdefinition \modelset{m} \mathtext{contains} \conditionelement{c}{l} \land \modelset{m} \mathtext{contains} \conditionelement{c}{r}
     \end{align*}
-    Without loss of generality, we assume that each condition element of both conditions occurs in at least one consistency relation pair, i.e.
+    Without loss of generality, we assume that each condition element of both conditions occurs in at least one consistency relation pair, i.e.,
     \begin{align*}
         \formulaskip & 
-        \forall \conditionelement{c}{} \in \condition{c}{l} : \exists \tupled{\conditionelement{c}{l}, \conditionelement{c}{r}} \in \consistencyrelation{CR}{} : \conditionelement{c}{} = \conditionelement{c}{l} \\
+        \forall \conditionelement{c}{} \in \condition{c}{l} : \exists \tupled{\conditionelement{c}{l}, \conditionelement{c}{r}} \in \consistencyrelation{CR}{} : \conditionelement{c}{} = \conditionelement{c}{l}\\
         &  
         \land \forall \conditionelement{c}{} \in \condition{c}{r} : \exists \tupled{\conditionelement{c}{l}, \conditionelement{c}{r}} \in \consistencyrelation{CR}{} : \conditionelement{c}{} = \conditionelement{c}{r}
     \end{align*}
@@ -230,7 +227,7 @@ This implies that the metamodel of such a model has to contain all the classes i
 
 A consistency relation according to \autoref{def:consistencyrelation} is a set of pairs of object tuples, which are supposed to indicate the tuples of objects that are considered consistent with each other, i.e., if a model contains one of the left object tuples occurs in the relation one of the related right object tuples has to occur in a model as well.
 It is based on two conditions that define relevant object tuples in each of the two metamodels and defines the ones that are related to each other.
-\todo{Metamodels in definition may not be different, so consistency relations within a model can be defined. May be a problem if the class tuples are overlapping, so exclude and discuss that?}
+%\todo{Metamodels in definition may not be different, so consistency relations within a model can be defined. May be a problem if the class tuples are overlapping, so exclude and discuss that?}
 
 We can now define a notion of consistency for a set of models based on the definition of consistency relations.
 
@@ -277,8 +274,8 @@ We can now define a notion of consistency for a set of models based on the defin
     For a set of consistency relations $\consistencyrelationset{CR} = \setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR}{2}, \dots}$, we say that:
     \begin{align*}
         \formulaskip &
-        \modelset{m} \mathtext{consistent to} \consistencyrelationset{CR} \equivalentperdefinition \\
-        & \formulaskip
+        \modelset{m} \mathtext{consistent to} \consistencyrelationset{CR} \equivalentperdefinition %\\
+        %& \formulaskip
         \forall \consistencyrelation{CR}{} \in \consistencyrelationset{CR} : \modelset{m} \mathtext{consistent to} \consistencyrelation{CR}{}
     \end{align*}
 \end{definition}
@@ -286,19 +283,21 @@ We can now define a notion of consistency for a set of models based on the defin
 \begin{figure}
     \centering
     \input{figures/correctness/formal/consistency_example.tex}
-    \caption{A consistency relation between employee and resident and six example model pairs: model pairs 1--4 being consistent with an appropriate witness structure $\consistencyrelation{W}{}$ shown in blue and model pair 5 and 6 being inconsistent with an inappropriate mapping structure shown in red and dashed.}
-    \label{fig:correctness:formal:consistency_example}
+    \caption[Examples for fine-grained consistency relations]{A consistency relation between employee and resident and six example model pairs: model pairs 1--4 being consistent with an appropriate witness structure $\consistencyrelation{W}{}$ shown in blue and model pair 5 and 6 being inconsistent with an inappropriate mapping structure shown in red and dashed.}
+    \label{fig:compatibility:formal_notion:consistency_example}
 \end{figure}
 
 A consistency relation $\consistencyrelation{CR}{}$ relates one condition element at the left side to one or more other condition elements at the right side of the relation.
 The definition of consistency ensures that if one condition element $\conditionelement{c}{} \in \condition{c}{l,\consistencyrelation{CR}{}}$ in the left side of the relation occurs in a set of models, exactly one of the condition elements related to it by a consistency relation $\consistencyrelation{CR}{}$ occurs in another model to consider the set of models consistent.
-\todo{Give example why this is reasonable, i.e. a counterexample for the more simple notion of Max.}
+%\todo{Give example why this is reasonable, i.e. a counterexample for the more simple notion of Max.}
 If another element that is related to $\conditionelement{c}{}$ occurs in the models, this one has to be, in turn, related to another condition element $\conditionelement{c'}{} \in \condition{c}{l,\consistencyrelation{CR}{}}$ of the left side of condition elements by $\consistencyrelation{CR}{}$, which also occurs in the models.
-This is a necessary restriction, because usually a single corresponding element is expected, as we will see in examples in the following.
+Without that restriction, using the modified relation $\consistencyrelation{R}{ER}'$ in the running example defined in \autoref{fig:compatibility:three_persons_example_extended}, there may exist two employees having the same name only with different capitalizations, which are considered consistent to a single resident having the same in lower case.
+The given restriction ensures that if there are several alternatives for a corresponding element to be consistent, only one is actually present.
+This is usually expected, as we will see in examples in the following.
 To achieve that, the definition uses an auxiliary structure $\consistencyrelation{W}{}$, which serves as a witness structure for those pairs of condition elements that co-occur in the models.
 
 \begin{example}
-The definition of consistency is exemplified in \autoref{fig:correctness:formal:consistency_example}, which is an alternation of an extract of \autoref{fig:prologue:three_persons_example} only considering employees and residents. Models with employees and residents are considered consistent if for each employee exactly one resident with the same name or the same name in lowercase exists.
+The definition of consistency is exemplified in \autoref{fig:compatibility:formal_notion:consistency_example}, which is an alternation of an extract of \autoref{fig:compatibility:three_persons_example_extended} only considering employees and residents. Models with employees and residents are considered consistent if for each employee exactly one resident with the same name or the same name in lowercase exists.
 The model pairs $1$--$3$ are obviously consistent according to the definition, because there is always a pair of objects that fulfills the consistency relation.
 In model pair $4$, there is a consistent resident for each employee, but there is no appropriate employee for the resident with $name = "Alice"$. However, our definition of consistency only requires that for each condition element of the left side of the relation that appears in the models an appropriate right element occurs, but not vice versa. Thus, a relation is interpreted unidirectionally, which we will discuss in more detail in the following.
 In model pair $5$, there are two residents with names in different capitalizations, which would both be considered consistent to the employee according to the consistency relation.
@@ -320,7 +319,7 @@ In this case, there are two residents respectively two employees that could be c
 As mentioned before, we define the notion of consistency in a unidirectional way, which means that a consistency relation may define that some elements $\conditionelement{c}{r}$ are required to occur in a set of models if some elements $\conditionelement{c}{l}$ occur, but not vice versa.
 Such a unidirectional notion can also be reasonable in our example, as it could make sense to require a resident for each employee, but not every resident might also be an employee.
 To achieve a bijective consistency definition, for each consistency relation $\consistencyrelation{CR}{}$ its transposed relation $\consistencyrelation{CR^T}{} = \setted{\tupled{\conditionelement{c}{l}, \conditionelement{c}{r}} \mid \tupled{\conditionelement{c}{r}, \conditionelement{c}{l}} \in \consistencyrelation{CR}{}}$ can be considered as well.
-Regarding \autoref{fig:correctness:formal:consistency_example}, if we consider the relation between employees and residents as well as its transposed, the model pair $4$ would also be considered inconsistent, because an appropriate employee for each resident would be required by the transposed relation.
+Regarding \autoref{fig:compatibility:formal_notion:consistency_example}, if we consider the relation between employees and residents as well as its transposed, the model pair $4$ would also be considered inconsistent, because an appropriate employee for each resident would be required by the transposed relation.
 We call sets of consistency relations that contain only bijective definitions of consistency \emph{symmetric}.
 
 \begin{definition}[Symmetric Consistency Relation Set]
@@ -338,7 +337,7 @@ We call sets of consistency relations that contain only bijective definitions of
 
 Any description of bijective consistency relations can be achieved by defining a symmetric set of consistency relations.
 We chose to define consistency in a unidirectional way due to two reasons:
-\begin{enumerate}
+\begin{properenumerate}
     \item Some relevant consistency relations are actually not bijective. 
     Apart from the simple example concerning residents and employees, this situation always occurs when objects at different levels of abstraction are related.
     Consider a relation between components and classes, requiring for each component an implementation class but not vice versa, or a relation between UML models and object-oriented code, requiring for each UML class an appropriate class in code but not vice versa.
@@ -348,7 +347,7 @@ We chose to define consistency in a unidirectional way due to two reasons:
     These relations could not be expressed if consistency relations were always considered bidirectional for determining consistency.
     \item We consider networks of consistency relations, in which, as we will see later, a combination of multiple bijective consistency relations does not necessarily imply a bijective consistency relation again. 
     Thus, we need a unidirectional notion of consistency relations anyway.
-\end{enumerate}
+\end{properenumerate}
 
 
 \subsubsection{Implicit Consistency Relations}
@@ -410,19 +409,21 @@ In the following, we explain these two requirements at an example.
         \centering
         \input{figures/correctness/formal/concatenation_example}
     \end{subfigure}
+
+    \vspace{1em}
     \begin{subfigure}{\textwidth}
         \centering
         \input{figures/correctness/formal/concatenation_subset_example}
     \end{subfigure}
 %    \includegraphics[width=\columnwidth]{figures/consistency_concatenation_example.png} 
     %\includegraphics[width=\columnwidth]{figures/concatenation_subset.png}
-    \caption{Two scenarios, each with two consistency relations: 
+    \caption[Examples for consistency relation concatenation]{Two scenarios, each with two consistency relations: 
     Consistency relations $\consistencyrelation{CR}{1}$ and two options $\consistencyrelation{CR}{2}, \consistencyrelation{CR'}{2}$ with $\consistencyrelation{CR}{1} \concat \consistencyrelation{CR}{2} \neq \emptyset$ and $\consistencyrelation{CR}{1} \concat \consistencyrelation{CR'}{2} = \emptyset$, and consistency relations $\consistencyrelation{CR}{3}$ and $\consistencyrelation{CR}{4}$ with $\consistencyrelation{CR}{3} \concat \consistencyrelation{CR}{4} = \emptyset$ and $\consistencyrelation{CR^T}{4} \concat \consistencyrelation{CR^T}{3} \neq \emptyset$}
     \label{fig:correctness:formal:concatenation_example}
 \end{figure}
 
 \begin{example}
-\autoref{fig:correctness:formal:concatenation_example} extends the initial example (\autoref{fig:prologue:three_persons_example}) with further classes in the consistency relations, such that they do not only relate single classes to each other.
+\autoref{fig:correctness:formal:concatenation_example} extends the initial example (\autoref{fig:compatibility:three_persons_example_extended}) with further classes in the consistency relations, such that they do not only relate single classes to each other.
 It defines an address for employees and in the second example also a location for the address of residents, which are represented in additional classes.
 Both examples contains a consistency relation $\consistencyrelation{CR}{1}$ respectively $\consistencyrelation{CR}{3}$ between persons and residents, which define that for each person a resident with the same name has to exist.
 The examples provide different options for consistency relation between residents (with locations) and employees with addresses ($\consistencyrelation{CR}{2}, \consistencyrelation{CR'}{2}, \consistencyrelation{CR}{4}$), which exemplify the necessity for the restrictions in \autoref{def:relationconcatenation}:
@@ -659,7 +660,7 @@ As a direct result of the previous lemma, we can now show that the transitive cl
 \subsection{A Formal Notion of Compatibility}
 
 Based on the fine-grained notion of consistency in terms of consistency relations, we can know precisely formulate our initially informal notion of \emph{compatibility} of consistency relations.
-We stated that we consider consistency relation incompatible if they are somehow contradictory, like the relation between names in our initial example in \autoref{fig:prologue:three_persons_example}.
+We stated that we consider consistency relation incompatible if they are somehow contradictory, like the relation between names in our initial example in \autoref{fig:compatibility:three_persons_example_extended}.
 In that example, for residents with non-lowercase names no consistent set of models could be derived.
 To capture that in a definition, we consider relations compatible if for all condition elements in the consistency relations, i.e., for every tuple of objects for which consistency is somehow constrained by requiring further elements to exist in a set of models to consider it consistent, a consistent model containing those objects can be found. In consequence, a consistency relation is not allowed to prevent objects for which other relations specify consistency from existing in consistent models.
 
@@ -692,12 +693,12 @@ We exemplify this notion of compatibility on an extract of the initial example w
     \centering
     \input{figures/correctness/formal/compatibility_examples}
     %\includegraphics[width=\columnwidth]{figures/incompatibility_example.png}
-    \caption{Three metamodels with different consistency relations. The sets $\setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR^T}{1},\consistencyrelation{CR}{2}, \consistencyrelation{CR^T}{2}, \consistencyrelation{CR}{3}, \consistencyrelation{CR^T}{3}}$ and $\setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR^T}{1}, \consistencyrelation{CR''}{2}, \consistencyrelation{CR''^T}{2}, \consistencyrelation{CR}{3}, \consistencyrelation{CR^T}{3}}$ are compatible, whereas the sets $\setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR^T}{1}, \consistencyrelation{CR'}{2}, \consistencyrelation{CR'^T}{2}, \consistencyrelation{CR}{3}, \consistencyrelation{CR^T}{3}}$ and $\setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR^T}{1}, \consistencyrelation{CR}{2}, \consistencyrelation{CR^T}{2}, \consistencyrelation{CR'}{3}, \consistencyrelation{CR'^T}{3}}$ are not.}
+    \caption[Examples for different incompatibility scenarios]{Three metamodels with different consistency relations. The sets $\setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR^T}{1},\consistencyrelation{CR}{2}, \consistencyrelation{CR^T}{2}, \consistencyrelation{CR}{3}, \consistencyrelation{CR^T}{3}}$ and $\setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR^T}{1}, \consistencyrelation{CR''}{2}, \consistencyrelation{CR''^T}{2}, \consistencyrelation{CR}{3}, \consistencyrelation{CR^T}{3}}$ are compatible, whereas the sets $\setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR^T}{1}, \consistencyrelation{CR'}{2}, \consistencyrelation{CR'^T}{2}, \consistencyrelation{CR}{3}, \consistencyrelation{CR^T}{3}}$ and $\setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR^T}{1}, \consistencyrelation{CR}{2}, \consistencyrelation{CR^T}{2}, \consistencyrelation{CR'}{3}, \consistencyrelation{CR'^T}{3}}$ are not.}
     \label{fig:correctness:formal:incompatibility_example}
 \end{figure}
 
 \begin{example}
-\autoref{fig:correctness:formal:incompatibility_example} shows an extract of the three metamodels from \autoref{fig:prologue:three_persons_example} and several consistency relations, of which different combinations are compatible or incompatible according to the previous definition.
+\autoref{fig:correctness:formal:incompatibility_example} shows an extract of the three metamodels from \autoref{fig:compatibility:three_persons_example_extended} and several consistency relations, of which different combinations are compatible or incompatible according to the previous definition.
 We always consider the actual relations together with their transposed ones to have a symmetric set of consistency relations.
 % \begin{enumerate}
 % \item $\setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR^T}{1},\consistencyrelation{CR}{2}, \consistencyrelation{CR^T}{2}, \consistencyrelation{CR}{3}}$:
@@ -733,7 +734,7 @@ Finally, such a relation would not prevent a consistency repair routine from fin
 So this can be seen as a semantic problem that requires further relation-specific knowledge, as it is necessary to know that a first name should never be mapped to a last name in our example.
 
 \item[$\setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR^T}{1}, \consistencyrelation{CR}{2}, \consistencyrelation{CR^T}{2}, \consistencyrelation{CR'}{3}, \consistencyrelation{CR'^T}{3}}$:]
-These consistency relations reflect the ones of our motivational example in \autoref{fig:prologue:three_persons_example}.
+These consistency relations reflect the ones of our motivational example in \autoref{fig:compatibility:three_persons_example_extended}.
 According to the informal notion of incompatibility that we motivated in the introduction with that example, our formal definition of compatibility also considers these relations as incompatible, because it is not possible to create a resident with an uppercase name, such that the containing set of models is consistent.
 For a resident with $name = \mathtext{"A\textvisiblespace B"}$, a person with $firstname = \mathtext{"A"}$ and $lastname = \mathtext{"B"}$ has to exist, which requires existence of an employee with $name = \mathtext{"A\textvisiblespace B"}$. Now $\consistencyrelation{CR'}{3}$ requires a resident with $name = \mathtext{"a\textvisiblespace b"}$ to exist, which in turn requires a resident with $firstname = \mathtext{"a"}$ and $lastname = \mathtext{"b"}$ and an employee with $name = \mathtext{"a\textvisiblespace b"}$ to exist.
 In consequence, there are two employees, one with the uppercase and one with the lowercase name, for which a resident with the lowercase name has to exist according to the relation $\consistencyrelation{CR'}{3}$. So there is no witness structure with a unique mapping between the elements that is required to fulfill \autoref{def:consistency} for consistency.
