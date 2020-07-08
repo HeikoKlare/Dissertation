@@ -1,0 +1,33 @@
+%\let\oldalgorithmic\algorithmic 
+%\renewcommand\algorithmic{\ttfamily\fontseries{l}\selectfont\oldalgorithmic}
+%\renewcommand{\Comment}[2][.3\linewidth]{\leavevmode\hfill\makebox[#1][l]{//~#2}}
+
+    %\algrenewcommand\alglinenumber[1]{\texttt{\footnotesize #1}}
+    \makeatletter
+    \algnewcommand{\LineComment}[1]{\Statex \hskip\ALG@thistlm \(// \) #1}
+\makeatother
+
+\begin{algorithmic}[1]
+\Procedure{\textsc{Prove-Compatibility}}{$\consistencyrelationset{CR}$}
+    \State $isTree$ $\leftarrow$ \textsc{Is-Relation-Tree}($\consistencyrelationset{CR}$) \label{algo:compatibility:starttree}
+    \If{$isTree$}
+        \State \Return{\textsc{true}}
+    \EndIf \label{algo:compatibility:endtree}
+
+    \State $hasIndependentSubsets$ $\leftarrow$ \textsc{Has-Independent-Subsets}($\consistencyrelationset{CR}$) \label{algo:compatibility:startindependence}
+    \If{$hasIndependentSubsets$}
+        \State $\setted{\consistencyrelationset{CR}_{1}, \consistencyrelationset{CR}_{2}}$ $\leftarrow$ \textsc{Find-Independent-Subsets}($\consistencyrelationset{CR}$)
+        \State $isFirstSetCompatible$ = \textsc{Prove-Compatibility}($\consistencyrelationset{CR}_{1}$)
+        \State $isSecondSetCompatible$ = \textsc{Prove-Compatibility}($\consistencyrelationset{CR}_{2}$)
+        \State \Return{$isFirstSetCompatible \land isSecondSetCompatible$}
+    \EndIf \label{algo:compatibility:endindependence}
+
+    \State $redundantRelation$ $\leftarrow$ \textsc{Find-Redundant-Relation}($\consistencyrelationset{CR}$) \label{algo:compatibility:startredundancy}
+    \If{$redundantRelation$ $\neq \varnothing$}
+        \State $\consistencyrelationset{CR}'$ = $\consistencyrelationset{CR} \setminus redundantRelation$
+        \State \Return{\textsc{Prove-Compatibility}($\consistencyrelationset{CR}'$)}
+    \EndIf \label{algo:compatibility:endredundancy}
+
+    \State \Return{\textsc{false}} \label{algo:compatibility:failure}
+\EndProcedure
+\end{algorithmic}
