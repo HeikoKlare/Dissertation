@@ -10,33 +10,37 @@
 \algdef{SE}[DOWHILE]{Do}{doWhile}{\algorithmicdo}[1]{\algorithmicwhile\ #1}%
 
 \begin{algorithmic}[1]
-\Procedure{\textsc{Enumerate-Cycles}}{$\text{Dual}\ \mathcal{M}^{*}, \textsc{v} \in V_{\mathcal{M}^{*}}$}
-    \State $\{B_1,\dots,B_n\}$ $\leftarrow$ \textsc{Paton-Algorithm}($\mathcal{M}^{*}$)
-    \State $Q$ $\leftarrow$ $\{B_1\}$, $R$ $\leftarrow$ $\varnothing$, $R^{*}$ $\leftarrow$ $\varnothing$\\
+\Procedure{\textsc{Enumerate-FoundCycles}}{$\text{Dual}\ \mathcal{M}^{*}, $p$ \in V_{\mathcal{M}^{*}}$}
+    \State $\{base_1,\dots,base_n\}$ $\leftarrow$ \textsc{Paton-Algorithm}($\mathcal{M}^{*}$)
+    \State $foundCycles$ $\leftarrow$ $\{base_1\}$
+    \State $currentCycles$ $\leftarrow$ $\varnothing$, $currentCycles^{*}$ $\leftarrow$ $\varnothing$\\
 
-    \For{$B \in \{B_2, \dots, B_n\}$}
-        \For{$T \in Q$}
-            \If{$T \cap B \neq \varnothing$}
-                \State $R \leftarrow R \cup \{T \oplus B\}$
+    \For{$base \in \{base_2, \dots, base_n\}$}
+        \For{$foundCycle \in foundCycles$}
+            \State $newCycle \leftarrow foundCycle \oplus base$
+            \If{$foundCycle \cap base \neq \varnothing$}
+                \State $currentCycles \leftarrow currentCycles \cup \{newCycle\}$
             \Else
-                \State $R^{*} \leftarrow R^{*} \cup \{T \oplus B\}$
+                \State $currentCycles^{*} \leftarrow currentCycles^{*} \cup \{newCycle\}$
             \EndIf
         \EndFor
-        \LineComment{Remove non-simple cycles from $R$}
-        \For{$U, V \in R$}
-            \If{$U \subset V$}
-                \State $R \leftarrow R \setminus \{V\}$, $R^{*} \leftarrow R^{*} \cup \{V\}$
+        \LineComment{Remove non-simple cycles from $currentCycles$}
+        \For{$cycle_1, cycle_2 \in currentCycles$}
+            \If{$cycle_2 \subset cycle_1$}
+                \State $currentCycles \leftarrow currentCycles \setminus \{cycle_1\}$
+                \State $currentCycles^{*} \leftarrow currentCycles^{*} \cup \{cycle_1\}$
             \EndIf
         \EndFor
-        \LineComment{New valid cycles are in $R \cup \{B\}$}
-        \For{$C \in R \cup \{B\}$}\label{lst:line:newCycles}
-            \If{$v \in C$ \textbf{and} \textsc{Replace-Hyperedge}$(v, C)$}
-                \State remove $v$ and its incident edges from $\mathcal{M}^{*}$
+        \LineComment{New valid cycles are in $currentCycles \cup \{base\}$}
+        \For{$cand \in currentCycles \cup \{base\}$}\label{lst:line:newCycles}
+            \If{$p \in cand$ \textbf{and} \textsc{Replace-Hyperedge}$(p, cand)$}
+                \State remove $p$ and its incident edges from $\mathcal{M}^{*}$
                 \State \textbf{break}
             \EndIf
         \EndFor
-        \State $Q \leftarrow Q \cup R \cup R^{*} \cup \{B\}$
-        \State $R \leftarrow \varnothing$, $R^{*} \leftarrow \varnothing$
+        \State $foundCycles \leftarrow foundCycles \cup currentCycles$
+        \State $foundCycles \leftarrow foundCycles \cup currentCycles^{*} \cup \{base\}$
+        \State $currentCycles \leftarrow \varnothing$, $currentCycles^{*} \leftarrow \varnothing$
     \EndFor
     %\State \Return{$S$}
 \EndProcedure

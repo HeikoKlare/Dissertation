@@ -1,7 +1,7 @@
 \section{A Practical Approach to Prove Compatibility}
 \label{chap:compatibility:practical_approach}
 
-Goal: Applies formal framework for extensional specification to actual languages with intensional specification (MA Aurélien)
+%Goal: Applies formal framework for extensional specification to actual languages with intensional specification (MA Aurélien)
 
 \begin{copiedFrom}{SoSym MPM4CPS}
 
@@ -9,12 +9,12 @@ Goal: Applies formal framework for extensional specification to actual languages
 %\label{sec:decomposition}
 
 The formal approach adopted in this article demonstrates that deriving a consistency relation tree from a set of consistency relations $\consistencyrelationset{CR}$ is an effective way to prove compatibility. It is especially a consequence of \autoref{theorem:treecompatibility}. 
-Given that proving compatibility amounts to the construction of a consistency relation tree, this result lends itself well to an operationalization. To this end, we propose an algorithm that turns the proof of compatibility into an operational procedure. This constitutes our contribution \ref{contrib:operationalizedapproach}.
+Given that proving compatibility amounts to the construction of a consistency relation tree, this result lends itself well to an operationalization. To this end, we propose an algorithm that turns the proof of compatibility into an operational procedure. %This constitutes our contribution \ref{contrib:operationalizedapproach}.
 For the most part, this algorithm is based on results previously developed and described in detail in a master's thesis~\cite{pepin2019ma} and, as introduced before, is mostly taken from the article~\owncite{klare2020compatibility-report} describing those results.
 
 Constructing a consistency relation tree can be achieved by finding and virtually removing every redundant consistency relation in $\consistencyrelationset{CR}$. Such a result facilitates the development of software systems. First, developers build transformations independently, resulting in a transformation network. Then,~they regularly run a procedure that assesses the compatibility of consistency relations specified in transformations by checking the existence of a consistency relation tree.
 
-Removing redundant relations in a consistency relation set to generate a tree is called \textit{decomposition}. Designing a decomposition procedure requires to represent consistency relations in actual model transformation languages and to provide a way to test the redundancy of a consistency relation. We first highlight a mapping between the consistency framework developed in this article and the QVT-R transformation language through the use of \textit{predicates}. As a consequence, results achieved with consistency relations become also applicable with QVT-R. Then, we design a fully automated decomposition procedure that takes a \emph{consistency specification}, i.e., a set of QVT-R transformations, as an input and virtually removes as many redundant consistency relations as possible. In the decomposition procedure, each consistency relation removal is a two-step process. First, a potentially redundant relation and an alternative concatenation of consistency relations are identified. Then, a redundancy test is performed: it answers whether it is possible or not to remove the candidate relation using the alternative concatenation. Uncoupling the search for candidates from the decision-making makes it possible to plug in different strategies to test redundancy. This section focuses on the first step, i.e., setting up a structure suited to the detection of possibly redundant relations and finding candidates for the redundancy test.
+Removing redundant relations in a consistency relation set to generate a tree, or a set of independent trees, is called \textit{decomposition}. Designing a decomposition procedure requires to represent consistency relations in actual model transformation languages and to provide a way to test the redundancy of a consistency relation. We first highlight a mapping between the consistency framework developed in this article and the QVT-R transformation language through the use of \textit{predicates}. As a consequence, results achieved with consistency relations become also applicable with QVT-R. Then, we design a fully automated decomposition procedure that takes a \emph{consistency specification}, i.e., a set of QVT-R transformations, as an input and virtually removes as many redundant consistency relations as possible. In the decomposition procedure, each consistency relation removal is a two-step process. First, a potentially redundant relation and an alternative concatenation of consistency relations are identified. Then, a redundancy test is performed: it answers whether it is possible or not to remove the candidate relation using the alternative concatenation. Uncoupling the search for candidates from the decision-making makes it possible to plug in different strategies to test redundancy. This section focuses on the first step, i.e., setting up a structure suited to the detection of possibly redundant relations and finding candidates for the redundancy test.
 
 %% 5.1.
 \subsection{Consistency Relations in Transformation Languages}
@@ -24,6 +24,7 @@ They rather describe patterns for models to be considered consistent and sometim
 In relational transformation languages, developers define consistency as a set of criteria that models must fulfill. Criteria are expressed using metamodel elements (i.e., class properties), as objects are only distinguished by their contents. For example, an \texttt{Employee} object and a \texttt{Person} object are considered consistent if their \texttt{name} attributes are equal.
 
 Criteria are equivalent to predicates, i.e., Boolean-valued filter functions: consistency relations are then defined as sets of pairs of condition elements for which the predicate evaluates to \textsc{true}. Therefore, we move from an extensional to an intensional, programming-like definition of consistency relations, making it easier to link consistency relations with QVT-R transformations.
+In \autoref{chap:correctness:notions_consistency:intensional_extensional}, we have shown that both types of specification provide equal expressiveness.
 
 \subsubsection{Properties, Property Values and Predicates}
 
@@ -262,6 +263,7 @@ transformation EmployeeResident(
     \label{lst:correctness:prevention:running_example_qvtr}
 \end{figure*}
 
+\todo{Take subsubsections of the following as subsection}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Decomposition Procedure}
 
@@ -364,11 +366,11 @@ OCL expressions can also occur in \texttt{when} and \texttt{where} clauses. As w
 
 \begin{algorithm}[t]
     \input{algorithms/merge_algorithm}
-    \caption[Merge algorithm]{Merge algorithm. Taken from \owncite{klare2020compatibility-report}.}
-    \label{algo:correctness:prevention:merge}
+    \caption[Merge algorithm combining properties to predicates]{Merge algorithm combining properties to predicates. Taken from \owncite{klare2020compatibility-report}.}
+    \label{algo:mergeproperties}
 \end{algorithm}
 
-\autoref{algo:correctness:prevention:merge} formalizes the way properties are grouped to form predicates. At the beginning of the algorithm, each property is associated with QVT-R variables that occur in the corresponding property template item. This association, called an \textit{entry}, is a couple $(\{p\}, V_{\{p\}})$ where $\{p\}$ is a singleton containing the property $p$ and $V_{\{p\}}$ a set of QVT-R variables. The entry of an invariant is composed of variables in it and all properties associated with these variables through property template items. At each iteration, the algorithm chooses a reference entry and merges all other entries with it if the intersection of their sets of QVT-R variables is nonempty. The algorithm stops when all sets of QVT-R variables are pairwise disjoint.
+\autoref{algo:mergeproperties} formalizes the way properties are grouped to form predicates. At the beginning of the algorithm, each property is associated with QVT-R variables that occur in the corresponding property template item. This association, called an \textit{entry}, is a couple $(\{p\}, V_{\{p\}})$ where $\{p\}$ is a singleton containing the property $p$ and $V_{\{p\}}$ a set of QVT-R variables. The entry of an invariant is composed of variables in it and all properties associated with these variables through property template items. At each iteration, the algorithm chooses a reference entry and merges all other entries with it if the intersection of their sets of QVT-R variables is nonempty. The algorithm stops when all sets of QVT-R variables are pairwise disjoint.
 
 \begin{example}
 There are five properties in the relation \texttt{PE} of the QVT-R transformation \texttt{PersonEmployee} in \autoref{lst:correctness:prevention:running_example_qvtr}, which can be described with the following entries:
@@ -447,23 +449,23 @@ Given that connected components are independent, a predicate can only be replace
 
 In the property graph, an alternative path for a hyperedge $E$ (i.e., a predicate) is a sequence of pairwise incident hyperedges such that the first and the last are also incident to $E$. Hyperedges of the property graph become vertices in the dual. Therefore, an alternative path for a predicate $E$ in the dual is characterized by a cycle that contains $E$. If the vertex sequence of such a cycle is $\tupled{E, E_1, \dots, E_n, E}$, the alternative path is $\tupled{E_1, \dots, E_n}$. Ultimately, the generation of candidate relations for a redundancy test amounts to the enumeration of pairs $(E, \tupled{E_i})$, where $E$ is a possibly redundant predicate (i.e., a hyperedge in the property graph and a vertex in its dual) and $\tupled{E_i}$ is an alternative sequence of predicates that may replace $E$. There may be multiple alternative paths for a given predicate in the dual of the property graph, hence the need to find multiple cycles. The problem of finding all simple cycles in an undirected graph is called \textit{cycle enumeration}.
 
-\begin{algorithm}[b]
+\begin{algorithm}
     \input{algorithms/cycle_enumeration_algorithm}
     \caption[Enumeration of alternative paths]{Enumeration of alternative paths. Taken from \owncite{klare2020compatibility-report}.}
-    \label{algo:correctness:prevention:cycleEnum}
+    \label{algo:cycleenumeration}
 \end{algorithm}
 
-The cycle enumeration algorithm used in the decomposition procedure relies on a \textit{cycle basis}. In an undirected graph, a cycle basis is a set of simple cycles that can be combined to generate all other simple cycles of the graph. The cycle basis is first computed using Paton's algorithm~\cite{paton1969algorithm}. For a given predicate, the enumeration starts from the cycle basis and merges two or more cycles in each iteration. In the context of the decomposition procedure, a cycle must also go through the predicate to analyze. \autoref{algo:correctness:prevention:cycleEnum} is a slightly modified version of Gibb's algorithm to enumerate simple cycles in an undirected graph using a cycle basis~\cite{gibbs1969cycle}. In this algorithm, every cycle is represented as a set of edges. We denote the symmetric difference with the $\oplus$ sign, i.e., $A \oplus B$ is the set of edges that are in $A$ or in $B$ but not in both. The set $Q$ contains all linear combinations of cycles. Merged with cycles of the basis, these linear combinations are used to merge more than two cycles of the basis. At each iteration of \autoref{algo:correctness:prevention:cycleEnum}, new simple cycles are in $R \cup \{B\}$. Note that redundancy tests can be performed as new cycles are generated, as shown on line \ref{lst:line:newCycles}. By doing so, it is not necessary to store all cycles and wait for the end of the algorithm before starting redundancy tests. More interestingly, if the redundancy test is positive for one alternative sequence of predicates, there is no need to test others. The initial predicate can be removed and the algorithm can be used with another possibly redundant predicate. 
+The cycle enumeration algorithm used in the decomposition procedure relies on a \textit{cycle basis}. In an undirected graph, a cycle basis is a set of simple cycles that can be combined to generate all other simple cycles of the graph. The cycle basis is first computed using Paton's algorithm~\cite{paton1969algorithm}. For a given predicate, the enumeration processes each cycle from the cycle basis and merges it with all yet processed cycles. In the context of the decomposition procedure, a cycle must also go through the predicate to analyze. \autoref{algo:cycleenumeration} is a slightly modified version of Gibb's algorithm to enumerate simple cycles in an undirected graph using a cycle basis~\cite{gibbs1969cycle}. In this algorithm, every cycle is represented as a set of edges. We denote the symmetric difference with the $\oplus$ sign, i.e., $A \oplus B$ is the set of edges that are in $A$ or in $B$ but not in both. The set $foundCycles$ contains all linear combinations of cycles that were yet processed. Merged with cycles of the basis $base_1, \dots, base_n$, these linear combinations are used to merge more than two cycles of the basis. At each iteration of \autoref{algo:cycleenumeration}, processing a new cycle from the cycle basis $base$, new simple cycles are in $currentCycles \cup \{base\}$. Edge-disjoint or non-simple cycles are stored in $currentCycles^*$. Note that redundancy tests can be performed as new cycles are generated, as shown on line \ref{lst:line:newCycles}. For the given predicate $p$, it is checked whether one of the newly generated cycles is redundant, i.e., it contains the predicate $p$ and $p$ can be replaced by the concatenation of the other edges. By doing so, it is not necessary to store all cycles and wait for the end of the algorithm before starting redundancy tests. More interestingly, if the redundancy test is positive for one alternative sequence of predicates, there is no need to test others. The initial predicate can be removed and the algorithm can be used with another possibly redundant predicate.
   
 \paragraph{Stopping Criterion}
- The decomposition procedure stops when each predicate has been tested once. Note that if the connected component becomes a tree after a few removals of predicates, then the last tests of remaining predicates are trivial. As there are no more cycles in the dual of the connected component, no redundancy test is performed.
+The decomposition procedure stops when each predicate has been tested once. Note that if the connected component becomes a tree after a few removals of predicates, then the last tests of remaining predicates are trivial. As there are no more cycles in the dual of the connected component, no redundancy test is performed.
 
-\subsection{Summary}
+\subsubsection{Summary}
 In this section, we have presented an algorithm for proving compatibility of relations in a consistency specification written in \qvtr.
 We defined property graphs and their dual as a representation of consistency relations and explained how they can be derived from a specification in \qvtr.
 We discussed how a consistency relation tree manifests in such a representation and how candidates for redundancies in connected components of such a representation can be found by computing cycle basis.
 Based on \autoref{theorem:independencecompatibility} and \autoref{theorem:treecompatibility}, as well as \autoref{corollary:transitiveredundancycompatibility}, this algorithm is able to prove compatibility by removing redundant relations, such that the resulting network is a composition of independent trees.
-However, we still need to discuss how redundancy of relations, in terms of redundant predicates in the property graph, can be identified, which we will discuss in the subsequent section.
+However, we still need to discuss how redundancy of relations, in terms of redundant predicates in the property graph, can be identified, according to the \textsc{Replace-Hyperedge} method in \autoref{algo:cycleenumeration}.We will discuss that in the subsequent section.
 
 % \todo[inline, color=kit-orange100]{AP: note on cycles complexity + heuristics (or evaluation, or future work?)} 
 
