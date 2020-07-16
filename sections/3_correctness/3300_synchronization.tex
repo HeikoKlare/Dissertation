@@ -14,9 +14,10 @@ Correctness of such a transformation could then be defined as the property of th
 In theory, a correct transformation can simply be achieved by adhering to that definition.
 
 \mnote{Transformation languages base on unidirectional consistency preservation rules}
-Using ordinary, existing transformation languages, the defined transformations will, however, not follow the definition of a synchronizing transformation.
+Using existing transformation languages, the defined transformations will, however, not follow the definition of a synchronizing transformation.
 Transformation languages usually allow the specification of unidirectional consistency preservation rules, i.e., rules that restore consistency by updating one model if the other was modified.
 Even if transformation languages allow bidirectional specifications, they still derive unidirectional consistency preservation rules from such a specification, such as forward and backward transformation (which may be incremental or not) derived from \glspl{TGG} rules~\cite{leblebici2014IncrementalTGGSurvey}.
+In the following, we refer to such transformations as \emph{ordinary transformations} and give a more precise definition of them later on.
 Synchronizing transformation, as we assume in transformation networks, are able to process changes made in both models and, in turn, also produce changes for both models.
 This is necessary, because in transformation networks both models involved in a transformation may have been modified due to different sequences of transformations having modified both of them.
 
@@ -41,11 +42,19 @@ We will see that this is founded by the insight that only few combinations of ch
 %%%
 \section{Gap between Synchronizing and Ordinary Transformations}
 
-\todo{Add intro to the gap here and then start with example}
+We have already introduced that there is both a formal and practical gap between synchronizing transformations, as we have defined as a component of transformation networks, and ordinary transformations, which are unidirectional and non-synchronizing, as used by most transformation languages.
+In the following, we first give an example for faulty behavior if we simply used ordinary transformations in a transformation network.
+Afterwards, we discuss options to sequentialize ordinary transformations and finally come up with a precise description of the formal gap and a practical approach to close it.
 
+%%
+%% MOTIVATING FAULT EXAMPLE WITH ORDINARY TRANSFORMATIONS
+%%
 \subsection{Behavior of Ordinary Transformations in Networks}
-Show at example that ordinary transformations do not operate as expected in networks.
-We have already sketched given the example of creating a class in UML and Java after adding a component to a \gls{PCM} model in \autoref{chap:introduction:challenges:correctness:synchronization}.
+We have already sketched the example of creating a class in UML and Java after adding a component to a \gls{PCM} model in \autoref{chap:introduction:challenges:correctness:synchronization}.
+In that scenario, it was possible that for a created \gls{PCM} component first a UML class is generated, which is then transformed into a Java class.
+Additionally, the transformation between \gls{PCM} and Java creates another Java class, as it does not consider that there may be another transformation that already created that class.
+Such scenarios can lead to the duplication of elements, or, in case of Java, an overwrite of an already created element, because the source file of the class will be placed at the same location in the file system.
+Overwriting the previously created file may also overwrite and thus remove information that was already added to that class by the transformations across UML.
 
 \begin{figure}
     \centering
@@ -56,16 +65,17 @@ We have already sketched given the example of creating a class in UML and Java a
 
 An analogous example can be given for the running example of persons, employees and residents depicted in \autoref{fig:networks:three_persons_example}.
 We consider the consistency relations $\consistencyrelation{R}{PE}, \consistencyrelation{R}{ER}$ and $\consistencyrelation{R}{PR}$.
-As discussed in \autoref{chap:compatibility}, these relations are compatible, thus for any given person, employee or resident, there is a consistent set of models containing it, which may be found by a set of transformations.
-If we now consider transformations with ordinary, unidirectional consistency preservation rules, they react to the changes in one model and update another accordingly.
+As discussed in \autoref{chap:compatibility}, these relations are compatible, thus for any given person, employee or resident, there is a consistent set of models containing it.
+Thus, the relations do not prevent transformations from finding consistent models whenever a person, employee or resident is added.
+If we now consider ordinary transformations with unidirectional consistency preservation rules, they react to the changes in one model and update another accordingly.
 In case of adding a person, this may look as depicted in \autoref{fig:synchronization:duplicate_creation_example}.
 For each of the given consistency relations, we assume unidirectional consistency preservation rules that preserve consistency according to them.
-They especially create an employee for each added person, an a resident for each created employee and person, respectively.
+They especially create an employee for each added person, and a resident for each created employee and person, respectively.
 Since the transformations assume the models to be consistent before applying the changes, they always add a corresponding element when one of the elements is added.
 This leads to the situation that both $\consistencypreservationrule{CPR}{\consistencyrelation{CR}{ER},\rightarrow}$ as well as $\consistencypreservationrule{CPR}{\consistencyrelation{CR}{PR},\rightarrow}$ create a resident upon creation of a person.
 In consequence, there exist two residents with the same name, which does not fulfill the consistency relations.
 
-It is our goal to find out how such a situation can be avoided by proper definition of such consistency preservation rules.
+It is our goal to find out how such a situation can be avoided by proper definition of consistency preservation rules in existing transformation languages.
 A simple solution in this example would have been to look for the existence of elements to create first.
 This can either be done by using a trace model, which most existing transformation language use to store corresponding elements, or by searching for an appropriate element in the other model.
 Using a trace model, however, has some drawbacks and pitfalls, which we will investigate later.
@@ -103,7 +113,24 @@ Using a trace model, however, has some drawbacks and pitfalls, which we will inv
 
 \subsection{Options for Transformation Sequentialization}
 
-\todo{Start with reference to research on synchronization scenarios, e.g., Diskin and Xiong}
+\mnote{Existing synchronization supports arbitrary conflicting concurrent changes}
+Some existing work already proposed strategies to synchronize concurrent changes between two models.
+For example, some work proposes techniques for processing concurrent changes with \glspl{TGG}~\cite{hermann2012concurrentSynchronization-FASE,orejas2020IncrementalConcurrentSynchronization-SoSym}, whereas others define specific algorithms for a general notion of synchronizing transformations according to our given definition~\cite{xiong2013SynchronizingConcurrentUpdates-FASE,xiong2009parallelUpdates-ICMT}.
+All these approaches, however, deal with the more general case that any changes may have been made to the models.
+That especially includes conflicting updates by one or more user, which need to be resolved.
+Such a resolution may lead to the necessity of reverting one of the changes.
+
+\mnote{Transformation networks only produce specific concurrency situations}
+We are, however, in the special situation that transformations do not perform arbitrary changes and that changes of other transformations may need to be revised, but not reverted.
+For example, it may be necessary to update an attribute value again, because the interval of consistent values of the currently executed transformation is smaller than the one of a transformation executed before.
+It will, however, not be necessary to completely revert the modification of the attribute value, because the modification was necessary for another transformation to restore consistency, thus the causal change for which consistency was restored, needs to be reverted as well.
+Finally, this would result in reverting a user change, which should never happen.
+
+\mnote{We assume compatibility of transformations}
+In fact, we assume transformations to be compatible according to \autoref{def:compatibility}, which excludes contradictions in their consistency relations that may prevent transformations from being able to find a consistent result for specific changes.
+This assumptions reduces the potential conflicts that may occur when changes of different transformations need to be synchronized.
+
+\todo{Go on here}
 
 
 
@@ -203,6 +230,9 @@ Thus, the rule is not synchronizing, i.e., it does not consider that the second 
 If we pass the changed second model, i.e., given models $\model{m}{1},\model{m}{2}$ and changes $\change{\metamodel{M}{1}},\change{\metamodel{M}{2}}$, we call $\consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow},\rightarrow}(\model{m}{1},\change{\metamodel{M}{2}}(\model{m}{2}),\change{\metamodel{M}{1}})$.
 Then, in general, the behavior of the function is undefined, as in \autoref{def:consistencypreservationrulecorrectness}, we only required the function to return a change such that applying all changes produces consistent models if the original models were consistent.
 In this case, however, the given models are not consistent to each other.
+
+
+\subsection{Closing the Gap}
 
 We thus want to achieve a slight adaptation of those unidirectional consistency preservation rules, such that they support the case that the second model has already been modified.
 Informally speaking, we want to emulate unidirectional synchronizing rules with non-synchronizing ones.
