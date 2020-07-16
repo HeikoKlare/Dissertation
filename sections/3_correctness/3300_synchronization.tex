@@ -7,15 +7,111 @@
 
 \todo{Ergebnis sollte sein: Synchronisierungseigenschaft ist erreichbar per Konstruktuion}
 
+\mnote{Transformation correctness can be achieved by adhering to the definition}
 Transformations are the central artifacts of which a transformation network is composed.
-We have introduced them as \emph{synchronizing transformations} in \autoref{def:synchronizingtransformation}, which are combinations of a consistency rule together with a consistency preservation rules that preserves it.
+We have introduced them as \emph{synchronizing transformations} in \autoref{def:synchronizingtransformation}, which are combinations of a consistency relation together with a consistency preservation rules that preserves it.
 Correctness of such a transformation could then be defined as the property of the consistency preservation rule to preserve consistency of given models according to the consistency relation (cf.\ \autoref{def:synchronizingtransformationcorrectness}).
 In theory, a correct transformation can simply be achieved by adhering to that definition.
+
+\mnote{Transformation languages base on unidirectional consistency preservation rules}
+Using ordinary, existing transformation languages, the defined transformations will, however, not follow the definition of a synchronizing transformation.
+Transformation languages usually allow the specification of unidirectional consistency preservation rules, i.e., rules that restore consistency by updating one model if the other was modified.
+Even if transformation languages allow bidirectional specifications, they still derive unidirectional consistency preservation rules from such a specification, such as forward, backward and synchronization (meaning incremental update) rules derived from \glspl{TGG}. \todo{Add cite for TGGs and arifacts to derive from them}
+Synchronizing transformation, as we assume in transformation networks, are able to process changes made in both models and, in turn, also produce changes for both models.
+This is necessary, because in transformation networks both models involved in a transformation may have been modified due to different sequences of transformations having modified both of them.
+
+\mnote{We want to find requirements to ordinary transformations to be used as synchronizing ones}
+In this chapter, we aim to close this gap between synchronizing transformations as required in transformation networks and ordinary transformations with unidirectional consistency preservation rules used by transformation languages.
+We investigate which requirements such an ordinary transformation has to fulfill to emulate a synchronizing transformation and thus be used in a transformation network.
+This chapter thus constitutes our contribution \contributionref{contrib:correctness:synchronization}, which consists of three subordinate contributions: a discussion of the formal basis for the gap between synchronizing and ordinary transformations, a case distinction for synchronization scenarios in ordinary transformations, and finally techniques to build synchronizing transformations by ordinary ones.
+\todo{Finally update goals}
+It answers the following research question:
+
+\researchquestionrepeat{rq:correctness:synchronization}
+
+\mnote{Making ordinary transformations synchronizing enables reuse of languages and knowledge}
+The benefit of enabling the definition of ordinary transformations that can be used a synchronizing ones instead of providing an approach or language for the specification of synchronizing transformations is that existing and well-researched transformation languages and knowledge about them can be reused.
+Additionally, it reduces the complexity, because the definition of two unidirectional consistency preservation rules is less cumbersome than the definition of a single synchronizing transformation, which has to consider all possible combinations of changes in two models.
+We will see that this is founded by the insight that only few combinations of changes are problematic and have to be explicitly considered.
+
+
+
+%%%
+%%% FORMAL GAP IDENTIFICATION
+%%%
+\section{Gap between Synchronizing and Ordinary Transformations}
+
+\todo{Add intro to the gap here and then start with example}
+
+\subsection{Behavior of Ordinary Transformations in Networks}
+Show at example that ordinary transformations do not operate as expected in networks.
+We have already sketched given the example of creating a class in UML and Java after adding a component to a \gls{PCM} model in \autoref{chap:introduction:challenges:correctness:synchronization}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/correctness/synchronization/duplicate_creation_example.png}    
+    \caption{Duplicate creation of a resident by two sequences of consistency preservation rules}
+    \label{fig:synchronization:duplicate_creation_example}
+\end{figure}
+
+An analogous example can be given for the running example of persons, employees and residents depicted in \autoref{fig:networks:three_persons_example}.
+We consider the consistency relations $\consistencyrelation{R}{PE}, \consistencyrelation{R}{ER}$ and $\consistencyrelation{R}{PR}$.
+As discussed in \autoref{chap:compatibility}, these relations are compatible, thus for any given person, employee or resident, there is a consistent set of models containing it, which may be found by a set of transformations.
+If we now consider transformations with ordinary, unidirectional consistency preservation rules, they react to the changes in one model and update another accordingly.
+In case of adding a person, this may look as depicted in \autoref{fig:synchronization:duplicate_creation_example}.
+For each of the given consistency relations, we assume unidirectional consistency preservation rules that preserve consistency according to them.
+They especially create an employee for each added person, an a resident for each created employee and person, respectively.
+Since the transformations assume the models to be consistent before applying the changes, they always add a corresponding element when one of the elements is added.
+This leads to the situation that both $\consistencypreservationrule{CPR}{\consistencyrelation{CR}{ER},\rightarrow}$ as well as $\consistencypreservationrule{CPR}{\consistencyrelation{CR}{PR},\rightarrow}$ create a resident upon creation of a person.
+In consequence, there exist two residents with the same name, which does not fulfill the consistency relations.
+
+It is our goal to find out how such a situation can be avoided by proper definition of such consistency preservation rules.
+A simple solution in this example would have been to look for the existence of elements to create first.
+This can either be done by using a trace model, which most existing transformation language use to store corresponding elements, or by searching for an appropriate element in the other model.
+Using a trace model, however, has some drawbacks and pitfalls, which we will investigate later.
+
+
+% \begin{copiedFrom}{DocSym}
+
+% % \section{Binary Transformation Interoperability}
+
+% % Multi-model consistency preservation can be a achieved by combining binary transformations to graphs, %of transformations, 
+% % with the transformations being executed transitively.
+% % Since all binary transformations are developed independently of each other, it is necessary that they interoperate properly in a \emph{non-intrusive} way, thus without the necessity for the developer to understand and modify them, which we refer to as \emph{black-box combination}.
+
+% Even under the assumption that, in contrast to our introductory motivation, all specifications are free of contradictions, it is easy to see that problems arise when combining binary transformations by transitively executing them.
+% For example, consider the relations in \autoref{fig:prologue:binary_combination_example}.
+% If a component is added to the \ac{ADL}, causing a \ac{UML} class creation due to \ref{fig:prologue:binary_combination_example:R1}, which in turn causes a Java class creation due to \ref{fig:prologue:binary_combination_example:R2}, the transformation for relation \ref{fig:prologue:binary_combination_example:R3} does not know that an appropriate class was already created, if the transformations are treated as black boxes.
+% Consequently, the transformation will create the same class again, which may override the existing one, depending on the implementation and execution order.
+% A simple solution for this example would be to have all transformations use a common trace model and check for existing elements before creating them in a transformation.
+% Nevertheless, independently developed transformations will usually not assume that %this only applies if the transformation considers possibly preexisting transformation results, which it will not do in general if it does not assume other transformations to create corresponding elements.
+% other transformations may already have created corresponding elements.
+% Additionally, the trace model must allow the transformation engine to retrieve transitive traces.
+% However, it is unclear if transitive resolution of traces can always be performed, as it can depend on whether the transitive trace belongs the considered consistency relation or another.
+% %If, in another scenario, the transformation in the example was actually supposed to create an additional class, it would have to ignore the existing trace.
+
+% As can be seen in the example, especially the correct handling of trace information in interdependent transformations has to be researched.
+% This applies not only to element creations, but also other change types, such as attribute or reference changes, especially if they are multi-valued.
+% In our thesis, we will therefore apply transitively executed binary transformations in different case studies to identify these and potential further problems.
+% We then want to come up with a catalog of such problems %preventing the black-box combination of transformations 
+% together with solution patterns for them.
+% For example, to avoid duplicate element creations, a simple pattern could be to always check for already existing traces for that consistency relation in the transformations.
+% In consequence, the integration of those patterns into a transformation language or the application of them as a transformation developer is supposed to achieve black-box combinability of the transformations.
+
+% \end{copiedFrom} % DocSym
+
+
+\subsection{Options for Transformation Sequentialization}
+
+\todo{Start with reference to research on synchronization scenarios, e.g., Diskin and Xiong}
+
+
 
 A consistency preservation rule according to \autoref{def:consistencypreservationrule} receives two models and two changes, one for each of the models, and returns two changes, i.e.:
 \begin{align*}
     \consistencypreservationrule{\consistencyrelation{CR}{}} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}, \changeuniverse{\metamodel{M}{2}}) \rightarrow (\changeuniverse{\metamodel{M}{1}}, \changeuniverse{\metamodel{M}{2}})
 \end{align*}
+\todo{Maybe add this to correctness formalization: Give example why we need that: both models can be modified due to network, both may need to be modified because if in both models something is added that needs to be reflected in the other, both have to be changed to restore consistency, without reverting one of the changes.}
 We used this rather general notion of a consistency preservation rule between two metamodels to support that both models may have been modified, which is inevitable in a transformation network.
 Additionally, both models may need to be modified to properly consistency.
 It would, however, be a cumbersome task to define the behavior of the transformation, or more precisely its consistency preservation rule, for all potential pairs of changes in both models.
@@ -40,6 +136,10 @@ An example may be that $\change{\metamodel{M}{2}}'$ removes an element from $\mo
 \todo{Revise change definition to be partial}
 
 We, however, want to ensure that both original changes are applied to the models and consistency preservation rules can react to them.
+
+
+
+\subsection{The Formal Gap of Synchronizing and Ordinary Transformations}
 
 \begin{itemize}
     \item We assume consistency preservation rules according to fine-grained consistency relations introduced for compatibility
@@ -96,14 +196,35 @@ Such a scenario may not occur in a transformation network, because if transforma
 
 An ordinary unidirectional consistency preservation rule looks as follows:
 \begin{align*}
-    \consistencypreservationrule{\consistencyrelation{CR}{},\rightarrow} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}) \rightarrow \changeuniverse{\metamodel{M}{2}}
+    \consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow},\rightarrow} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}) \rightarrow \changeuniverse{\metamodel{M}{2}}
 \end{align*}
+Thus, the rule is not synchronizing, i.e., it does not consider that the second model was modified as well.
+
+If we pass the changed second model, i.e., given models $\model{m}{1},\model{m}{2}$ and changes $\change{\metamodel{M}{1}},\change{\metamodel{M}{2}}$, we call $\consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow},\rightarrow}(\model{m}{1},\change{\metamodel{M}{2}}(\model{m}{2}),\change{\metamodel{M}{1}})$.
+Then, in general, the behavior of the function is undefined, as in \autoref{def:consistencypreservationrulecorrectness}, we only required the function to return a change such that applying all changes produces consistent models if the original models were consistent.
+In this case, however, the given models are not consistent to each other.
+
+We thus want to achieve a slight adaptation of those unidirectional consistency preservation rules, such that they support the case that the second model has already been modified.
+Informally speaking, we want to emulate unidirectional synchronizing rules with non-synchronizing ones.
+Additionally, we want to ensure that such a rule that is inverse-preserving for consistent inputs is also inverse-preserving for the case that the second model was already modified, such that executing both rules consecutively ensures consistency to the relations in both directions, like we have shown for a pair of inverse-preserving unidirectional synchronizing consistency preservation rules.
+So the question is:
+What has to be considered if a consistency preservation rule $\consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow},\rightarrow}$ shall be able to process the input $\tupled{\model{m}{1},\change{\metamodel{M}{2}}\model{m}{2},\change{\metamodel{M}{1}}}$, return $\change{\metamodel{M}{2}}'$, such that $\tupled{\model{m}{1},\model{m}{2}}$ is consistent to $\consistencyrelationset{CR}_{\rightarrow}$, as well as $\tupled{\change{\metamodel{M}{1}}(\model{m}{1}),\change{\metamodel{M}{2}}' \concatfunction \change{\metamodel{M}{2}}(\model{m}{2})}$ is consistent to $\consistencyrelationset{CR}_{\rightarrow}$, and that it is inverse-preserving for that input as well.
+
+To find out what has to be done to achieve that, we consider the possible combinations of changes made to $\model{m}{1}$ and $\model{m}{2}$ that the consistency preservation rule may need to consider.
+For each combination of changes, we need to find out whether:
+\begin{enumerate}
+    \item The result is still consistent to $\consistencyrelationset{CR}_{\rightarrow}$
+    \item The process is inverse-preserving, i.e., no relation in $\consistencyrelationset{CR}_{\leftarrow}$ that was fulfilled before is violated afterwards
+\end{enumerate}
+
+Since we consider the practical realization of such preservation rules with ordinary transformation languages, we also specifically consider the changes that can be processed by those transformation languages.
+Thus, we focus on the types of changes that can be performed in EMOF-based and conforming Ecore-based models.
+
 \todo{Go on here: map this to synchronizing ones and the inverse-preserving property}
 
 
 
 \begin{itemize}
-    \item 
     \item Define unidirectional consistency preservation rules as above
     \item Define correctness of unidirectional consistency preservation rules
     \item Say that we want to investigate what happens when we apply CPR to m1, d(m2) with m1, m2 consistent instead of to m1, m2
@@ -134,99 +255,21 @@ For that, we make the case distinction and derive the creation pattern.
 For each change merge case, we consider that we somehow "merge" the changes. In general, the change of the transformation to m2 will overwrite the previous change to m2. Then we consider that there is another consistency relation affected by the new change. We show whether/why not the other consistency relation can be violated by that change and discuss how to avoid that.
 
 
-\begin{copiedFrom}{DocSym}
-
-\section{Binary Transformation Interoperability}
-
-Multi-model consistency preservation can be a achieved by combining binary transformations to graphs, %of transformations, 
-with the transformations being executed transitively.
-Since all binary transformations are developed independently of each other, it is necessary that they interoperate properly in a \emph{non-intrusive} way, thus without the necessity for the developer to understand and modify them, which we refer to as \emph{black-box combination}.
-
-Even under the assumption that, in contrast to our introductory motivation, all specifications are free of contradictions, it is easy to see that problems arise when combining binary transformations by transitively executing them.
-For example, consider the relations in \autoref{fig:prologue:binary_combination_example}.
-If a component is added to the \ac{ADL}, causing a \ac{UML} class creation due to \ref{fig:prologue:binary_combination_example:R1}, which in turn causes a Java class creation due to \ref{fig:prologue:binary_combination_example:R2}, the transformation for relation \ref{fig:prologue:binary_combination_example:R3} does not know that an appropriate class was already created, if the transformations are treated as black boxes.
-Consequently, the transformation will create the same class again, which may override the existing one, depending on the implementation and execution order.
-A simple solution for this example would be to have all transformations use a common trace model and check for existing elements before creating them in a transformation.
-Nevertheless, independently developed transformations will usually not assume that %this only applies if the transformation considers possibly preexisting transformation results, which it will not do in general if it does not assume other transformations to create corresponding elements.
-other transformations may already have created corresponding elements.
-Additionally, the trace model must allow the transformation engine to retrieve transitive traces.
-However, it is unclear if transitive resolution of traces can always be performed, as it can depend on whether the transitive trace belongs the considered consistency relation or another.
-%If, in another scenario, the transformation in the example was actually supposed to create an additional class, it would have to ignore the existing trace.
-
-As can be seen in the example, especially the correct handling of trace information in interdependent transformations has to be researched.
-This applies not only to element creations, but also other change types, such as attribute or reference changes, especially if they are multi-valued.
-In our thesis, we will therefore apply transitively executed binary transformations in different case studies to identify these and potential further problems.
-We then want to come up with a catalog of such problems %preventing the black-box combination of transformations 
-together with solution patterns for them.
-For example, to avoid duplicate element creations, a simple pattern could be to always check for already existing traces for that consistency relation in the transformations.
-In consequence, the integration of those patterns into a transformation language or the application of them as a transformation developer is supposed to achieve black-box combinability of the transformations.
-
-\end{copiedFrom} % DocSym
 
 
-\begin{copiedFrom}{ICMT}
-
-To ensure that a network of \acp{BX} operates properly, potential mistakes %, as identified in the previous section, 
-must be avoided.
-%\todoHeiko{Klarmachen, dass wir hier keine vollumfänglichen Lösungsstrategien präsentieren, sondern das, was man im Prinzip auf den Ebenen tun muss. Nur für die unterste Ebene gibt es ein Konzept}
-We evaluate our categorization regarding correctness and completeness %for that 
-in a case study that combines independently developed transformations.
-In that case study, we classify occurring failures with our categorization and trace them back to a causal mistake.
-To identify whether such a classification is correct, we need to be able to fix the mistake and validate that the failure disappears.
-%To investigate whether the classification of revealed mistakes is correct, we need to be able to fix them. %the classification of a mistake was correct and if another mistake was potentially hidden by the fixed one.
-%Therefore, we do not provide complete solution strategies, but instead discuss how mistakes at the different levels can be avoided in general as our contribution \ref{contrib:avoidance}.
-Therefore, we discuss general strategies to avoid mistakes at the different levels as our contribution \ref{contrib:avoidance} and apply them in the evaluation.
-%, we discuss how mistakes at the different levels can be avoided in general, but do not provide complete solutions % solution strategies
-%in this work.
-
-%At the system level, mistakes can only be avoided by careful requirements elicitation. 
-%Since occurring mistakes on that level represent non-conformance with a usually informal notion of consistency, such mistakes cannot be automatically avoided or detected.
-At the global level, mistakes occur due to non-conformance with an informal notion of consistency and %cannot be detected automatically but 
-can only be avoided by careful requirements elicitation. 
-We therefore have to assume that global level mistakes are reliably avoided by the developers.
-Analytic approaches~\cite{klare2018docsym}
-can ensure that specifications at the modularization and operationalization level are free of faults.
-%This can be applied on both the modularization and the operationalization level.
-Nevertheless, %under the assumption that transformations are developed independently, 
-the drawback of such an approach is that it works a-posteriori, when transformations are combined to a network. %, so transformations would have to be adapted %after their specification 
-%when they are combined to a network
-We, in contrast, want to achieve avoidance of interoperability issues a-priori, so that transformations can be developed independently and combined afterwards.
-It is easy to see that mistakes at the modularization level cannot be avoided a-priori. 
-%If modular transformations are developed independently, 
-Ensuring that transformations are non-contradictory %, i.e. that they rely on the same notion of a global consistency specification, 
-would require developers to have knowledge about the other transformations, which breaks the assumption of independent development.
-%This breaks our assumption that developers have restricted domain knowledge, each defining one modular consistency specification.
-%
-Finally, mistakes regarding element matching at the operationalization level are domain-independent. 
-This enables the development of generic mechanisms to ensure interoperability at the operationalization level by construction, without knowing about other transformations.
-
-In the following, we discuss one strategy to avoid mistakes at the modularization and one to avoid those at the operationalization level.
-Developers can use these strategies to build networks that are free of faults, or can use them to fix mistakes if failures occur.
-
-% MOVED TO BEGINNING OF SECTION
-% We evaluate our categorization in a case study combining independently developed transformations. 
-% For that, we need to fix mistakes in order to investigate whether their classification was correct. %the classification of a mistake was correct and if another mistake was potentially hidden by the fixed one.
-% Therefore, we do not provide complete solution strategies, but instead discuss how mistakes at the different levels can be avoided in general as our contribution \ref{contrib:avoidance}.
-
-%We therefore assume that mistakes on modularization level are avoided as well and investigate, under this assumption, whether the operationalization can be develop interoperable by construction.
-
-% \begin{itemize}
-%     \item Problems on all three levels must be avoided
-%     \item On all levels, possibility to use model checking for finding faults when combining a set of transformations (cf. \cite{klare2018docsym}
-%     \item Detecting mistakes on level 1 is hard, because one would have to compare the specification against a natural, usually unspecified notion of consistency
-%     \item Drawback: works a-posteriori, so transformations would have to be adapted afterwards to be used together
-%     \item Therefore: approach for a-priori avoidance of interoperability issues necessary
-%     \item Problem: on level 2 no a-priori avoidance of problems possible, or overall knowledge from level 1 necessary -> breaks our assumption of independent development
-%     \item But: On level 3 possibility to develop mechanisms and patterns to ensure interoperability on that level by construction, because it only concerns the operationalization of specifications. In contrast to the consistency specifications, which are domain specific, the operationalization follows a generic pattern for which generic interoperability solutions can be derived
-%     \item We assume interoperability on level 2 for our approach so that there are no interactions between mistakes on the level 2 and 3 (no precise enough)
-% \end{itemize}
-
-\end{copiedFrom} % ICMT
+%%%
+%%% CASE DISTINCTION 
+%%%
+\section{Synchronization Scenarios in Ordinary Transformations}
 
 
-\section{Ensuring Interoperability of Executed Transformations 
-    \pgsize{15 p.}
-}
+
+
+
+%%%
+%%% AVOIDANCE PATTERNS
+%%%
+\section{Synchronization of Ordinary Transformation}
 Goal: Avoidance strategies for interoperability mistakes, i.e. achieving synchronization of transformations (MA Torsten / Timur)
 \label{chap:prevention:interoperability}
 
@@ -281,6 +324,12 @@ In all other cases, heuristics must be used, which potentially leads to failures
 
 \end{copiedFrom} % ICMT
 
+
+
+%%% 
+%%% SUMMARY
+%%%
+\section{Summary}
 
 \begin{insight}[Synchronization]
     When constructing synchronizing transformations, both models may have been and need to be modified in contrast to ordinary bidirectional transformations, which update only one of the models.
