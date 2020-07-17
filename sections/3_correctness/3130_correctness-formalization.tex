@@ -164,14 +164,14 @@ State-based transformations always suffer from the problem that it is unknown wh
 This, for example, includes that information about elements which were moved or renamed can potentially not be reconstructed, leading to elements that are deleted and created anew, losing all information that was potentially added to them.
 Unidirectionality may be reasonable when assuming that only one of the models was modified. In that case it is sufficient to update the other model to restore consistency.
 With a modular specification of consistency preservation, however, several \glspl{consistency preservation rule} modifying the same models may need to be executed.
-This can be seen in the example in \autoref{todo}\todo{add graphics and explanation for that}.
+This can be seen in the example in \autoref{todo}\todo{add graphics and explanation for that; a simple example for a concurrent modification scenario (although maybe not induced by a network but several users) are that different classes are added to the UML and the Java model. Now it is necessary to react to changes in both models and to update both to reflect the classes added to the other. A single unidirectional transformation would result in reverting some changes, i.e., removing some classes that were added by the users}.
 In consequence, the rules need to be able to deal with changes performed in both of the input models and, consequentially, need to update both models to reflect the changes in the other.
 
 \mnote{Synchronizing consistency preservation rules circument drawbacks}
 To be able to combine several \glspl{consistency preservation rule} without the discussed drawbacks, we define a \emph{synchronizing} rather than a unidirectional notion of them.
 Those rules are able to react to changes in both models and produce changes in both models again.
 This is sometime also called the capability of handling \emph{concurrent} modifications (e.g. \cite{leblebici2014IncrementalTGGSurvey-GTVMT}).
-To precisely define this behavior, we first introduce a notion of \emph{changes} and afterwards of \emph{\glspl{consistency preservation rule}}.
+To precisely define this behavior, we first introduce a notion of \emph{changes} and afterwards of \emph{\glspl{consistency preservation rule}}, which we also refer to as \emph{synchronizing} consistency preservation rules.
 
 \begin{definition}[Change]
     Given a metamodel $\metamodel{M}{}$, a change $\change{\metamodel{M}{}}$ is a function that takes an instance of that metamodel and returns another one:
@@ -220,10 +220,11 @@ For us, it does not matter how the function describing a change behaves in cases
 %     \end{align*}
 % \end{definition}
 
+\todo{Maybe remove \enquote{model-level} if we do not need a fine-grained notion of preservation rules. Maybe better call it \enquote{synchronizing} to be able to distinguish it from non-synchronizing ones later.}
 \begin{definition}[\ModelLevelConsistencyPreservationRule]
     \label{def:consistencypreservationrule}
     Let $\metamodel{M}{1}, \metamodel{M}{2}$ be two metamodels and $\consistencyrelation{CR}{} \subseteq \metamodelinstanceset{M}{1} \times \metamodelinstanceset{M}{2}$ a binary \modellevelconsistencyrelation between them.
-    A \emph{\modellevelconsistencypreservationrule} $\consistencypreservationrule{\consistencyrelation{CR}{}}$ for the relation $\consistencypreservationrule{\consistencyrelation{CR}{}}$ is a function:
+    A \emph{\modellevelconsistencypreservationrule} $\consistencypreservationrule{\consistencyrelation{CR}{}}$ for the relation $\consistencyrelation{CR}{}$ is a function:
     \begin{align*}
         \consistencypreservationrule{\consistencyrelation{CR}{}} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}, \changeuniverse{\metamodel{M}{2}}) \rightarrow (\changeuniverse{\metamodel{M}{1}}, \changeuniverse{\metamodel{M}{2}})
     \end{align*}
@@ -241,7 +242,7 @@ This conforms to the notion of correctness defined for bidirectional transformat
 \begin{definition}[\ModelLevelConsistencyPreservationRule Correctness]
     \label{def:consistencypreservationrulecorrectness}
     Let $\consistencypreservationrule{\consistencyrelation{CR}{}}$ be a \emph{\modellevelconsistencypreservationrule}.
-    We call a \modellevelconsistencypreservationrule \emph{correct} if the resulting models when applying the generated changes are consistent to $\consistencyrelation{CR}{}$ again:
+    We call $\consistencypreservationrule{\consistencyrelation{CR}{}}$ \emph{correct} if the resulting models when applying the generated changes are consistent to $\consistencyrelation{CR}{}$ again:
     \begin{align*}
         &
         \forall 
@@ -249,14 +250,14 @@ This conforms to the notion of correctness defined for bidirectional transformat
         \model{m}{2} \in \metamodelinstanceset{M}{2},
         \change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}},
         \change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}} :
-        \tupled{\model{m}{1}, \model{m}{2}} \in \consistencyrelation{CR}{} \Rightarrow\\
+        \tupled{\model{m}{1}, \model{m}{2}} \consistenttomath \consistencyrelation{CR}{} \Rightarrow\\
         & \formulaskip
         \exists 
         \change{\metamodel{M}{1}}' \in \changeuniverse{\metamodel{M}{1}},
         \change{\metamodel{M}{2}}' \in \changeuniverse{\metamodel{M}{2}} :
         \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}) = (\change{\metamodel{M}{1}}', \change{\metamodel{M}{2}}') \\
         & \formulaskip
-        \land \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \change{\metamodel{M}{2}}'(\model{m}{2})} \in \consistencyrelation{CR}{}
+        \land \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \change{\metamodel{M}{2}}'(\model{m}{2})} \consistenttomath \consistencyrelation{CR}{}
     \end{align*}
 \end{definition}
 
