@@ -1,0 +1,75 @@
+\begin{forest}%
+for tree={parent anchor=south,
+         child anchor=north,
+%          l+=1cm,
+%          fill=black!10,
+         draw,
+         delay={content={\strut #1}},
+%          node distance=2ex and 1ex,
+         },
+featuremandatory/.style={tikz={\node[draw,fill=black!60,inner sep=2pt,circle,anchor=south,yshift=-1pt]at(.north){};}},
+featureoptional/.style={tikz={\node[draw,fill=white,inner sep=2pt,circle,anchor=south,yshift=-1pt]at(.north){};}},
+[Change
+   [Atomic
+      [Operation
+         [Content
+            [Additive]
+            [Subtractive]
+         ]
+         [Order
+            [Permute,featuremandatory]
+         ]
+      ]
+      [Target,featuremandatory
+         [Root]
+         [Feature
+            [Type,featuremandatory
+               [Attribute]
+               [Reference]
+            ]
+            [Cardinality,featuremandatory
+               [Single]
+               [Multi]
+            ]
+         ]
+      ]
+      [Existential,featureoptional
+         [Create]
+         [Delete]
+      ]
+   ]
+   [Compound
+      [Unset]
+      [Move]
+      [Replace]
+   ]
+]      
+% fill angles 
+\foreach \i/\j/\k in {!1/!/!2,!21/!2/!23,!111/!11/!112,!121/!12/!122,!12211/!1221/!12212,!12221/!1222/!12222,!131/!13/!132}
+{
+\coordinate (A) at (\i.north);
+\coordinate (O) at (\j.south);
+\coordinate (B) at (\k.north);
+\featurexor{A}{O}{B}
+}
+\foreach \i/\j/\k in {!1111/!111/!1112}
+{
+\coordinate (A) at (\i.north);
+\coordinate (O) at (\j.south);
+\coordinate (B) at (\k.north);
+\featureor{A}{O}{B}
+}
+\node [yshift=-6ex,xshift=-30ex,anchor=north west] at (!12211) {constraints:};
+\node [yshift=-9ex,xshift=-30ex,anchor=north west] at (!12211) {1.\ Permute $\Rightarrow$ Multi};
+\node [yshift=-12ex,xshift=-30ex,anchor=north west] at (!12211) {2.\ (Multi $\wedge$ Content) $\Rightarrow$ (Additive $\oplus$ Subtractive)};
+\node [yshift=-15ex,xshift=-30ex,anchor=north west] at (!12211) {3.\ Single $\Rightarrow$ (Additive $\wedge$ Subtractive)};
+\node [yshift=-6ex,anchor=north west] at (!12221) {4.\ Existential $\Rightarrow$ (Root $\oplus$ Reference)};
+\node [yshift=-9ex,anchor=north west] at (!12221) {5.\ Create $\Rightarrow$ (Additive $\oplus$ Root)};
+\node [yshift=-12ex,anchor=north west] at (!12221) {6.\ Delete $\Rightarrow$ (Subtractive $\oplus$ Root)};
+\node [yshift=-15ex,anchor=north west] at (!12221) {7.\ Root $\Rightarrow$ (Additive $\oplus$ Subtractive)};
+% \begin{enumerate}[leftmargin=*]
+%  \item Permute $\shortimplies$ Multi
+%  \item (Multi $\wedge$ Content) $\shortimplies$ (Additive XOR Subtractive)
+%  \item Single $\shortimplies$ (Additive $\wedge$ Subtractive)
+% \end{enumerate}
+\end{forest}
