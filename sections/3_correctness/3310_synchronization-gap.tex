@@ -1,0 +1,428 @@
+%%%
+%%% FORMAL GAP IDENTIFICATION
+%%%
+\section{Gap between Synchronizing and Ordinary Transformations}
+
+We have already introduced that there is both a formal and practical gap between synchronizing transformations, as we have defined as a component of transformation networks, and ordinary transformations, which are unidirectional and non-synchronizing, as used by most transformation languages.
+In the following, we first give an example for faulty behavior if we simply used ordinary transformations in a transformation network.
+Afterwards, we discuss options to sequence ordinary transformations and finally come up with a precise description of the formal gap and a practical approach to close it.
+
+%%
+%% MOTIVATING FAULT EXAMPLE WITH ORDINARY TRANSFORMATIONS
+%%
+\subsection{Behavior of Ordinary Transformations in Networks}
+We have already sketched the example of creating a class in UML and Java after adding a component to a \gls{PCM} model in \autoref{chap:introduction:challenges:correctness:synchronization}.
+In that scenario, it was possible that for a created \gls{PCM} component first a UML class is generated, which is then transformed into a Java class.
+Additionally, the transformation between \gls{PCM} and Java creates another Java class, as it does not consider that there may be another transformation that already created that class.
+Such scenarios can lead to the duplication of elements, or, in case of Java, an overwrite of an already created element, because the source file of the class will be placed at the same location in the file system.
+Overwriting the previously created file may also overwrite and thus remove information that was already added to that class by the transformations across UML.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/correctness/synchronization/duplicate_creation_example.png}    
+    \caption{Duplicate creation of a resident by two sequences of consistency preservation rules}
+    \label{fig:synchronization:duplicate_creation_example}
+\end{figure}
+
+An analogous example can be given for the running example of persons, employees and residents depicted in \autoref{fig:networks:three_persons_example}.
+We consider the consistency relations $\consistencyrelation{R}{PE}, \consistencyrelation{R}{ER}$ and $\consistencyrelation{R}{PR}$.
+As discussed in \autoref{chap:compatibility}, these relations are compatible, thus for any given person, employee or resident, there is a consistent set of models containing it.
+Thus, the relations do not prevent transformations from finding consistent models whenever a person, employee or resident is added.
+If we now consider ordinary transformations with unidirectional consistency preservation rules, they react to the changes in one model and update another accordingly.
+In case of adding a person, this may look as depicted in \autoref{fig:synchronization:duplicate_creation_example}.
+For each of the given consistency relations, we assume unidirectional consistency preservation rules that preserve consistency according to them.
+They especially create an employee for each added person, and a resident for each created employee and person, respectively.
+Since the transformations assume the models to be consistent before applying the changes, they always add a corresponding element when one of the elements is added.
+This leads to the situation that both $\consistencypreservationrule{\consistencyrelation{CR}{ER},\rightarrow}$ as well as $\consistencypreservationrule{\consistencyrelation{CR}{PR},\rightarrow}$ create a resident upon creation of a person.
+In consequence, there exist two residents with the same name, which does not fulfill the consistency relations.
+
+It is our goal to find out how such a situation can be avoided by proper definition of consistency preservation rules in existing transformation languages.
+A simple solution in this example would have been to look for the existence of elements to create first.
+This can either be done by using a trace model, which most existing transformation language use to store corresponding elements, or by searching for an appropriate element in the other model.
+Using a trace model, however, has some drawbacks and pitfalls, which we will investigate later.
+
+
+% \begin{copiedFrom}{DocSym}
+
+% % \section{Binary Transformation Interoperability}
+
+% % Multi-model consistency preservation can be a achieved by combining binary transformations to graphs, %of transformations, 
+% % with the transformations being executed transitively.
+% % Since all binary transformations are developed independently of each other, it is necessary that they interoperate properly in a \emph{non-intrusive} way, thus without the necessity for the developer to understand and modify them, which we refer to as \emph{black-box combination}.
+
+% Even under the assumption that, in contrast to our introductory motivation, all specifications are free of contradictions, it is easy to see that problems arise when combining binary transformations by transitively executing them.
+% For example, consider the relations in \autoref{fig:prologue:binary_combination_example}.
+% If a component is added to the \ac{ADL}, causing a \ac{UML} class creation due to \ref{fig:prologue:binary_combination_example:R1}, which in turn causes a Java class creation due to \ref{fig:prologue:binary_combination_example:R2}, the transformation for relation \ref{fig:prologue:binary_combination_example:R3} does not know that an appropriate class was already created, if the transformations are treated as black boxes.
+% Consequently, the transformation will create the same class again, which may override the existing one, depending on the implementation and execution order.
+% A simple solution for this example would be to have all transformations use a common trace model and check for existing elements before creating them in a transformation.
+% Nevertheless, independently developed transformations will usually not assume that %this only applies if the transformation considers possibly preexisting transformation results, which it will not do in general if it does not assume other transformations to create corresponding elements.
+% other transformations may already have created corresponding elements.
+% Additionally, the trace model must allow the transformation engine to retrieve transitive traces.
+% However, it is unclear if transitive resolution of traces can always be performed, as it can depend on whether the transitive trace belongs the considered consistency relation or another.
+% %If, in another scenario, the transformation in the example was actually supposed to create an additional class, it would have to ignore the existing trace.
+
+% As can be seen in the example, especially the correct handling of trace information in interdependent transformations has to be researched.
+% This applies not only to element creations, but also other change types, such as attribute or reference changes, especially if they are multi-valued.
+% In our thesis, we will therefore apply transitively executed binary transformations in different case studies to identify these and potential further problems.
+% We then want to come up with a catalog of such problems %preventing the black-box combination of transformations 
+% together with solution patterns for them.
+% For example, to avoid duplicate element creations, a simple pattern could be to always check for already existing traces for that consistency relation in the transformations.
+% In consequence, the integration of those patterns into a transformation language or the application of them as a transformation developer is supposed to achieve black-box combinability of the transformations.
+
+% \end{copiedFrom} % DocSym
+
+
+%%
+%% OPTIONS TO COMBINE TRANSFORMATIONS
+%%
+\subsection{Options for Transformation Combination}
+
+\mnote{Existing synchronization supports arbitrary conflicting concurrent changes}
+Some existing work already proposed strategies to synchronize concurrent changes between two models.
+For example, some work proposes techniques for processing concurrent changes with \glspl{TGG}~\cite{hermann2012concurrentSynchronization-FASE,orejas2020IncrementalConcurrentSynchronization-FASE}, whereas others define specific algorithms for a general notion of synchronizing transformations according to our given definition~\cite{xiong2013SynchronizingConcurrentUpdates-SoSym,xiong2009parallelUpdates-ICMT}.
+All these approaches, however, deal with the more general case that any changes may have been made to the models.
+That especially includes conflicting updates by one or more user, which need to be resolved.
+Such a resolution may lead to the necessity of reverting one of the changes.
+
+\mnote{Transformation networks only produce specific concurrency situations}
+We are, however, in the special situation that transformations do not perform arbitrary changes and that changes of other transformations may need to be revised, but not reverted.
+For example, it may be necessary to update an attribute value again, because the interval of consistent values of the currently executed transformation is smaller than the one of a transformation executed before.
+It will, however, not be necessary to completely revert the modification of the attribute value, because the modification was necessary for another transformation to restore consistency, thus the causal change for which consistency was restored, needs to be reverted as well.
+Finally, this would result in reverting a user change, which should never happen.
+
+\mnote{We assume compatibility of transformations}
+In fact, we assume transformations to be compatible according to \autoref{def:compatibility}, which excludes contradictions in their consistency relations that may prevent transformations from being able to find a consistent result for specific changes.
+This assumptions reduces the potential conflicts that may occur when changes of different transformations need to be synchronized.
+
+\mnote{Difference between synchronizing and unidirectional consistency preservation rules}
+A synchronizing consistency preservation rule according to \autoref{def:consistencypreservationrule} receives two models and two changes, one for each of the models, and returns two changes, i.e.:
+\begin{align*}
+    \consistencypreservationrule{\consistencyrelation{CR}{}} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}, \changeuniverse{\metamodel{M}{2}}) \rightarrow (\changeuniverse{\metamodel{M}{1}}, \changeuniverse{\metamodel{M}{2}})
+\end{align*}
+%\todo{Maybe add this to correctness formalization: Give example why we need that: both models can be modified due to network, both may need to be modified because if in both models something is added that needs to be reflected in the other, both have to be changed to restore consistency, without reverting one of the changes.}
+%We used this rather general notion of a consistency preservation rule between two metamodels to support that both models may have been modified, which is inevitable in a transformation network.
+%Additionally, both models may need to be modified to properly consistency.
+It would, however, be a cumbersome task to define the behavior of the transformation, or more precisely its consistency preservation rule, for all potential pairs of changes in both models.
+Furthermore, existing transformation languages usually specify unidirectional consistency preservation rules, thus they only support the propagation of changes made in one model to the other, but not to process changes made to both models at once. Thus, each bidirectional transformation defined in a transformation language actually consists of two consistency preservation rules:
+\begin{align*}
+    \consistencypreservationrule{\consistencyrelation{CR}{},\rightarrow} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}) \rightarrow \changeuniverse{\metamodel{M}{2}}\\
+    \consistencypreservationrule{\consistencyrelation{CR}{},\leftarrow} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{2}}) \rightarrow \changeuniverse{\metamodel{M}{1}}
+\end{align*}
+
+\mnote{First option: Independent execution and merge}
+In consequence, we usually have two unidirectional consistency preservation rules $\consistencypreservationrule{\consistencyrelation{CR}{},\rightarrow}$ and $\consistencypreservationrule{\consistencyrelation{CR}{},\leftarrow}$ that define how changes are propagated from one model to the other and vice versa, but this is not equivalent to a synchronizing transformation.
+Imagine models $\model{m}{1}$ and $\model{m}{2}$ and changes to them $\change{\metamodel{M}{1}}$ and $\change{\metamodel{M}{2}}$.
+If we now applied the two unidirectional consistency preservation rules independently, we would have $\change{\metamodel{M}{2}}' = \consistencypreservationrule{\consistencyrelation{CR}{},\rightarrow}(\model{m}{1},\model{m}{2}, \change{\metamodel{M}{1}})$ and $\change{\metamodel{M}{1}}' = \consistencypreservationrule{\consistencyrelation{CR}{},\leftarrow}(\model{m}{1},\model{m}{2}, \change{\metamodel{M}{2}})$.
+It is, however, not guaranteed that $\tupled{\change{\metamodel{M}{1}}' \concatfunction \change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}' \concatfunction \change{\metamodel{M}{2}}(\model{m}{2})}$ is consistent, thus simply merging the individually produced changes does not necessarily lead to a consistent result.
+
+\mnote{Second option: Sequential execution}
+Another option would be to sequence the execution, thus first generating $\change{\metamodel{M}{2}}' = \consistencypreservationrule{\consistencyrelation{CR}{},\rightarrow}(\model{m}{1},\model{m}{2}, \change{\metamodel{M}{1}}$ as before.
+Afterwards, we apply the second consistency preservation rule to modified $\model{m}{2}$, thus $\change{\metamodel{M}{1}}' = \consistencypreservationrule{\consistencyrelation{CR}{},\leftarrow}(\change{\metamodel{M}{1}}(\model{m}{1}),\change{\metamodel{M}{2}}'(\model{m}{2}), \change{\metamodel{M}{2}})$.
+As a result, we receive $\tupled{\change{\metamodel{M}{1}'} \concatfunction \change{\metamodel{M}{1}}(\model{m}{1}, \change{\metamodel{M}{2}} \concatfunction \change{\metamodel{M}{2}}'(\model{m}{2})}$, which is consistent to $\consistencyrelation{CR}{}$.
+This means that $\change{\metamodel{M}{2}}$ is not applied to $\model{m}{2}$ anymore, to which the changes were made originally, but needs to be applied to $\change{\metamodel{M}{2}}'(\model{m}{2})$.
+It is, however, not clear whether the change can still be applied to that state, i.e., whether $\change{\metamodel{M}{2}}$ is defined for $\change{\metamodel{M}{2}}'(\model{m}{2})$.
+An example may be that $\change{\metamodel{M}{2}}'$ removes an element from $\model{m}{2}$, which $\change{\metamodel{M}{2}}$ changes.
+\todo{Revise change definition to be partial}
+
+\mnote{Goal is to preserve all original changes}
+We, however, want to ensure that both original changes are applied to the models and consistency preservation rules can react to them.
+Thus, we aim to find an approach that allows the unidirectional consistency preservation rules to also deal with the situation that the both models have been modified to emulate a synchronizing rule.
+
+
+%%
+%% THE DIRECTIONALITY GAP: Formal framework considers bidirectional transformations, practically we have unidirectional ones
+%%
+\subsection{The Directionality Gap}
+
+\mnote{Unidirectional synchronizing preservation rules to close the gap}
+To come up with an approach to combine unidirectional consistency preservation rules to behave as a single synchronizing one, we first identify how we can decompose synchronizing consistency preservation rules into unidirectional ones.
+We then relate these unidirectional synchronizing rules to the non-synchronizing ones defined in transformation languages.
+
+\mnote{Fine-grained consistency relations allow to define relation between unidirectional preservation rules}
+In \autoref{chap:compatibility:formal_notion}, we also discussed that consistency relation can be considered in a fine-grained way that is able to reflect different notion of consistency in both directions of a relation.
+We will base our notion of unidirectional synchronizing rules on those fine-grained relations to be able to find a proper notion of how the rules in both directions are supposed to work together.
+We did, however, also discuss in that chapter that all fine-grained relations can also be translated into \modellevelconsistencyrelations, thus the insights we already had for those model-level relations still apply to the considerations regarding fine-grained ones.
+
+\mnote{Stick to coarse-grained notion of preservation rules}
+According to the consideration of fine-grained consistency relations, transformation languages also allow the specification of or derive fine-grained consistency preservation rules from a declarative specification.
+They are often called \emph{transformation rules} and composed to a transformation that consists of multiple such rules, each encoding a consistency relations and a preservation rule for it.
+We will, however, stick to the coarse-grained notion of consistency preservation rules, as they are sufficient for our considerations.
+
+\mnote{New transformation notion based on fine-grained consistency relations}
+In consequence, from now we will consider a synchronizing transformation as a set of fine-grained consistency relations according to \autoref{def:consistencyrelation} and a consistency preservation rule that preserves consistency according to the set of relations.
+The consistency preservation rule and also the complete transformation are thus still considered correct if applying it to a consistent pair of models and changes to them, applying the resulting changes to the models again delivers a pair of models that is consistent to all consistency relations.
+Note that being consistent to all fine-grained consistency relations is equivalent to being consistent to the single \modellevelconsistencyrelation induced by the fine-grained relations.
+
+
+\subsubsection{Unidirectional Synchronizing Transformations}
+
+\mnote{Decomposition of consistency preservation rules into two unidirectional ones}
+To reflect the unidirectional notion of consistency preservation provided by transformation languages in our formalism, we propose a decomposition of consistency preservation rules according to \autoref{def:consistencypreservationrule} into two unidirectional ones.
+
+\begin{definition}[Unidirectional Consistency Preservation Rule]
+    \label{def:unidirectionalconsistencypreservationrule}
+    Let $\metamodel{M}{1}, \metamodel{M}{2}$ be two metamodels and $\consistencyrelationset{CR}$ a set of consistency relations between elements of those metamodels.
+    A \emph{unidirectional consistency preservation rule} $\consistencypreservationrule{\consistencyrelationset{CR}}$ for the relation set $\consistencyrelationset{CR}$ is a function:
+    \begin{align*}
+        \consistencypreservationrule{\consistencyrelationset{CR}} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}, \changeuniverse{\metamodel{M}{2}}) \rightarrow \changeuniverse{\metamodel{M}{2}}
+    \end{align*}
+\end{definition}
+
+\mnote{Notation for two related unidirectional rules}
+To be able to explicitly reference the consistency preservation rules for both directions between two metamodels $\metamodel{M}{1}$ and $\metamodel{M}{2}$, we denote the set of consistency relations between $\metamodel{M}{1}$ and $\metamodel{M}{2}$ as $\consistencyrelationset{CR}_{\rightarrow}$ and the one in the opposite direction between $\metamodel{M}{2}$ and $\metamodel{M}{1}$ as $\consistencyrelationset{CR}_{\leftarrow}$.
+We then refer to the two unidirectional consistency preservation rules as:
+\begin{align*}
+    \consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow}} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}) \rightarrow \changeuniverse{\metamodel{M}{2}}\\
+    \consistencypreservationrule{\consistencyrelationset{CR}_{\leftarrow}} : (\metamodelinstanceset{M}{2}, \metamodelinstanceset{M}{1}, \changeuniverse{\metamodel{M}{2}}) \rightarrow \changeuniverse{\metamodel{M}{1}}
+\end{align*}
+
+\mnote{Correctness of unidirectional rules analogous to original rules}
+We define correctness of such a unidirectional consistency preservation rule in the same way it was defined for synchronizing consistency preservation rules according to \autoref{def:consistencypreservationrule} and compliant to existing correctness notions for non-synchronizing consistency preservation rules, such as~\cite{stevens2010sosym}.
+
+\begin{definition}[Unidirectional Consistency Preservation Rule Correctness]
+    \label{def:unidirectionalconsistencypreservationrulecorrectness}
+    Let $\consistencypreservationrule{\consistencyrelationset{CR}}$ be a \emph{unidirectional consistency preservation rule}.
+    We call $\consistencypreservationrule{\consistencyrelationset{CR}}$ \emph{correct} if the resulting models when applying the generated changes are consistent to $\consistencyrelationset{CR}$ again:
+    \begin{align*}
+        &
+        \forall 
+        \model{m}{1} \in \metamodelinstanceset{M}{1}, 
+        \model{m}{2} \in \metamodelinstanceset{M}{2},
+        \change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}},
+        \change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}} : \\
+        & \formulaskip
+        \tupled{\model{m}{1}, \model{m}{2}} \consistenttomath \consistencyrelationset{CR} \\
+        & \formulaskip
+        \land \exists 
+        \change{\metamodel{M}{2}}' \in \changeuniverse{\metamodel{M}{2}} :
+        \change{\metamodel{M}{2}}' = \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}) \\
+        & \formulaskip\formulaskip
+        \Rightarrow
+        \tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}'(\model{m}{2})} \consistenttomath \consistencyrelationset{CR}
+    \end{align*}
+\end{definition}
+
+\mnote{Unidirectional synchronizing transformation encapsule a preservation rule for each direction}
+Based on such a unidirectional notion of consistency preservation rule, we can also define a unidirectional notion of transformations, which then consists of two sets of unidirectional consistency relations and two unidirectional consistency preservation rules.
+
+\begin{definition}[Unidirectional Synchronizing Transformation]
+    \label{def:unidirectionalsynchronizingtransformation}
+    Let $\metamodel{M}{1}$ and $\metamodel{M}{2}$ be two metamodels and $\consistencyrelationset{CR}_{\rightarrow}$ a set of consistency relations between $\metamodel{M}{1}$ and $\metamodel{M}{2}$, as well as $\consistencyrelationset{CR}_{\leftarrow}$ a set of consistency relations between $\metamodel{M}{2}$ and $\metamodel{M}{1}$.
+    Additionally, let $\consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow}}$ and $\consistencypreservationrule{\consistencyrelationset{CR}_{\leftarrow}}$ be unidirectional consistency preservation rules for both consistency relation sets.
+    A \emph{unidirectional synchronizing transformation} is a quadruple $\transformation{T} = \tupled{\consistencyrelationset{CR}_{\rightarrow}, \consistencyrelationset{CR}_{\leftarrow},\consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow}}, \consistencypreservationrule{\consistencyrelationset{CR}_{\leftarrow}}}$.
+\end{definition}
+
+\mnote{Correctness of unidirectional synchronizing transformations}
+We call such a unidirectional synchronizing transformation correct if both consistency preservation rules are correct, i.e., they both preserve consistency according to the underlying consistency relation set.
+
+\begin{definition}[Unidirectional Synchronizing Transformation Correctness]
+    \label{def:unidirectionalsynchronizingtransformationcorrectness}
+    Let $\transformation{T} = \tupled{\consistencyrelationset{CR}_{\rightarrow}, \consistencyrelationset{CR}_{\leftarrow},\consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow}}, \consistencypreservationrule{\consistencyrelationset{CR}_{\leftarrow}}}$ be a unidirectional synchronizing transformation.
+    We call $\transformation{T}$ correct if, and only if, $\consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow}}$ and $\consistencypreservationrule{\consistencyrelationset{CR}_{\leftarrow}}$ are both correct according to \autoref{def:unidirectionalconsistencypreservationrulecorrectness}.
+\end{definition}
+
+\mnote{Each unidirectional rule only preserves consistency in one direction}
+With a unidirectional synchronizing transformation that adheres to the given correctness definition, we are able to preserve consistency for the consistency relations in each direction between two models.
+Executing either of the unidirectional consistency preservation rules of the transformation does, however, not ensure that the consistency relations for the other direction are fulfilled as well.
+That is the purpose of the other unidirectional consistency preservation rule.
+
+% \begin{itemize}
+    % \item We assume consistency preservation rules according to fine-grained consistency relations introduced for compatibility
+    % \item So a synchronizing transformation considers fine-grained relations, in fact a transformation then consists of multiple relations, two for each fine-grained relation (each direction). Their combination induces the \modellevelconsistencyrelation for the two metamodels.
+    % \item Although the consistency preservation rule may in practice also be defined in terms fine-grained rules, which together with the fine-grained consistency rules then forms what is often called \emph{transformation rules}, we do not need to have a more fine-grained notion here.
+    % \item The transformation then is still correct as defined before, when the preservation rule preserves consistency to the relation, but now according to all fine-grained relations (and thus also the induced monolithic one) instead to the single model-level one.
+    % \item To reflect the notion of unidirectional consistency preservation rules, as often defined in transformation languages, which are still synchronizing, i.e., are able to react to changes made to both models, we may define:
+% \end{itemize}
+% \begin{align*}
+%     \consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow},\rightarrow} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}, \changeuniverse{\metamodel{M}{2}}) \rightarrow \changeuniverse{\metamodel{M}{2}})\\
+%     \consistencypreservationrule{\consistencyrelationset{CR}_{\leftarrow},\leftarrow} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}, \changeuniverse{\metamodel{M}{2}}) \rightarrow \changeuniverse{\metamodel{M}{1}})
+% \end{align*}
+
+\subsubsection{Alignment of Unidirectional Synchronizing Transformations}
+
+\mnote{Sequential execution of unidirectional rules does not guarantee consistency to relations in both directions}
+It is now possible to execute both consistency preservation rules of a unidirectional synchronizing transformation one after another, as each is able to reflect the changes produced by the other due to the ability to process changes made to both models.
+Thus, we could sequentially calculate:
+\begin{align*}
+    &
+    \change{\metamodel{M}{2}}' = \consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow}}(\model{m}{1},\model{m}{2},\change{\metamodel{M}{1}},\change{\metamodel{M}{2}})\\
+    &
+    \change{\metamodel{M}{1}}' = \consistencypreservationrule{\consistencyrelationset{CR}_{\leftarrow}}(\model{m}{2},\model{m}{1},\change{\metamodel{M}{2}}',\change{\metamodel{M}{1}})
+\end{align*}
+We then receive the resulting model pair as $\tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \change{\metamodel{M}{2}}'(\model{m}{2})}$.
+This gives us the guarantee that the resulting model pair is consistent to $\consistencyrelationset{CR}_{\leftarrow}$, as its consistency preservation rule was executed last.
+However, the definitions do not give any guarantee that the model pair is consistent to $\consistencyrelationset{CR}_{\rightarrow}$, as the execution of $\consistencypreservationrule{\consistencyrelationset{CR}_{\leftarrow}}$ may violate some of those relations.
+
+\mnote{Not violating relations of the other direction is desirable for unidirectional rules}
+It is, however, a desirable property of a unidirectional synchronizing transformation that the consistency preservation rules for the two directions between the same metamodels are aligned with each other in a way that executing the rule in one direction does not lead to further violations of the consistency relations in the other direction.
+This is especially necessary to produce the same behavior as a synchronizing transformation.
+We call such a property \emph{inverse-preserving}, as it ensures that fulfillment of consistency relations of the inverse direction are preserved.
+
+\begin{definition}[Inverse-Preserving Unidirectional Synchronizing Transformation]%Unidirectional Consistency Preservation Rule}
+    \label{def:inversepreservingunidirectionalsynchronizingtransformation}
+    Let $\transformation{T} = \tupled{\consistencyrelationset{CR}_{\rightarrow}, \consistencyrelationset{CR}_{\leftarrow},\consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow}}, \consistencypreservationrule{\consistencyrelationset{CR}_{\leftarrow}}}$ be a correct unidirectional synchronizing transformation for two metamodels $\metamodel{M}{1}$ and $\metamodel{M}{2}$.
+    We say that $\transformation{T}$ is \emph{inverse-preserving} if, and only if, executing one of the consistency preservation rules ensures that the resulting models are still consistent to all consistency relations of the opposite direction to which the models were consistent before.
+    For $\consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow}}$ this is given by the following (for $\consistencypreservationrule{\consistencyrelationset{CR}_{\leftarrow}}$ analogously):
+    \begin{align*}
+        & \forall \model{m}{1} \in \metamodelinstanceset{M}{1}, \model{m}{2} \in \metamodelinstanceset{M}{2}, \change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}}, \change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}} : \\
+        & 
+        \exists \change{\metamodel{M}{2}}' \in \changeuniverse{\metamodel{M}{2}} : \change{\metamodel{M}{2}}' = \consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow}}(\model{m}{1},\model{m}{2},\change{\metamodel{M}{1}},\change{\metamodel{M}{2}}) \\
+        & \formulaskip
+        \Rightarrow
+        \forall \consistencyrelation{CR}{} \in \consistencyrelationset{CR}_{\leftarrow}: 
+        \bigl(
+        \tupled{\change{\metamodel{M}{2}}(\model{m}{2}),\change{\metamodel{M}{1}}(\model{m}{1})} \consistenttomath \consistencyrelation{CR}{} \\
+        & \formulaskip\formulaskip
+        \Rightarrow
+        \tupled{\change{\metamodel{M}{2}}'(\model{m}{2}), \change{\metamodel{M}{1}}(\model{m}{1})} \consistenttomath \consistencyrelation{CR}{}
+        \bigr)
+    \end{align*}
+\end{definition}
+
+\mnote{Inverse-preserving transformations define reasonable alignment}
+This is a reasonable property, because the consistency relations in both directions are usually not disaligned, but only give the freedom to define different consistency notions in both directions, such as more options for consistent elements in one direction than in the other to support different kinds of abstraction.
+It should, however, never be the case that preserving consistency in one direction violates consistency relations in the other direction if transformations are defined properly.
+
+\mnote{Inverse-preserving transformations can be sequences}
+Given an inverse-preserving unidirectional synchronizing transformation, executing the two unidirectional consistency preservation rules one after another to given consistent models and changes to them preserves consistency to all consistency relations.
+This is a direct consequence of the inverse-preserving property, because no directional rule is allowed to violate consistency that was already ensured in the other direction.
+
+\begin{theorem}[Inverse-Preserving Unidirectional Synchronizing Transformation Sequencing Correctness]
+    \label{theorem:sequencinginversepreservingtransformations}
+    Let $\transformation{T} = \tupled{\consistencyrelationset{CR}_{\rightarrow}, \consistencyrelationset{CR}_{\leftarrow}, \consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow}}, \consistencypreservationrule{\consistencyrelationset{CR}_{\leftarrow}}}$ be a correct, inverse-preserving unidirectional synchronizing transformation.
+    Then sequentially executing both consistency preservation rules to given models and changes restores consistency to both consistency relation sets, i.e., given models $\model{m}{1}, \model{m}{2}$ and changes to them $\change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}$, it holds hat:
+    \begin{align*}
+        &
+        \tupled{\model{m}{1}, \model{m}{2}} \consistenttomath \consistencyrelationset{CR}_{\rightarrow}
+        \land \tupled{\model{m}{2}, \model{m}{1}} \consistenttomath \consistencyrelationset{CR}_{\leftarrow}\\
+        &
+        \land \exists \change{\metamodel{M}{2}}' \in \changeuniverse{\metamodel{M}{2}}' : 
+        \change{\metamodel{M}{2}}' = \consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}) \\
+        &
+        \land \exists \change{\metamodel{M}{1}}' \in \changeuniverse{\metamodel{M}{1}}' :
+        \change{\metamodel{M}{1}}' = \consistencypreservationrule{\consistencyrelationset{CR}_{\leftarrow}}(\model{m}{2}, \model{m}{1}, \change{\metamodel{M}{2}}', \change{\metamodel{M}{1}}) \\
+        &
+        \Rightarrow \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \change{\metamodel{M}{2}}'(\model{m}{2})}\consistenttomath \consistencyrelationset{CR}_{\rightarrow}  \\
+        & \formulaskip
+        \land \tupled{\change{\metamodel{M}{2}}'(\model{m}{2}), \change{\metamodel{M}{1}}'(\model{m}{1})} \consistenttomath \consistencyrelationset{CR}_{\leftarrow}
+    \end{align*}
+\end{theorem}
+\begin{proof}
+    Given models $\model{m}{1}, \model{m}{2}$ that are consistent to $\consistencyrelationset{CR}_{\rightarrow}$ and $\consistencyrelationset{CR}_{\leftarrow}$ and changes $\change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}$, we assume that $\change{\metamodel{M}{1}}'$ and $\change{\metamodel{M}{2}}'$ exist as the results of the consistency preservation rules according to the theorem.
+    If this was not the case, the consistency preservation rules are not defined for the given inputs and thus are not able to produce consistent results, which evaluates the left side of the implication to false, making the whole statement of the theorem true.
+    Now we show correctness of both implied statements:
+    \begin{properenumerate}
+        \item $\tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \change{\metamodel{M}{2}}'(\model{m}{2})}\consistenttomath \consistencyrelationset{CR}_{\rightarrow}$:
+        As a direction implication of correctness of $\consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow}}$, we know that $\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}'(\model{m}{2})} \consistenttomath \consistencyrelationset{CR}_{\rightarrow}$.
+        Now the inverse-preserving property of $\transformation{T}$ ensures for the given input of $\consistencypreservationrule{\consistencyrelationset{CR}_{\leftarrow}}$ according to \autoref{def:inversepreservingunidirectionalsynchronizingtransformation} that 
+        \begin{align*}
+        & \forall \consistencyrelation{CR}{} \in \consistencyrelationset{CR}_{\rightarrow}: 
+        \bigl(
+        \tupled{\change{\metamodel{M}{1}}(\model{m}{1}),\change{\metamodel{M}{2}}'(\model{m}{2})} \consistenttomath \consistencyrelation{CR}{} \\
+        & \formulaskip\formulaskip
+        \Rightarrow
+        \tupled{\change{\metamodel{M}{1}}'(\model{m}{2}), \change{\metamodel{M}{2}}'(\model{m}{1})} \consistenttomath \consistencyrelation{CR}{}
+        \bigr)
+        \end{align*}
+        Since the left side of the implication is true for all consistency relations in $\consistencyrelationset{CR}_{\rightarrow}$ due to correctness of $\consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow}}$, the right side is also true for all consistency relations in $\consistencyrelationset{CR}_{\rightarrow}$.
+        In consequence, we know that $\tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \change{\metamodel{M}{2}}'(\model{m}{2})} \consistenttomath \consistencyrelationset{CR}_{\rightarrow}$
+        \item $\tupled{\change{\metamodel{M}{2}}'(\model{m}{2}), \change{\metamodel{M}{1}}'(\model{m}{1})} \consistenttomath \consistencyrelationset{CR}_{\leftarrow}$:
+        This directly follows from correctness of $\consistencypreservationrule{\consistencyrelationset{CR}_{\leftarrow}}$.
+    \end{properenumerate}
+    In consequence, sequentially applying both consistency preservation rules of an inverse-preserving unidirectional synchronizing transformation ensures consistency to the consistency relations in both directions.
+\end{proof}
+
+\mnote{Inverse-preserving unidirectional transformation can emulate synchronizing ones}
+As a consequence of the theorem, we know that we can emulate a synchronizing transformation according to \autoref{def:synchronizingtransformation} with an inverse-preserving unidirectional synchronizing transformation according to \autoref{def:inversepreservingunidirectionalsynchronizingtransformation}.
+We can execute the unidirectional consistency preservation rules one after another to achieve that the resulting models are consistent to all consistency relations in both direction.
+
+\mnote{Ensuring inverse-preserving property is already a problem of bidirectional transformations}
+In fact, it is not trivial to ensure that two unidirectional transformations are inverse-preserving, even if the consistency relations in both directions are the same, which we will also see in our evaluation of errors in \autoref{chap:errors}.
+This problem, however, already arises when defining bidirectional transformations.
+Transformation languages may derive two unidirectional preservation rules from one specification, so that they are inherently inverse-preserving, or they may allow individual specification of the directions and provide some support for checking that they are aligned with each other, e.g., in the sense that they are inverse-preserving.
+This is, however, an isolated and existing topic of research and a challenge that already has to be solved for a single bidirectional transformation rather than a network, which is why we do not discuss this problem in more detail here and therefore assume given transformations to be inverse-preserving.
+
+\mnote{Directionality gap was discussed, synchronization gap remains}
+We have discussed the gap between synchronizing transformations and ordinary transformations defined in transformation languages regarding directionality by decomposing synchronizing transformations into unidirectional ones.
+In the following, we discuss the remaining gap of the formalized transformations being synchronizing, whereas practically defined transformations do not have that property.
+
+
+%%
+%% THE SYNCHRONIZATION GAP: After the directionality gap, we need to discuss how to come from synchronizing to non-synchronizing transformations
+%%
+\subsection{The Synchronization Gap}
+
+\mnote{Practical transformations are not synchronizing}
+Still, there is a gap to practical approaches for defining transformations, as existing approaches do usually not support synchronization, i.e., they are not able to process changes in both models, but only in one of them.
+Transformation languages usually assume that changes are either made by the developer and are then to be propagated to the other model by the transformation, or they are made by the transformation in reaction to changes to the other model.
+The case that developers modify multiple models is sometimes also referred to as a synchronization scenario (although the term is sometimes even used for the simple case of incremental update).
+If we consider that scenario, we will refer to it as \emph{concurrent editing} to avoid confusion.
+
+\mnote{In contrast to arbitrary concurrent changes, transformation networks produce less conflicts}
+Although the two cases have in common that both instead of only one model involved in a transformation may have been modified, they have a specific difference.
+While user changes to both models can be arbitrarily conflicting, changes performed by other transformations in a network should, in general, not be conflicting, especially if the underlying relations are compatible, as discussed in \autoref{chap:compatibility}.
+For example, if a user changes an element $A$, whose information needs to be propagated to element $B$, but removes element $B$ as well, this cannot be resolved easily, apart from potentially removing element $A$ as well.
+However, as we know from existing approaches for concurrent editing with tools like Git, conflict resolution is not a trivial task~\todo{add cite for difficulty of conflict resolution}.
+Such a scenario may, however, not occur in a transformation network, because if transformations remove elements that are to be updated by others, there will obviously be some conflicts in the transformations manifested in an incompatibility of their consistency relations.
+
+\mnote{Definition of ordinary transformations}
+An ordinary unidirectional consistency preservation rule as defined in or produced by a transformation language looks as follows:
+\begin{align*}
+    \consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow}} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}) \rightarrow \changeuniverse{\metamodel{M}{2}}
+\end{align*}
+Such a rule is not synchronizing, i.e., it does not consider that the second model was modified as well, like we defined for unidirectional consistency preservation rules in \autoref{def:unidirectionalconsistencypreservationrule}.
+
+\mnote{Passing changed models to consistency preservation rule is not possible}
+Given models $\model{m}{1},\model{m}{2}$ and changes $\change{\metamodel{M}{1}},\change{\metamodel{M}{2}}$, if we simply pass the changed model $\model{m}{2}$ to the preservation rule, we call $\consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow}}(\model{m}{1},\change{\metamodel{M}{2}}(\model{m}{2}),\change{\metamodel{M}{1}})$.
+Then, in general, the behavior of the function is undefined.
+As defined in \autoref{def:consistencypreservationrulecorrectness}, we only required the function to return a change such that applying all changes produces consistent models if the original models were consistent.
+In this case, however, the given models are not necessarily consistent to each other.
+
+%\subsection{Closing the Gap}
+\mnote{Emulate synchronizing transformations with non-synchronizing ones}
+We thus want to achieve a slight adaptation of those non-synchronizing unidirectional consistency preservation rules, such that they support the case that they support the synchronization case, i.e., that the second model has already been modified.
+Informally speaking, we want to emulate unidirectional synchronizing consistency preservation rules with non-synchronizing ones.
+Additionally, we want to ensure that if such a rule is inverse-preserving for consistent inputs, it is also inverse-preserving for the case that the second model was already modified, such that executing both rules consecutively ensures consistency to the relations in both directions, as we have already proven for inverse-preserving synchronizing transformations in \autoref{theorem:sequencinginversepreservingtransformations}.
+
+\mnote{Find requirements for non-synchronizing transformations to impose same behavior as synchronizing ones}
+We thus want to find out what has to be considered to define a pair of ordinary, non-synchronizing consistency preservation rules $\consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow}}$ $\consistencypreservationrule{\consistencyrelationset{CR}_{\leftarrow}}$ to emulate a unidirectional synchronizing transformation.
+This means that $\consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow}}$ is able to process an input $\tupled{\model{m}{1},\change{\metamodel{M}{2}}\model{m}{2},\change{\metamodel{M}{1}}}$ and return $\change{\metamodel{M}{2}}'$, such that if $\tupled{\model{m}{1},\model{m}{2}}$ is consistent to $\consistencyrelationset{CR}_{\rightarrow}$, then $\tupled{\change{\metamodel{M}{1}}(\model{m}{1}),\change{\metamodel{M}{2}}' \concatfunction \change{\metamodel{M}{2}}(\model{m}{2})}$ is consistent to $\consistencyrelationset{CR}_{\rightarrow}$ as well (and $\consistencypreservationrule{\consistencyrelationset{CR}_{\leftarrow}}$ analogously).
+Additionally, it requires that the transformation induced by the two non-synchronizing consistency preservation rules is inverse-preserving according to \autoref{def:inversepreservingunidirectionalsynchronizingtransformation}, such that sequentially executing them ensures consistency to all consistency relations in both directions.
+
+\mnote{Ensure correctness and inverse-preserving}
+To achieve that goal, we discuss all possible combinations of changes made to $\model{m}{1}$ and $\model{m}{2}$ that the consistency preservation rules may need to consider.
+We consider the most atomic types of changes that can be performed and ensure that the finding hold for arbitrary change combinations by composition.
+For each combination of changes processed by $\consistencypreservationrule{\consistencyrelationset{CR}_{\rightarrow}}$ , we need to find out the following (for $\consistencypreservationrule{\consistencyrelationset{CR}_{\leftarrow}}$ analogously):
+\begin{enumerate}
+    \item The consistency preservation rule operates correctly, i.e., the result is still consistent to $\consistencyrelationset{CR}_{\rightarrow}$.
+    \item The transformation is inverse-preserving, i.e., no relation in $\consistencyrelationset{CR}_{\leftarrow}$ that was fulfilled before is violated afterwards.
+\end{enumerate}
+
+\mnote{Case distinction for all change type combinations necessary}
+In the following section, we perform a case distinction for all possible combinations of changes, specifically for EMOF-based models as the most common and general formalism to describe metamodels and models.
+This allows us to derive which combinations of changes are problematic at all and thus have to be explicitly considered when defining ordinary non-synchronizing transformations to be able to properly use them in a transformation network.
+In consequence, it enables transformation developers to construct transformations with ordinary transformation languages that behave like synchronizing transformations required in networks.
+
+
+
+% \begin{itemize}
+%     \item Define unidirectional consistency preservation rules as above
+%     \item Define correctness of unidirectional consistency preservation rules
+%     \item Say that we want to investigate what happens when we apply CPR to m1, d(m2) with m1, m2 consistent instead of to m1, m2
+% \end{itemize}
+
+% Define ordinary transformations to take deltas in model 1 and produce deltas in model 2
+% Say that unidirectional synchronizing transformations take deltas in both models and update the deltas in one of them.
+% Refer to fine-grained formalization regarding compatibility, where consistency relations are directional, thus each directional preservation rule preserves consistency according to the consistency relations in one direction.
+% Having synchronizing unidirectional transformation, executing both preserves consistency to both unidirectional consistency relations. However, their must be some kind of conformance of the unidirectional transformation to each other (define how this conformance looks like!), so that executing each once does not lead to violations in the other direction. In general, that may not be possible. In fact, each unidirectional transformation should consider the unidirectional consistency relations of both directions.
+
+% So:
+% Ordinary unidirectional transformation for Rr: m1, m2, d1 -> d2, such that (d1(m1), d2(m2)) consistent to all relations in Rr (Rl respectively)
+% Synchronizing unidirectional transformation: m1, m2, d1, d2 -> d2', such that (d1(m1), d2'(m2)) consistent to all relations Rr and consistent to all relations in Rl to which is was consistent before (thus no violation of further consistency relations)
+
+% Direct consequence: Executing one transformation after the other ensures that models are consistent to alle relations in Rr and relation
+
+% Based on that, we derive how we can use languages that take deltas in model 1 and produce them in model 2 to emulate synchronizing unidirectional transformations that are able to manage deltas in both models and produce deltas in one of them.
+% For that, we make the case distinction and derive the creation pattern.
+% For each change merge case, we consider that we somehow "merge" the changes. In general, the change of the transformation to m2 will overwrite the previous change to m2. Then we consider that there is another consistency relation affected by the new change. We show whether/why not the other consistency relation can be violated by that change and discuss how to avoid that.
+
