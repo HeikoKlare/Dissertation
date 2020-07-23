@@ -10,6 +10,7 @@ Afterwards, we give a formal definition of unidirectional preservation rules and
 Finally, we discuss the relation between unidirectional consistency preservation rules and unidirectional consistency relations as introduced in \autoref{chap:compatibility:formal_notion}.
 %discuss options to sequence ordinary transformations and finally come up with a precise description of the formal gap and a practical approach to close it.
 
+
 %%
 %% MOTIVATING FAULT EXAMPLE WITH ORDINARY TRANSFORMATIONS
 %%
@@ -44,7 +45,6 @@ A simple solution in this example would have been to look for the existence of e
 This can either be done by using a trace model, which most existing transformation language use to store corresponding elements, or by searching for an appropriate element in the other model.
 Using a trace model, however, has some drawbacks and pitfalls, which we will investigate later.
 
-
 % \begin{copiedFrom}{DocSym}
 
 % % \section{Binary Transformation Interoperability}
@@ -75,6 +75,9 @@ Using a trace model, however, has some drawbacks and pitfalls, which we will inv
 % \end{copiedFrom} % DocSym
 
 
+%%
+%% USING FINE-GRAINED RELATIONS
+%%
 \subsection{Consistency Preservation for Fine-grained Relations}
 
 \mnote{Consistency preservation defined for model-level consistency relations}
@@ -130,6 +133,9 @@ Note that being consistent to all fine-grained consistency relations is equivale
 %\todo{Relate to the circumstance that we want to consider unidirectional preservation rules, so unidirectional rules might be interesting. We will later find, that this is not the case}
 
 
+%%
+%% UNIDIRECTIONAL CONSISTENCY PRESERVATION RULES
+%%
 \subsection{Unidirectional Consistency Preservation Rules}
 
 \mnote{Formal definition of unidirectional consistency preservation rules}
@@ -202,13 +208,9 @@ This was also the reason for allowing a synchronizing consistency preservation r
 % 1. Schon eine synchronisierende Transformation muss nicht für jede Eingabe definiert sein. Es könnte natürlich sein, dass sich gleichzeitige Änderungen nicht sinnvoll in Einklang bringen lassen. Theoretisch ist es aber möglich eine total definierte Funktion anzugeben, da immer ein beliebigen (im dümmsten Fall immer dasselbe / leere Modell) zurückgeliefert werden kann.
 
 
-\subsection{Bidirectional Transformations}
-
-In practice unidirectional CPR are defined as pairs for both directions. This is usually denoted as bidirectional transformations.
-They properly work for both directions individually.
-\todo{Define Bidirectional Transformation, being composed of two unidirectional ones. Define correctness for the case that only one model was modified.}
-
-
+%%
+%% NONALIGNMENT OF UNIDIRECTIONAL CONSISTENCY RELATIONS AND UNIDIRECTIONAL CONSISTENCY PRESERVATION RULES
+%%
 \subsection{Unidirectional Relations and Preservation Alignment}
 A unidirectional consistency relations require preservation rules in both directions (add/delete)
 \begin{itemize}
@@ -219,6 +221,8 @@ Konsequenz: Wir können nicht für die unidirektionalen Konsistenzrelationen jew
 
 Define mapping between change types and directionality of involved consistency relation (delete in opposite direction than add or modification). Make example at witness structures.
 
+Beachten, dass auch beim Hinzufügen in m2 die Relation m1->m2 verletzt werden kann, da nun zu viele Elemente vorhanden sind -> keine Witness-Struktur.
+
 
 \paragraph{Synchronizing Transformation cannot be Unidirectional}
 Es ist einfach zu sehen, dass synchronisierende Transformationen nicht so einfach unidirektional definiert werden können.
@@ -228,8 +232,44 @@ Das bedeutet aber das Korrektheit hier nicht definiert werden kann als die Eigen
 Das gilt allerdings nur, wenn man den Korrektheitsbegriff beibehält. Wir werden sehen, dass es andere Möglichkeiten gibt diesen Begriff einer unidirektionalen synchronisierenden Transformation zu definieren.
 
 
+%%
+%% COMPOSING TWO UNIDIRECTIONAL CPR TO BIDIRECTIONAL TRANSFORMATIONS
+%%
+\subsection{Bidirectional Transformations}
+\mnote{Unidirectional consistency preservation rules usually appear as pairs}
+A unidirectional consistency preservation rule does usually not appear on its own but in combination with another rule for the opposite direction.
+We have already seen that even a single unidirectional consistency relation between two metamodels requires unidirectional consistency preservation rules for both directions to preserve consistency according to that relation after changes either instances of either of the metamodels.
+In practice, many transformation languages, especially relational ones such as \gls{QVTR} or \gls{TGG} tools, allow the specification of \emph{bidirectional transformations}, which means that they define or derive unidirectional consistency preservation rules for both directions.
 
-\todo{Conclude that an open issue is how to combine to unidirectional CPRs to emulate a synchronizing transformation, i.e. react to changes in both models.}
+\mnote{Combine two unidirectional consistency preservation rules to a bidirectional transformation}
+In general, it is reasonable to consider two unidirectional consistency preservation rules between two metamodels together, such that after changes in instances of any of the two metamodels, the other model can be updated to restore consistency.
+A synchronizing transformation according to \autoref{def:synchronizingtransformation} is also able to process changes in any of the two models, thus such a notion fits to our goal of emulating synchronizing transformations.
+According to common terminology, we define this as a bidirectional transformation.
 
+\begin{definition}[Bidirectional Transformation]
+    \label{def:bidirectionaltransformation}
+    Let $\metamodel{M}{1}$ and $\metamodel{M}{2}$ be two metamodels and $\consistencyrelationset{CR}$ a set of consistency relations between them.
+    Additionally, let $\consistencypreservationrule{\consistencyrelationset{CR},{\rightarrow}}$ and $\consistencypreservationrule{\consistencyrelationset{CR},{\leftarrow}}$ be unidirectional consistency preservation rules with:
+    \begin{align*}
+        &
+        \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}) \rightarrow \changeuniverse{\metamodel{M}{2}} \\
+        &
+        \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow} : (\metamodelinstanceset{M}{2}, \metamodelinstanceset{M}{1}, \changeuniverse{\metamodel{M}{2}}) \rightarrow \changeuniverse{\metamodel{M}{1}}
+    \end{align*}
+    A \emph{bidirectional transformation} is a triple $\transformation{T} = \tupled{\consistencyrelationset{CR},\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}$.
+\end{definition}
 
+\mnote{Correctness of bidirectional transformations}
+We call such a bidirectional transformation correct if both consistency preservation rules are correct, i.e., they both preserve consistency according to the underlying consistency relation set.
+
+\begin{definition}[Bidirectional Transformation Correctness]
+    \label{def:bidirectionaltransformationcorrectness}
+    Let $\transformation{T} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}$ be a bidirectional transformation.
+    We call $\transformation{T}$ correct if, and only if, $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ and $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}$ are both correct according to \autoref{def:unidirectionalconsistencypreservationrulecorrectness}.
+\end{definition}
+
+\mnote{Bidirectional transformations do not support changes of both models}
+Such bidirectional transformations ensure that if any of two models is changed, a change for the other is generated such that both changed models are consistent again, if possible.
+This does, however, not reflect the case that both models have been modified concurrently, as it is the case in transformation networks and thus supported by our initial definition of synchronizing transformations.
+We therefore discuss in the following sections how we can combine the unidirectional consistency preservation rules of a bidirectional transformation and which requirements we have to make to them such that the bidirectional transformation behaves like a synchronizing one.
 
