@@ -1,7 +1,13 @@
 \section{Combining Unidirectional Consistency Preservation Rules}
 
+\mnote{Discuss options to combine unidirectional preservation rules to be synchronizing}
+We have introduced that bidirectional transformations, as we assume to be the notion for practically usable transformation specifications, can only be applied after changes to one model and update the other to restore consistency.
+This induced a gap to synchronizing transformations, as required in transformation networks, which are able to accept changes made in both models and update both models to restore consistency.
+To close this gap, we discuss options to combine the unidirectional consistency preservation rules of a bidirectional transformation, such that it considers changes made to both models and thus acts like a synchronizing transformation.
+
+
 %%
-%% OPTIONS TO COMBINE TRANSFORMATIONS
+%% OPTIONS TO COMBINE TRANSFORMATIONS / CPRS
 %%
 \subsection{Options for Combination}
 
@@ -22,93 +28,180 @@ Finally, this would result in reverting a user change, which should never happen
 In fact, we assume transformations to be compatible according to \autoref{def:compatibility}, which excludes contradictions in their consistency relations that may prevent transformations from being able to find a consistent result for specific changes.
 This assumptions reduces the potential conflicts that may occur when changes of different transformations need to be synchronized.
 
-\mnote{Difference between synchronizing and unidirectional consistency preservation rules}
-A synchronizing consistency preservation rule according to \autoref{def:consistencypreservationrule} receives two models and two changes, one for each of the models, and returns two changes, i.e.:
-\begin{align*}
-    \consistencypreservationrule{\consistencyrelation{CR}{}} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}, \changeuniverse{\metamodel{M}{2}}) \rightarrow (\changeuniverse{\metamodel{M}{1}}, \changeuniverse{\metamodel{M}{2}})
-\end{align*}
+%\mnote{Difference between synchronizing and unidirectional consistency preservation rules}
+%A synchronizing consistency preservation rule according to \autoref{def:consistencypreservationrule} receives two models and two changes, one for each of the models, and returns two changes, i.e.:
+% \begin{align*}
+%     \consistencypreservationrule{\consistencyrelation{CR}{}} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}, \changeuniverse{\metamodel{M}{2}}) \rightarrow (\changeuniverse{\metamodel{M}{1}}, \changeuniverse{\metamodel{M}{2}})
+% \end{align*}
 %\todo{Maybe add this to correctness formalization: Give example why we need that: both models can be modified due to network, both may need to be modified because if in both models something is added that needs to be reflected in the other, both have to be changed to restore consistency, without reverting one of the changes.}
 %We used this rather general notion of a consistency preservation rule between two metamodels to support that both models may have been modified, which is inevitable in a transformation network.
 %Additionally, both models may need to be modified to properly consistency.
-It would, however, be a cumbersome task to define the behavior of the transformation, or more precisely its consistency preservation rule, for all potential pairs of changes in both models.
-Furthermore, existing transformation languages usually specify unidirectional consistency preservation rules, thus they only support the propagation of changes made in one model to the other, but not to process changes made to both models at once. Thus, each bidirectional transformation defined in a transformation language actually consists of two consistency preservation rules:
-\begin{align*}
-    \consistencypreservationrule{\consistencyrelation{CR}{},\rightarrow} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}) \rightarrow \changeuniverse{\metamodel{M}{2}}\\
-    \consistencypreservationrule{\consistencyrelation{CR}{},\leftarrow} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{2}}) \rightarrow \changeuniverse{\metamodel{M}{1}}
-\end{align*}
+% It would, however, be a cumbersome task to define the behavior of the transformation, or more precisely its consistency preservation rule, for all potential pairs of changes in both models.
+% Furthermore, existing transformation languages usually specify unidirectional consistency preservation rules, thus they only support the propagation of changes made in one model to the other, but not to process changes made to both models at once. Thus, each bidirectional transformation defined in a transformation language actually consists of two consistency preservation rules:
+% \begin{align*}
+%     \consistencypreservationrule{\consistencyrelation{CR}{},\rightarrow} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}) \rightarrow \changeuniverse{\metamodel{M}{2}}\\
+%     \consistencypreservationrule{\consistencyrelation{CR}{},\leftarrow} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{2}}) \rightarrow \changeuniverse{\metamodel{M}{1}}
+% \end{align*}
+
+\mnote{Both preservation rules of a bidirectional transformation must be executed at least once}
+A bidirectional transformation according to \autoref{def:bidirectionaltransforamtion} consists of two unidirectional consistency preservation rules.
+We have discussed in \autoref{chap:synchronization:gap:alignment} that it is not possible to extend those consistency preservation rules to be synchronizing such that the execution of a single unidirectional consistency preservation rule restores consistency to all consistency relations after changes to both models.
+In fact, it will be necessary to execute both preservation rules at least ones to restore consistency.
+There are, however, different options how to apply the rules, each having different benefits and drawbacks.
 
 \mnote{First option: Independent execution and merge}
-In consequence, we usually have two unidirectional consistency preservation rules $\consistencypreservationrule{\consistencyrelation{CR}{},\rightarrow}$ and $\consistencypreservationrule{\consistencyrelation{CR}{},\leftarrow}$ that define how changes are propagated from one model to the other and vice versa, but this is not equivalent to a synchronizing transformation.
+%In consequence, we usually have two unidirectional consistency preservation rules $\consistencypreservationrule{\consistencyrelation{CR}{},\rightarrow}$ and $\consistencypreservationrule{\consistencyrelation{CR}{},\leftarrow}$ that define how changes are propagated from one model to the other and vice versa, but this is not equivalent to a synchronizing transformation.
+A first option is to independently apply the consistency preservation rules and then merge the results.
 Imagine models $\model{m}{1}$ and $\model{m}{2}$ and changes to them $\change{\metamodel{M}{1}}$ and $\change{\metamodel{M}{2}}$.
-If we now applied the two unidirectional consistency preservation rules independently, we would have $\change{\metamodel{M}{2}}' = \consistencypreservationrule{\consistencyrelation{CR}{},\rightarrow}(\model{m}{1},\model{m}{2}, \change{\metamodel{M}{1}})$ and $\change{\metamodel{M}{1}}' = \consistencypreservationrule{\consistencyrelation{CR}{},\leftarrow}(\model{m}{1},\model{m}{2}, \change{\metamodel{M}{2}})$.
-It is, however, not guaranteed that $\tupled{\change{\metamodel{M}{1}}' \concatfunction \change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}' \concatfunction \change{\metamodel{M}{2}}(\model{m}{2})}$ is consistent, thus simply merging the individually produced changes does not necessarily lead to a consistent result.
+If we now applied the two unidirectional consistency preservation rules independently, we would have $\change{\metamodel{M}{2}}' = \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}(\model{m}{1},\model{m}{2}, \change{\metamodel{M}{1}})$ and $\change{\metamodel{M}{1}}' = \consistencypreservationrule{\consistencyrelationset{CR}{}}^{\leftarrow}(\model{m}{2}, \model{m}{1}, \change{\metamodel{M}{2}})$.
+It is, however, not guaranteed that $\tupled{\change{\metamodel{M}{1}}' \concatfunction \change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}' \concatfunction \change{\metamodel{M}{2}}(\model{m}{2})}$ is consistent.
+It is even not guaranteed that the changes, such as $\change{\metamodel{M}{1}}$ and $\change{\metamodel{M}{1}}'$ can be concatenated at all, since $\change{\metamodel{M}{1}}'$ was generated for $\model{m}{1}$ rather than $\change{\metamodel{M}{1}}(\model{m}{1})$.
+An example may be that $\change{\metamodel{M}{1}}$ removes an element from $\model{m}{1}$, which $\change{\metamodel{M}{1}}'$ changes.
+Even if the change is still defined for that changed model, the result may not be consistent because the necessary change produced by $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ cannot be applied anymore.
+%For example, $\change{\metamodel{M}{1}}'$ may add an element that $\change{\metamodel{M}{1}}$ already added.
+%Then the resulting model may be invalid or, if the element is only added once, this may result in the missing existence of unique corresponding elements to build a witness structure for consistency.
+Thus simply merging the individually produced changes does not necessarily lead to a consistent result.
 
 \mnote{Second option: Sequential execution}
-Another option would be to sequence the execution, thus first generating $\change{\metamodel{M}{2}}' = \consistencypreservationrule{\consistencyrelation{CR}{},\rightarrow}(\model{m}{1},\model{m}{2}, \change{\metamodel{M}{1}}$ as before.
-Afterwards, we apply the second consistency preservation rule to modified $\model{m}{2}$, thus $\change{\metamodel{M}{1}}' = \consistencypreservationrule{\consistencyrelation{CR}{},\leftarrow}(\change{\metamodel{M}{1}}(\model{m}{1}),\change{\metamodel{M}{2}}'(\model{m}{2}), \change{\metamodel{M}{2}})$.
-As a result, we receive $\tupled{\change{\metamodel{M}{1}'} \concatfunction \change{\metamodel{M}{1}}(\model{m}{1}, \change{\metamodel{M}{2}} \concatfunction \change{\metamodel{M}{2}}'(\model{m}{2})}$, which is consistent to $\consistencyrelation{CR}{}$.
+Another option would be to sequence the execution, thus first generating $\change{\metamodel{M}{2}}' = \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}(\model{m}{1},\model{m}{2}, \change{\metamodel{M}{1}}$ as before.
+$\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}'(\model{m}{2})}$ is consistent due to correctness of $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$.
+Afterwards, we apply the second consistency preservation rule to the the new consistent models and the original change to $\model{m}{2}$, thus $\change{\metamodel{M}{1}}' = \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}(\change{\metamodel{M}{2}}'(\model{m}{2}), \change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}})$.
+As a result, we receive $\tupled{\change{\metamodel{M}{1}'} \concatfunction \change{\metamodel{M}{1}}(\model{m}{1}, \change{\metamodel{M}{2}} \concatfunction \change{\metamodel{M}{2}}'(\model{m}{2})}$, which is consistent to $\consistencyrelationset{CR}$.
 This means that $\change{\metamodel{M}{2}}$ is not applied to $\model{m}{2}$ anymore, to which the changes were made originally, but needs to be applied to $\change{\metamodel{M}{2}}'(\model{m}{2})$.
-It is, however, not clear whether the change can still be applied to that state, i.e., whether $\change{\metamodel{M}{2}}$ is defined for $\change{\metamodel{M}{2}}'(\model{m}{2})$.
-An example may be that $\change{\metamodel{M}{2}}'$ removes an element from $\model{m}{2}$, which $\change{\metamodel{M}{2}}$ changes.
-\todo{Revise change definition to be partial}
+It is again unclear whether the change can still be applied to that state, i.e., whether $\change{\metamodel{M}{2}}$ is defined for $\change{\metamodel{M}{2}}'(\model{m}{2})$, like in the merge example above.
+If, however, the changes are applicable, then we have the guarantee that all original changes are reflected, as they were applied to the models, and that the resulting models are consistent, because of the correctness of the consistency preservation rules.
+%An example may be that $\change{\metamodel{M}{2}}'$ removes an element from $\model{m}{2}$, which $\change{\metamodel{M}{2}}$ changes.
+%\todo{Revise change definition to be partial}
 
-\mnote{Goal is to preserve all original changes}
-We, however, want to ensure that both original changes are applied to the models and consistency preservation rules can react to them.
-Thus, we aim to find an approach that allows the unidirectional consistency preservation rules to also deal with the situation that the both models have been modified to emulate a synchronizing rule.
+\mnote{Further investigate sequential execution because of less drawbacks}
+Both discussed options have the drawback that they cannot guarantee to produce a result, as it is possible that the involved changes cannot be concatenated.
+In addition, the first option of independently applying the consistency preservation rules and then merging the results cannot even give a guarantee that if changes can be concatenated the resulting models are consistent.
+Thus, we do not pursue that approach anymore.
+In the following, we further discuss the second option of sequencing the execution of the consistency preservation rules.
+
+% \mnote{Goal is to preserve all original changes}
+% We, however, want to ensure that both original changes are applied to the models and consistency preservation rules can react to them.
+% Thus, we aim to find an approach that allows the unidirectional consistency preservation rules to also deal with the situation that the both models have been modified to emulate a synchronizing rule.
 
 
-
+%%%
+%%% SEQUENCING OF CPRS
+%%%
 \subsection{Sequencing of Consistency Preservation Rules}
 
-Optimalfall: d2' und d2 erzeugen Änderungen für Elemente, die disjunkte Mengen von Condition Elements betreffen. Dann können sie beliebig sequentialisiert werden und erzeugen konsistente Ergebnisse.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/correctness/synchronization/sequencing_schema.png}
+    \caption[Schema for sequencing unidirectional consistency preservation rules]{Schema for sequencing unidirectional consistency preservation rules after concurrent changes.}
+    \label{fig:synchronization:sequencing_schema}
+\end{figure}
 
-Problemfälle:
-d2' erzeugt Änderungen, die sich nicht auf d2 anwenden lassen
-d2' erzeugt Änderungen, die sich auf Condition Elemente beziehen, die von d2 geändert werden
-d2' und d2 erzeugen Änderungen, die zusammen neue Condition Elements induzieren
+\mnote{Changes that affect disjoint sets of elements can be concatenated}
+The sequential application of original changes and execution of consistency preservation rules as explained in the previous section is depicted schematically in \autoref{fig:synchronization:sequencing_schema}.
+It has two important properties. 
+First, it ensures that all original changes are applied to the models and, second, it guarantees that the resulting models are consistent.
+It is, however, only applicable in specific situations.
+The optimal case, in which the approach is always applicable, is if $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ produces changes for the second model, which affects a disjoint set of elements in $\consistencyrelationset{CR}$ compared to the original changes to the second model $\change{\metamodel{M}{2}}$.
+If two changes affect completely disjoint sets of elements, they can obviously be consecutively applied.
+It would even not make a difference in which order they are applied then.
 
-\begin{itemize}
-    \item In the best case we would apply changes to model 1, then execute the first preservation rule to change model 2 (so they are consistent then again) and then apply the changes to model 2 and execute the second preservation rule, such that they are then consistent again.
-    \item What comes in mind directly: For sure, this could result in the situation that changes are reverted, because the change to 1 propagated by 1 -> 2 changes a value which is changed by back by change to 2 and then reverted back by 2 -> 1. But even a synchronizing transformation would have to select either of the values in that case and revert one the changes, so there is already an underlying problem of the relations that may not be compatible
-    \item It is however unclear whether the changes to model 2 can still be applied after applying the changes of the transformation 
-    \item We therefore make a case distinction over all possible combinations of changes to be executed one after another.
-    \item Especially, we want to find out where there are conflicts if changes to model 2 are applied before 1 -> 2 changes. This allows us to encode 1 -> 2 in a way that it is able to deal with it instead of having the problem of not being able to apply changes to model 2
-\end{itemize}
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/correctness/synchronization/non_transformability.png}
+    \caption[Non-transformability in sequencing scenario]{Example for non-transformability when sequencing the application of unidirectional consistency preservation rules and concurrent changes.}
+    \label{fig:synchronization:non_transformability}
+\end{figure}
 
-Kann d2 auf d2' angewendet werden? Was sind mögliche Probleme?
-%Wir können Sequentialisieren, aber dann sind Änderungen potentiell nicht mehr propagierbar (und wenn die CPR es doch tun, weil sie für die Eingabe undefiniert sind und irgendwas tun, kommt Quatsch raus).
+\mnote{Non-applicability and non-transformability can occur when change and consistency preservation rule application are sequenced}
+Unfortunately, the changes $\change{\metamodel{M}{2}}'$ produced by $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ and the original ones produced by other transformations $\change{\metamodel{M}{2}}$ do not necessarily affect disjoint sets of elements.
+In that case, two problems can occur:
+\begin{properdescription}
+    \item[Non-Applicability:] The most obvious problem, which we have already discussed, is that the original change to the second model $\change{\metamodel{M}{2}}$ cannot be applied to the model changed by $\change{\metamodel{M}{2}}'$ as the result of $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$. 
+    This can, for example, happen when $\change{\metamodel{M}{2}}'$ removes an element that is affected by $\change{\metamodel{M}{2}}$.
+    Due to the change of the element in $\change{\metamodel{M}{2}}$, it is part of a condition element in another transformation that was executed before.
+    Since $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ removed that element, the condition element exists no longer anyway, thus this removal has to be propagated back by the transformation that originally introduced the change in $\change{\metamodel{M}{2}}$.
+    In consequence, the modification in $\change{\metamodel{M}{2}}$ can simply be ignored.
+    In the worst case, all elements affected by $\change{\metamodel{M}{2}}$ were removed by $\change{\metamodel{M}{2}}'$, then, in fact, all changes in $\change{\metamodel{M}{2}}$ can be ignored, because all condition elements of the involved consistency relations were removed.
+    Thus, we can always ensure that the changes, at least those that are still relevant, can still be applied.
+    
+    \item[Non-Transformability:] Even if the changes $\change{\metamodel{M}{2}}$ can be applied to $\change{\metamodel{M}{2}}'(\model{m}{2})$, this does still not guarantee that $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}$ is able to process the given changes.
+    In fact, this requirement applies to all changes, thus even original user changes, but there are special circumstances in this situation that make it prone to not being able to transform the changes.
+    Whenever $\change{\metamodel{M}{2}}'$ adds condition elements that were already added by $\change{\metamodel{M}{2}}$, their concatenation can lead to a duplication of those elements.
+    Consider the scenario depicted in \autoref{fig:synchronization:non_transformability} with consistency relation $\consistencyrelation{CR}{ER}$. 
+    An employee \enquote{alive avid} is added by the original change to $\model{m}{1}$.
+    The consistency preservation rule then generates an appropriate resident with the same name to fulfill the consistency relation.
+    Applying the original change to $\model{m}{2}$ then leads to the addition of resident \enquote{Alice Avid}.
+    Now it is impossible for $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}$ to generate a change $\change{\metamodel{M}{1}}'$ for the first model to restore consistency. The employee corresponds to both residents, as both fulfill the constraint of the consistency relation. 
+    But there is no additional employee that could be added to achieve a unique mapping between corresponding elements.
+    A synchronizing transformation would have been able to produce a consistent result by simply performing no additional changes, as the originally added resident is already consistent to the originally added employee.
+    In consequence, if the unidirectional consistency preservation would have known that the resident was already added, it would not have performed any changes.
+\end{properdescription}
 
-1. Nicht Anwendbarkeit: Element, auf das Änderung angewendet werden soll, existiert nicht mehr. D.h. das Element wurde durch die CPR entfernt, was nötig war, um die entsprechende Konsistenzrelation zu erfüllen. Die Änderung die über einen anderen Pfad kam, kann nicht mehr angewendet werden. Das Condition Element ist nicht mehr vorhanden, also muss diese Löschung zurückpropagiert werden, damit auch entsprechend der anderen Konsistenzrelationen die korrespondierenden Condition Elements entfernt werden -> Änderung wird ignoriert und die Löschung wird propagiert
-2. Nicht Propagierbarkeit (gilt generell für die Propagierbarkeit von Änderungen, nicht nur in diesem Szenario, auch bei Nutzeränderungen): Wenn alle Änderungen angewendet sind, kann der Zielzustand so sein, dass d1(m1) nicht so angepasst werden, dass Konsistenz wiederherstellt wird. Dies ist insbesondere dann der Fall, wenn für d2(d2'(m2)) kein Modell in IM1 existiert, sodass es eine valide Witness-Struktur gibt. Das ist dann der Fall, wenn nicht für jedes Condition Element ein eindeutiges korrespondierendes gefunden werden kann, also entweder aufgrund der Elemente in d2(d2'(m2)) in einem m1 Elemente vorkommen müssen, die durch eine Konsistenzregel ein weiteres Condition Element in d2(d2'(m2)) benötigen würden, oder es kein m1 gibt, sodass eine eindeutige Zuordnung möglich ist, also in d2(d2'(m2)) quasi doppelte Elemente vorkommen
+\mnote{Non-transformable changes of users cannot be avoided, but those of transformations can}
+As remarked before, the situation that certain changes cannot be processed by the consistency preservation rules cannot be avoided. 
+If the user had added the second resident in the previous scenario, there would have also been no possibility for the consistency preservation rule to generate changes that restore consistency.
+The difference is, however, that in this case it is fine that consistency preservation cannot find a result, whereas in case of the scenario discussed above, the original changes could have been reasonably processed to a consistent result, if the unidirectional consistency preservation would have considered that there already was a change that restored consistency.
 
-Ersteres wäre bspw. der Fall, wenn ein zweiter Resident eingefügt wird, dafür entsprechend ein zweiter Employee erzeugt werden muss, aber bei zwei Employees (warum auch immer) immer ein dritter Resident erzeugt werden muss, durch eine weitere Konsistenzrelation. Dies wäre jedoch auch ein Problem, wenn der Nutzer eine solche Änderung macht, da dann die CPR gar nicht in der Lage ist unidirektional Konsistenz herzustellen. Daher können wir mit solch einer Art von  Konsistenzrelationen sowieso per se nicht umgehen. Wie bereits gesagt, kann man das in der Praxis dennoch erlauben und verliert dann gewisse Garantien bzgl. Konsistenz oder Terminierung. Der Entwickler muss das halt einfach richtig umsetzen.
-Dieses Problem ließe sich noch durch mehrfache Ausführung der Transformationen lösen, da es immer noch Modelle gibt, die diese Änderung reflektieren und konsistent sind, muss eben nur die Transformationen dafür lange genung ausführen.
+\mnote{Consistency preservation rules need to be able to process inconsistent inputs}
+In consequence, it is inevitable that consistency preservation rules need to be able to deal with the situation that the second model was already modified, such that the given models are not initially consistent, to reflect the changes that already have been made and integrate them into consistency preservation.
+This means that we finally have to relax our requirements for the input of consistency preservation rules, which also means that we need to make further requirements, because the consistency preservation rules cannot guarantee correctness for inputs that are not consistent.
+We have already given examples where it is not possible to restore consistency by one unidirectional consistency preservation rule after changes in both models.
 
-Zweiteres wäre beispielsweise ein doppelter Resident, für den kein konsistentes Employee-Modell erzeugt werden kann.
-Das Vorkommen doppelter Elemente lässt sich auch nicht durch mehrfache Ausführung der CPR auflösen (außer man löscht eines der Elemente wieder).
-Hier ist das zugrunde liegende Problem, dass mehrfach ein Element erzeugt wurde, was eigentlich das gleiche sein soll.
-Eine synchronisierende Transformation könnte an dieser Stelle berücksichtigen, dass d2 bereits entsprechende Elemente einfügt, sodass in d2' nicht zusätzliche Erzeugungen generiert werden müssen, um eine valide Witness-Struktur zu induzieren.
-Die unidirektionale CPR sieht diese Änderung jedoch nicht und somit passiert die Hinzufügung doppelt.
-Um das zu Vermeiden müsste die CPR berücksichtigen, dass d2 bereits entsprechende Änderungen macht.
+\mnote{Relaxed notion can affect number of times consistency preservation rules are executed}
+Before we define a precise notion of further requirements to consistency preservation rules that accept inconsistent inputs, we first discuss how often it may be necessary to execute both consistency preservation rules to restore consistency, as that directly affects the requirements we have to make.
 
-Go on here \dots
+%Optimalfall: d2' und d2 erzeugen Änderungen für Elemente, die disjunkte Mengen von Condition Elements betreffen. Dann können sie beliebig sequentialisiert werden und erzeugen konsistente Ergebnisse.
+
+% Problemfälle:
+% d2' erzeugt Änderungen, die sich nicht auf d2 anwenden lassen
+% d2' erzeugt Änderungen, die sich auf Condition Elemente beziehen, die von d2 geändert werden
+% d2' und d2 erzeugen Änderungen, die zusammen neue Condition Elements induzieren
+
+% \begin{itemize}
+%     \item In the best case we would apply changes to model 1, then execute the first preservation rule to change model 2 (so they are consistent then again) and then apply the changes to model 2 and execute the second preservation rule, such that they are then consistent again.
+%     \item What comes in mind directly: For sure, this could result in the situation that changes are reverted, because the change to 1 propagated by 1 -> 2 changes a value which is changed by back by change to 2 and then reverted back by 2 -> 1. But even a synchronizing transformation would have to select either of the values in that case and revert one the changes, so there is already an underlying problem of the relations that may not be compatible
+%     \item It is however unclear whether the changes to model 2 can still be applied after applying the changes of the transformation 
+%     \item We therefore make a case distinction over all possible combinations of changes to be executed one after another.
+%     \item Especially, we want to find out where there are conflicts if changes to model 2 are applied before 1 -> 2 changes. This allows us to encode 1 -> 2 in a way that it is able to deal with it instead of having the problem of not being able to apply changes to model 2
+% \end{itemize}
+
+% Kann d2 auf d2' angewendet werden? Was sind mögliche Probleme?
+% %Wir können Sequentialisieren, aber dann sind Änderungen potentiell nicht mehr propagierbar (und wenn die CPR es doch tun, weil sie für die Eingabe undefiniert sind und irgendwas tun, kommt Quatsch raus).
+
+% 1. Nicht Anwendbarkeit: Element, auf das Änderung angewendet werden soll, existiert nicht mehr. D.h. das Element wurde durch die CPR entfernt, was nötig war, um die entsprechende Konsistenzrelation zu erfüllen. Die Änderung die über einen anderen Pfad kam, kann nicht mehr angewendet werden. Das Condition Element ist nicht mehr vorhanden, also muss diese Löschung zurückpropagiert werden, damit auch entsprechend der anderen Konsistenzrelationen die korrespondierenden Condition Elements entfernt werden -> Änderung wird ignoriert und die Löschung wird propagiert
+% 2. Nicht Propagierbarkeit (gilt generell für die Propagierbarkeit von Änderungen, nicht nur in diesem Szenario, auch bei Nutzeränderungen): Wenn alle Änderungen angewendet sind, kann der Zielzustand so sein, dass d1(m1) nicht so angepasst werden, dass Konsistenz wiederherstellt wird. Dies ist insbesondere dann der Fall, wenn für d2(d2'(m2)) kein Modell in IM1 existiert, sodass es eine valide Witness-Struktur gibt. Das ist dann der Fall, wenn nicht für jedes Condition Element ein eindeutiges korrespondierendes gefunden werden kann, also entweder aufgrund der Elemente in d2(d2'(m2)) in einem m1 Elemente vorkommen müssen, die durch eine Konsistenzregel ein weiteres Condition Element in d2(d2'(m2)) benötigen würden, oder es kein m1 gibt, sodass eine eindeutige Zuordnung möglich ist, also in d2(d2'(m2)) quasi doppelte Elemente vorkommen
+
+% Ersteres wäre bspw. der Fall, wenn ein zweiter Resident eingefügt wird, dafür entsprechend ein zweiter Employee erzeugt werden muss, aber bei zwei Employees (warum auch immer) immer ein dritter Resident erzeugt werden muss, durch eine weitere Konsistenzrelation. Dies wäre jedoch auch ein Problem, wenn der Nutzer eine solche Änderung macht, da dann die CPR gar nicht in der Lage ist unidirektional Konsistenz herzustellen. Daher können wir mit solch einer Art von  Konsistenzrelationen sowieso per se nicht umgehen. Wie bereits gesagt, kann man das in der Praxis dennoch erlauben und verliert dann gewisse Garantien bzgl. Konsistenz oder Terminierung. Der Entwickler muss das halt einfach richtig umsetzen.
+% Dieses Problem ließe sich noch durch mehrfache Ausführung der Transformationen lösen, da es immer noch Modelle gibt, die diese Änderung reflektieren und konsistent sind, muss eben nur die Transformationen dafür lange genung ausführen.
+
+% Zweiteres wäre beispielsweise ein doppelter Resident, für den kein konsistentes Employee-Modell erzeugt werden kann.
+% Das Vorkommen doppelter Elemente lässt sich auch nicht durch mehrfache Ausführung der CPR auflösen (außer man löscht eines der Elemente wieder).
+% Hier ist das zugrunde liegende Problem, dass mehrfach ein Element erzeugt wurde, was eigentlich das gleiche sein soll.
+% Eine synchronisierende Transformation könnte an dieser Stelle berücksichtigen, dass d2 bereits entsprechende Elemente einfügt, sodass in d2' nicht zusätzliche Erzeugungen generiert werden müssen, um eine valide Witness-Struktur zu induzieren.
+% Die unidirektionale CPR sieht diese Änderung jedoch nicht und somit passiert die Hinzufügung doppelt.
+% Um das zu Vermeiden müsste die CPR berücksichtigen, dass d2 bereits entsprechende Änderungen macht.
+
+% Go on here \dots
 
 
-Wenn wir die undirektionalen CPR sequentialisieren (also erst d2' erzeugen, dann d2 darauf anwenden), kann es sein, dass d2'(m2) Änderungen an Condition Elements in m2 vornimmt oder neue hinzufügt, um Konsistenz wiederherzustellen, die ebenfalls von d2 eingefügt werden, sodass es nicht mehr möglich ist, durch die rückwärtige CPR Änderungen vorzunehmen, die eine valide Witness-Struktur induzieren.
-Z.B. könnte d2'(m2) einen Resident hinzufügen, der bereits durch d2 eingefügt wurde (weil er über einen anderne Pfad erstellt wurde, siehe \autoref{fig:synchronization:duplicate_creation_example}). Wird nun d2 auf d2'(m2) angewendet, würde ggf. in einem Container, in dem die Residents gespeichert werden, zwei Residents mit gleichem Namen eingefügt. Für diese kann aber keine Änderung in m1 (sei es das Employee-Modell) erzeugt werden, durch die eine valide Witness-Struktur entsteht. Das Einfügen eines zweiten Employee mit dem gleichen Namen führt dazu, dass jeder Employee und jeder Resident zu zwei Residents bzw. Employees korrespondiert, was keine eindeutige Witness-Struktur induziert.
-Um dies zu vermeiden, müssen die CPR sicherstellen, dass in den Änderungen am anderen Modell nicht bereits entsprechende Condition Elements erzeugt wurden.
-Alle anderen Änderungen sind unproblematisch, da Änderungen die d2 an bestehenden Condition Elements, die nicht zu neuen Condition Elements führen, durchführt mittels 2->1 propagiert werden können, indem die Condition Elements in m1 angepasst werden.
+% Wenn wir die unidirektionalen CPR sequentialisieren (also erst d2' erzeugen, dann d2 darauf anwenden), kann es sein, dass d2'(m2) Änderungen an Condition Elements in m2 vornimmt oder neue hinzufügt, um Konsistenz wiederherzustellen, die ebenfalls von d2 eingefügt werden, sodass es nicht mehr möglich ist, durch die rückwärtige CPR Änderungen vorzunehmen, die eine valide Witness-Struktur induzieren.
+% Z.B. könnte d2'(m2) einen Resident hinzufügen, der bereits durch d2 eingefügt wurde (weil er über einen anderne Pfad erstellt wurde, siehe \autoref{fig:synchronization:duplicate_creation_example}). Wird nun d2 auf d2'(m2) angewendet, würde ggf. in einem Container, in dem die Residents gespeichert werden, zwei Residents mit gleichem Namen eingefügt. Für diese kann aber keine Änderung in m1 (sei es das Employee-Modell) erzeugt werden, durch die eine valide Witness-Struktur entsteht. Das Einfügen eines zweiten Employee mit dem gleichen Namen führt dazu, dass jeder Employee und jeder Resident zu zwei Residents bzw. Employees korrespondiert, was keine eindeutige Witness-Struktur induziert.
+% Um dies zu vermeiden, müssen die CPR sicherstellen, dass in den Änderungen am anderen Modell nicht bereits entsprechende Condition Elements erzeugt wurden.
+% Alle anderen Änderungen sind unproblematisch, da Änderungen die d2 an bestehenden Condition Elements, die nicht zu neuen Condition Elements führen, durchführt mittels 2->1 propagiert werden können, indem die Condition Elements in m1 angepasst werden.
 
-Insgesamt ist die Situation die gleiche, als würde ein Nutzer eine entsprechende Änderung machen. Auch er kann natürlich einen zweiten Resident mit demselben Namen einführen. Hier würde die CPR selbstverständlich fehlschlagen. Während das für Nutzeränderungen erwüscht ist, da die doppelte Erzeugung desselben Elementes hier schon vom Nutzer durchgeführt wurde und für einen entsprechende Nutzeränderung kein konsistentes Modell generiert werden kann, ist dies innerhalb des Transformationsnetwerkes unerwünscht, da die CPR natürlich eine konsistente Modellmenge finden können und die doppelte Erzeugung lediglich daher kommt, dass die Transformationen nicht, wie verlangt, synchronisieren sind. In letztem Fall wäre sichergestellt, dass nach entsprechenden Änderungen an beiden Modellen (also Erzegung von Employee in einem, Erzeugung des passenden Resident im anderen) keine Änderungen gemacht werden, da bereits eine passende Witness-Struktur vorhanden ist.
-Die unidirektionalen CPR schaffen das jedoch nicht, da Ihnen die entsprechende Information fehlt.
+% Insgesamt ist die Situation die gleiche, als würde ein Nutzer eine entsprechende Änderung machen. Auch er kann natürlich einen zweiten Resident mit demselben Namen einführen. Hier würde die CPR selbstverständlich fehlschlagen. Während das für Nutzeränderungen erwüscht ist, da die doppelte Erzeugung desselben Elementes hier schon vom Nutzer durchgeführt wurde und für einen entsprechende Nutzeränderung kein konsistentes Modell generiert werden kann, ist dies innerhalb des Transformationsnetwerkes unerwünscht, da die CPR natürlich eine konsistente Modellmenge finden können und die doppelte Erzeugung lediglich daher kommt, dass die Transformationen nicht, wie verlangt, synchronisieren sind. In letztem Fall wäre sichergestellt, dass nach entsprechenden Änderungen an beiden Modellen (also Erzegung von Employee in einem, Erzeugung des passenden Resident im anderen) keine Änderungen gemacht werden, da bereits eine passende Witness-Struktur vorhanden ist.
+% Die unidirektionalen CPR schaffen das jedoch nicht, da Ihnen die entsprechende Information fehlt.
 
-\paragraph{Concatenation of Changes}
-WAS PASSIERT EIGENTLICH BEI CHANGE CONCATENATION?
-Bis jetzt haben wir Änderungen immer nur auf den Zustand eines Modells angewandt, für den sie auch generiert waren. Ein Change kann jedoch von seiner Definition her auch auf andere Zustände angewandt werden. Die Frage ist, wie er sich dabei verhält. Die Definition macht dazu erstmal keine Aussage, d.h. er könnte im Prinzip beliebigen Quatsch machen. Natürlicherweise würde man aber erwarten, dass er dieselben Änderungen an Modellen durchführt (Einfügen/Löschen von Objekten, Ändern von Attributen/Referenzen usw.), soweit dies möglich ist. Zumindest wenn die jeweiligen Elemente vorhanden sind, auf die sich die Änderungen beziehen, sollte die Änderung das gleiche ausführen.
-Da wir das nicht präzise formulieren können, kommen wir nicht umhin, dass d2' auf Basis von d2(m2) erzeugt wird. Also spricht auch das gegen Sequentialisierung.
+% \paragraph{Concatenation of Changes}
+% WAS PASSIERT EIGENTLICH BEI CHANGE CONCATENATION?
+% Bis jetzt haben wir Änderungen immer nur auf den Zustand eines Modells angewandt, für den sie auch generiert waren. Ein Change kann jedoch von seiner Definition her auch auf andere Zustände angewandt werden. Die Frage ist, wie er sich dabei verhält. Die Definition macht dazu erstmal keine Aussage, d.h. er könnte im Prinzip beliebigen Quatsch machen. Natürlicherweise würde man aber erwarten, dass er dieselben Änderungen an Modellen durchführt (Einfügen/Löschen von Objekten, Ändern von Attributen/Referenzen usw.), soweit dies möglich ist. Zumindest wenn die jeweiligen Elemente vorhanden sind, auf die sich die Änderungen beziehen, sollte die Änderung das gleiche ausführen.
+% Da wir das nicht präzise formulieren können, kommen wir nicht umhin, dass d2' auf Basis von d2(m2) erzeugt wird. Also spricht auch das gegen Sequentialisierung.
 
 
-\subsection{Non-termination of Bidirectional Transformations}
+%%%
+%%% NON-TERMINATION
+%%%
+\subsection{Execution Bounds for Bidirectional Transformations}
 
 Wie bei Orchestrierung gesehen, kann es im Allgemeinen notwendig sein CPRs mehrfach auszuführen, da die aufeinander reagieren müssen, um eine konsistente Modellmenge "auszuhandeln".
 Dasselbe kann bei zwei unidirektionalen Transformationen passieren. Während eine synchronisierende Transformation beliebige Änderungen an beiden Modellen machen kann, kann es sein, dass unidirektionale Transformationen mehrfach aufeinander reagieren müssen, um das gleiche zu erreichen.
