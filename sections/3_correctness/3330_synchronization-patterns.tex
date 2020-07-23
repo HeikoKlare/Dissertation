@@ -1,7 +1,54 @@
 %%%
 %%% AVOIDANCE PATTERNS
 %%%
-\section{Synchronization of Ordinary Transformation}
+\section{Synchronization of Bidirectional Transformations}
+% Das Praktische Problem
+Während wir es dem Entwickler überlassen eine unidirektionale synchronisierende Transformation zu entwickeln, die die entsprechend notwendigen Eigenschaften hat, widmen wir uns noch einem praktischen Problem.
+Konsistenz herstellen tun CPR sowieso. Sie reagieren auf Änderungen und erzeugen Änderungen im Zielmodell, sodass die partielle Konsistenz erhöht wird.
+Bleibt also zu klären, wie das Einführen von Inkonsistenzen durch das Hinzufügen von Elementen verhindert werden kann.
+Dies können wir auf Basis der konkreten Änderungen an Modellen machen oder auf Basis der möglichen Änderungen von Condition Elements.
+
+\subsection{Case Distinction for Changes}
+% Erkenntnis: Fallunterscheidung über Changes bringt nichts
+Es ist leicht einzusehen, dass eine Fallunterscheidung über Changes nichts bringt.
+Beispielsweise könnte ein externer Change (d2) und ein Change per CPRr (d2') völlig unabhängige Elemente betreffen (z.B. einmal ein Attribut einer Klasse, einmal eine Referenz einer anderen Klasse), insofern können wir sie nacheinander ausführen. Allerdings können sie zusammen ein neues Condition Element induzieren. Die Rücktransformation CPRl müsste hierfür ein entsprechendes Condition Element in d1(m1) hinzufügen, was induktiv wieder ein neues Condition Element provozieren kann.
+Und das kann passieren, obwohl jede CPR für sich in der Lage ist Konsistenz in einem Schritt herzustellen.
+Somit ist es nicht sinnvoll über Änderungen zu unterscheiden, sondern über Condition Elements, da relevant ist, ob eine Kombination von Änderungen dazu führt, dass sich ein Condition Element ändert, ein neues entsteht oder ein altes entfernt wird.
+
+Die Kombination zweier Changes kann niemals dazu führen, dass ein Condition Element entfernt wird, was nicht eh entfernt worden wäre, da bereits beim Nicht-Vorhandensein eines Elementes aus dem Condition Element das Condition Element schon nicht mehr im Modell ist.
+Gleiches gilt für die Änderung eines Condition Element. Ein Condition Element ist genau eine Menge von Modellelementen. Entweder ein Change ändert dieses oder nicht, aber nicht erst eine Kombination von Änderungen kann dazu führen.
+Interessant ist die Erzeugung eines Condition Elementes, denn diese kann durch die Kombination mehrere Änderungen entstehen. Erst wenn alle Modellelemente innerhalb eines Condition Elementes erzeugt wurde induziert dies Konsistenzanforderungen.
+
+\subsection{Case Distinction for Condition Elements}
+Die Unterscheidung über Condition Elements ist sinnvoller, denn genau dann wenn ein solches Element betroffen ist hat das Auswirkungen auf die Konsistenz. Durch welche Art von Änderung das genau entsteht, ist zweitrangig. Man könnte lediglich noch untersuchen, welche Modelländerung zu welcher Änderung eines Condition Elementes führen kann, um dem Entwickler bei der Einschätzung zu helfen.
+\todo{Das könnten wir wirklich noch tun!}
+
+Inkonsistenzen werden dadurch eingeführt, dass neue Condition Elements hinzugefügt werden, für die es keine eindeutigen korrespondierenden Elemente gibt, d.h. keine Witness-Struktur aufgebaut werden kann.
+Dies ist der Fall sein, wenn Elemente erzeugt werden, um notwendige Konsistenz herzustellen, dadurch aber neue Condition Elements induziert werden, die wieder Konsistenzhaltung bedürfen.
+Entsteht das neue Condition Element aus Modellelementen, die alle im partiell konsistenten Teilmodell liegen, dann ist die CPR falsch.
+Für dieses partielle Modell, welches vorher konsistent war, und die zugehörige Änderung müsste die CPR gem. Definition Korrektheit ein konsistentes Ergebnis produzieren, kann also keine Condition Elements in m2 induzieren, die keine korrespondierenden Elemente in m2 haben, da die Modelle dann nicht konsistent sind.
+Entsteht das neue Condition Element mit Modellelementen, die nicht im partiell konsistenten Teilmodell liegen, ist das okay, da hierfür keine Konsistenz verlangt ist.
+
+Probleme mit denen CPR durch nebenläufige Änderung umgehen können muss:
+1. Neue Condition Elements sind bereits vorhanden
+2. Condition Elements wurden auf Zielseite modifiziert
+3. Condition Elements wurden auf Zielseite gelöscht
+
+1. Das müssen wir herausfinden, siehe Trace-Modell
+2. CPR muss wissen, welche korrespondierenden Elemente es vorher gab und diese auf der Zielseite entsprechend anpassen. Im Prinzip muss die CPR nur betrachten, welche Bedingungen die Elemente erfüllen müssen und diese wiederherstellen. Hier müssen aber nur die Änderungen in beide Richtungen entsprechend übertragen werden.
+3. CPR muss nichts tun, da durch das Löschen auf der Zielseite auch ein Löschen auf der Quellseite nötig ist, um wieder eine passende Witness-Struktur zu induzieren. Das kann nur die gegenläufige CPR sicherstellen.
+
+Konsequenz: 1. ist der Fall, den wir uns noch genauer anschauen müssen.
+
+% ZUSAMMENFASSUNG DER SZENARIEN BEI BEARBEITUNG VON MODIFIZIERTEM M2
+Mögliche Situationen wenn wir an 1->2 statt m2 direkt d2(m2) übergeben:
+1. d2(m2) ändert Elemente in einem Condition Element, die 1->2 auch ändern muss. Dann ändert 1->2 einfach partiell die Elemente, und 2->1 macht dann nachher den Rest (nachweisen, dass das geht)
+2. d2(m2) fügt neue Condition Elemente hinzu: Unproblematisch, wenn sie nicht mit Elemente in d1(m1) zusammenhängen (d.h. keine Witness-Struktur zwischen d1(m1) und d2(m2) die Elemente verbindet), dann werden sie von 2->1 bearbeitet. Wenn sie mit Element in d1(m1) zusammenhängen (also es eine Witness-Struktur gibt, die Elemente verbindet, auch wenn das noch nicht im Trace-Modell steht), muss hier das Matching passieren! Hier ist natürlich von einer passenden Granularität der Konsistenzrelationen auszugehen. Bspw. kann es reichen, dass eine eine Person/Resident/... mit einem passenden Namen vorhanden ist, ohne dass irgendwelche anderen Werte übereinstimmen (das könnte dann in weiteren Konsistenzrelationen stehen). Dann gäbe es z.B. eine Konsistenzrelation, die angibt, dass für jede Person ein Resident mit dem gleichen Namen vorhanden sein muss, und dann noch eine die beschreibt, dass für Person/Resident-Paare mit dem gleichen Namen auch andere Attribute passend abgebildet werden müssen. Dies ist aber in Transformationssprachen eh implizit so realisiert und lässt sich mit unserem Formalismus für feingranulare Konsistenzrelationen problemlos abbilden.
+3. d2(m2) entfernt Condition Elemente: Unproblematisch, wenn die Verarbeitung von d1 nicht auf die entsprechenden Condition Elemente zugreifen muss, also nichts in m1 geändert wurde was zu gelöschten Elementen in d2(m2) korrespondiert. Ansonsten können keine Informationen übertragen werden, da die Witness-Struktur nicht mehr gilt, also macht 1->2 an der Stelle nicht weiter und 2->1 übernimmt den Abbau der Elemente in m1.
+
+
+
+
 Goal: Avoidance strategies for interoperability mistakes, i.e. achieving synchronization of transformations (MA Torsten / Timur)
 \label{chap:prevention:interoperability}
 
