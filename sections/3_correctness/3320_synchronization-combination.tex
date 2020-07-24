@@ -203,50 +203,110 @@ Before we define a precise notion of further requirements to consistency preserv
 %%%
 \subsection{Execution Bounds for Bidirectional Transformations}
 
-Wie bei Orchestrierung gesehen, kann es im Allgemeinen notwendig sein CPRs mehrfach auszuführen, da die aufeinander reagieren müssen, um eine konsistente Modellmenge "auszuhandeln".
-Dasselbe kann bei zwei unidirektionalen Transformationen passieren. Während eine synchronisierende Transformation beliebige Änderungen an beiden Modellen machen kann, kann es sein, dass unidirektionale Transformationen mehrfach aufeinander reagieren müssen, um das gleiche zu erreichen.
-
 \begin{figure}
     \centering
-    \includegraphics[width=0.8\textwidth]{figures/correctness/synchronization/multiple_unidirectional_execution.png}
+    \includegraphics[width=0.7\textwidth]{figures/correctness/synchronization/multiple_unidirectional_execution.png}
     \caption[Multiple execution of unidirectional consistency preservation rules]{A consistency relation requiring multiple executions of unidirectional consistency preservation rules to find a consistent result}
     \label{fig:synchronization:multiple_unidirectional_execution}
 \end{figure}
 
-Siehe \autoref{fig:synchronization:multiple_unidirectional_execution}: Es gibt zwei Relationen (und deren transponierte). Die eine Relation ist erfüllt, wenn für jedes A mit einer Zahl ein B mit der Zahl um eins höher vorkommt, außer A ist 5 (oder eine bel. andere Zahl), dann darf B auch 5 sein (und umgekehrt). Die andere Relation ist erfüllt, wenn für jedes A ein B mit der gleichen Zahl existiert (und umgekehrt).
-Wird nun A(i=0) in das Modell eingefügt, wird zur Erfüllung der Relationen B(i=1) und B(i=0) von der CPRr eingefügt.
-Daraufhin fügt die CPRl A(i=1) ein, da sonst $CR_2$ nicht erfüllt ist.
-Nun fügt CPRr wiederum B(i=2) ein, damit $CR_1$ erfüllt ist usw.
-Dies geht bis CPRl A(i=5) einfügt, denn nun ist auch $CR_1$ erfüllt.
-Es braucht mehrere Durchläufe um dieses Ergebnis zu erhalten.
+\mnote{Unidirectional consistency preservation rules cannot be correct for every consistency relation set}
+Correctness of unidirectional consistency preservation rules ensures that after executing such a rule the resulting models are consistent.
+It is easy to see that this correctness notion cannot be fulfilled for certain sets of consistency relation sets.
+This is exemplified at the artificial scenario depicted in \autoref{fig:synchronization:multiple_unidirectional_execution}.
+We assume two consistency relations $\consistencyrelation{CR}{1}$ and $\consistencyrelation{CR}{2}$ and their transposed relations, i.e., $\consistencyrelationset{CR} = \setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR}{1}^T, \consistencyrelation{CR}{2}, \consistencyrelation{CR}{2}^T}$.
+$\consistencyrelation{CR}{1}$ requires that for each \modelelement{A} an instance of \modelelement{B} exists, which has the same value of $i$ incremented by $1$.
+The only exception is that if $i$ in \modelelement{A} is $5$ (or any other arbitrary value), then there may also be a \modelelement{B} with the same value of $i$.
+$\consistencyrelation{CR}{2}$ requires that for each \modelelement{A} an instance of \modelelement{B} exists, which has the same value of $i$.
+We want to define a bidirectional transformation of two unidirectional consistency preservation rules $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ for propagating changes in models with instances of \modelelement{A} to one with instances of \modelelement{B} and $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}$ to propagate changes in the opposite direction. 
 
-Das folgende ist alles intuitiv gesprochen, funktioniert so nicht.
-ERKENNTNIS: Wir können von einer unidirektionalen CPR i.A. gar nicht verlangen, dass sie Konsistenz bzgl. aller Relationen herstellt.
-Ziel ist nur, dass sie die Konsistenzrelationen in Vorwärtsrichtung wiederherstellt, in Rückwärtsrichtung nicht vollständig.
-Bspw. für ein Insert fügt sie Elemente hinzu, bei Änderung passt sie Elemente an. Bei einer Löschung ist die rückwärtige Konsistenzrelation nicht erfüllt, hier muss aber die CPR vorwärts löschen, d.h. wir verlangen, dass Elemente die vorher schon im Zielmodell waren und immer noch sind, auch konsistent sind bzgl. aller Relationen bzgl. der sie vorher konsistent waren.
-Auch für eine Änderung gilt das in die Richtung: Wenn ich an m1 was ändere wodurch eine Witness-Struktur in Rückrichtung verletzt wird, muss die vorwärts CPR das wiederherstellen.
+\mnote{Example scenario not allowing a single consistency preservation rule to restore consistency}
+Consider the following scenario: If an \modelelement{A} with $i = 0$ is added to an empty model, $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ cannot perform any changes in an (also empty) model with instances of \modelelement{B} that restore consistency.
+Because of $\consistencyrelation{CR}{1}$ a \modelelement{B} with $i = 1$ has to be created, and because of $\consistencyrelation{CR}{2}$ a \modelelement{B} with $i = 0$ has to be created.
+While this also fulfills $\consistencyrelation{CR}{1}^T$, the existence of \modelelement{B} with $i = 1$ requires the existence of an \modelelement{A} with $i = 1$ due to $\consistencyrelation{CR}{2}^T$.
+Since $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ cannot modify the model with instances of \modelelement{A}, it is impossible for $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ to restore consistency in that case.
 
-Das bedeutet, die rückwärts CPR muss dann nur noch auf Hinzufügungen oder Änderungen reagieren, die durch die vorwärts CPR gemacht wurden (auch Löschungen?).
-ERKENNTNIS: Wir können noch nicht einmal Terminierung für zwei unidirektionale Transformationen garantieren. Letztendlich haben wir dort wieder das gleiche Problem wie in Netzwerken, wie wir im Orchestrierungs-Kapitel sehen werden. Das Beispiel zeigt, dass es auch keine obere Schranke für die Anzahl aus Ausführungen gibt (je nach Wahl von X sind hier beliebig viele möglich). Wir könnten Sie nur eine gewissen Zeit ausführen lassen und ansonsten konservativ abbrechen.
+\mnote{Multiple executions of consistency preservation rules can lead to a consistent result}
+Allowing the consistency preservation rules to react to each other multiple times does, however, lead to a consistent result.
+If $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}$ adds an \modelelement{A} with $i = 1$ in response to the previous execution of $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$, all consistency relations except $\consistencyrelation{CR}{1}$ are fulfilled.
+$\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ can then create a \modelelement{B} with $i = 2$, which is iteratively processed by $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}$.
+This process terminates as soon as $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}$ adds an \modelelement{A} with $i = 5$, as then $\consistencyrelation{CR}{1}$ is also fulfilled.
 
-ALSO: Entweder lassen wir das zu, dann können wir keine Terminierung erwarten, oder wir fordern halt, dass eine CPR immer in einem Schritt Konsistenz herstellen muss (für alle Relationen) und wenn sie das nicht schafft, wirft sie eben einen Fehler. Dadurch sind manche Fälle ausgeschlossen, aber das macht man üblicherweise ja immer so.
+\mnote{Number of necessary consistency preservation rule execution can be arbitrarily high}
+We have seen that is possible to execute unidirectional consistency preservation rules multiple times to achieve a consistent state and that is cannot always be possible to ensure consistency with only one execution of such a rule.
+In fact, the number of necessary execution of consistency preservation rules can be arbitrarily high.
+The value of $5$ in $\consistencyrelation{CR}{1}$ of the example can be exchanged by an arbitrary high value requiring an arbitrary high number of executions.
+This may only be circumvented if we required that $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ must perform changes such that $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}$ can then restore consistency with a single execution.
+In our scenario this would mean that $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ adds all \modelelement{B} with $i \leq 5$.
+Anyway, such a behavior requires a relaxation of the correctness requirement for consistency preservation rules, because $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ can never result in a consistent state.
 
-WAS TUN WIR?
-Wir verlangen das was alle Formalismen bisher verlangen: Eine unidirektionale CPR kann vollständig Konsistenz herstellen. Auch wenn es theoretische Szenarien gibt, in denen das nicht möglich ist, gehen bisher diverse Arbeiten davon aus und in unserer Evaluation (siehe \autoref{chap:correctness_evaluation}) werden wir sehen, dass es auch in unseren Fallstudien der Fall ist.
-AUßERDEM: In der Praxis können wir natürlich solche Szenarien erlauben, auch wenn dann gewisse Eigenschaften auf Basis des Formalismus nicht mehr garantiert sind.
-Wenn der Entwickler die Transformationen so baut, dass deren mehrfache Ausführung immer terminiert, ist das kein Problem. Ein relevantes Beispiel hierfür könnte sein, dass man eine Konsistenzrelation bereits instanziieren möchte, wenn ein Condition Element nur partiell hinzugefügt wurde, d.h., dass in dem Fall Änderungen an beiden Modellen notwendig sind.
-Hierfür könnte der Ablauf wie folgt sein: In Modell 1 wird ein Condition Element partiell instanziiert, CPRr instanziiert dafür ein korrespondierendes Condition Element in Modell 2, woraufhin CPRl das Condition Element in Modell 1 vervollständigt. In diesem Fall ist nach der Ausführung von CPRr keine Konsistenz gegeben, was jedoch gewünscht ist.
-Beispielsweise wird ein PCM Repository auf drei Packages abgebildet. Nun könnte bereits bei der Erzeugung eines Package (mit passendem Namen) das PCM Repository instanziiert werden, woraufhin die zwei weiteren Java Packages erzeugt werden.
+\mnote{Consistency preservation rules may be desired to complete partial condition elements}
+Additionally, it may be desired that elements of a consistency relation are created by a consistency preservation rule, although a condition element was only created partially yet.
+In that case, both the partial condition element has to be completed in one model and the corresponding condition element in the other model have to be created.
+Thus changes in both models are required, which can only be achieved by executing both consistency preservation rules and accepting that the first executed one does not return consistent models.
+An example for such a scenario could be the consistency relation between components in \gls{PCM} and their realization as a package and component in Java.
+It may be desired that as soon as a package at a specific place, e.g., a \enquote{components} package, or with a specific name, e.g., containing \enquote{Component}, is created in the Java code, this is identified as a component, thus creating the component in the \gls{PCM} model as well as the implementation class in Java.
+In that case, there is no complete condition element created in Java, because this would also require the existence of an appropriate class.
+If the elements shall still be created, both models have to be changed, thus the first consistency preservation rule introduces the \gls{PCM} component which introduces an inconsistency between the models, as the corresponding Java class is missing, which is then corrected by the second consistency preservation rule.
 
-Man könnte hierfür eine passende Monotonie-Eigenschaft definieren, die das Problem jedoch nur unnötig verkompliziert, sodass wir bei der Anforderung bleiben, dass eine CPR Konsistenz zu allen Relationen herstellt.
+\mnote{Synchronization scenarios require multiple executions but need termination guarantees}
+Finally, it is questionable whether such scenarios should be considered in the formal framework or if it should be up to a developer to implement such a scenarios without having specific guarantees regarding termination of the consistency preservation rules or regarding consistency of the models after executing the rules a specific number of times.
+Since we need to relax the requirement of consistency preservation rules to always produce consistent results after one execution in the synchronization scenario where both models have been modified, we will allow the consistency preservation rules to be executed more than once anyway.
+Regarding the example in \autoref{fig:synchronization:multiple_unidirectional_execution}, if we started with an \modelelement{A} with $i = 6$ and let the consistency preservation rules operate as discussed above, always adding the elements with $i$ incremented by one, this process would never terminate.
+We thus need to ensure that such an execution terminates.
+Since the consistency preservation rules depend on each other, this will, however, be a property of the bidirectional transformation rather than the individual consistency preservation rule.
+
+% Wie bei Orchestrierung gesehen, kann es im Allgemeinen notwendig sein CPRs mehrfach auszuführen, da die aufeinander reagieren müssen, um eine konsistente Modellmenge "auszuhandeln".
+% Dasselbe kann bei zwei unidirektionalen Transformationen passieren. Während eine synchronisierende Transformation beliebige Änderungen an beiden Modellen machen kann, kann es sein, dass unidirektionale Transformationen mehrfach aufeinander reagieren müssen, um das gleiche zu erreichen.
+
+
+% Siehe \autoref{fig:synchronization:multiple_unidirectional_execution}: Es gibt zwei Relationen (und deren transponierte). Die eine Relation ist erfüllt, wenn für jedes A mit einer Zahl ein B mit der Zahl um eins höher vorkommt, außer A ist 5 (oder eine bel. andere Zahl), dann darf B auch 5 sein (und umgekehrt). Die andere Relation ist erfüllt, wenn für jedes A ein B mit der gleichen Zahl existiert (und umgekehrt).
+% Wird nun A(i=0) in das Modell eingefügt, wird zur Erfüllung der Relationen B(i=1) und B(i=0) von der CPRr eingefügt.
+% Daraufhin fügt die CPRl A(i=1) ein, da sonst $CR_2$ nicht erfüllt ist.
+% Nun fügt CPRr wiederum B(i=2) ein, damit $CR_1$ erfüllt ist usw.
+% Dies geht bis CPRl A(i=5) einfügt, denn nun ist auch $CR_1$ erfüllt.
+% Es braucht mehrere Durchläufe um dieses Ergebnis zu erhalten.
+
+% Das folgende ist alles intuitiv gesprochen, funktioniert so nicht.
+% ERKENNTNIS: Wir können von einer unidirektionalen CPR i.A. gar nicht verlangen, dass sie Konsistenz bzgl. aller Relationen herstellt.
+% Ziel ist nur, dass sie die Konsistenzrelationen in Vorwärtsrichtung wiederherstellt, in Rückwärtsrichtung nicht vollständig.
+% Bspw. für ein Insert fügt sie Elemente hinzu, bei Änderung passt sie Elemente an. Bei einer Löschung ist die rückwärtige Konsistenzrelation nicht erfüllt, hier muss aber die CPR vorwärts löschen, d.h. wir verlangen, dass Elemente die vorher schon im Zielmodell waren und immer noch sind, auch konsistent sind bzgl. aller Relationen bzgl. der sie vorher konsistent waren.
+% Auch für eine Änderung gilt das in die Richtung: Wenn ich an m1 was ändere wodurch eine Witness-Struktur in Rückrichtung verletzt wird, muss die vorwärts CPR das wiederherstellen.
+
+% Das bedeutet, die rückwärts CPR muss dann nur noch auf Hinzufügungen oder Änderungen reagieren, die durch die vorwärts CPR gemacht wurden (auch Löschungen?).
+% ERKENNTNIS: Wir können noch nicht einmal Terminierung für zwei unidirektionale Transformationen garantieren. Letztendlich haben wir dort wieder das gleiche Problem wie in Netzwerken, wie wir im Orchestrierungs-Kapitel sehen werden. Das Beispiel zeigt, dass es auch keine obere Schranke für die Anzahl aus Ausführungen gibt (je nach Wahl von X sind hier beliebig viele möglich). Wir könnten Sie nur eine gewissen Zeit ausführen lassen und ansonsten konservativ abbrechen.
+
+% ALSO: Entweder lassen wir das zu, dann können wir keine Terminierung erwarten, oder wir fordern halt, dass eine CPR immer in einem Schritt Konsistenz herstellen muss (für alle Relationen) und wenn sie das nicht schafft, wirft sie eben einen Fehler. Dadurch sind manche Fälle ausgeschlossen, aber das macht man üblicherweise ja immer so.
+
+% WAS TUN WIR?
+% Wir verlangen das was alle Formalismen bisher verlangen: Eine unidirektionale CPR kann vollständig Konsistenz herstellen. Auch wenn es theoretische Szenarien gibt, in denen das nicht möglich ist, gehen bisher diverse Arbeiten davon aus und in unserer Evaluation (siehe \autoref{chap:correctness_evaluation}) werden wir sehen, dass es auch in unseren Fallstudien der Fall ist.
+% AUßERDEM: In der Praxis können wir natürlich solche Szenarien erlauben, auch wenn dann gewisse Eigenschaften auf Basis des Formalismus nicht mehr garantiert sind.
+% Wenn der Entwickler die Transformationen so baut, dass deren mehrfache Ausführung immer terminiert, ist das kein Problem. Ein relevantes Beispiel hierfür könnte sein, dass man eine Konsistenzrelation bereits instanziieren möchte, wenn ein Condition Element nur partiell hinzugefügt wurde, d.h., dass in dem Fall Änderungen an beiden Modellen notwendig sind.
+% Hierfür könnte der Ablauf wie folgt sein: In Modell 1 wird ein Condition Element partiell instanziiert, CPRr instanziiert dafür ein korrespondierendes Condition Element in Modell 2, woraufhin CPRl das Condition Element in Modell 1 vervollständigt. In diesem Fall ist nach der Ausführung von CPRr keine Konsistenz gegeben, was jedoch gewünscht ist.
+% Beispielsweise wird ein PCM Repository auf drei Packages abgebildet. Nun könnte bereits bei der Erzeugung eines Package (mit passendem Namen) das PCM Repository instanziiert werden, woraufhin die zwei weiteren Java Packages erzeugt werden.
+
+% Man könnte hierfür eine passende Monotonie-Eigenschaft definieren, die das Problem jedoch nur unnötig verkompliziert, sodass wir bei der Anforderung bleiben, dass eine CPR Konsistenz zu allen Relationen herstellt.
 
 
 \subsection{Necessity for Synchronization Extension}
-Necessity for extension of BX ot make them synchronizing
-Derive that we need transformations that are able to deal with inconsistent input models
 
-Wir müssen annehmen, dass m2 nicht konsistent ist und dann Fallunterscheidung machen. Aber welche abgeschwächte Garantie können wir fordern, sodass die Ausführung in beide Richtungen immer noch zu Konsistenz führt?
-Das beantworten wir in der folgenden Section.
+\mnote{We need to able consistency preservation rules to handle inconsistent input models}
+In the previous sections, we have discussed that after changes to two models, these changes and the ones produced by consistency preservation rules that restore consistency between these models cannot be sequenced in a way such that we receive consistent models in all cases the consistency preservation rules are able to handle.
+We especially found that it is necessary for a unidirectional consistency preservation rule to consider the changes made to the model it is supposed to modify.
+Thus, we need to enable consistency preservation rules to deal with the situation that the input models are inconsistent.
+In our current definition, no behavior of a consistency preservation rule and the encapsulating bidirectional transformation for such a situation is defined.
+Thus, we discuss an appropriate extension of bidirectional transformations that support this scenario of synchronization in the following section.
+
+\mnote{We need to guarantee termination if consistency preservation rules are executed multiple times}
+Additionally, we found that it can be required that consistency preservation rules need to be executed multiple times.
+This is obviously necessary to make bidirectional transformation synchronizing, thus we will especially consider how to achieve execution bounds, such that termination of multiple executions of the consistency preservation rules of a bidirectional transformation is guaranteed.
+
+
+% Necessity for extension of BX to make them synchronizing
+% Derive that we need transformations that are able to deal with inconsistent input models
+
+% Wir müssen annehmen, dass m2 nicht konsistent ist und dann Fallunterscheidung machen. Aber welche abgeschwächte Garantie können wir fordern, sodass die Ausführung in beide Richtungen immer noch zu Konsistenz führt?
+% Das beantworten wir in der folgenden Section.
 
 
 
