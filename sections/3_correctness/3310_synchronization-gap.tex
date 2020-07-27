@@ -1,7 +1,7 @@
 %%%
 %%% FORMAL GAP IDENTIFICATION
 %%%
-\section{Gap to Ordinary Transformation}
+\section{Deriving the Gap to Ordinary Transformation}
 
 %\todo{Exchange "ordinary" with "unidirectional"}
 We have already introduced that there is both a formal and practical gap between synchronizing transformations, as we have defined as a component of transformation networks, and ordinary transformations, which are unidirectional and non-synchronizing, as used by most transformation languages.
@@ -147,7 +147,7 @@ In contrast to a synchronizing consistency preservation rule as defined in \auto
     Let $\metamodel{M}{1}, \metamodel{M}{2}$ be two metamodels and $\consistencyrelationset{CR}$ a set of consistency relations between elements of those metamodels.
     A \emph{unidirectional consistency preservation rule} $\consistencypreservationrule{\consistencyrelationset{CR}}$ for the relation set $\consistencyrelationset{CR}$ is a (usually partial) function:
     \begin{align*}
-        \consistencypreservationrule{\consistencyrelationset{CR}} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}) \rightarrow \changeuniverse{\metamodel{M}{2}}
+        \consistencypreservationrule{\consistencyrelationset{CR}} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}) \rightarrow \changeuniverse{\metamodel{M}{2}} \cup \setted{\bot}
     \end{align*}
 \end{definition}
 
@@ -155,6 +155,7 @@ In contrast to a synchronizing consistency preservation rule as defined in \auto
 This is how the consistency preservation rules defined in or derived from existing transformation languages operate.
 They take two models and changes to one of them and generate changes for the other.
 Most of them even directly apply the changes instead of returning a dedicated change artifact.
+If the rule is not able to handle the given changes, it may return $\bot$.
 
 \mnote{Correctness of unidirectional rules analogous to common notions}
 In addition, they usually assume the input models to be consistent and then ensure that applying the input and the output changes to the models, the resulting models are consistent again.
@@ -173,11 +174,11 @@ Thus, we define correctness of such a unidirectional consistency preservation ru
         \model{m}{2} \in \metamodelinstanceset{M}{2},
         \change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}} : \\
         & \formulaskip
-        \tupled{\model{m}{1}, \model{m}{2}} \consistenttomath \consistencyrelationset{CR} \\
+        \bigl( \tupled{\model{m}{1}, \model{m}{2}} \consistenttomath \consistencyrelationset{CR} \\
         & \formulaskip
         \land \exists 
         \change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}} :
-        \change{\metamodel{M}{2}} = \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) \\
+        \change{\metamodel{M}{2}} = \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) \bigr) \\
         & \formulaskip\formulaskip
         \Rightarrow
         \tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}(\model{m}{2})} \consistenttomath \consistencyrelationset{CR}
@@ -319,9 +320,9 @@ According to common terminology, we define this as a bidirectional transformatio
     Additionally, let $\consistencypreservationrule{\consistencyrelationset{CR},{\rightarrow}}$ and $\consistencypreservationrule{\consistencyrelationset{CR},{\leftarrow}}$ be unidirectional consistency preservation rules with:
     \begin{align*}
         &
-        \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}) \rightarrow \changeuniverse{\metamodel{M}{2}} \\
+        \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}) \rightarrow \changeuniverse{\metamodel{M}{2}} \cup \setted{\bot} \\
         &
-        \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow} : (\metamodelinstanceset{M}{2}, \metamodelinstanceset{M}{1}, \changeuniverse{\metamodel{M}{2}}) \rightarrow \changeuniverse{\metamodel{M}{1}}
+        \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow} : (\metamodelinstanceset{M}{2}, \metamodelinstanceset{M}{1}, \changeuniverse{\metamodel{M}{2}}) \rightarrow \changeuniverse{\metamodel{M}{1}} \cup \setted{\bot}
     \end{align*}
     A \emph{bidirectional transformation} is a triple $\transformation{T} = \tupled{\consistencyrelationset{CR},\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}$.
 \end{definition}
