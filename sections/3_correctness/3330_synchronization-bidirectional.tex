@@ -203,7 +203,7 @@ When finally coming to the synchronization scenario, in which both models have b
 
 \begin{algorithm}
     \begin{algorithmic}[1]
-        \Procedure{\textsc{Execute-Bidirectional-Transformation}}{$\transformation{T} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}, \model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}$}
+        \Procedure{\function{Execute-Bidirectional-Transformation}}{$\transformation{T} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}, \model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}$}
             \If{$\neg (\tupled{\model{m}{1}, \model{m}{2}} \consistenttomath \consistencyrelationset{CR})$}
                 \State \Return{$bot$}
             \EndIf
@@ -510,6 +510,7 @@ Afterwards, we apply the second consistency preservation rule to the unmodified 
 This way, we ensure that all inconsistencies are introduced by changes that are processed by the consistency preservation rules, which was our requirement for practical applicability due to the necessity only to react to changes instead of processing arbitrarily inconsistent models states.
 
 \begin{definition}[Synchronizing Bidirectional Transformation Execution Step]
+    \label{def:synchronizingtransformationexecutionstep}
     Let $\transformation{T} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}$ be a bidirectional transformation for metamodels $\metamodel{M}{1}$ and $\metamodel{M}{2}$.
     A \emph{synchronizing execution step} $\function{SyncEx}_{\transformation{T}}^1$ of $\transformation{T}$ is a function:
     \begin{align*}
@@ -544,7 +545,7 @@ This leads the \autoref{algo:synchronization:executesynchronizingbidirectionaltr
 
 \begin{algorithm}
     \begin{algorithmic}[1]
-        \Procedure{\textsc{Execute-Synchronizing-Bidirectional-Transformation}}{$\transformation{T} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}, \model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}$}
+        \Procedure{\function{Execute-Synchronizing-Bidirectional-Transformation}}{$\transformation{T} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}, \model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}$}
             \If{$\neg (\tupled{\model{m}{1}, \model{m}{2}} \consistenttomath \consistencyrelationset{CR})$}
                 \State \Return{$bot$}
             \EndIf
@@ -576,7 +577,7 @@ This leads the \autoref{algo:synchronization:executesynchronizingbidirectionaltr
 This algorithm has the same properties as the one for the non-synchronization case given in \autoref{algo:synchronization:executebidirectionaltransformation}.
 It does always terminate and either returns $\bot$ or a consistent pair of models.
 
-\begin{theorem}[Consistency Termination of Partial-Consistency-Improving Synchronizing Bidirectional Transformation Execution]
+\begin{theorem}[Consistent Termination of Partial-Consistency-Improving Synchronizing Bidirectional Transformation Execution]
     \label{theorem:synchronizingbidirectionaltransformationconsistencytermination}
     Let $\transformation{T} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}$ be a partial-consistency-improving bidirectional transformation.
     Then \autoref{algo:synchronization:executesynchronizingbidirectionaltransformation} does always terminate and either returns $\bot$ or a consistent model pair.
@@ -597,6 +598,14 @@ Thus, we have proven that we can execute a bidirectional transformation that is 
 In fact, we have already restricted the algorithm such that it must not be able to deal with arbitrarily inconsistent models, but only with models that are initially given, such that only the given changes introduce inconsistencies.
 This is supposed to make it easier to define transformation in practice that fulfill the property of being partial-consistency-improving, as they can rely on the assumption that inconsistency is only introduced by the given changes.
 
+\mnote{Definition of synchronizing bidirectional transformations}
+With the insight that partial-consistency-improving bidirectional transformations can be used to integrate changes to both of two models and deliver consistent models based on that changes, we can define \emph{synchronizing bidirectional transformations} as bidirectional transformations with the property of being partial-consistency-improving.
+
+\begin{definition}[Synchronizing Bidirectional Transformation]
+    Let $\transformation{T}$ be a partial-consistency-improving bidirectional transformation.
+    Then we call $\transformation{T}$ a \emph{synchronizing bidirectional transformation}.
+\end{definition}
+
 \mnote{Order of consistency preservation rules provides no conceptual benefit but may improve usability}
 As we have already discussed at the end of \autoref{chap:synchronization:bidirectional:transformations}, we defined bidirectional transformation execution steps starting with $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$, although it may also be necessary to start with $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}$ if a change was performed in the second model.
 We discussed that our definitions are without loss of generality and can be directly transferred by swapping the rules.
@@ -605,8 +614,83 @@ From a practical perspective, it can, however, make sense to define one the cons
 For example, it might make sense to first execute the consistency preservation rule from the more abstract to the more detailed model, if such a relation exists between the models.
 We leave such considerations up to the individual transformation developer or future research, as the selection of the order does not provide any conceptual benefits, but, in the best case, eases the definition of appropriate consistency preservation rules and improves usability.
 
+\todo{Define synchronizing bidirectional transformation as a partial-consistency-improving bidirectional transformation}
 
-\todo{Show equivalence of synchronizing transformation and synchronizing bidirectional transformation}
+
+\subsection{Equivalence to Synchronizing Transformations}
+
+\mnote{Synchronizing and synchronizing bidirectional transformations have equal inputs and outputs}
+For our definition of transformation networks, we used the notion of synchronizing transformations (cf.~\autoref{def:synchronizingtransformation}), whose single consistency preservation rule accept two consistent models and a change to each of them and return two changes that, if applied to the models, result in consistent models again.
+Synchronizing bidirectional transformations, i.e., the yet defined transformations, which are composed of two unidirectional consistency preservation rules, also accept two consistent models and a change to each of them and return two consistent models.
+We could also define those transformations to return changes rather than the consistent models by simply concatenating all changes calculated by the transformation execution steps.
+For reasons of simplicity, we omitted that in the formal description.
+
+\mnote{Synchronizing and synchronizing bidirectional transformations have equal expressiveness}
+Although synchronizing transformations and synchronizing bidirectional transformations have the same requirements to their inputs and provide the same guarantees regarding consistency for their output, both may also return $\bot$ to indicate that they were not able to calculate changes that lead to consistent models.
+While a synchronizing transformation can be defined such that it never return $\bot$ by defining a consistency preservation rule that is a total function, the possibility of a synchronizing bidirectional transformation to never return $\bot$ depends on the interplay of the two unidirectional consistency preservation rules.
+Nevertheless, we can show that both have equal expressiveness, i.e., they can always return the same results for the same inputs.
+
+\begin{theorem}[Expressiveness of Synchronizing Bidirectional Transformation]
+    Synchronizing bidirectional transformations have equal expressiveness than synchronizing transformations.
+\end{theorem}
+\begin{proof}
+    Each synchronizing bidirectional transformation can be realized by a synchronizing transformation by simply defining the function of the consistency preservation rule such that it returns the result that is produced by the execution of the synchronizing bidirectional transformation.
+    Let $\transformation{T}$ be a synchronizing bidirectional transformation with:
+    \begin{align*}
+        \function{Execute-Synchronizing-Bidirectional-Transformation}(\transformation{T}, \model{m}{1}, \model{m}{2}, \change{\metamodel{M}{2}}) = (\model{m}{1}', \model{m}{2}')
+    \end{align*}
+    Then we define the consistency preservation rule $\consistencypreservationrule{}$ of a synchronizing transformation as:
+    \begin{align*}
+        &
+        \consistencypreservationrule{}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}) = (\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}', \change{\metamodel{M}{2}}') \\
+        & \formulaskip
+        \mathtext{with} \change{\metamodel{M}{1}}'(\change{\metamodel{M}{1}}(\model{m}{1})) \equivalentperdefinition \model{m}{1}' 
+        \land \change{\metamodel{M}{2}}'(\change{\metamodel{M}{2}}(\model{m}{2})) \equivalentperdefinition \model{m}{2}'
+    \end{align*}
+    Then, per definition, applying the resulting changes to the input models, the synchronizing transformation delivers for every possible input the same result by applying $\consistencypreservationrule{}$ as the synchronizing bidirectional transformation.
+
+    Realizing a synchronizing transformation by a synchronizing bidirectional transformation requires the repeated execution of the two consistency preservation rules to emulate the behavior of the single 
+    synchronizing consistency preservation rule.
+    Let $\consistencypreservationrule{}$ be the consistency preservation rule of a synchronizing transformation with:
+    \begin{align*}
+        \consistencypreservationrule{}(\model{m}{1},\model{m}{2},\change{\metamodel{M}{1}},\change{\metamodel{M}{2}}) = (\model{m}{1},\model{m}{2},\change{\metamodel{M}{1}}',\change{\metamodel{M}{2}}')
+    \end{align*}
+    Then we can define the two unidirectional consistency preservation rules of the synchronizing transformation $\transformation{T}$ as follows.
+    \begin{align*}
+        & 
+        \consistencypreservationrule{}^{\rightarrow}(\model{m}{1},\change{\metamodel{M}{2}}(\model{m}{2}),\change{\metamodel{M}{1}}) = \change{\metamodel{M}{2}}'' \mathtext{with} \change{\metamodel{M}{2}}''(\change{\metamodel{M}{2}}(\model{m}{2})) \equivalentperdefinition \change{\metamodel{M}{2}}'(\model{m}{2}) \\
+        &
+        \consistencypreservationrule{}^{\leftarrow}(\model{m}{2},\change{\metamodel{M}{1}}(\model{m}{1}),\change{\metamodel{M}{2}}'' \concatfunction \change{\metamodel{M}{2}}) = \change{\metamodel{M}{1}}'' \mathtext{with} \change{\metamodel{M}{1}}''(\change{\metamodel{M}{1}}(\model{m}{1})) \equivalentperdefinition \change{\metamodel{M}{1}}'(\model{m}{1})
+    \end{align*}
+    So we simply define the two consistency preservation rules in a way such that each of them delivers for the inputs in the synchronizing execution step $\function{SyncEx}_{\transformation{T}}^1$ according to \autoref{def:synchronizingtransformationexecutionstep} those changes that are necessary to produce exactly the results of the consistency preservation rule $\consistencypreservationrule{}$ of the synchronizing transformation.
+    Then according to the behavior of $\function{SyncEx}_{\transformation{T}}^1$, we have:
+    \todo{Vielleicht besser Striche über Buchstaben statt noch mehr Apostrophe}
+    \begin{align*}
+        &
+        \function{SyncEx}_{\transformation{T}}^1(\model{m}{1},\model{m}{2},\change{\metamodel{M}{1}},\change{\metamodel{M}{2}}) = (\model{m}{1}'', \model{m}{2}'', \change{\metamodel{M}{1}}''') \mathtext{with} \\
+        & \formulaskip
+        \change{\metamodel{M}{1}}'''(\model{m}{1}'') = % per def SyncEx
+        \change{\metamodel{M}{1}}'''(\change{\metamodel{M}{1}}(\model{m}{1})) = % per def SyncEx and per def above
+        %\consistencypreservationrule{}^{\leftarrow}(\model{m}{2},\change{\metamodel{M}{1}}(\model{m}{1}),\change{\metamodel{M}{2}}'' \concatfunction \change{\metamodel{M}{2}})(\change{\metamodel{M}{1}}(\model{m}{1})) % per def above
+        \change{\metamodel{M}{1}}'(\model{m}{1}) \\
+        & \formulaskip
+        \land
+        \model{m}{2}'' = \change{\metamodel{M}{2}}'(\model{m}{2})
+    \end{align*}
+    So $\function{SyncEx}_{\transformation{T}}^1$ produces $\model{m}{1}''$, $\model{m}{2}''$ and $\change{\metamodel{M}{1}}'''$ for which we know that $\change{\metamodel{M}{1}}'''(\model{m}{1}'')$ and $\model{m}{2}''$ are consistent, because their equivalents $\change{\metamodel{M}{1}}'(\model{m}{1})$ and $\change{\metamodel{M}{2}}'(\model{m}{2})$ are consistent by assumption.
+    Thus, the execution of the synchronizing bidirectional transformation $\transformation{T}$ according to \autoref{algo:synchronization:executesynchronizingbidirectionaltransformation} terminates after the conditional statement in \autoref{algo:synchronization:executesynchronizingbidirectionaltransformation:line:synchronizationstart} with the same consistent models that are delivered by the applying the changes calculated by the consistency preservation rule $\consistencypreservationrule{}$ of the assumed synchronizing transformation.
+
+    With these construction approaches in both directions, we have shown that each synchronizing transformation can be expressed by a synchronizing bidirectional transformation and vice versa.
+\end{proof}
+
+\mnote{Executing only one synchronizing execution step will not lead to consistency in pratice}
+Although we have proven that each synchronizing transformation can be expressed by a synchronizing bidirectional transformations and thus the latter ones can be used to express any desired consistency preservation in a transformation network, the constructive approach in the proof does not reflect a practical construction approach for the unidirectional consistency preservation rules of a synchronizing bidirectional transformation.
+In practice, it will usually not be possible to define the rules in a way that they deliver consistent models after executing each ones, as we already discussed in \autoref{chap:synchronization:combination:bounds}.
+It shows, however, that it would possible in theory.
+
+\mnote{Synchronizing bidirectional transformations can be used in transformation networks}
+Based on the knowledge that we can use synchronizing bidirectional transformations in transformation networks, we discuss in the following how a transformation developer can actually achieve that the specification of a bidirectional transformation in terms of two unidirectional consistency preservation rules does actually fulfill the requirements of being partial-consistency-improving and thus synchronizing.
+
 
 % We yet discussed how to integrate one change on partially consistent models.
 % Now we apply to this be able to integrate changes to both models.
