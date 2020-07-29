@@ -221,7 +221,7 @@ It would also be possible to involve the developer and let him decide whether an
 \mnote{Ordinary transformations must be extended by considering implicit unique information}
 In summary, it is necessary that transformation developers use key information for identifying corresponding elements based on \emph{implicit unique} information in addition to the usage of \emph{explicit unique} information in terms of trace links, like already used for ordinary transformations.
 In case that corresponding elements are found based on implicit unique information, they need to establish a trace link for the elements.
-We define this behavior in \autoref{algo:synchronization:findcorrespondingelements}.
+We define this behavior in \autoref{algo:synchronization:findcorrespondingelements}, which is an extended version of \autoref[Algorithm 1]{saglam2020ma} defined a master's thesis supervised by the author of this thesis and adapted to our formalism.
 
 \begin{algorithm}
     \begin{algorithmic}[1]
@@ -259,7 +259,9 @@ In a practical implementation it may not consider every subset of the model $\mo
 Depending on the implementation of the modelling framework, different possibilities to efficiently find specific elements can be used.
 The implementation of \gls{EMF}, for example, provides functions that yield all instances of a specific class.
 
-\todo{Say that this is only an engineering considerations and not formally proven to be compliant with the partial-consistency-improving definition. Although the considerations are derived from that definition, we do not get a formal guarantee of specific properties. We therefore evaluate whether further problems that we did non consider here can occur.}
+\mnote{Algorithm must be used everywhere corresponding elements are created}
+The transformation developers has to apply this algorithm every time he creates corresponding elements because a condition element was added.
+This ensures that applying the bidirectional transformation to the synchronization case properly handles the situation that a change has already created the corresponding elements to ensure that the resulting transformation is partial-consistency-improving.
 
 % \begin{copiedFrom}{ICMT}
 
@@ -313,15 +315,23 @@ The implementation of \gls{EMF}, for example, provides functions that yield all 
 % \end{copiedFrom} % ICMT
 
 
+\subsection{Model Changes Inducing Condition Element Changes}
 
-\subsection{From Model Changes to Condition Element Changes}
+\mnote{Condition element changes are induced by model element changes}
+The previous discussions were based on the distinction of different change scenarios for condition elements, as those are relevant when considering the synchronization case of bidirectional transformations.
+An actual transformation does, however, not receive changes of condition elements but changes of actual model elements.
+These then eventually lead to the addition, removal or change of a condition element.
+Thus, a transformation developers needs to decide which model changes introduce which modifications of condition elements to determine the appropriate behavior of the consistency preservation rules.
 
-\todo{Diskutieren, welche Änderungen an Modellementen zu welchen Änderungen an Condition Elements führen können.}
+\mnote{Focus on EMOF- and Ecore-based models}
+The possible types of model changes are induced by the used metamodeling formalism, as the \metametamodel defines which changes can be performed in models.
+\gls{EMOF} is the most common standard describing a metamodeling formalism, on which Ecore, the \metametamodel the \gls{EMF} is based.
+Our metamodeling formalism introduced in \autoref{chap:networks} is conforming to \gls{EMOF}, which is why we consider changes in \gls{EMOF}- and Ecore-based models.
 
 % TAKEN FROM SYNCHRONIZATION SCENARIOS SECTION
 % We map model changes to potential changes of condition elements, so we find out when a developer has to consider what may happen
-Since we consider the practical realization of such preservation rules with ordinary transformation languages, we also specifically consider the changes that can be processed by those transformation languages.
-Thus, we focus on the types of changes that can be performed in EMOF-based and conforming Ecore-based models.
+%Since we consider the practical realization of such preservation rules with ordinary transformation languages, we also specifically consider the changes that can be processed by those transformation languages.
+%Thus, we focus on the types of changes that can be performed in EMOF-based and conforming Ecore-based models.
 
 \begin{figure}
     \centering
@@ -330,45 +340,62 @@ Thus, we focus on the types of changes that can be performed in EMOF-based and c
     \label{fig:synchronization:change_feature_model}
 \end{figure}
 
-\textcite{kramer2017a} proposes feature models for changes in EMOF- and Ecore-based models, which are supposed to be able to express all kinds of possible changes in them.
-The feature model for EMOF-based models is given at \cite[Fig. 5.2]{kramer2017a} and the change model for Ecore-based models is given at \cite[Fig. 5.3]{kramer2017a}.
-We depict the latter one in \autoref{fig:synchronization:change_feature_model}.
+\mnote{Possible change types extracted in existing work}
+\textcite{kramer2017a} proposes feature models for changes these types of models, which are supposed to be able to express all kinds of possible changes in them.
+The feature model for changes in \gls{EMOF}-based models is given at \cite[Fig. 5.2]{kramer2017a} and the one for changes in Ecore-based models is given at \cite[Fig. 5.3]{kramer2017a}.
+Since \gls{EMOF} and Ecore are rather similar (cf.~\autoref{chap:foundations:formalisms:differences}), we focus on Ecore as the practically realized metamodeling formalism.
 
-Make distinction of EMOF- and Ecore-based model, point out differences and explain why we focus on Ecore-based models.
+\mnote{Changes to existing feature model for changes in Ecore models}
+We depict a modified version of the feature model for changes in Ecore-based models in \autoref{fig:synchronization:change_feature_model}.
+In comparison to the original model at \cite[Fig. 5.3]{kramer2017a}, we made the following changes:
+\begin{properdescription}
+    \item[No compound changes:] We do not consider compound changes, because they are simply compositions of atomic changes and thus do not need to be considered explicitly.
+    \item[No permutation:] We removed the \enquote{Permutation} feature, because it can be considered as a compound change of a subtractive and additive multi-valued feature change. Whether or not permutation rather than the removal and addition is relevant is up to the interpretation of the change sequence and is comparable to moving an element from one reference to another, which is also modelled as a compound change.
+    \item[Mandatory content:] We made the \enquote{Content} feature mandatory, because due to removing the permutation every change is either additive or subtractive.
+    \item[Constraints reduction:] We reduced the constraints to those that are still relevant after performing the previous change.
+    \item[Error corrections:] We fixed an error in the constraints of the original model. They required a \enquote{Create} change of a root element to be subtractive, which does not make sense. We corrected that error by simplification.
+\end{properdescription}
 
+\mnote{Condition element changes induced by different types of model element changes}
+The set of all possible types of changes in Ecore-based models can be derived by enumerating all valid configurations of the feature model.
+We discuss for each of the resulting changes, which types of condition element change it may induce.
+\begin{properdescription}
+    \item[Additive root change (possibility create):] Adding a root element can lead to the addition of a condition element, which consists only of this root element. It may neither induce a change or removal of a condition element.
+    \item[Subtractive root change (possibility delete):] Removing a root element can lead to the removal of a condition element, which involves the root element. Since it completely removes an element, it can neither lead to a change or addition of a condition element.
+    \item[Single-valued attribute change:] Changing an attribute can lead to either an addition, removal or change of a condition element. The change may lead to an element that now, potentially together with other elements, forms a condition element. It may also lead to a different condition element of the same condition, for example, by renaming an element. Finally, it can also lead to an element that is not present in a condition anymore. This does apply no matter whether the attribute change is only additive, only subtractive, or both, thus whether it adds, removes or replaces the attribute value.
+    \item[Additive multi-valued attribute change:] Adding an attribute value to a multi-valued attribute can lead to either an addition, removal or change of a condition element. The change can lead to the situation that the element is now part of condition element, is not part of a condition element anymore, or that it represents a different condition element of the same condition and is thus comparable to the change of a single-valued attribute.
+    \item[Subtractive multi-valued attribute change:] Removing an attribute value from a multi-valued attribute can lead to either an addition, removal or change of a condition element, due to the same reasons as the additive multi-valued attribute change.
+    \item[Single-valued reference change (possibility create and/or delete):] Changing a reference can lead to either an addition, removal or change of a condition element, due to the same reasons as for single-valued attribute changes. This is even independent from whether the added or removed element is created or deleted, respectively.
+    \item[Additive multi-valued reference change (possibility create):] Adding a reference to a multi-valued reference can lead to either an addition, removal or change of a condition element, due to the same reasons as for adding an attribute to a multi-valued attribute. Like for single-valued reference changes this is even independent from whether the element was created or did already exist before.
+    \item[Subtractive multi-valued reference change (possibility delete):] Removing a reference from a multi-valued reference can lead to either an addition, removal or change of a condition element, due to the same reasons as for removing an attribute from a multi-valued attribute. Like for single-valued reference changes and additive multi-valued reference changes this is even independent from whether the element was created or did already exist before.
+\end{properdescription}
 
-Changes to Max:
-\begin{itemize}
-    \item No compound changes
-    \item No permutation, as it is compound change of subtractive and additive multi-valued feature change. Whether or not permutation rather than removal and addition is relevant is up to the one interpreting the change sequence. It is the same as a move of an element from one reference to another, which is also modelled as a compound change.
-    \item Content is mandatory, because we do not have permutation changes as atomic ones, thus every change is either additive or subtractive
-    \item Constraints are limited to those still relevant for the remaining scenarios
-    \item Fixed error: original model did require a create change of a root element to be subtractive, which does not make any sense, leading to simplification of constraints
-\end{itemize}
+\mnote{Most model changes can lead to any kind of condition element change}
+It is easy to see that except for root changes each type of model change can lead to any kind of condition element change.
+This is due to the fact that almost every type of change can lead to the situation that model elements form a condition element or do not form a condition element anymore.
+There may be a missing reference or attribute value, or even a superfluous reference or attribute value, after whose change the model elements form a condition element.
+This conforms to the notion of creating a corresponding elements whenever all conditions for some model elements are fulfilled in the \gls{QVT}-like \emph{Mappings Language}~\cite[p. 283]{kramer2017a}.
+Since all types of changes can lead to the fulfillment of conditions, the addition of a condition element is not tied to a specific type of change.
 
-Arising changes, i.e., all possible configurations of the feature model:
-\begin{itemize}
-    \item Additive root change (create or not)
-    \item Subtractive root change (create or not)
-    \item Single-valued attribute change
-    \item Additive multi-valued attribute change
-    \item Subtractive multi-valued attribute change
-    \item Single-valued reference change (with create and/or delete and/or nothing)
-    \item Additive multi-valued reference change (create or not)
-    \item Subtractive multi-valued reference change (delete or not)
-\end{itemize}
+\mnote{Restriction of relevant change types can depend on consistency relation}
+Depending on the specific consistency relation, there may, however, be some change types that are not relevant in that case.
+For example, if a consistency relation puts two model elements having only reference values into relation, then no attribute change will lead to the addition, removal or change of a condition element of that consistency relation.
 
+\mnote{Identifying corresponding elements always necessary when condition elements are added}
+The specific case of identifying corresponding elements during synchronization discussed in the previous subsection needs to be considered whenever a condition element was added.
+Since this can occur because of any type of change except for removals of root elements, we cannot make any general restrictions on the types of model changes that need to be explicitly considered for the synchronization case.
+The transformation developer must, however, decide after which changes a condition element may be created anyway, independent from whether corresponding elements may already exist or not.
+Thus he makes this decision anyway and he must only extend the existing logic for finding corresponding elements according to the given algorithm.
 
-
-FROM MAX:
-Different information and case distinctions are necessary to describe all possible model changes for modelling languages that follow the Essential Meta Object Facility (EMOF) standard or the Ecore variant. 
-Both meta-modelling languages and the differences between them are described in \autoref{chap:foundations:modeling:models}.
-Only two differences have a major effect on our change modelling language and the specifications language that use them:
-\begin{enumerate}%[1.]
-\item In EMOF, properties can be typed using metaclasses or using other data types, but in Ecore these are distinguished as references and attributes.
-\item Ecore requires that all elements except for a root element are contained in exactly one container and EMOF only requires that all elements have at most one container~\cite[pp.\ 31-32]{mof}.
-\end{enumerate}
-If we only consider these two differences, then Ecore can be seen as a refinement of EMOF, which only adds a more fine-grained distinction of properties and further containment restrictions.
-Because of this refinement relation, we will first describe which information is necessary to represent model changes of EMOF-based models and then add further information and distinctions for Ecore-based models.
-Finally, we briefly explain how we made all this information available in practice using a change modelling language.
+% FROM MAX:
+% Different information and case distinctions are necessary to describe all possible model changes for modelling languages that follow the Essential Meta Object Facility (EMOF) standard or the Ecore variant. 
+% Both meta-modelling languages and the differences between them are described in \autoref{chap:foundations:modeling:models}.
+% Only two differences have a major effect on our change modelling language and the specifications language that use them:
+% \begin{enumerate}%[1.]
+% \item In EMOF, properties can be typed using metaclasses or using other data types, but in Ecore these are distinguished as references and attributes.
+% \item Ecore requires that all elements except for a root element are contained in exactly one container and EMOF only requires that all elements have at most one container~\cite[pp.\ 31-32]{mof}.
+% \end{enumerate}
+% If we only consider these two differences, then Ecore can be seen as a refinement of EMOF, which only adds a more fine-grained distinction of properties and further containment restrictions.
+% Because of this refinement relation, we will first describe which information is necessary to represent model changes of EMOF-based models and then add further information and distinctions for Ecore-based models.
+% Finally, we briefly explain how we made all this information available in practice using a change modelling language.
 
