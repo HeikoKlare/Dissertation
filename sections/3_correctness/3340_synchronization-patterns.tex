@@ -4,121 +4,319 @@
 \section{Achieving Synchronization of Bidirectional Transformations}
 % Das Praktische Problem
 
-\todo{Special case: Changes witness inconsistency. In the previous definition, we can give arbitrary models and even empty changes to the models and still require them to get consistent.}
+\mnote{Synchronizing bidirectional transformation for transformation networks}
+We have introduced the notion of synchronizing bidirectional transformations, which can be used within transformation networks in place of synchronizing transformations.
+They are composed of two unidirectional consistency preservation rules, which fits to the way how transformations are specified in actual transformation languages.
+In contrast to only be correct, as it is commonly required from transformations, they need to fulfill the notion being partial-consistency-improving to be used instead of synchronizing transformations.
 
-We just introduced requirements a developer has to fulfill in his unidirectional transformation. This, theoretically, gives him the ability to define transformation of unidirectional rules to be used as synchronizing ones.
-There is, however, no canonical way to fulfill all the requirements.
-Building a language that ensures all the requirements will be a cumbersome task and is thus out of scope of this thesis, and may, potentially, even lead to severe restrictions to expressiveness, reducing its practical applicability.
-Thus, it can be possible that it is up to engineers to thoroughly define their transformations to ensure these properties.
-Nevertheless, we will make an engineering consideration to distinguish different scenarios that may occur and what has to be considered there in general.
-This leads us to a pattern to follow when developing transformations to avoid a typical problem.
-We will see in our evaluation, that this is actually the most severe problems that transformation developers have to deal with when developing unidirectional CPRs to be used as synchornizing transformations.
+\mnote{Partial consistency improvement is intuitive but not canonically achievable}
+The knowledge about this requirement, theoretically, gives a transformation developer the ability to define appropriate transformations to be used in transformation networks.
+Although we discussed that the requirement for transformation to be partial-consistency-improving is reasonable as it reflect intuitive requirements to transformations to always restore more consistency than is violated by their execution.
+There is, however, still no canonical way to fulfill the requirement of being partial-consistency-improving.
+It may be possible to define analyses for transformation or even appropriate transformation languages that guarantee that property by construction.
+This could, however, even lead to severe restrictions in expressiveness, if analyzability is the primary goal.
+In addition, research about synchronizing concurrent changes (e.g.~\cite{hermann2012concurrentSynchronization-FASE,orejas2020IncrementalConcurrentSynchronization-FASE,xiong2013SynchronizingConcurrentUpdates-SoSym,xiong2009parallelUpdates-ICMT} already addresses a comparable problem.
+Thus, we do not discuss or investigate such approaches in this thesis.
 
-Während wir es dem Entwickler überlassen eine unidirektionale synchronisierende Transformation zu entwickeln, die die entsprechend notwendigen Eigenschaften hat, widmen wir uns noch einem praktischen Problem.
-Konsistenz herstellen tun CPR sowieso. Sie reagieren auf Änderungen und erzeugen Änderungen im Zielmodell, sodass die partielle Konsistenz erhöht wird.
-Bleibt also zu klären, wie das Einführen von Inkonsistenzen durch das Hinzufügen von Elementen verhindert werden kann.
-Dies können wir auf Basis der konkreten Änderungen an Modellen machen oder auf Basis der möglichen Änderungen von Condition Elements.
+\mnote{Systematic avoidance of synchronization problems by case distinction}
+We leave it up to transformation developers to thoroughly define their transformation such that they fulfill the required property.
+Having precise knowledge about the property that needs to be fulfilled by the transformations already provides a benefit regarding the baseline of using ordinary transformations in a transformation networks without knowing how the transformations have to be improved to work properly.
+Nevertheless, we discuss a distinction of possible scenarios that can occur when changes need to be synchronized and come up with engineering considerations how to systematically deal with these scenarios.
+We identify one essentially problematic scenario and propose a strategy to avoid that problem by proper construction of transformations.
+Un our evaluation, we will see that it is actually the most relevant problem scenario that transformation developers have to deal with when developing synchronizing bidirectional transformations.
 
-\subsection{Case Distinction for Changes}
-% Erkenntnis: Fallunterscheidung über Changes bringt nichts
-Es ist leicht einzusehen, dass eine Fallunterscheidung über Changes nichts bringt.
-Beispielsweise könnte ein externer Change (d2) und ein Change per CPRr (d2') völlig unabhängige Elemente betreffen (z.B. einmal ein Attribut einer Klasse, einmal eine Referenz einer anderen Klasse), insofern können wir sie nacheinander ausführen. Allerdings können sie zusammen ein neues Condition Element induzieren. Die Rücktransformation CPRl müsste hierfür ein entsprechendes Condition Element in d1(m1) hinzufügen, was induktiv wieder ein neues Condition Element provozieren kann.
-Und das kann passieren, obwohl jede CPR für sich in der Lage ist Konsistenz in einem Schritt herzustellen.
-Somit ist es nicht sinnvoll über Änderungen zu unterscheiden, sondern über Condition Elements, da relevant ist, ob eine Kombination von Änderungen dazu führt, dass sich ein Condition Element ändert, ein neues entsteht oder ein altes entfernt wird.
+% \todo{Special case: Changes witness inconsistency. In the previous definition, we can give arbitrary models and even empty changes to the models and still require them to get consistent.}
 
-Die Kombination zweier Changes kann niemals dazu führen, dass ein Condition Element entfernt wird, was nicht eh entfernt worden wäre, da bereits beim Nicht-Vorhandensein eines Elementes aus dem Condition Element das Condition Element schon nicht mehr im Modell ist.
-Gleiches gilt für die Änderung eines Condition Element. Ein Condition Element ist genau eine Menge von Modellelementen. Entweder ein Change ändert dieses oder nicht, aber nicht erst eine Kombination von Änderungen kann dazu führen.
-Interessant ist die Erzeugung eines Condition Elementes, denn diese kann durch die Kombination mehrere Änderungen entstehen. Erst wenn alle Modellelemente innerhalb eines Condition Elementes erzeugt wurde induziert dies Konsistenzanforderungen.
+% We just introduced requirements a developer has to fulfill in his unidirectional transformation. This, theoretically, gives him the ability to define transformation of unidirectional rules to be used as synchronizing ones.
+% There is, however, no canonical way to fulfill all the requirements.
+% Building a language that ensures all the requirements will be a cumbersome task and is thus out of scope of this thesis, and may, potentially, even lead to severe restrictions to expressiveness, reducing its practical applicability.
+% Thus, it can be possible that it is up to engineers to thoroughly define their transformations to ensure these properties.
+% Nevertheless, we will make an engineering consideration to distinguish different scenarios that may occur and what has to be considered there in general.
+% This leads us to a pattern to follow when developing transformations to avoid a typical problem.
+% We will see in our evaluation, that this is actually the most severe problems that transformation developers have to deal with when developing unidirectional CPRs to be used as synchronizing transformations.
 
-\subsection{Case Distinction for Condition Elements}
-Die Unterscheidung über Condition Elements ist sinnvoller, denn genau dann wenn ein solches Element betroffen ist hat das Auswirkungen auf die Konsistenz. Durch welche Art von Änderung das genau entsteht, ist zweitrangig. Man könnte lediglich noch untersuchen, welche Modelländerung zu welcher Änderung eines Condition Elementes führen kann, um dem Entwickler bei der Einschätzung zu helfen.
-\todo{Das könnten wir wirklich noch tun!}
-
-Inkonsistenzen werden dadurch eingeführt, dass neue Condition Elements hinzugefügt werden, für die es keine eindeutigen korrespondierenden Elemente gibt, d.h. keine Witness-Struktur aufgebaut werden kann.
-Dies ist der Fall sein, wenn Elemente erzeugt werden, um notwendige Konsistenz herzustellen, dadurch aber neue Condition Elements induziert werden, die wieder Konsistenzhaltung bedürfen.
-Entsteht das neue Condition Element aus Modellelementen, die alle im partiell konsistenten Teilmodell liegen, dann ist die CPR falsch.
-Für dieses partielle Modell, welches vorher konsistent war, und die zugehörige Änderung müsste die CPR gem. Definition Korrektheit ein konsistentes Ergebnis produzieren, kann also keine Condition Elements in m2 induzieren, die keine korrespondierenden Elemente in m2 haben, da die Modelle dann nicht konsistent sind.
-Entsteht das neue Condition Element mit Modellelementen, die nicht im partiell konsistenten Teilmodell liegen, ist das okay, da hierfür keine Konsistenz verlangt ist.
-
-Probleme mit denen CPR durch nebenläufige Änderung umgehen können muss:
-1. Neue Condition Elements sind bereits vorhanden
-2. Condition Elements wurden auf Zielseite modifiziert
-3. Condition Elements wurden auf Zielseite gelöscht
-
-1. Das müssen wir herausfinden, siehe Trace-Modell
-2. CPR muss wissen, welche korrespondierenden Elemente es vorher gab und diese auf der Zielseite entsprechend anpassen. Im Prinzip muss die CPR nur betrachten, welche Bedingungen die Elemente erfüllen müssen und diese wiederherstellen. Hier müssen aber nur die Änderungen in beide Richtungen entsprechend übertragen werden.
-3. CPR muss nichts tun, da durch das Löschen auf der Zielseite auch ein Löschen auf der Quellseite nötig ist, um wieder eine passende Witness-Struktur zu induzieren. Das kann nur die gegenläufige CPR sicherstellen.
-
-Konsequenz: 1. ist der Fall, den wir uns noch genauer anschauen müssen.
-
-% ZUSAMMENFASSUNG DER SZENARIEN BEI BEARBEITUNG VON MODIFIZIERTEM M2
-Mögliche Situationen wenn wir an 1->2 statt m2 direkt d2(m2) übergeben:
-1. d2(m2) ändert Elemente in einem Condition Element, die 1->2 auch ändern muss. Dann ändert 1->2 einfach partiell die Elemente, und 2->1 macht dann nachher den Rest (nachweisen, dass das geht)
-2. d2(m2) fügt neue Condition Elemente hinzu: Unproblematisch, wenn sie nicht mit Elemente in d1(m1) zusammenhängen (d.h. keine Witness-Struktur zwischen d1(m1) und d2(m2) die Elemente verbindet), dann werden sie von 2->1 bearbeitet. Wenn sie mit Element in d1(m1) zusammenhängen (also es eine Witness-Struktur gibt, die Elemente verbindet, auch wenn das noch nicht im Trace-Modell steht), muss hier das Matching passieren! Hier ist natürlich von einer passenden Granularität der Konsistenzrelationen auszugehen. Bspw. kann es reichen, dass eine eine Person/Resident/... mit einem passenden Namen vorhanden ist, ohne dass irgendwelche anderen Werte übereinstimmen (das könnte dann in weiteren Konsistenzrelationen stehen). Dann gäbe es z.B. eine Konsistenzrelation, die angibt, dass für jede Person ein Resident mit dem gleichen Namen vorhanden sein muss, und dann noch eine die beschreibt, dass für Person/Resident-Paare mit dem gleichen Namen auch andere Attribute passend abgebildet werden müssen. Dies ist aber in Transformationssprachen eh implizit so realisiert und lässt sich mit unserem Formalismus für feingranulare Konsistenzrelationen problemlos abbilden.
-3. d2(m2) entfernt Condition Elemente: Unproblematisch, wenn die Verarbeitung von d1 nicht auf die entsprechenden Condition Elemente zugreifen muss, also nichts in m1 geändert wurde was zu gelöschten Elementen in d2(m2) korrespondiert. Ansonsten können keine Informationen übertragen werden, da die Witness-Struktur nicht mehr gilt, also macht 1->2 an der Stelle nicht weiter und 2->1 übernimmt den Abbau der Elemente in m1.
+% Während wir es dem Entwickler überlassen eine unidirektionale synchronisierende Transformation zu entwickeln, die die entsprechend notwendigen Eigenschaften hat, widmen wir uns noch einem praktischen Problem.
+% Konsistenz herstellen tun CPR sowieso. Sie reagieren auf Änderungen und erzeugen Änderungen im Zielmodell, sodass die partielle Konsistenz erhöht wird.
+% Bleibt also zu klären, wie das Einführen von Inkonsistenzen durch das Hinzufügen von Elementen verhindert werden kann.
+% Dies können wir auf Basis der konkreten Änderungen an Modellen machen oder auf Basis der möglichen Änderungen von Condition Elements.
 
 
+\subsection{Synchronization Scenarios}
+
+\mnote{Inconsistency is already introduced by changes}
+For the execution of synchronizing bidirectional transformation, we have assumed that inconsistencies are only introduced by changes.
+Thus, defining a consistency preservation rule that processes changes in one model, it has to deal with the situation that the other model has been changed as well.
+Although this might intuitively lead to the expectation that distinguishing the different types of changes, such as element insertions, removals or changes, helps to identify different relevant scenarios, it is easy to see that actually the modification of condition elements of the consistency relations rather than individual elements is relevant.
+
+\mnote{Case distinction by models changes is not helpful}
+If we process a change $\change{\metamodel{M}{1}}$ to model $\model{m}{1}$ and $\model{m}{2}$ was changed by $\change{\metamodel{M}{2}}$ as well.
+Then a consistency preservation rule $\consistencypreservationrule{}^{\rightarrow}$ from $\metamodel{M}{1}$ to $\metamodel{M}{2}$ of a synchronizing bidirectional transformation $\transformation{T}$ produces a change $\change{\metamodel{M}{2}}'$ in the execution of the synchronizing execution step $\function{SyncEx}_{\transformation{T}^1}$.
+If we assume that $\change{\metamodel{M}{1}}$ performs a change that introduces a new condition element, thus $\consistencypreservationrule{}^{\rightarrow}$ is responsible for adding a corresponding element to $\change{\metamodel{M}{2}}(\model{m}{2})$ such that partial consistency between the two is improved (and in the best case already restored to $1$).
+$\consistencypreservationrule{}^{\rightarrow}$ must, however, consider the change $\change{\metamodel{M}{2}}$, which have already added an appropriate corresponding element, such that adding a further one may reduce rather than improve partial consistency.
+Adding a condition element to a model can, however, not only be the result of adding an element, but also of different types of changes, such as also the change of an attribute or reference.
+In fact, it must only be considered that a condition element was added, but not which kind of change introduced it.
+
+% \subsection{Case Distinction for Changes}
+% % Erkenntnis: Fallunterscheidung über Changes bringt nichts
+% Es ist leicht einzusehen, dass eine Fallunterscheidung über Changes nichts bringt.
+% Beispielsweise könnte ein externer Change (d2) und ein Change per CPRr (d2') völlig unabhängige Elemente betreffen (z.B. einmal ein Attribut einer Klasse, einmal eine Referenz einer anderen Klasse), insofern können wir sie nacheinander ausführen. Allerdings können sie zusammen ein neues Condition Element induzieren. Die Rücktransformation CPRl müsste hierfür ein entsprechendes Condition Element in d1(m1) hinzufügen, was induktiv wieder ein neues Condition Element provozieren kann.
+% Und das kann passieren, obwohl jede CPR für sich in der Lage ist Konsistenz in einem Schritt herzustellen.
+% Somit ist es nicht sinnvoll über Änderungen zu unterscheiden, sondern über Condition Elements, da relevant ist, ob eine Kombination von Änderungen dazu führt, dass sich ein Condition Element ändert, ein neues entsteht oder ein altes entfernt wird.
+
+% Die Kombination zweier Changes kann niemals dazu führen, dass ein Condition Element entfernt wird, was nicht eh entfernt worden wäre, da bereits beim Nicht-Vorhandensein eines Elementes aus dem Condition Element das Condition Element schon nicht mehr im Modell ist.
+% Gleiches gilt für die Änderung eines Condition Element. Ein Condition Element ist genau eine Menge von Modellelementen. Entweder ein Change ändert dieses oder nicht, aber nicht erst eine Kombination von Änderungen kann dazu führen.
+% Interessant ist die Erzeugung eines Condition Elementes, denn diese kann durch die Kombination mehrere Änderungen entstehen. Erst wenn alle Modellelemente innerhalb eines Condition Elementes erzeugt wurde induziert dies Konsistenzanforderungen.
+
+% \subsection{Case Distinction for Condition Elements}
+%\todo{We assume transformation to be correct, because they have to be correct anyway. Thus, if only one model is changed, consistency is achieved after one execution of the transformation.
+%Thus, we only have to consider which scenarios can occur when the second model has also been modified}
+
+% Die Unterscheidung über Condition Elements ist sinnvoller, denn genau dann wenn ein solches Element betroffen ist hat das Auswirkungen auf die Konsistenz. Durch welche Art von Änderung das genau entsteht, ist zweitrangig. Man könnte lediglich noch untersuchen, welche Modelländerung zu welcher Änderung eines Condition Elementes führen kann, um dem Entwickler bei der Einschätzung zu helfen.
+% \todo{Das könnten wir wirklich noch tun!}
+
+\mnote{Case distinction for addition, removal and change of condition elements}
+We already discussed in \autoref{chap:synchronization:gap:alignment} that the addition, removal and change of condition elements are the relevant scenarios which can lead to the violation of consistency.
+In case of adding a condition element, an appropriate corresponding element for it may be missing, such that no witness structure for consistency is given.
+This requires an appropriate element to be added.
+In case of removing a condition element, the element was corresponding to another one, which now has no corresponding element anymore.
+This requires the corresponding condition element to be removed.
+Changing a condition element can be seen as a modification of model elements such that they now represent another condition element of the same condition and, thus, are still part of the same consistency relation.
+We then usually require the consistency preservation rule to update the corresponding condition element appropriately.
+
+\mnote{Inuitive behavior ensures partial consistency improbement}
+That behavior is what consistency preservation rules are actually supposed to implement.
+A bidirectional transformation with such consistency preservation rules are inherently supposed to fulfill the property of being partial-consistency-improving, because the elements, which have no corresponding elements due to the modification, are not part of the maximal consistent subsets before executing the consistency preservation rule.
+After executing it, either the corresponding element is removed and thus the model size decreases, or a corresponding element is added, such that the size of maximal consistent subsets improves.
+
+\mnote{Interference of condition elements may affect partial consistency improvement}
+What may prevent a transformation from being partial-consistency-improving is that, in addition to the above considerations, the addition or removal of a condition element to improve consistency affects further condition elements.
+This may be due to the reason that condition elements overlap, i.e., some model elements may be part of several condition elements.
+Then, if all elements of a condition element are removed, the other condition element is not present anymore as well.
+A consistency preservation rule must thus be carefully defined such that removing one condition element does not lead to the removal of another one, which was actually part of the maximal consistent subset.
+Otherwise the consistency preservation rule introduces a new violation of consistency.
+The same applies to the scenario of adding condition elements. 
+If the addition leads to the introduction of an addition condition element, because some elements of the added condition element together with other existing elements form a condition element of any consistency relation, this may introduce an inconsistency if no corresponding element already exists, thus reducing partial consistency.
+If the previously existing elements within the induced condition element were part of the maximal consistent subset, the consistency preservation rule is actually not correct.
+If the models were consistent before and only the change to one model is performed, correctness of the consistency preservation rule requires the result to be consistent.
+It, however, introduces a further condition element which has no corresponding element, thus the result is not consistent.
+If, on the hand, the previously existing elements within the induced condition element were not part of the maximal consistent subset, then it is fine that these elements are still inconsistent, as the consistency preservation rules still need to process them anyway.
+These problems are comparable to those of fine-grained transformation rules, as discussed in \autoref{chap:synchronization:gap:finegrained}, which need to be defined such that one rule does not lead to the violation of the consistency relation of another.
+
+\mnote{Conflicts between original condition element changes and those of consistency preservation rules}
+The previous considerations reflected the case that only one model was changed.
+If the other model was changed as well, the combinations of changes can lead to specific situations that have to be handled differently.
+We therefore distinguish the consider addition, removal or change of a condition element to be processed by the consistency preservation rule and discuss what conflicts may occur by changes performed in the other model.
+Changes of condition elements are, in practice, traced by the usage of trace models that store trace links between corresponding elements.
+It can be seen as a representation of the witness structure we defined for identifying consistency.
+If elements get changed, the trace links still exist and show which corresponding elements need to adapted.
+According to the defined notion of consistency, these potential conflicts are just based on the question whether appropriate condition elements exist or not.
+\begin{properdescription}
+    \item[Addition:] Whenever a condition element is added to one model, it must be ensured that a corresponding condition element in the other model exists.
+    In the case that both models were consistent before, the corresponding element cannot already be present in the other model and thus has to be added.
+    If the other model have been changed, an appropriate corresponding element may already have been added.
+    That scenario has to be explicitly considered to avoid a duplicate creation of the condition element, which then may then lead to a violation of consistency that cannot be resolved by adding further elements anymore.
+    \item[Removal:] Whenever a condition element is removed from one model, the corresponding condition element must be removed from the other model, as otherwise its corresponding element is missing, which would violate consistency.
+    If the models were consistent before, the corresponding element must necessarily exist and thus can be removed.
+    If the corresponding condition element is not present because it was removed from the other model already, the element can but also does not need to be removed anymore.
+    It must only be considered that the existence of the corresponding element cannot be assumed.
+    \item[Change:] When model elements are changed such that they now represent a different condition element of the same condition as before, they usually also require the corresponding element to be updated to represent the condition element of an applicable consistency relation pair.
+    If the corresponding element is removed, the other consistency preservation rule will remove the changed condition element anyway to restore consistency.
+    Thus nothing has to be done and the consistency preservation rule must only consider that the corresponding element may have been removed.
+    If the corresponding element was changed, which is identified by the trace model that still contains a trace link to a changed element, the corresponding element must be adapted such that it reflects the given change.
+    The modification to the corresponding element will then be propagated back by the consistency preservation rule in the opposite direction.
+\end{properdescription}
+
+\mnote{Problematic scenario is the addition of condition elements whose corresponding elements already exist}
+In summary, we have to deal with two specific situations that can occur when the second model may have been changed.
+First, when adding condition elements, their corresponding elements may already exist in the other model.
+Second, when removing condition elements, their corresponding elements may have already been removed from the other model.
+While the second scenario is easy to handle by doing nothing whenever the corresponding elements of removed condition elements are not present anymore, the first scenario requires an approach to find out whether corresponding elements already exist or not.
+While existing corresponding elements can be retrieved from the trace model, there are no trace links for these elements yet.
+In the following, we discuss an approach how to find such corresponding elements.
+
+% Inkonsistenzen werden dadurch eingeführt, dass neue Condition Elements hinzugefügt werden, für die es keine eindeutigen korrespondierenden Elemente gibt, d.h. keine Witness-Struktur aufgebaut werden kann.
+% Dies ist der Fall sein, wenn Elemente erzeugt werden, um notwendige Konsistenz herzustellen, dadurch aber neue Condition Elements induziert werden, die wieder Konsistenzhaltung bedürfen.
+% Entsteht das neue Condition Element aus Modellelementen, die alle im partiell konsistenten Teilmodell liegen, dann ist die CPR falsch.
+% Für dieses partielle Modell, welches vorher konsistent war, und die zugehörige Änderung müsste die CPR gem. Definition Korrektheit ein konsistentes Ergebnis produzieren, kann also keine Condition Elements in m2 induzieren, die keine korrespondierenden Elemente in m2 haben, da die Modelle dann nicht konsistent sind.
+% Entsteht das neue Condition Element mit Modellelementen, die nicht im partiell konsistenten Teilmodell liegen, ist das okay, da hierfür keine Konsistenz verlangt ist.
+
+% Probleme mit denen CPR durch nebenläufige Änderung umgehen können muss:
+% 1. Neue Condition Elements sind bereits vorhanden
+% 2. Condition Elements wurden auf Zielseite modifiziert
+% 3. Condition Elements wurden auf Zielseite gelöscht
+
+% 1. Das müssen wir herausfinden, siehe Trace-Modell
+% 2. CPR muss wissen, welche korrespondierenden Elemente es vorher gab und diese auf der Zielseite entsprechend anpassen. Im Prinzip muss die CPR nur betrachten, welche Bedingungen die Elemente erfüllen müssen und diese wiederherstellen. Hier müssen aber nur die Änderungen in beide Richtungen entsprechend übertragen werden.
+% 3. CPR muss nichts tun, da durch das Löschen auf der Zielseite auch ein Löschen auf der Quellseite nötig ist, um wieder eine passende Witness-Struktur zu induzieren. Das kann nur die gegenläufige CPR sicherstellen.
+
+% Konsequenz: 1. ist der Fall, den wir uns noch genauer anschauen müssen.
+
+% % ZUSAMMENFASSUNG DER SZENARIEN BEI BEARBEITUNG VON MODIFIZIERTEM M2
+% Mögliche Situationen wenn wir an 1->2 statt m2 direkt d2(m2) übergeben:
+% 1. d2(m2) ändert Elemente in einem Condition Element, die 1->2 auch ändern muss. Dann ändert 1->2 einfach partiell die Elemente, und 2->1 macht dann nachher den Rest (nachweisen, dass das geht)
+% 2. d2(m2) fügt neue Condition Elemente hinzu: Unproblematisch, wenn sie nicht mit Elemente in d1(m1) zusammenhängen (d.h. keine Witness-Struktur zwischen d1(m1) und d2(m2) die Elemente verbindet), dann werden sie von 2->1 bearbeitet. Wenn sie mit Element in d1(m1) zusammenhängen (also es eine Witness-Struktur gibt, die Elemente verbindet, auch wenn das noch nicht im Trace-Modell steht), muss hier das Matching passieren! Hier ist natürlich von einer passenden Granularität der Konsistenzrelationen auszugehen. Bspw. kann es reichen, dass eine eine Person/Resident/... mit einem passenden Namen vorhanden ist, ohne dass irgendwelche anderen Werte übereinstimmen (das könnte dann in weiteren Konsistenzrelationen stehen). Dann gäbe es z.B. eine Konsistenzrelation, die angibt, dass für jede Person ein Resident mit dem gleichen Namen vorhanden sein muss, und dann noch eine die beschreibt, dass für Person/Resident-Paare mit dem gleichen Namen auch andere Attribute passend abgebildet werden müssen. Dies ist aber in Transformationssprachen eh implizit so realisiert und lässt sich mit unserem Formalismus für feingranulare Konsistenzrelationen problemlos abbilden.
+% 3. d2(m2) entfernt Condition Elemente: Unproblematisch, wenn die Verarbeitung von d1 nicht auf die entsprechenden Condition Elemente zugreifen muss, also nichts in m1 geändert wurde was zu gelöschten Elementen in d2(m2) korrespondiert. Ansonsten können keine Informationen übertragen werden, da die Witness-Struktur nicht mehr gilt, also macht 1->2 an der Stelle nicht weiter und 2->1 übernimmt den Abbau der Elemente in m1.
 
 
-Goal: Avoidance strategies for interoperability mistakes, i.e. achieving synchronization of transformations (MA Torsten / Timur)
-\label{chap:prevention:interoperability}
+\subsection{Identification of Existing Corresponding Elements}
+\label{chap:synchronization:achieving:identification}
 
-\begin{copiedFrom}{ICMT}
+\mnote{Synchronizing scenario requires identification of corresponding elements}
+Whenever a condition element is added, which requires a corresponding element to exist in the other model, the consistency preservation rule will usually create appropriate elements in the other model, as in the case when that model may not have been modified as well, these elements cannot already occur.
+In the synchronization case, however, the change to the other model may have already introduced those elements, thus it is necessary to find them to avoid a duplicate creation.
+
+\mnote{Corresponding elements cannot be identified by transitive trace links}
+In \owncite{klare2019icmt}, we proposed a strategy to identify such corresponding elements.
+Transformation languages usually use trace models to store the information which elements are corresponding to each other.
+Although there will not be a trace link between corresponding elements when they were created by different transformations, an intuitive attempt might be to use the trace links of the other transformations across which they were created.
+For example, if for a \gls{PCM} component a UML class is created and for this UML class a Java class is created, then there are trace links between the \gls{PCM} component and the UML class, as well as between the UML class and the Java class.
+Synchronizing the addition of the \gls{PCM} component and the Java class should not result in a redundant addition of, for example, a further Java class.
+Resolving the existing trace links transitively is, however, not a solution.
+In this case, there exists a unique one-to-one mapping that actually traces the \gls{PCM} component to the corresponding Java class.
+It would, however, also be possible that a \gls{PCM} component has trace links to several elements in the Java model across UML.
+If those elements are even multiple classes, such as one public and one internal utility class, but the consistency relation between \gls{PCM} and Java only requires one Java class for a \gls{PCM} component, it would be unclear which to select.
+Transformation languages usually tag trace links with additional information, for example, containing the transformation rule that created them, to distinguish links to instances of the same class.
+Since these tags are created by other transformations, considering them would violate our assumption of independent development of transformation and modular reuse.
+Even worse, it could also be the case that another third class is required by the consistency relation between \gls{PCM} and Java.
+Finally, it is up to the actual consistency relation to define when elements are to be considered corresponding.
+
+\mnote{Information for identifying corresponding elements is given in consistency relation}
+Thus, whether corresponding elements already exist cannot be identified by transitively resolving trace links of other transformations, but only by considering the two involved models.
+The information to identify whether elements can be considered corresponding is precisely given in the consistency relation.
+For example, if the relation specifies that, in a very simplified notion, a \gls{PCM} component is consistent to all Java classes that have the same name, no matter what implementation the class contains, then if any class with the name of the \gls{PCM} component is found in the Java code, it can be considered corresponding.
+
+\mnote{Three levels of corresponding element identificatio}
+We come up with three levels of identifying corresponding elements:
+\begin{properdescription}
+    \item[Explicit unique:] The information that elements correspond is unique and represented explicitly, e.g., within a trace model. %Existing transformation languages usually use this technique.
+    \item[Implicit unique:] The information that elements correspond is unique, but represented implicitly, e.g., in terms of key information within the models such as element names. %types and element names.
+    \item[Non-unique:] If no unique information exists, heuristics must be used, e.g. based on ambiguous information or transitive resolution of indirect trace links.
+\end{properdescription}
+
+\mnote{Trace links provide explicit and unique information about corresponding elements}
+In the best case, a trace link already exists between the corresponding elements. This can be due to the reason that one consistency preservation rule created the corresponding element and added the trace link. Then the other consistency preservation rule processes the change that introduced the corresponding element, but now can already retrieve the trace link.
+This is what we call \emph{explicit unique} information, because the information is represented explicitly and unambiguously in the trace model.
+
+\mnote{Key information uniquely identifies corresponding elements by implicit information within models}
+If no trace link exists, like in the synchronization scenario, the information specified in consistency relation to identify corresponding elements needs to be used.
+This can be considered key information, because the information is used as the key to identify corresponding elements.
+To this end, the models has to be queried for elements with the given information.
+The transformation language \gls{QVTR} already provides a language construct to specify such key information within transformation rules~\cite[7.10.2.]{qvt}.
+%\todo{Compare to QVT-R description in \cite[7.10.2]{qvt}, which specifies that elements are created if no elements match the defined key property values specified in the object template}
+We call this information \emph{implicit unique}, because elements can be unambiguously identified but rely on implicit information within the models rather than explicit traces.
+Note that in case that multiple corresponding elements are found by matching key information, any of them can be selected.
+It is up to the consistency preservation rule for the other direction to add further elements such that corresponding elements for all of them are added, such that a valid witness structure is induced.
+
+\mnote{Non-unique information requires heuristics but only occurs in rare cases}
+In the worst case, no unique information is given.
+Precisely following our formalism, this scenario can never occur, because each consistency relation defines the necessary key information.
+Thus, this scenario can only occur in practice with a relaxed notion of consistency.
+This can be the case when for an element a corresponding one is always created, containing some related information, but no unique information to identify that the two are corresponding is given.
+In that case, only trace links identify that the elements are corresponding.
+Thus, if other transformations created the element and thus no direct trace link exists, it is impossible to identify that these elements are to be corresponding.
+Since no information to identify that the elements should be corresponding is present anyway and since this requires a relaxed consistency notion, we assume this scenario unlikely and did not face it in our evaluation at any time.
+If, nevertheless, this scenario occurs, only heuristics can be used to identify corresponding elements without any guarantee of success.
+It would also be possible to involve the developer and let him decide whether an element should be considered corresponding or not.
+
+\mnote{Ordinary transformations must be extended by considering implicit unique information}
+In summary, it is necessary that transformation developers use key information for identifying corresponding elements based on \emph{implicit unique} information in addition to the usage of \emph{explicit unique} information in terms of trace links, like already used for ordinary transformations.
+In case that corresponding elements are found based on implicit unique information, they need to establish a trace link for the elements.
+We define this behavior in \autoref{algo:synchronization:findcorrespondingelements}.
+
+\begin{algorithm}
+    \begin{algorithmic}[1]
+        \Procedure{\function{Find-Corresponding-Elements}}{$\consistencyrelation{CR}{}, \conditionelement{c}{l}, \model{m}{2}, \model{traces}{}$}
+            \State $\mathvariable{tracedElements}$ $\leftarrow$ $\setted{\conditionelement{c}{r} \mid \tupled{\conditionelement{c}{l}, \conditionelement{c}{r}} \in \model{traces}{}}$
+            \For{$\conditionelement{c}{r} \in \mathvariable{tracedElements}$} \label{algo:synchronization:findcorrespondingelements:line:explicit}
+                \If{$\tupled{\conditionelement{c}{l}, \conditionelement{c}{r}} \in \consistencyrelation{CR}{}$}
+                    \State \Return{\textsc{true}}
+                \EndIf
+            \EndFor
+            \For{$\conditionelement{c}{r} \in \mathcal{P}(\model{m}{2})$} \label{algo:synchronization:findcorrespondingelements:line:implicit}
+                \If{$\tupled{\conditionelement{c}{l}, \conditionelement{c}{r}} \in \consistencyrelation{CR}{}$}
+                    \State $\model{trace}{}$ $\leftarrow$ $\model{trace}{} \cup \setted{\tupled{\conditionelement{c}{l},\conditionelement{c}{r}}}$
+                    \State \Return{\textsc{true}}
+                \EndIf 
+            \EndFor
+            \State \Return{\textsc{false}}
+        \EndProcedure
+    \end{algorithmic}
+    \caption[Algorithm to find corresponding elements]{Algorithm to find corresponding elements.}
+    \label{algo:synchronization:findcorrespondingelements}
+\end{algorithm}
+
+\mnote{Algorithm considers trace links and key information for finding corresponding elements}
+\autoref{algo:synchronization:findcorrespondingelements} receives the consistency relation for which corresponding elements shall be found, the condition element $\conditionelement{c}{l}$ of the condition $\condition{c}{l,\consistencyrelation{CR}{}}$, which is contained in a model $\model{m}{1}$ for which corresponding elements shall be found, the second model $\model{m}{2}$ in which the corresponding elements shall be searched, and the trace model $\model{traces}{} \subseteq \model{m}{1} \times \model{m}{2}$ containing pairs of elements in $\model{m}{1}$ and $\model{m}{2}$.
+The algorithm first retrieves all corresponding elements for the condition element from the trace model and then in the loop in \autoref{algo:synchronization:findcorrespondingelements:line:explicit}, checks whether any of the corresponding elements according to the trace model is a corresponding element in the consistency relation $\consistencyrelation{CR}{}$.
+If this is the case, a corresponding element is found and the procedure can be quit returning \textsc{true} to indicate that a corresponding element was found.
+Otherwise, model $\model{m}{2}$ is browsed for the existence of a corresponding element in the loop starting in \autoref{algo:synchronization:findcorrespondingelements:line:implicit}.
+It considers all subset of $\model{m}{2}$, i.e., the potency set $\mathcal{P}(\model{m}{2})$, of which each could be such a corresponding element, and if one of them is corresponding according to $\consistencyrelation{CR}{}$, then the pair $\tupled{\conditionelement{c}{l},\conditionelement{c}{r}}$ is added to the trace model $\model{trace}{}$ as an appropriate trace link and the procedure is quit returning \textsc{true}.
+If no such element is found, the procedure returns \textsc{false} to indicate that no corresponding element is found and thus has to be created by the consistency preservation rule.
+
+\mnote{Identification by key information can be implemented more efficiently}
+The loop in \autoref{algo:synchronization:findcorrespondingelements:line:implicit} is defined in a rather inefficient way, but describes its purpose in the most general way.
+In a practical implementation it may not consider every subset of the model $\model{m}{2}$, but instead retrieve all candidate elements, for example, by filtering the model elements by their class.
+Depending on the implementation of the modelling framework, different possibilities to efficiently find specific elements can be used.
+The implementation of \gls{EMF}, for example, provides functions that yield all instances of a specific class.
+
+\todo{Say that this is only an engineering considerations and not formally proven to be compliant with the partial-consistency-improving definition. Although the considerations are derived from that definition, we do not get a formal guarantee of specific properties. We therefore evaluate whether further problems that we did non consider here can occur.}
+
+% \begin{copiedFrom}{ICMT}
 
 % FORMERLY: \subsection{Matching Elements in Operationalizations}
-\subsection{Matching Elements}
-\label{chap:prevention:interoperability:matching}
+%\subsection{Identification of Existing Corresponding Elements}
+% \label{chap:prevention:interoperability:matching}
 
-\todo{Compare to QVT-R description in \cite[7.10.2]{qvt}, which specifies that elements are created if no elements match the defined key property values specified in the object template}
-
-To avoid failures due to mistakes at the operationalization level, transformations must respect that other transformations may have already created elements.
-In the binary case, this is unnecessary.
-A single incremental \ac{BX} can assume that elements are either created by the user, %and then are input of the transformations
-or were created by the transformation itself.
-To identify corresponding elements, transformation languages usually use trace models, which are created by the transformations.
-When \acp{BX} are combined to networks, %elements may also be created by other transformations.
-%In consequence, 
-direct trace links may be missing because a sequence of other transformations created the elements and trace links only indirectly across elements in other models.
-%Thus, it is necessary to establish direct trace links between corresponding elements.´
-In this scenario, corresponding elements can be matched by information at three levels:
-%Such element matching can be performed on three levels:
-\begin{enumerate}
-    \item \emph{Explicit unique}: The information that elements correspond is unique and represented explicitly, e.g., within a trace model. %Existing transformation languages usually use this technique.
-    \item \emph{Implicit unique}: The information that elements correspond is unique, but represented implicitly, e.g., in terms of key information within the models such as element names. %types and element names.
-    \item \emph{Non-unique}: If no unique information exists, heuristics must be used, e.g. based on ambiguous information or transitive resolution of indirect trace links.
-\end{enumerate}
-\todo{Give examples for each case to show that they actually occur}
-
-Indirect trace links, which link elements transitively across other models, usually exist for elements that correspond, because other transformations have already created them.
-Nevertheless, indirect trace links cannot be used to unambiguously identify such elements.
-An element can correspond to multiple elements in another model, which is why most transformation languages offer tagging of trace links with additional information to identify the correct element.
-%For example, a component in an architecture description could be mapped to two classes in an object-oriented design, one providing the component implementation and one providing utilities.
-%The relevant corresponding element can be retrieved if the traces are tagged with the information that one class is the implementation and one is a utility.
-For example, a language may tag trace links with the transformation rule they were instantiated in.
-This is helpful in the bidirectional case, but when links are resolved transitively, these tags have been created by other, independently developed transformations, and are thus unknown.
-%If such tags would be considered, transformations would depend on tags of other transformations and could thus not be developed independently anymore.
-Therefore, resolving indirect trace links is only a heuristic, but does not unambiguously retrieve corresponding elements.
-
-% Explain how to match rules on three different levels, what the levels can provide etc.
-
+% To avoid failures due to mistakes at the operationalization level, transformations must respect that other transformations may have already created elements.
+% In the binary case, this is unnecessary.
+% A single incremental \ac{BX} can assume that elements are either created by the user, %and then are input of the transformations
+% or were created by the transformation itself.
+% To identify corresponding elements, transformation languages usually use trace models, which are created by the transformations.
+% When \acp{BX} are combined to networks, %elements may also be created by other transformations.
+% %In consequence, 
+% direct trace links may be missing because a sequence of other transformations created the elements and trace links only indirectly across elements in other models.
+% %Thus, it is necessary to establish direct trace links between corresponding elements.´
+% In this scenario, corresponding elements can be matched by information at three levels:
+% %Such element matching can be performed on three levels:
 % \begin{enumerate}
-%     \item Direct Correspondences
-%     \item Key information
-%     \item Heuristics: Indirect correspondences, potentially ambiguous information
+%     \item \emph{Explicit unique}: The information that elements correspond is unique and represented explicitly, e.g., within a trace model. %Existing transformation languages usually use this technique.
+%     \item \emph{Implicit unique}: The information that elements correspond is unique, but represented implicitly, e.g., in terms of key information within the models such as element names. %types and element names.
+%     \item \emph{Non-unique}: If no unique information exists, heuristics must be used, e.g. based on ambiguous information or transitive resolution of indirect trace links.
 % \end{enumerate}
+% \todo{Give examples for each case to show that they actually occur}
 
-Finally, it is up to the transformation engine or the transformation developer %, depending on the provided abstraction level, 
-to ensure that elements are correctly matched.
-In contrast to the bidirectional case, direct trace links cannot be assumed in case of networks of \acp{BX}.
-Therefore, key information within the models must always be considered to identify matching elements.
-Whenever direct trace links or unique key information exists, relevant elements can be unambiguously matched.
-In all other cases, heuristics must be used, which potentially leads to failures.
+% Indirect trace links, which link elements transitively across other models, usually exist for elements that correspond, because other transformations have already created them.
+% Nevertheless, indirect trace links cannot be used to unambiguously identify such elements.
+% An element can correspond to multiple elements in another model, which is why most transformation languages offer tagging of trace links with additional information to identify the correct element.
+% %For example, a component in an architecture description could be mapped to two classes in an object-oriented design, one providing the component implementation and one providing utilities.
+% %The relevant corresponding element can be retrieved if the traces are tagged with the information that one class is the implementation and one is a utility.
+% For example, a language may tag trace links with the transformation rule they were instantiated in.
+% This is helpful in the bidirectional case, but when links are resolved transitively, these tags have been created by other, independently developed transformations, and are thus unknown.
+% %If such tags would be considered, transformations would depend on tags of other transformations and could thus not be developed independently anymore.
+% Therefore, resolving indirect trace links is only a heuristic, but does not unambiguously retrieve corresponding elements.
 
-\end{copiedFrom} % ICMT
+% % Explain how to match rules on three different levels, what the levels can provide etc.
+
+% % \begin{enumerate}
+% %     \item Direct Correspondences
+% %     \item Key information
+% %     \item Heuristics: Indirect correspondences, potentially ambiguous information
+% % \end{enumerate}
+
+% Finally, it is up to the transformation engine or the transformation developer %, depending on the provided abstraction level, 
+% to ensure that elements are correctly matched.
+% In contrast to the bidirectional case, direct trace links cannot be assumed in case of networks of \acp{BX}.
+% Therefore, key information within the models must always be considered to identify matching elements.
+% Whenever direct trace links or unique key information exists, relevant elements can be unambiguously matched.
+% In all other cases, heuristics must be used, which potentially leads to failures.
+
+% \end{copiedFrom} % ICMT
 
 
 
 \subsection{From Model Changes to Condition Element Changes}
+
+\todo{Diskutieren, welche Änderungen an Modellementen zu welchen Änderungen an Condition Elements führen können.}
 
 % TAKEN FROM SYNCHRONIZATION SCENARIOS SECTION
 % We map model changes to potential changes of condition elements, so we find out when a developer has to consider what may happen
