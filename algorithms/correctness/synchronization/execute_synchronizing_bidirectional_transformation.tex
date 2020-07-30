@@ -1,0 +1,25 @@
+\begin{algorithmic}[1]
+    \Procedure{\function{ExecuteSync}}{$\transformation{T} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}, \model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}$}
+        \If{$\neg (\tupled{\model{m}{1}, \model{m}{2}} \consistenttomath \consistencyrelationset{CR})$}
+            \State \Return{$bot$}
+        \EndIf
+        \If{$\neg (\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}} \consistenttomath \consistencyrelationset{CR})$} \label{algo:synchronization:executesynchronizingbidirectionaltransformation:line:synchronizationstart}
+            \State $executionResult$ $\leftarrow$ $\function{SyncEx}_\transformation{T}^1(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}})$
+            \If{$executionResult = \bot$}
+                \State \Return{$\bot$} \label{algo:synchronization:executesynchronizingbidirectionaltransformation:line:returnbot1}
+            \Else
+                \State ($\model{m}{1}, 
+                \model{m}{2}, \change{\metamodel{M}{1}}$) $\equalsperdefinition$ $executionResult$
+            \EndIf
+        \EndIf \label{algo:synchronization:executesynchronizingbidirectionaltransformation:line:synchronizationend}
+        \While{$\neg (\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}} \consistenttomath \consistencyrelationset{CR})$}
+            \State $executionResult$ $\leftarrow$ $\function{Ex}_\transformation{T}^1(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}})$
+            \If{$executionResult = \bot$}
+                \State \Return{$\bot$} \label{algo:executesynchronizingbidirectionaltransformation:line:returnbot2}
+            \Else
+                \State ($\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}$) $\equalsperdefinition$ $executionResult$
+            \EndIf
+        \EndWhile
+        \State \Return{$\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}}$} \label{algo:synchronization:executesynchronizingbidirectionaltransformation:line:returnresult}
+    \EndProcedure
+\end{algorithmic}

@@ -202,23 +202,8 @@ When finally coming to the synchronization scenario, in which both models have b
 % \end{definition}
 
 \begin{algorithm}
-    \begin{algorithmic}[1]
-        \Procedure{\function{Execute-Bidirectional-Transformation}}{$\transformation{T} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}, \model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}$}
-            \If{$\neg (\tupled{\model{m}{1}, \model{m}{2}} \consistenttomath \consistencyrelationset{CR})$}
-                \State \Return{$bot$}
-            \EndIf
-            \While{$\neg (\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}} \consistenttomath \consistencyrelationset{CR})$}
-                \State $executionResult$ $\leftarrow$ $\function{Ex}_\transformation{T}^1(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}})$
-                \If{$executionResult = \bot$}
-                    \State \Return{$\bot$} \label{algo:synchronization:executebidirectionaltransformation:line:returnbot}
-                \Else
-                    \State ($\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}$) $\equalsperdefinition$ $executionResult$
-                \EndIf
-            \EndWhile
-            \State \Return $\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}}$ \label{algo:synchronization:executebidirectionaltransformation:line:returnresult}
-        \EndProcedure
-    \end{algorithmic}
-    \caption[Algorithm to execute a bidirectional transformation]{Algorithm to execute a bidirectional transformation.}
+    \input{algorithms/correctness/synchronization/execute_bidirectional_transformation.tex}
+    \caption[Execution of a bidirectional transformation]{Execution of a bidirectional transformation.}
     \label{algo:synchronization:executebidirectionaltransformation}
 \end{algorithm}
 
@@ -544,32 +529,8 @@ This leads the \autoref{algo:synchronization:executesynchronizingbidirectionaltr
 %Step integrates both changes, comparable to ordinary step, but first treats changes to m2 as already applied, i.e., given models are inconsistent, then processes the changes in the opposite direction to generate necessary changes to restore consistency from them.
 
 \begin{algorithm}
-    \begin{algorithmic}[1]
-        \Procedure{\function{Execute-Synchronizing-Bidirectional-Transformation}}{$\transformation{T} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}, \model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}$}
-            \If{$\neg (\tupled{\model{m}{1}, \model{m}{2}} \consistenttomath \consistencyrelationset{CR})$}
-                \State \Return{$bot$}
-            \EndIf
-            \If{$\neg (\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}} \consistenttomath \consistencyrelationset{CR})$} \label{algo:synchronization:executesynchronizingbidirectionaltransformation:line:synchronizationstart}
-                \State $executionResult$ $\leftarrow$ $\function{SyncEx}_\transformation{T}^1(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}})$
-                \If{$executionResult = \bot$}
-                    \State \Return{$\bot$} \label{algo:synchronization:executesynchronizingbidirectionaltransformation:line:returnbot1}
-                \Else
-                    \State ($\model{m}{1}, 
-                    \model{m}{2}, \change{\metamodel{M}{1}}$) $\equalsperdefinition$ $executionResult$
-                \EndIf
-            \EndIf \label{algo:synchronization:executesynchronizingbidirectionaltransformation:line:synchronizationend}
-            \While{$\neg (\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}} \consistenttomath \consistencyrelationset{CR})$}
-                \State $executionResult$ $\leftarrow$ $\function{Ex}_\transformation{T}^1(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}})$
-                \If{$executionResult = \bot$}
-                    \State \Return{$\bot$} \label{algo:executesynchronizingbidirectionaltransformation:line:returnbot2}
-                \Else
-                    \State ($\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}$) $\equalsperdefinition$ $executionResult$
-                \EndIf
-            \EndWhile
-            \State \Return $\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}}$ \label{algo:synchronization:executesynchronizingbidirectionaltransformation:line:returnresult}
-        \EndProcedure
-    \end{algorithmic}
-    \caption[Algorithm to execute a bidirectional transformation for synchronization]{Algorithm to execute a bidirectional transformation in the synchronization case.}
+    \input{algorithms/correctness/synchronization/execute_synchronizing_bidirectional_transformation.tex}
+    \caption[Execution of a bidirectional transformation for synchronization]{Execution of a bidirectional transformation in the synchronization case.}
     \label{algo:synchronization:executesynchronizingbidirectionaltransformation}
 \end{algorithm}
 
@@ -630,14 +591,14 @@ Although synchronizing transformations and synchronizing bidirectional transform
 While a synchronizing transformation can be defined such that it never return $\bot$ by defining a consistency preservation rule that is a total function, the possibility of a synchronizing bidirectional transformation to never return $\bot$ depends on the interplay of the two unidirectional consistency preservation rules.
 Nevertheless, we can show that both have equal expressiveness, i.e., they can always return the same results for the same inputs.
 
-\begin{theorem}[Expressiveness of Synchronizing Bidirectional Transformation]
+\begin{theorem}[Synchronizing Bidirectional Transformation Expressiveness]
     Synchronizing bidirectional transformations have equal expressiveness than synchronizing transformations.
 \end{theorem}
 \begin{proof}
     Each synchronizing bidirectional transformation can be realized by a synchronizing transformation by simply defining the function of the consistency preservation rule such that it returns the result that is produced by the execution of the synchronizing bidirectional transformation.
     Let $\transformation{T}$ be a synchronizing bidirectional transformation with:
     \begin{align*}
-        \function{Execute-Synchronizing-Bidirectional-Transformation}(\transformation{T}, \model{m}{1}, \model{m}{2}, \change{\metamodel{M}{2}}) = (\model{m}{1}', \model{m}{2}')
+        \function{ExecuteSync}(\transformation{T}, \model{m}{1}, \model{m}{2}, \change{\metamodel{M}{2}}) = (\model{m}{1}', \model{m}{2}')
     \end{align*}
     Then we define the consistency preservation rule $\consistencypreservationrule{}$ of a synchronizing transformation as:
     \begin{align*}
