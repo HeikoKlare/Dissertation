@@ -376,8 +376,8 @@ Important properties for the consistency specification are in the left-hand side
 OCL expressions can also occur in \texttt{when} and \texttt{where} clauses. As with relation invocations, we focus on invariants (\texttt{where}), which we limit to the manipulation of QVT-R variables, given that properties can be limited to domain patterns without loss of generality. The processing of an invariant is similar to that of property template items: properties that depend on QVT-R variables occurring in the same invariant have to be grouped together.
 
 \begin{algorithm}
-    \input{algorithms/merge_algorithm}
-    \caption[Algorithm to merge properties to predicates]{Algorithm to merge properties to predicates. Taken from \owncite{klare2020compatibility-report}.}
+    \input{algorithms/correctness/compatibility/merge_properties}
+    \caption[Merge of properties to predicates]{Merge of properties to predicates. Adapted from \owncite{klare2020compatibility-report}.}
     \label{algo:mergeproperties}
 \end{algorithm}
 
@@ -466,11 +466,12 @@ Given that connected components are independent, a predicate can only be replace
 In the property graph, an alternative path for a hyperedge $E$ (i.e., a predicate) is a sequence of pairwise incident hyperedges such that the first and the last are also incident to $E$. Hyperedges of the property graph become vertices in the dual. Therefore, an alternative path for a predicate $E$ in the dual is characterized by a cycle that contains $E$. If the vertex sequence of such a cycle is $\tupled{E, E_1, \dots, E_n, E}$, the alternative path is $\tupled{E_1, \dots, E_n}$. Ultimately, the generation of candidate relations for a redundancy test amounts to the enumeration of pairs $(E, \tupled{E_i})$, where $E$ is a possibly redundant predicate (i.e., a hyperedge in the property graph and a vertex in its dual) and $\tupled{E_i}$ is an alternative sequence of predicates that may replace $E$. There may be multiple alternative paths for a given predicate in the dual of the property graph, hence the need to find multiple cycles. The problem of finding all simple cycles in an undirected graph is called \textit{cycle enumeration}.
 
 \begin{algorithm}
-    \input{algorithms/cycle_enumeration_algorithm}
-    \caption[Enumeration of alternative paths]{Enumeration of alternative paths. Taken from \owncite{klare2020compatibility-report}.}
+    \input{algorithms/correctness/compatibility/cycle_enumeration}
+    \caption[Enumeration of alternative paths]{Enumeration of alternative paths. Adapted from \owncite{klare2020compatibility-report}.}
     \label{algo:cycleenumeration}
 \end{algorithm}
 
+\todo{The algorithm does not only find cycles, but actually removes redundant edges, right? So we should rename it.}
 The cycle enumeration algorithm used in the decomposition procedure relies on a \textit{cycle basis}. In an undirected graph, a cycle basis is a set of simple cycles that can be combined to generate all other simple cycles of the graph. The cycle basis is first computed using Paton's algorithm~\cite{paton1969algorithm}. For a given predicate, the enumeration processes each cycle from the cycle basis and merges it with all yet processed cycles. In the context of the decomposition procedure, a cycle must also go through the predicate to analyze. \autoref{algo:cycleenumeration} is a slightly modified version of Gibb's algorithm to enumerate simple cycles in an undirected graph using a cycle basis~\cite{gibbs1969cycle}. In this algorithm, every cycle is represented as a set of edges. We denote the symmetric difference with the $\oplus$ sign, i.e., $A \oplus B$ is the set of edges that are in $A$ or in $B$ but not in both. The set $foundCycles$ contains all linear combinations of cycles that were yet processed. Merged with cycles of the basis $base_1, \dots, base_n$, these linear combinations are used to merge more than two cycles of the basis. At each iteration of \autoref{algo:cycleenumeration}, processing a new cycle from the cycle basis $base$, new simple cycles are in $currentCycles \cup \{base\}$. Edge-disjoint or non-simple cycles are stored in $currentCycles^*$. Note that redundancy tests can be performed as new cycles are generated, as shown on line \ref{lst:line:newCycles}. For the given predicate $p$, it is checked whether one of the newly generated cycles is redundant, i.e., it contains the predicate $p$ and $p$ can be replaced by the concatenation of the other edges. By doing so, it is not necessary to store all cycles and wait for the end of the algorithm before starting redundancy tests. More interestingly, if the redundancy test is positive for one alternative sequence of predicates, there is no need to test others. The initial predicate can be removed and the algorithm can be used with another possibly redundant predicate.
   
 \paragraph{Stopping Criterion}
