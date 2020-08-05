@@ -274,100 +274,189 @@ In the following, we thus, for first, allow an arbitrary number of executions of
 % Let us, for first, assume that transformations need an arbitrary number of executions.
 
 
-\subsection{Failure Cases} %When to Return $\bot$?}
-When is it allowed or needed to return $\bot$?
-It may always return $\bot$ to be correct, this is however not what we want.
-It would be intuitive to expect an application function to always return consistent models when there is an execution order of the transformations (i.e. an orchestration) that delivers consistent models.
+\subsection{Expected Behavior} % Failure Cases} %When to Return $\bot$?}
 
-Basically three reasons for not finding consistent solution
-\begin{enumerate}
-    \item Relations are contradictory: then a user change introducing an element for which no consistent models can be found (see definition compatibility), cannot be resolved by transformation such that resulting models are consistent and reflect that change. (example with employee for which no consistent other models can be found)
-    \item No orchestration exists: even if the relations are compatible, transformation may be defined in a way that they make contradictory decisions for locally consistent solution. (example with three options for name mapping with one overlapping, where each transformation always selects the one that is not appropriate for the other). We can further distinguish here whether there is always a change that cannot be processed by a CPR (then the change conflicts with the consistency relations and thus has to be rejected like any change may need to be rejected), or whether an arbitrary long sequence of transformations exists that can be applied but does never yield a consistent set of models.
-    \item No orchestration found: finally, the application/orchestration may not be able to find an order of transformations that leads to a consistent state although it exists.
-\end{enumerate}
+The application function is defined to return models only when they can be derived by applying transformations in an order delivered by the orchestration function and otherwise to return $\bot$.
+In addition, we expect a \emph{correct} application function only to yield models that are consistent.
+We did, however, not yet define under which conditions we expect the function not to return $\bot$, because there are different reasons why the function may not be able to deliver consistent models although we could expect it to do so.
+In fact, with the current definition, the function is even considered correct if it always returns $\bot$, which is not practical.
+Thus, we need to define when exactly we expect the function to return $\bot$.
 
-In accordance to existing work, such as \cite{stevens2020BidirectionalTransformationLarge-SoSym}, we call a given set of models and changes \emph{resolvable} by the transformation network, if there exists a sequence of the transformations such that the resulting models are consistent.
-We do, however, not restrict ourselves to a single execution of each transformation but allow them to be executed multiple times (as motivated before).
-Orchestration ermittelt eine "Resolution" (siehe bestehende Arbeiten~\cite{stevens2020BidirectionalTransformationLarge-SoSym}), also eine Ausführungsreihenfolge, zumindest wenn man sie als "korrekt" bezeichnet.
+It might be intuitive to expect an application function to always return consistent models when the input models are consistent and when there is an execution order of the transformations, i.e., an orchestration, that delivers consistent models.
+This, in consequence, would lead to the requirement that the orchestration function delivers a sequence of transformations whose application delivers consistent models whenever such a sequence exists for the given models and changes to them.
+There can be different reasons why the orchestration function may not deliver such a sequence:
+%When is it allowed or needed to return $\bot$?
+%It may always return $\bot$ to be correct, this is however not what we want.
+%We can distinguish three levels of reasons why the function may not be able to find consistent models:
+\begin{properdescription}
+    \item[Relations are incompatible:] If the consistency relations are incompatible, a user change may introduce an element for which no consistent models exist. In consequence, the transformation cannot be executed in an order such that the resulting models are consistent and still reflect the given user change.
+    %(example with employee for which no consistent other models can be found)
+    \item[No orchestration exists:] Even if the relations are compatible, transformations may be defined in a way that they make contradictory decisions for locally consistent solutions. Thus, for a given a change the consistency relations allow different ways to store consistency, of which the transformations always select a way that is not consistent to one of the other relations.
+    Then no order of the transformations can restore consistency, although models exist that fulfill consistency for the given change.
+    % (example with three options for name mapping with one overlapping, where each transformation always selects the one that is not appropriate for the other). We can further distinguish here whether there is always a change that cannot be processed by a CPR (then the change conflicts with the consistency relations and thus has to be rejected like any change may need to be rejected), or whether an arbitrary long sequence of transformations exists that can be applied but does never yield a consistent set of models.
+    \item[No orchestration found:] Finally, although an order of transformations for given changes exists that delivers consistent models, the orchestration function may not deliver it. 
+    %finally, the application/orchestration may not be able to find an order of transformations that leads to a consistent state although it exists.
+\end{properdescription}
 
-2. entspricht "has a resolution" bei Stevens
-3. entspricht "is resolvable" bei Stevens
+These reasons can be considered different levels, because each of them induces the next, i.e., if there is no orchestration, it cannot be found, and having contradictory relations, there exists no orchestration for some of the changes.
+In the end, all of them lead to the situation that no orchestration can found and, thus, the orchestration function is not able to deliver it.
 
-We can avoid the first by requiring compatibility.
-We need to make restrictions to the transformation to resolve the second. We do, however, probably need to require them to know about the other transformations to avoid that. Finally, we will have to deal with that situation and then inform the user about the problem.
-We investigate whether we can always guarantee to find an orchestration if it exists.
-For now, we focus on the last problem, since that is a problem of the application and orchestration function, rather than the problem that no orchestration may exist at all.
+The initially given intuitive requirement that the orchestration function delivers a transformation sequence that yields consistent models whenever it exists, would thus assume that the first two levels do not occur and then require the orchestration function to ensure the third.
+While we can assume compatibility of the relations, as we discussed how to analyze it in \autoref{chap:compatibility}, we cannot assume that an orchestration does always exists, as we will see in the following.
 
-Now we have these options:
-\begin{itemize}
-    \item We accept that there is no orchestration or that the strategy does not find it in specific situations, than we only need to consider that the strategy must always terminate.
-    We could, for example, change the algorithm such that it always returns $\bot$, which is correct, or terminates after executing each transformation once.
-    \item We define a precise criterion when the strategy is allowed to return $\bot$. Most intuitively, one might say that it should only return $\bot$ whenever no orchestration exists.
-\end{itemize}
+Although compatibility reduces the chance that an orchestration function does not deliver a transformation sequence that yields consistent models, as we have motivated with the scenario depicted in \autoref{fig:compatibility:unwanted_behavior}, it does not ensure that there is always such a sequence of transformations that the orchestration function can find.
+In general, this is always the case when consistency relations define different options for consistency, i.e., they allow the existence of different corresponding elements to consider the models consistent.
+Compatibility ensures that there is an overlap of these corresponding elements, such that for every element, for which consistency is restricted, consistent models can be found.
+If, however, the consistency preservation rules of the transformations always restore consistency by introducing corresponding elements that are not in this overlap, each transformation will restore consistency locally to its consistency relation, but they can, together, never restore consistency to all consistency relations.
 
-Obviously, we would like to have a precise criterion, which we introduce as an \emph{optimal} orchestration function.
-Again, there are two approaches to ensure that an execution order is always found if it exists.
-There is the problem space P of all possible execution orders after a change and there is the solution space S containing those orders that yield a consistent result. We can then:
-\begin{enumerate}
-    \item Strategy approach: Define a strategy that explores the problem space P to find one of the solution in the solution space S.
-    \item Transformation approach: Ensure that P = S by defining appropriate \emph{well-behavedness} restriction to the transformations.
-\end{enumerate}
+Consider the situation that we have three metamodels $\metamodel{A}{}$, $\metamodel{B}{}$ and $\metamodel{C}{}$ with instances $\model{a}{i}$, $\model{b}{i}$ and $\model{c}{i}$.
+Let us assume that those models are uniquely indexed by $i$ and we defined the following consistency relations:
+\begin{align*}
+    &
+    \consistencyrelation{CR}{AB} = \setted{\tupled{\model{a}{i}, \model{b}{k}} \mid k = i} \\
+    &
+    \consistencyrelation{CR}{AC} = \setted{\tupled{\model{a}{i}, \model{c}{l}} \mid l = i \lor l = i+1} \\
+    &
+    \consistencyrelation{CR}{BC} = \setted{\tupled{\model{b}{k}, \model{c}{l}} \mid l = k+1 \lor l = k+2}
+\end{align*}
+This induces the set of consistent models $\setted{\tupled{\model{a}{i}, \model{b}{k}, \model{c}{l}} \mid  i = k = l-1}$, which is given to all three consistency relations.
+Thus for any given model we are able to find instances of the other metamodels that are consistent to all consistency relations.
+If we define consistency preservation rules for these consistency relations, the ones for $\consistencyrelation{CR}{AC}$ and $\consistencyrelation{CR}{BC}$ may decide between two models to restore consistency.
+If $\consistencyrelation{CR}{AC}$ does always select $\model{c}{i}$ for $\model{a}{i}$ and vice versa, and if $\consistencyrelation{CR}{BC}$ does always select $\model{c}{i+2}$ for $\model{a}{i}$ and vice versa, no orchestration of the transformations will yield consistent models, because they never select those models that are in the overlap of the consistency relations.
 
-Lösungsoptionen (Grad der Einschränkung an die Transformationen) --  überdeckt sich mit der Klassifizierung hierüber -> zusammenführen
-\begin{itemize}
-    \item Hohe Einschränkung: Jede beliebige Reihenfolge von ausgeführten Transformationen führt letztendlich zu einem korrekten Ergebnis (Fixpunktiteration -- Allquantifizierung) -- Hippokratie-Eigenschaft sorgt dafür, dass keine Transformation wieder etwas ändert, wenn Konsistenz bereits hergestellt ist.
-    Diese Eigenschaft ist in der Praxis möglicherweise zu strikt, da sie sehr starke Anforderungen an die Transformationen stellen müsste. Dafür wäre aber die Anwendungsfunktion trivial.
-    \item Mittlere Einschränkung: Es gibt eine Reihenfolge von ausgeführten Transformationen für jede Änderung die terminiert (Existenzquantifizierung) und die Ausführungsfunktion findet diese Reihenfolge.
-    Utopisch, dass die Anwendungsfunktion aus (potentiell sehr mächtigen) Transformationen die richtige Reihenfolge errechnen kann. Dafür aber (möglicherweise) weniger Anforderungen an die Transformationen (zumindest nicht mehr Anforderungen, denn die Allquantifzierung induziert die Existenzquantifizierung). Eine Funktion könnte dann zumindest nach best-effort versuchen, die richtige Reihenfolge zu finden und konservativ abbrechen, wenn sie diese nicht finden kann (also entweder konsistent terminieren oder terminieren mit der Aussage, dass es entweder keine solche Reihenfolge gibt -- bei relaxierten Anforderungen -- oder dass es sie nicht finden kann).  
-    \item Geringe Einschränkung: Es gibt potentiell keine Reihenfolge der Transformationen, die bei einer Änderung zu einer konsistenten Lösung kommt. Hier müsste die Ausführungsfunktion entsprechend einen Fehler ausgeben.
-\end{itemize}
+\begin{figure}[]
+    \centering
+    \includegraphics[width=\textwidth]{figures/correctness/orchestration/no_orchestration.png}
+    \caption[Consistency preservation rules without orchestration]{Consistency relations with options for corresponding elements leading to consistency preservation rules of which no orchestration yields consistent models.}
+    \label{fig:orchestration:no_orchestration}
+\end{figure}
+
+We have already given an abstract example for that problem in \autoref{fig:correctness:no_execution_order}. \autoref{fig:orchestration:no_orchestration}, in addition, demonstrates this situation at a derivation of the running example.
+The consistency relation between employees and residents ensures that for each resident and employee there is corresponding other element with the same name.
+The consistency relations between employees and persons and between residents and persons ensure that for each person there is a corresponding employee and resident, respectively, but they allow different relations of their names.
+While both consider elements corresponding if the name of an employee and resident, respectively, are the concatenation of the first and last name of a person, an employee is also allowed to have the inverse concatenation of last and first name, whereas a resident is also allowed to have this inverse concatenation, but with an additional separation of the last and first name with a comma.
+These options for the consistency relations provide further degrees of freedom for each transformation on its own, as they allow, for example, employee names to be encoded differently.
+This can, for example, be reasonable if the order of first and last name is not relevant in a model managing employees.
+In combination with the other consistency relations, however, the only employees, residents and persons that are considered consistent to all of the consistency relations are those having the same names with the concatenation of first and last name.
+Nevertheless, these consistency relations are compatible, because for each possible condition element, i.e., for every possible employee, person and resident, there are consistent models that contain them.
+
+Consistency relations that preserve these consistency relations need to to choose one of the given options for the names of corresponding employees, residents and persons.
+\autoref{fig:orchestration:no_orchestration} sketches consistency preservation rules that make such a selection.
+The rules with alternative 1 ensure that for each employee, resident and persons corresponding elements exist, which fulfill those relations of the names that are conflicting.
+This means, the employee name is the concatenation of the last and first name of a person, whereas the resident name contains an additional comma in that concatenation.
+In the other direction, the names of employees and residents are split at the appropriate indices, given by the whitespace and comma, respectively, to calculate the required first and last name of a person.
+In consequence, there is no execution sequence of the transformations that results in consistent models, because the execution of the transformation between employees and persons always leads to a violation of the consistency relation between residents and persons and vice versa.
+This is because the transformation between person and resident always introduces a comma in the resident name, which is then appended to the last name by the transformation between employee and persons.
+A repeated execution of the transformation repeatedly appends that comma.
+On the other hand, the execution of any of the transformation does never lead to the introduction of a person that fulfills the non-conflicting conditions of both consistency relations by simply containing a first and last name, which is represented as concatenation of first and last name in both an employee and resident.
+This is concrete example for the previously discussed abstract situation that of different options in consistency relations always the non-overlapping ones are chosen by the consistency preservation rules.
+
+If we consider the alternative 2 for the consistency preservation rule between persons and residents, we can always find an orchestration that yields consistent models.
+The alternative rule decides how consistency is ensured based on the existence of a comma within the resident name.
+If a comma is present, the name relation containing a comma is used, and otherwise the simple concatenation of first and last name is assumed.
+For an employee, first execution the transformation from employees to residents and afterwards the one from residents to persons ensures that all consistency relations are fulfilled, because the one between residents and persons sets first and last name of a person according to the relations that is also fulfilled between person and employee, because the name does not contain a comma.
+For a person, first executing the transformation from persons to employees and then following the process above also ensures consistency.
+Finally, for a resident, we can, for example, first apply the transformation between residents and employees and then the one between residents and persons, resulting in consistent models due to the same reasons as above.
+
+Although there are execution orders of the transformations that yield consistent models with the consistency preservation rule defined as alternative 2, not every execution order leads to consistent models.
+In the scenarios discussed above, we have ensured that the transformation between residents and persons is executed for a resident first.
+If that transformation is first executed for a person, then a comma is added, which leads to the subsequent application of the same consistency preservation rules as with alternative 1, meaning that no further execution order yields consistent models.
+
+No matter whether exactly those consistency relations and preservation rules for them may occur in an actual transformation network, they exemplify the general situation of having consistency preservation rules that select one of different options provided by the consistency relation to introduced corresponding elements to restore consistency.
+The example shows that whether or not an order of transformations exists that yields consistent models in such a situation depends on whether at least one transformation selects an option that is consistent to other consistency relations as well.
+It also shows that even if an execution order exists, not all execution orders yield consistent models, thus we need to be able to find one that does.
+
+In accordance with existing work \cite{stevens2020BidirectionalTransformationLarge-SoSym}, we call a given set of models and changes \emph{resolvable} by a transformation network, if an orchestration exists.
+In contrast to existing work, we do, however, not restrict ourselves to a single execution of each transformation, as we have motivated before.
+
+We have to accept that transformation networks may be unresolvable, i.e., that there is no orchestration for the transformations that yields consistent models.
+Ensuring that a network is resolvable for any changes would lead to restrictions for the individual transformations, which would especially require different transformations to be aligned with each other.
+Since that conflicts our assumption of independent development and modular reuse, we do not focus on that problem, but accept that it can occur and instead focus on how we can find an orchestration if it exists. 
+
+% "has a resolution" bei Stevens entspricht im Prinzip Kompatibilität
+% "is resolvable" bei Stevens entspricht im Prinzip "orchestration exists"
+
+% In accordance to existing work, such as \cite{stevens2020BidirectionalTransformationLarge-SoSym}, we call a given set of models and changes \emph{resolvable} by the transformation network, if there exists a sequence of the transformations such that the resulting models are consistent.
+% We do, however, not restrict ourselves to a single execution of each transformation but allow them to be executed multiple times (as motivated before).
+% Orchestration ermittelt eine "Resolution" (siehe bestehende Arbeiten~\cite{stevens2020BidirectionalTransformationLarge-SoSym}), also eine Ausführungsreihenfolge, zumindest wenn man sie als "korrekt" bezeichnet.
+
+% Argumentation:
+% Compatibility können wir fordern, dass eine Orchestrierungsstrategie existiert aber nicht. 
+
+% We can avoid the first by requiring compatibility.
+% We need to make restrictions to the transformation to resolve the second. We do, however, probably need to require them to know about the other transformations to avoid that. Finally, we will have to deal with that situation and then inform the user about the problem.
+% We investigate whether we can always guarantee to find an orchestration if it exists.
+% For now, we focus on the last problem, since that is a problem of the application and orchestration function, rather than the problem that no orchestration may exist at all.
+
+% DECIDED THAT THE FOLLOWING IS NOT AN OPTINO BUT THE SECOND IS DEFINITE.
+% Now we have these options:
+% \begin{itemize}
+%     \item We accept that there is no orchestration or that the strategy does not find it in specific situations, than we only need to consider that the strategy must always terminate.
+%     We could, for example, change the algorithm such that it always returns $\bot$, which is correct, or terminates after executing each transformation once.
+%     \item We define a precise criterion when the strategy is allowed to return $\bot$. Most intuitively, one might say that it should only return $\bot$ whenever no orchestration exists.
+% \end{itemize}
+
 
 
 \subsection{Optimal Orchestration Functions}
 
-It is obvious that we can define consistency preservation rules for which the orchestration function cannot find an execution order that returns a consistent tuple of models after certain changes. We already gave an example in \autoref{fig:correctness:no_execution_order}. There exists no execution order for any input value that terminates. The transformations will always increase the value, although the defined relations could be fulfilled for the input value, but the transformations never find that solution.
+To ensure that an application function delivers consistent models whenever an orchestration exists that yields those models exists, we need to find an orchestration function that fulfills this property.
+We denote this as an \emph{optimal} orchestration function.
+Recall that $\generalizationfunction{\metamodeltuple{M},\transformation{t}}$ is the generalization function that applies a transformation, which is only defined for two models, to a model tuple that instantiate all metamodels in $\metamodeltuple{M}$.
+% It is obvious that we can define consistency preservation rules for which the orchestration function cannot find an execution order that returns a consistent tuple of models after certain changes. We already gave an example in \autoref{fig:correctness:no_execution_order}. There exists no execution order for any input value that terminates. The transformations will always increase the value, although the defined relations could be fulfilled for the input value, but the transformations never find that solution.
 
-Although we will discuss restrictions to relations and transformations that reduce the chance that no solution can be found, it will not be possible to ensure that such a solution can always be found. This is due to the reason that transformations can perform arbitrary changes given that transformations are Turing complete, which should not be restricted, because it is unclear which restrictions could be made without forbidding scenarios that should actually we supported. Thus, we assume that transformations are Turing complete.
+% Although we will discuss restrictions to relations and transformations that reduce the chance that no solution can be found, it will not be possible to ensure that such a solution can always be found. This is due to the reason that transformations can perform arbitrary changes given that transformations are Turing complete, which should not be restricted, because it is unclear which restrictions could be made without forbidding scenarios that should actually we supported. Thus, we assume that transformations are Turing complete.
 
-We explicitly allow the orchestration function to return a sequence that will, if applied to models and changes to them, not deliver a consistent tuple of models. As discusses, this is supposed to reflect cases in which no such sequence can be calculated.
-However, it may be useful to have some notion of \emph{optimality} that ensures that if a sequence that delivers a consistent result exists, the orchestration function is supposed to find it.
-Formally, this notion looks as follows.
+% We explicitly allow the orchestration function to return a sequence that will, if applied to models and changes to them, not deliver a consistent tuple of models. As discusses, this is supposed to reflect cases in which no such sequence can be calculated.
+% However, it may be useful to have some notion of \emph{optimality} that ensures that if a sequence that delivers a consistent result exists, the orchestration function is supposed to find it.
+% Formally, this notion looks as follows.
 
 \begin{definition}[Optimal Consistency Preservation Orchestration Function]
-    \todo{Needs to be adapted to transformations rather than CPRs}
-    Let $\consistencypreservationruleset{}$ be a set of consistency preservation rules for a set of consistency relations $\consistencyrelationset{CR}$ on metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$.
-    We say that an orchestration function $\orcfunction{\consistencypreservationruleset{}}$ for these rules is \emph{optimal} if it always returns a sequence that delivers a consistent set of models if possible, i.e.,
+    Let $\transformationset{T}$ be a set of transformations for a set of metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$.
+    We say that an orchestration function $\orcfunction{\transformationset{T}}$ for these transformations is \emph{optimal} if it returns a sequence of them that yields a consistent set of models whenever it exists, i.e.,
     \begin{align*}
         &
         \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \forall \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} :
         \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \Rightarrow \\
         & \formulaskip
         \bigl[ \bigl(
-            \exists \consistencypreservationrule{1}, \dots, \consistencypreservationrule{m} \in \consistencypreservationruleset{} : 
+            \exists \transformation{t}_{1}, \dots, \transformation{t}_{m} \in \transformationset{} : 
             \exists \changetuple{\metamodeltuple{M}}' = \tupled{\change{\metamodel{M}{1}}', \dots, \change{\metamodel{M}{n}}'} \in \changeuniverse{\metamodeltuple{M}} :\\
             & \formulaskip \formulaskip
-            \generalizationfunction{\consistencypreservationrule{1}} \concatfunction \dots \concatfunction \generalizationfunction{\consistencypreservationrule{m}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}')\\
+            \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{m}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}')\\
             & \formulaskip \formulaskip
             \land \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \dots, \change{\metamodel{M}{n}}'(\model{m}{n})} \consistenttomath \consistencyrelationset{CR} \bigr) \\
             & \formulaskip
             \Rightarrow \bigl(        
-            \exists \consistencypreservationrule{1}', \dots, \consistencypreservationrule{m}' \in \consistencypreservationruleset{} : 
+            \exists \transformation{t}_{1}', \dots, \transformation{t}_{m}' \in \transformationset{} : 
             \exists \changetuple{\metamodeltuple{M}}'' = \tupled{\change{\metamodel{M}{1}}'', \dots, \change{\metamodel{M}{n}}''} \in \changeuniverse{\metamodeltuple{M}} :\\
             & \formulaskip \formulaskip
-            \orcfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \tupled{\consistencypreservationrule{1}', \dots, \consistencypreservationrule{m}'} \\
+            \orcfunction{\transformationset{T}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \tupled{\consistencypreservationrule{1}', \dots, \consistencypreservationrule{m}'} \\
             & \formulaskip \formulaskip
-            \land \generalizationfunction{\consistencypreservationrule{1}'} \concatfunction \dots \concatfunction \generalizationfunction{\consistencypreservationrule{m}'}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}'')\\
+            \land \generalizationfunction{\metamodeltuple{M},\transformation{t}_{1}'} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M},\transformation{t}_{m}'}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}'')\\
             & \formulaskip \formulaskip
             \land \tupled{\change{\metamodel{M}{1}}''(\model{m}{1}), \dots, \change{\metamodel{M}{n}}''(\model{m}{n})} \consistenttomath \consistencyrelationset{CR}
         \bigr) \bigr]
     \end{align*}
 \end{definition}
 
+We can distinguish two approaches to ensure that the orchestration function does always find an execution order that yields consistent models if it exists.
+Let $P_{i}$ be the problem space, i.e., all possible transformation execution orders for an input $i$ of models and a change to them and let $S_{i}$ be the solution space with those orders that yield consistent models.
+\begin{properdescription}
+    \item[Strategy Definition:] Define a strategy that explores the problem space $P_{i}$ to find one of the sequences in the solution space $S_{i}$, if $S_{i} \neq \emptyset$.
+    \item[Transformation Restriction:] Define a \emph{well-behavedness} property for the transformations that ensures that executing the transformations in any order often enough, they yield consistent models if $S_{i} \neq \emptyset$, i.e., for any given input $i$ there is an $n \in \mathbb{N}$ such that $\forall s \in P_{i} : \abs{s} > n \Rightarrow s \in S_{i}$.
+\end{properdescription}
+
 %Unfortunately, optimality is a property that we cannot request from an orchestration function. Optimality would mean that the orchestration function can decide whether there is sequence of transformations that leads to consistent models and thus terminate.
 
-Optimality of an orchestration function means that it can decide whether there is a sequence of transformations that leads to consistent models and thus terminates.
+In the latter case, the orchestration function may return any order of the transformations, as long as the sequence is long enough to be optimal.
+This means, performing an iterative execution of the transformations leads to a consistent result, comparable to a fixed-point iteration.
+Since we want to avoid to restrict transformations, we first follow the former approach and investigate the possibility to find an optimal orchestration function without restricting the transformations.
+%Optimality of an orchestration function means that it can decide whether there is a sequence of transformations that leads to consistent models and thus terminates.
+In the following, we therefore define a general algorithm that realizes an application function that assumes an optimal orchestration function and investigate how we can ensure that the orchestration is optimal.
 
-In the following, we define a general algorithm for the application function which assumes an optimal orchestration function and investigate, whether it can find an orchestration in S for all inputs.
+
+\todo{Who returns $\bot$ when no order existsß Orc or app?}
 
 
 
@@ -471,6 +560,15 @@ We concentrate on the first problem first and later discuss the latter.
 \begin{itemize}
     \item Restrictions must, in the best case, be local to a transformation, i.e., they should be fulfillable without knowing with which other transformations the transformation shall be combined
     \item Can this ever be the case?
+\end{itemize}
+
+Lösungsoptionen (Grad der Einschränkung an die Transformationen) --  überdeckt sich mit der Klassifizierung hierüber -> zusammenführen
+\begin{itemize}
+    \item Hohe Einschränkung: Jede beliebige Reihenfolge von ausgeführten Transformationen führt letztendlich zu einem korrekten Ergebnis (Fixpunktiteration -- Allquantifizierung) -- Hippokratie-Eigenschaft sorgt dafür, dass keine Transformation wieder etwas ändert, wenn Konsistenz bereits hergestellt ist.
+    Diese Eigenschaft ist in der Praxis möglicherweise zu strikt, da sie sehr starke Anforderungen an die Transformationen stellen müsste. Dafür wäre aber die Anwendungsfunktion trivial.
+    \item Mittlere Einschränkung: Es gibt eine Reihenfolge von ausgeführten Transformationen für jede Änderung die terminiert (Existenzquantifizierung) und die Ausführungsfunktion findet diese Reihenfolge.
+    Utopisch, dass die Anwendungsfunktion aus (potentiell sehr mächtigen) Transformationen die richtige Reihenfolge errechnen kann. Dafür aber (möglicherweise) weniger Anforderungen an die Transformationen (zumindest nicht mehr Anforderungen, denn die Allquantifzierung induziert die Existenzquantifizierung). Eine Funktion könnte dann zumindest nach best-effort versuchen, die richtige Reihenfolge zu finden und konservativ abbrechen, wenn sie diese nicht finden kann (also entweder konsistent terminieren oder terminieren mit der Aussage, dass es entweder keine solche Reihenfolge gibt -- bei relaxierten Anforderungen -- oder dass es sie nicht finden kann).  
+    \item Geringe Einschränkung: Es gibt potentiell keine Reihenfolge der Transformationen, die bei einer Änderung zu einer konsistenten Lösung kommt. Hier müsste die Ausführungsfunktion entsprechend einen Fehler ausgeben.
 \end{itemize}
 
 
