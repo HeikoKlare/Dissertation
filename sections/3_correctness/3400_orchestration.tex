@@ -424,6 +424,30 @@ We define this as an \emph{optimality} property in the following.
 
 \subsection{Optimal Orchestration}
 
+% An application function that delivers consistent models whenever an orchestration exists that yields them is what we would assume \emph{optimal}.
+% Recall that $\generalizationfunction{\metamodeltuple{M},\transformation{t}}$ is the generalization function that applies a transformation, which is only defined for two models, to a model tuple that instantiate all metamodels in $\metamodeltuple{M}$.
+
+% \begin{definition}[Optimal Transformation Application Function]
+%     Let $\transformationset{T}$ be a set of transformations for a set of metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$.
+%     We say that an application function $\appfunction{\orcfunction{\transformationset{T}}}$ for these transformations is \emph{optimal} if it returns models that are consistent whenever there is an orchestration of the transformation that yields a consistent set of models whenever it exists, i.e.,
+%     \begin{align*}
+%         &
+%         \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \forall \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} :
+%         \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \Rightarrow \\
+%         & \formulaskip
+%         \bigl(
+%             \exists \transformation{t}_{1}, \dots, \transformation{t}_{m} \in \transformationset{} : 
+%             \exists \changetuple{\metamodeltuple{M}}' = \tupled{\change{\metamodel{M}{1}}', \dots, \change{\metamodel{M}{n}}'} \in \changeuniverse{\metamodeltuple{M}} :\\
+%             & \formulaskip \formulaskip
+%             \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{m}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}')\\
+%             & \formulaskip \formulaskip
+%             \land \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \dots, \change{\metamodel{M}{n}}'(\model{m}{n})} \consistenttomath \consistencyrelationset{CR} \bigr) \\
+%             & \formulaskip
+%             \Rightarrow \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m},\changetuple{\metamodeltuple{M}}) \consistenttomath \consistencyrelationset{CR}
+%         \bigr)
+%     \end{align*}
+% \end{definition}
+
 \mnote{Definition of optimal orchestration function}
 To ensure that an application function delivers consistent models whenever an orchestration exists that yields those models, we need to find an orchestration function that fulfills this property.
 We denote this as an \emph{optimal} orchestration function.
@@ -436,7 +460,7 @@ Recall that $\generalizationfunction{\metamodeltuple{M},\transformation{t}}$ is 
 % However, it may be useful to have some notion of \emph{optimality} that ensures that if a sequence that delivers a consistent result exists, the orchestration function is supposed to find it.
 % Formally, this notion looks as follows.
 
-\begin{definition}[Optimal Consistency Preservation Orchestration Function]
+\begin{definition}[Optimal Transformation Orchestration Function]
     Let $\transformationset{T}$ be a set of transformations for a set of metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$.
     We say that an orchestration function $\orcfunction{\transformationset{T}}$ for these transformations is \emph{optimal} if it returns a sequence of them that yields a consistent set of models whenever it exists, i.e.,
     \begin{align*}
@@ -465,8 +489,52 @@ Recall that $\generalizationfunction{\metamodeltuple{M},\transformation{t}}$ is 
     \end{align*}
 \end{definition}
 
+\mnote{Optimal orchestration function not restricted to return sequence only when it yields consistent models}
+Note that we do not require an optimal orchestration function not to return a sequence when there is no sequence that yields consistent models.
+This is reasonable, because an application may be defined to return consistent models whenever there is an orchestration that yields consistent models, but to also support the process of identifying why there is none by delivering a sequence of transformations that leads to a failure.
+
+\mnote{Optimality of the application function}
+Finally, the result of the application function is what is relevant in the process of consistency preservation in a transformation network.
+Thus, we apply the notion of \emph{optimality} to that function accordingly by requiring it to deliver consistent models whenever an orchestration that yields them exists.
+
+\begin{definition}[Optimal Transformation Application Function]
+    \label{def:optimalapplicationfunction}
+    Let $\transformationset{T}$ be a set of transformations for a set of metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$.
+    We say that an application function $\appfunction{\orcfunction{\transformationset{T}}}$ for these transformations is \emph{optimal} if it returns models that are consistent whenever there is an orchestration of the transformation that yields a consistent set of models whenever it exists, i.e.,
+    \begin{align*}
+        &
+        \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \forall \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} :
+        \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \Rightarrow \\
+        & \formulaskip
+        \bigl(
+            \exists \transformation{t}_{1}, \dots, \transformation{t}_{m} \in \transformationset{} : 
+            \exists \changetuple{\metamodeltuple{M}}' = \tupled{\change{\metamodel{M}{1}}', \dots, \change{\metamodel{M}{n}}'} \in \changeuniverse{\metamodeltuple{M}} :\\
+            & \formulaskip \formulaskip
+            \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{m}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}')\\
+            & \formulaskip \formulaskip
+            \land \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \dots, \change{\metamodel{M}{n}}'(\model{m}{n})} \consistenttomath \consistencyrelationset{CR} \bigr) \\
+            & \formulaskip
+            \Rightarrow \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m},\changetuple{\metamodeltuple{M}}) \consistenttomath \consistencyrelationset{CR}
+        \bigr)
+    \end{align*}
+\end{definition}
+
+\mnote{Optimal application function requires optimal orchestration function}
+According to the defined behavior of an application function, an optimal applicaion function requires an optimal orchestration function.
+
+\begin{lemma}[Optimal Application Function]
+    \label{lemma:optimalapplicationfunction}
+    An application function $\appfunction{\orcfunction{\transformationset{T}}}$ can only be optimal if $\orcfunction{\transformationset{T}}$ is optimal.
+\end{lemma}
+\begin{proof}
+    Let us assume that the complete condition in \autoref{def:optimalapplicationfunction} is fulfilled, i.e., that the input models are consistent and that there is a sequence of transformations that yields consistent models.
+    Then to be optimal, the application function needs to return models that are consistent.
+    According to the definition of an application function (see \autoref{def:applicationfunction}), the sequence of transformations delivered by $\orcfunction{\transformationset{T}}$ for that input must yield the same model tuple as $\appfunction{\orcfunction{\transformationset{T}}}$.
+    Thus, the orchestration function must deliver a sequence for such inputs that yields consistent models, which is equivalent to $\orcfunction{\transformationset{T}}$ being optimal.
+\end{proof}
+
 \mnote{Different approaches to achieve optimality}
-We can distinguish two approaches to ensure that the orchestration function is optiomal, i.e., that it does always find an execution order that yields consistent models if it exists.
+We can distinguish two approaches to ensure that the orchestration function is optimal, i.e., that it does always find an execution order that yields consistent models if it exists.
 Let $P_{i}$ be the problem space, i.e., all possible transformation execution orders for an input $i$ of models and a change to them and let $S_{i}$ be the solution space with those orders that yield consistent models.
 \begin{properdescription}
     \item[Strategy Definition:] Define a strategy that explores the problem space $P_{i}$ to find one of the sequences in the solution space $S_{i}$, if $S_{i} \neq \emptyset$.
