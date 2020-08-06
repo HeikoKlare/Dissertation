@@ -21,10 +21,10 @@
             \State $\tupled{\model{m}{1}, \dots, \model{m}{n}} \leftarrow \modeltuple{m}$
             \State $\tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \leftarrow \changetuple{\metamodeltuple{M}}$
             \State $\modeltuple{m}_{res} \leftarrow \tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \dots, \change{\metamodel{M}{n}}(\model{m}{n})}$
-            \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\transformationset{t}, \modeltuple{m}_{res}$) \label{algo:orchestration:application:line:consistencycheck}
+            \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\transformationset{t}, \modeltuple{m}_{res}$) \label{algo:orchestration:application:line:startconsistencycheck}
             \If{$\neq \mathvariable{isConsistent}$}
                 \State \Return{$\bot$}
-            \EndIf
+            \EndIf \label{algo:orchestration:application:line:endconsistencycheck}
             % \For{$\transformation{t} \in \transformationset{T}$} \label{algo:orchestration:application:line:startcheckconsistency}
             %     %\State $(\consistencyrelation{CR}{}, \consistencypreservationrule{\consistencyrelation{CR}{}}) \leftarrow \transformation{t}$
             %     \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}_{\metamodeltuple{M}}(\modeltuple{m}_{res}, \transformation{t}$) %\consistencyrelation{CR}{})$
@@ -104,7 +104,7 @@ We show that the algorithm fulfills these properties in the following theorem.
 
     Correctness of an application function according to \autoref{def:applicationfunctioncorrectness} requires the output models, if not returning $\bot$, to be consistent to the consistency relations of all transformations, as long as the input models were consistent.
     The algorithm only returns models in \autoref{algo:orchestration:application:line:returnresult}.
-    These models are always consistent to the consistency relations of all transformations, because Lines~\ref{algo:orchestration:application:line:startcheckconsistency}--\ref{algo:orchestration:application:line:endcheckconsistency} ensure this and otherwise return $\bot$ before.
+    These models are always consistent to the consistency relations of all transformations, because Lines~\ref{algo:orchestration:application:line:startconsistencycheck}--\ref{algo:orchestration:application:line:endconsistencycheck} ensure this and otherwise return $\bot$ before.
 \end{proof}
 
 \mnote{Termination is not guaranteed}
@@ -134,7 +134,7 @@ This will lead to the insight that we cannot guarantee termination of the algori
 \subsection{Upper Execution Bound}
 
 \mnote{No general upper bound for necessary number of executions}
-With the example in \autoref{fig:orchestration:necessity_multiple_executions}, in which values are incremented by one upon each execution of one specific transformation until a fixed but arbitrary value $x$ is reached, we were able to show in \autoref{lemma:minimal_execution} that there can be transformation networks in which a transformation needs to be executed at least $x-1$ times for a fixed but arbitrary $x$ until consistent models are models.
+With the example in \autoref{fig:orchestration:necessity_multiple_executions}, in which values are incremented by one upon each execution of one specific transformation until a fixed but arbitrary value $x$ is reached, we were able to show in \autoref{lemma:minimal_executions} that there can be transformation networks in which a transformation needs to be executed at least $x-1$ times for a fixed but arbitrary $x$ until consistent models are models.
 Thus, any orchestration that yields consistent models contains that transformation at least $x-1$ times.
 While we have used that to show that executing each transformation only once is, in general, not sufficient, we can also easily show the more general statement that we cannot find a maximal length for the orchestration of transformation networks of specific size.
 
