@@ -1,10 +1,10 @@
 \section{Restriction of Transformation Networks}
 
 \mnote{Restrictions either transformation-local or for complete network}
-We have discussed that it is necessary to restrict the transformations as an input of the application function to avoid that it is undecidable whether an orchestration of them exists for given models and changes that yields consistent models.
+We have discussed that it is necessary to restrict the transformations as an input of the application function to avoid that it is undecidable whether a consistent orchestration of them exists for given models and changes.
 Those restrictions can be at two levels:
 \begin{properdescription}
-    \item[Transformation:] Restrictions only concern the single transformation. Thus, if each transformation fulfills a specific property, the application function is able to decide whether an orchestration that yields consistent models exists.
+    \item[Transformation:] Restrictions only concern the single transformation. Thus, if each transformation fulfills a specific property, the application function is able to decide whether a consistent orchestration exists.
     \item[Network:] Restrictions concern the complete network, i.e., the combination of transformations. Only a set of transformations can have an appropriate property that enables the application function to decide the orchestration problem, but not each transformation on its own.
 \end{properdescription}
 
@@ -35,7 +35,7 @@ Unfortunately, we will show that those restrictions are impractical.
 %     \item Hohe Einschränkung: Jede beliebige Reihenfolge von ausgeführten Transformationen führt letztendlich zu einem korrekten Ergebnis (Fixpunktiteration -- Allquantifizierung) -- Hippokratie-Eigenschaft sorgt dafür, dass keine Transformation wieder etwas ändert, wenn Konsistenz bereits hergestellt ist.
 %     Diese Eigenschaft ist in der Praxis möglicherweise zu strikt, da sie sehr starke Anforderungen an die Transformationen stellen müsste. Dafür wäre aber die Anwendungsfunktion trivial.
 %     \item Mittlere Einschränkung: Es gibt eine Reihenfolge von ausgeführten Transformationen für jede Änderung die terminiert (Existenzquantifizierung) und die Ausführungsfunktion findet diese Reihenfolge.
-%     Utopisch, dass die Anwendungsfunktion aus (potentiell sehr mächtigen) Transformationen die richtige Reihenfolge errechnen kann. Dafür aber (möglicherweise) weniger Anforderungen an die Transformationen (zumindest nicht mehr Anforderungen, denn die Allquantifzierung induziert die Existenzquantifizierung). Eine Funktion könnte dann zumindest nach best-effort versuchen, die richtige Reihenfolge zu finden und konservativ abbrechen, wenn sie diese nicht finden kann (also entweder konsistent terminieren oder terminieren mit der Aussage, dass es entweder keine solche Reihenfolge gibt -- bei relaxierten Anforderungen -- oder dass es sie nicht finden kann).  
+%     Utopisch, dass die Anwendungsfunktion aus (potentiell sehr mächtigen) Transformationen die richtige Reihenfolge errechnen kann. Dafür aber (möglicherweise) weniger Anforderungen an die Transformationen (zumindest nicht mehr Anforderungen, denn die Allquantifizierung induziert die Existenzquantifizierung). Eine Funktion könnte dann zumindest nach best-effort versuchen, die richtige Reihenfolge zu finden und konservativ abbrechen, wenn sie diese nicht finden kann (also entweder konsistent terminieren oder terminieren mit der Aussage, dass es entweder keine solche Reihenfolge gibt -- bei relaxierten Anforderungen -- oder dass es sie nicht finden kann).  
 %     \item Geringe Einschränkung: Es gibt potentiell keine Reihenfolge der Transformationen, die bei einer Änderung zu einer konsistenten Lösung kommt. Hier müsste die Ausführungsfunktion entsprechend einen Fehler ausgeben.
 % \end{itemize}
 
@@ -50,7 +50,7 @@ It can, however, be that a1, b1 and c1 are consistent and a4, b4 and c4 are, but
 The relations may still be compatible, because for example (a2, b3, a4), (a3, b2, a5) and so ond could be consistent.
 Since we have no requirements such as a least change requirement, the transformation may, for every input, return one of the last pairs, although this actually does not make any sense.
 Then the transformations do only alternate between those models.
-This seems to be a rather theoretical consideration, because transformations will usually not perform arbitrary irreasonable changes, such as always returning the same models.
+This seems to be a rather theoretical consideration, because transformations will usually not perform arbitrary unreasonable changes, such as always returning the same models.
 However, even if we found that we can define an additional property, such as least change, such that requiring each object to only have one corresponding element in the consistency relations together with that property, then still the latter requirement is impractical, as usually an element can correspond to different others.
 At least in the case when consistency relations gap abstraction levels, this is necessary.
 For example, a UML class needs to be able to correspond to a Java class with any implementation of its bodies. Restricting it to only one is not practical.
@@ -76,14 +76,14 @@ There, only elements that are involved in the violated consistency relations are
     \label{fig:orchestration:confluence}
 \end{figure}
 
-In literature~\cite{stevens2020BidirectionalTransformationLarge-SoSym}, confluence in a transformation network is described as the property that two orchestrations that yield consistent models for the same given models and changes always yield the same models.
+In literature~\cite{stevens2020BidirectionalTransformationLarge-SoSym}, confluence in a transformation network is described as the property that two consistent orchestrations for the same given models and changes always yield the same models.
 Thus, executing transformations in any order such that the result is consistent will deliver the same result.
 It is, however, easy to see that this is an impractical requirement.
 
 In the example depicted in \autoref{fig:orchestration:confluence}, derived from the running example, three consistency relations expect for each person, employee and resident two corresponding others to exist.
 They need to have the same name or, in case of the relations between persons and employees, as well as between residents and employees, the employee may have the same name in lower case.
 The consistency preservation rule between persons and employees ensures that an employee with the same name exists, whereas the one between residents and employees ensures that an employee with the name in lower case exists.
-Whenever a person is added, two execution orders of transformations that all yield consistent models can be distinguished.
+Whenever a person is added, two consistent orchestrations can be distinguished.
 First, the transformation between persons and employees can be executed, either followed or preceded by the one between persons and residents. Then all elements have the same name.
 The models are also consistent to the relation between residents and employees, because the relation allows the names to be equal.
 Second, the transformation between persons and residents can be executed, followed by the one between residents and employees.
@@ -92,7 +92,7 @@ Then the employee has the name in lower case, but still this is consistent to th
 Apart from that artificial example, such a situation can always occur if transformations have different options for elements to be consistent.
 If there is not a single element that is in the overlap of consistent elements between all transformations, the result may be any of the elements in the overlap.
 And the result may depend on which transformation made the first selection that fell into the overlap.
-Finally, \textcite[p. 14]{stevens2020BidirectionalTransformationLarge-SoSym} also states explicitly that a network will only be confluent under very specific cirumcumstances.
+Finally, \textcite[p. 14]{stevens2020BidirectionalTransformationLarge-SoSym} also states explicitly that a network will only be confluent under very specific circumstances.
 
 % Another intuitive notion of confluence would require that information flows together in a compatible way, i.e., the execution of a transformation does not violate consistency to other adjacent transformations.
 % Formally this can be described as: A network is confluent when in every cycle of transformations t1,...tn the execution t1...ti-1 and tn,...,ti for any i leads to the same changes in the network.
