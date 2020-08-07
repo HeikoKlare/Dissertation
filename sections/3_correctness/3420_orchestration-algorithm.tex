@@ -15,7 +15,7 @@
             \State $\mathvariable{generatedChanges} \leftarrow \tupled{}$
             \State $\transformation{t}_{next}$ $\leftarrow$ $\function{Orchestrate}_{\transformationset{T}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}, \mathvariable{executedTransformations}, \mathvariable{generatedChanges})$ \label{algo:orchestration:application:line:startorchestrate}
             \While{$\transformation{t}_{next} \neq \bot$}
-                \State $(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ $\leftarrow$ $\function{Gen}_{\metamodeltuple{M}, \transformation{t}_{next}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ \label{algo:orchestration:application:line:stepcalculation}
+                \State $(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ $\leftarrow$ $\generalizationfunction{\metamodeltuple{M}, \transformation{t}_{next}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ \label{algo:orchestration:application:line:stepcalculation}
                 \State $\mathvariable{executedTransformation}.add(\transformation{t}_{next})$
                 \State $\mathvariable{generatedChanges}.add(\changetuple{\metamodeltuple{M}})$
                 \State $\transformation{t}_{next}$ $\leftarrow$ $\function{Orchestrate}_{\transformationset{T}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}, \mathvariable{executedTransformations}, \mathvariable{generatedChanges})$
@@ -70,8 +70,8 @@ We will later discuss specific strategies.
 Until then, the concrete strategy is not important and any of the exemplified ones can be imagined.
 
 \mnote{Assumed further functions of algorithm}
-Next to \function{Orchestrate}, the algorithm uses the external functions \function{Gen} and \function{CheckConsistency}.
-The \function{Gen} function is the generalization function, which simply applies the given transformation to the appropriate models of the given tuple.
+Next to \function{Orchestrate}, the algorithm uses the external functions $\generalizationfunction{}$ and \function{CheckConsistency}.
+The $\generalizationfunction{}$ function is the generalization function, which simply applies the given transformation to the appropriate models of the given tuple.
 The \function{CheckConsistency} checks whether the given models are consistent to the set of transformations, according to \autoref{def:consistencytransformation}.
 Due to their simplicity, we do not provide an explicit implementation of these two functions.
 
@@ -122,18 +122,18 @@ The \function{Orchestrate} function receives the list of previously executed tra
 We do, however, need to ensure that the \function{Orchestrate} function returns $\bot$ after a finite number of calls.
 
 \mnote{Options to guarantee termination}
-If we assume that we can achieve optimality for the orchestration function, we would have the guarantee that if an orchestration that yields consistent models exists the function will find it.
+If we assume that we can achieve optimality for the orchestration function, we would have the guarantee that if a consistent orchestration exists, the function will find it.
 There is, however, no restriction to what the orchestration function may return when there is no orchestration that yields consistent models at all.
 Thus, we have two options to ensure termination:
 \begin{enumerate}
-    \item We enable the orchestration function to identify whether an orchestration that yields consistent models exists.
+    \item We enable the orchestration function to identify whether a consistent orchestration exists.
     \item We find an upper bound for the number of necessary transformation executions, such that if more transformations were executed, we cannot expect the algorithm to find consistent models anymore and thus abort. 
 \end{enumerate}
 
 \mnote{Termination and optimality are conflicting}
 The simplest solution would be to find an upper bound for the number of necessary transformation executions.
 We will, however, prove in the following that there is no such upper bound.
-Afterwards, we will show that identifying whether an orchestration that yields consistent models exists is not possible either.
+Afterwards, we will show that identifying whether a consistent orchestration exists is not possible either.
 This will lead to the insight that we cannot guarantee termination of the algorithm with an optimal orchestration function.
 
 
@@ -141,7 +141,7 @@ This will lead to the insight that we cannot guarantee termination of the algori
 
 \mnote{No general upper bound for necessary number of executions}
 With the example in \autoref{fig:orchestration:necessity_multiple_executions}, in which values are incremented by one upon each execution of one specific transformation until a fixed but arbitrary value $x$ is reached, we were able to show in \autoref{lemma:minimal_executions} that there can be transformation networks in which a transformation needs to be executed at least $x-1$ times for a fixed but arbitrary $x$ until consistent models are models.
-Thus, any orchestration that yields consistent models contains that transformation at least $x-1$ times.
+Thus, any consistent orchestration contains that transformation at least $x-1$ times.
 While we have used that to show that executing each transformation only once is, in general, not sufficient, we can also easily show the more general statement that we cannot find a maximal length for the orchestration of transformation networks of specific size.
 
 \begin{theorem}[Orchestration with Fixed Number of Executions]
@@ -152,13 +152,13 @@ While we have used that to show that executing each transformation only once is,
     We know from \autoref{lemma:minimal_executions} that $\transformationset{T}_{inc}$ requires at least $x-1$ executions of $\transformation{T}_{12}$ for the inputs defined in \autoref{lemma:minimal_executions} and the fixed but arbitrary value $x$.
     Thus, with $x \geq n+2$ for $\transformationset{T}_{inc}$, we know that at least $x-1 = n+1$ executions of $\transformation{T}_{12}$ are necessary.
     Let $\modeltuple{m}$ and $\changetuple{}$ be the inputs defined in \autoref{lemma:minimal_executions}.
-    Then for any orchestration function $\orcfunction{\transformationset{T}}$ that yields consistent models for these inputs, we know that $\abs{\orcfunction{\transformationset{T}}(\modeltuple{m}, \changetuple{})} >= x-1 = n+1 > n$.
+    Then for any orchestration function $\orcfunction{\transformationset{T}}$ that delivers a consistent orchestration for these inputs, we know that $\abs{\orcfunction{\transformationset{T}}(\modeltuple{m}, \changetuple{})} >= x-1 = n+1 > n$.
     This proves the theorem by example.
 \end{proof}
 
-\mnote{Upper bound cannot be used to decide whether orchestration that yields consistent models exists}
+\mnote{Upper bound cannot be used to decide whether consistent orchestration exists}
 In consequence, it is not possible to find a fixed value or a value only depending on the transformation network size that defines an upper bound for the necessary number of transformation executions to yield consistent models.
-Thus, even if we are able to ensure optimality of orchestration with the \function{Apply} and \function{Orchestrate} functions, there is no upper bound for the number of transformation execution that is necessary for an orchestration that yields consistent models.
+Thus, even if we are able to ensure optimality of orchestration with the \function{Apply} and \function{Orchestrate} functions, there is no upper bound for the number of transformation execution that is necessary for a consistent orchestration.
 We cannot abort the execution after a fixed number of loop iterations without the possibility that consistent models would have been found if the execution had proceeded and thus not ensuring optimality.
 
 %To avoid non-termination of the algorithm, we thus need to be able to ensure that the \function{Orchestrate} function at some point returns $\bot$.
@@ -192,8 +192,8 @@ We cannot abort the execution after a fixed number of loop iterations without th
 
 \subsection{Undecidability of Orchestration Existence} %Undecidability of Orchestration}
 
-\mnote{Impossible to decide whether orchestration that yields consistent models exists}
-To ensure termination of the \function{Apply} algorithm with an optimal orchestration function, we need to identify the case that no orchestration that yields consistent models exists, because that is the only situation in which otherwise an infinite number of transformation execution is possible.
+\mnote{Impossible to decide whether consistent orchestration exists}
+To ensure termination of the \function{Apply} algorithm with an optimal orchestration function, we need to identify the case that no consistent orchestration exists, because that is the only situation in which otherwise an infinite number of transformation execution is possible.
 Unfortunately, we will show that the problem to decide whether such an orchestration exists or not is undecidable.
 
 %--> Undecidability
@@ -211,7 +211,7 @@ Unfortunately, we will show that the problem to decide whether such an orchestra
     Let $\appfunction{\orcfunction{}}$ be an application function. $\appfunction{\orcfunction{}}$ cannot be optimal.
 \end{theorem}
 \begin{proof}
-    An optimal $\appfunction{\orcfunction{}}$ returns consistent models whenever there is an orchestration that yields consistent models.
+    An optimal $\appfunction{\orcfunction{}}$ returns consistent models whenever there is a consistent orchestration.
     With such a function, we are able to decide whether such an orchestration exists or not.
     \begin{align*}
         \function{ExistsOrc}(\transformationset{T},\modeltuple{m},\changetuple{\metamodeltuple{M}}) =
@@ -220,7 +220,7 @@ Unfortunately, we will show that the problem to decide whether such an orchestra
                 \textsc{false}, & otherwise
             \end{cases}
     \end{align*}
-    $\function{ExistsOrc}$ returns \textsc{true} if, any only if, an orchestration that yields consistent models exists.
+    $\function{ExistsOrc}$ returns \textsc{true} if, any only if, a consistent orchestration exists.
     $\appfunction{\orcfunction{}}$ does, per definition, only return consistent models when there is an orchestration that yields them.
     Additionally, it does always return consistent models when an orchestration that yields them exists, because it is optimal.
     It follows from \autoref{lemma:networkfromturingmachine} that we can simulate a universal Turing machine with a transformation network in the sense that we can construct a transformation network whose application function delivers consistent models for a given input if, and only if, the Turing machine halts for corresponding inputs.
@@ -270,7 +270,7 @@ In particular, the algorithm will never return models that are inconsistent, nei
 From our previous findings regarding decidability, we know that we cannot expect the algorithm to realize an optimal application function.
 Thus, we either need to implement \function{Orchestrate} such that it always returns $\bot$ after a finite number of executions to ensure termination, which results in returning $\bot$ although consistent models are expected, or we allow an arbitrary number of executions to improve the ability to find consistent results but accept that the algorithm may not terminate.
 
-We have discussed that non-termination of the algorithm can occur because no orchestration that yields consistent models exists at all or because the algorithm is not able to find it.
+We have discussed that non-termination of the algorithm can occur because no consistent orchestration exists at all or because the algorithm is not able to find it.
 A special case of non-termination is \emph{alternation}, which means that the same states are passed repeatedly. 
 In case of transformation networks, alternation means from some point in time the subsequent executions of the transformations in Line~\ref{algo:orchestration:application:line:stepcalculation} of \autoref{algo:orchestration:application} repeatedly produce the same sequence of results, i.e., of changes.
 % Non-termination can, in general, manifest in terms of \emph{alternation} or \emph{divergence}, which means that either the same states are passed repeatedly or that an infinite sequence of different states is produced.
