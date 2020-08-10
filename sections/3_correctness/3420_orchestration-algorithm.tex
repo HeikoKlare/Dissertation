@@ -270,8 +270,9 @@ Afterwards, we discuss how we can realize \function{Apply} in a way that it alwa
 
 
 \subsection{Alternation} % Divergence and alternation
+\label{chap:orchestration:algorithm:alternation}
 
-The proposed algorithm, like any algorithm, is supposed to \emph{terminate} in specific \emph{state} to be considered correct.
+The proposed algorithm, like any algorithm, is supposed to \emph{terminate} in a specific \emph{state} to be considered correct.
 In our case, a correct state, as required by an application function it implements, is the return of consistent models or $\bot$, which the algorithm fulfills by construction.
 In particular, the algorithm will never return models that are inconsistent, neither because it does not detect that they are inconsistent nor that it detects that they are inconsistent but still returns them.
 From our previous findings regarding decidability, we know that we cannot expect the algorithm to realize an optimal application function.
@@ -279,7 +280,7 @@ Thus, we either need to implement \function{Orchestrate} such that it always ret
 
 We have discussed that non-termination of the algorithm can occur because no consistent orchestration exists at all or because the algorithm is not able to find it.
 A special case of non-termination is \emph{alternation}, which means that the same states are passed repeatedly. 
-In case of transformation networks, alternation means from some point in time the subsequent executions of the transformations in Line~\ref{algo:orchestration:application:line:stepcalculation} of \autoref{algo:orchestration:application} repeatedly produce the same sequence of results, i.e., of changes.
+In case of transformation networks, alternation means that from some point in time the subsequent executions of the transformations in Line~\ref{algo:orchestration:application:line:stepcalculation} of \autoref{algo:orchestration:application} repeatedly produce the same sequence of results, i.e., of changes.
 % Non-termination can, in general, manifest in terms of \emph{alternation} or \emph{divergence}, which means that either the same states are passed repeatedly or that an infinite sequence of different states is produced.
 % In case of transformation networks, alternation means from some point in time the subsequent executions of the transformations in Line~\ref{algo:orchestration:application:line:stepcalculation} of \autoref{algo:orchestration:application} repeatedly produce the same sequence of results, i.e., of changes.
 % Divergence means that from some point in time all results, i.e., changes, produced in Line~\ref{algo:orchestration:application:line:stepcalculation} differ.
@@ -287,9 +288,17 @@ In contrast to non-termination in general, the scenario of alternation can at le
 % To this end, the history of change produced by the algorithm in Line~\ref{algo:orchestration:application:line:stepcalculation} has to be stored.
 % It can either be used by the \function{Apply} function to detect alternation or by passing it to the \function{Orchestrate} function to influence the selection of transformations to avoid alternation.
 
+\begin{definition}[Alternation of Apply Algorithmus]
+    \label{def:applyalternation}
+    Let there be a number $n$ of execution of the transformation execution loop in Lines~\autoref{algo:orchestration:application:line:startorchestrate}--\autoref{algo:orchestration:application:line:endorchestrate} of \autoref{algo:orchestration:application}, such that for all numbers of execution $> n$ there is a sequence of executed transformations and generated changes that occur at least two times subsequently at the end of the current states of $\mathvariable{executedTransformations}$ and $\mathvariable{generatedChanges}$.
+\end{definition}
+
 The \function{Orchestrate} function receives the history of transformations and changes and is thus able to identify the situation that the same sequence of transformations was already executed and produced equal changes in each application.
-This allows it to implement the function in a way that it does not return the same sequence of transformation when it was already passed and produced the same changes.
+This allows it to implement the function in a way that it does not return the same sequence of transformations when it was already passed and produced the same changes.
 If a concrete realization of the \function{Orchestrate} function is not implemented in a way that it can react to the detection of alternation and produce a different sequence of transformations, it can at least return $\bot$ to ensure termination of \function{Apply}, because repeated execution of the same transformations will still returns the same changes. 
+
+Alternation produces orchestrations that can never yield consistent models, thus they are part of the problem space $P_{i}$ of finding an orchestration for a given input $i$ of models and changes but can never be part of the solution space $S_{i}$ containing the consistent orchestrations.
+Avoid such alternations thus improves the possibility to find a consistent orchestration, because the number of consistent orchestrations to the number of orchestrations that can potentially be applied is improved.
 
 \todo{Maybe add reference to conservative orchestration section for the dynamic detection of alternation, if appropriate.}
 

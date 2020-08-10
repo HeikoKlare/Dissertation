@@ -194,54 +194,181 @@ Finally, \textcite[p. 14]{stevens2020BidirectionalTransformationLarge-SoSym} als
 
 \subsection{Monotony}
 
-\begin{itemize}
-    \item Muss eine Transformation mit jedem beliebigen Delta umgehen können müssen? Eine Einschränkung auf Monotonie würde dies verhindern. Bzw. wir müssten zeigen, dass es Konsistenzrelationen gibt, die unter der Anforderung an Monotonie nicht wiederhergestellt werden können. Bspw. fügt eine andere Transformation 3 Elemente hinzu, wo zwei mit dem anderen entsprechend der Konsistenzrelationen korrelieren und somit keine Witness-Struktur aufgebaut werden kann, die Konsistenz beweist. Das lässt sich durch Hinzufügen weiterer Elemente potentiell nicht auflösen (siehe Beispiele im SoSym-Paper).
-    \item Refer to synchronization chapter, where we introduced a monotony notion based on transformations being partial-consistency-improving. Here, in contrast, the CPRs cannot be aligned, such that we cannot, for example, expect one transformation not to lead to a reduction of consistency regarding consistency relations of other, previously executed transformations.
-\end{itemize}
-\begin{itemize}
-    \item Im Allgemeinen könnte eine Transformation beliebige dieser Deltasequenzen modifizieren. Wir verlangen jedoch, dass eine Transformation nur Deltas anhängt, also die Sequenzen länger werden
-    \item Genauer beschränken wir auch, welche Sequenzen eine Transformation sehen und ändern darf, genau gesagt darf sie die Sequenzen von zwei Modellen sehen und eine davon verlängern.
-    \item Hier kommt bereits der Unterschied zu bisherigen Transformationen, denn die sehen nur Deltas an einem Modell und erzeugen Deltas an dem anderen. Das ist bei uns schon gänzlich anders. Bidirektionale Transformationen unterstützen das im Übrigen auch nicht, sondern sind nur Spezifikationen, aus denen sich Wiederherstellungsroutinen für beide Richtungen ableiten lassen (siehe Stevens 2010)
-\end{itemize}
+We have discussed in \autoref{chap:orchestration:algorithm:alternation} that alternation, as a specific kind of non-termination scenario, can be avoided by construction of the orchestration function or at least can be detected by the \function{Apply} algorithm.
+Instead of detecting alternation during orchestration, we may also restrict the transformation network such that no alternation can occur by construction.
+We can achieve this by defining a notion of monotony for the transformations.
 
-\paragraph{Idea:} Require monotony to avoid alternation
+For the construction of synchronizing bidirectional transformations by unidirectional consistency preservation rules in \autoref{chap:synchronization:bidirectional:transformations}, we have have defined the property of \emph{partial consistency improvement}, which is a monotony notion for the two unidirectional consistency preservation rules of a synchronizing bidirectional transformation, as each execution of them improved that property.
+We can, however, not define monotony in a similar way for the whole transformation network because of two reasons.
+First, the notion of partial consistency is not applicable for transformation networks, because each transformation needs to restore consistency between two models completely.
+Second, since each transformation is developed independently from all others, we cannot apply the notion of partial consistent improvement to the other models by restricting how far a transformation may violate consistency to the other transformations.
 
-We would have to relax the definition of transformation to be monotone, because if a transformation is monotone, it may only append information, but this is not always possible, as can be seen in the following example. A monotone transformation must be able to return bottom if it cannot make further changes to restore consistency to the relation.
-
-\begin{definition}[Monotone Transformation]
-    Transformation gets models M and deltas D and produces new deltas D'. Taking the union of the original models M and the new models D'(M), then D(M) must be a subset of that, because other elements would have been added and removed afterwards or elements would have been changes once by D and again in a different way by D'.
-
-    Generally, monotony could also mean that only the same complete model state is not passed twice. \todo{Why dont we do that?}
+We thus define a different notion of monotony for transformations as follows.
+\begin{definition}[Monotone Synchronizing Transformation]
+    \label{def:monotonetransformation}
+    Let $\metamodeltuple{M} = \metamodelsequence{M}{n}$ be metamodels and let $\transformation{t}$ be a synchronizing transformation. We call $\transformation{t}$ monotone if it does not change elements that were already changed, i.e.
+    \begin{align*}
+        &
+        \forall \modeltuple{m} = \tupled{\model{m}{1}, \dots, \model{m}{n}} \in \metamodeltuple{M}, \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} : \\
+        &
+        \bigl(\exists \changetuple{\metamodeltuple{M}}' = \tupled{\change{\metamodel{M}{1}}', \dots, \change{\metamodel{M}{n}}'} \in \changeuniverse{\metamodeltuple{M}} : \generalizationfunction{\metamodeltuple{M},\transformation{t}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \changetuple{\metamodeltuple{M}}' \\
+        & \formulaskip
+        \Rightarrow
+        % WE CANNOT ASSUME TRANSFORAMTION TO BE STRONG MONTONE, BECAUSE IF TRANSFORMATION IS EXECTED FOR ALREADY CONSISTENT MODELS, IT CANNOT CHANGE ANYTHING
+        % (\changetuple{\metamodeltuple{M}}'(\changetuple{\metamodeltuple{M}}(\modeltuple{m})) = \changetuple{\metamodeltuple{M}}(\modeltuple{m}) \Rightarrow \modeltuple{m} \consistenttomath \transformationset{T}) \\
+        % & \formulaskip
+        % \land 
+        \forall i \in \setted{1, \dots, n} : 
+        (\change{\metamodel{M}{i}}(\model{m}{i}) \setminus \model{m}{i} \subseteq \change{\metamodel{M}{i}}'(\change{\metamodel{M}{i}}(\model{m}{i})) \\
+        & \formulaskip\formulaskip
+        \land
+        (\model{m}{i} \setminus \change{\metamodel{M}{i}}(\model{m}{i})) \cap \change{\metamodel{M}{i}}'(\change{\metamodel{M}{i}}(\model{m}{i})) = \emptyset)
+        \bigr)
+        %\change{\metamodeltuple{M}}(\modeltuple{m}) \subseteq \modeltuple{m} \cup \changetuple{\metamodeltuple{M}}'(\changetuple{\metamodeltuple{M}}(\model{m}{}))
+        %\land
+        %\modeltuple{m} \cup \changetuple{\metamodeltuple{M}}'(\changetuple{\metamodeltuple{M}}(\model{m}{})) \subseteq \changetuple{\metamodeltuple{M}}(\model{m}{})\big)
+    \end{align*}
 \end{definition}
 
-This would mean that each transformation only appends changes, i.e., if an element was added/removed, the transformation may not do the inverse. The same applies to attribute/reference changes: if an attribute/reference was already changes it may not be changed again.
-This way, it is by design impossible to pass through the same state again. Actually, if a monotone transformation returns bottom, the network has to terminate with a failure.
-However, this is hard restriction to transformations. It leads to the fact that in some networks that actually have a simple solution no solution is found at all. This can be easily seen at the example in \autoref{fig:formal:monotonycounterexample}. In the example adding "aa" to the left model, any execution order of the transformations leads to the situation that a previous change must be revoked to result in a consistent state. However, it is possible to derive a consistent state for that input change.
+The definition is based on the idea that transformations are only supposed to append changes but not to revert previous changes.
+This means that elements that were introduced by previous changes still need to be present after applying the transformation.
+Additionally, elements that were removed are not allowed to be added by the transformation again.
+Thus all elements of the originally changed models were either contained in the original models or are contained in the models yielded by the transformation application, which leads to the model relations in the definition.
+Additionally, 
 
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{figures/correctness/orchestration/monotony_counterexample.png}
-    \caption{Counterexample for monotony}
-    \label{fig:formal:monotonycounterexample}
-\end{figure}
+% \begin{definition}[Strongly Montone Synchronizing Transformation]
+%     Let $\metamodeltuple{M}$ be metamodels and let $\transformation{t}$ be a monotone synchronizing transformation. We call $\transformation{t}$ strongly monotone if it does not perform any changes only when all models are already consistent does not change elements that were already changed, i.e.
+% \end{definition}
 
-One could now argue that there are binary relations in the example, which may never be fulfilled at all. We will later discuss how far relations that cannot be fulfilled should be restricted. However, in general, this is wanted behavior, because in general it may be necessary that transformations produce intermediate states that are not yet consistent with each other. Otherwise this would means that each transformation is always able to directly deliver a state that is consistent to all other relations, which is especially not possible, because other transformations may add further information to the models. More precisely, a relation may consider <a model consistent to all other models that contain any additional information not affected by the transformation. For example, a UML class model may be considered consistent to all Java models with any implementation of the specified methods, thus to an infinite number of models. Now saying that it should not be allowed that the transformation selects one with an empty implementation because that is not consistent to another relations induced by another transformation, such as the relationship to a component model, does not make any sense. Thus having those relation elements that may be considered locally consistent but will never occur in a globally consistent tuple of models does not make sense.
-In the example, we can see that such an inconsistent intermediate state is passed through and afterwards a consistent tuple of models is reached if not requiring monotony.
-In consequence, requiring monotony from transformations is a too strict requirement, because it is necessary to run through states that may be changed later on.
+Having only monotone transformations ensures that each orchestration, which does not apply a transformation to already consistent models, yields a sequence of pairwise different model states, if the transformations are sequentially applied.
+
+\begin{lemma}
+    \label{lemma:monotonetransformationsnosamestates}
+    Let $\transformationset{T}$ be a set of correct monotone synchronizing transformations for a tuple of metamodels $\metamodeltuple{M}$.
+    Then for all models and changes, as well as any orchestration $\tupled{\transformation{t}_{1}, \dots, \transformation{t}_{m}}  \; (\transformation{i} \in \transformationset{T})$ that does contain a transformation when its models are already consistent, then prefixes of that orchestration only yield the same models if those prefixes are consistent orchestrations, i.e.
+    \begin{align*}
+        &
+        \forall \modeltuple{m} \in \metamodeltupleinstanceset{M}, \changetuple{\metamodeltuple{M}} \in \changetuple{\metamodeltuple{M}} : \forall i, k \in \setted{1, \dots, m} : \\
+        &
+        \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{i}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \\
+        & \formulaskip 
+        \Rightarrow
+        \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concat \dots \concat \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \consistenttomath \transformationset{T}
+        \end{align*}
+\end{lemma}
+\begin{proof}
+    Assume that there are two prefixes $\tupled{\transformation{t}_{1}, \dots, \transformation{t}_{i}}$ and $\tupled{\transformation{t}_{1}, \dots, \transformation{t}_{k}}$ of an orchestration, $i < k$ without loss of generality, such that they yield the same inconsistent models, i.e., $\generalizationfunction{\metamodeltuple{M}, \transformation{t}_{i}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ although $\generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ is not consistent to $\transformationset{T}$.
+    We denote the change tuple delivered by any prefixes of length $l$ as $\changetuple{\metamodeltuple{M},l} = \tupled{\change{\metamodel{M}{1},l}, \dots, \change{\metamodel{M}{n}, l}}$ with $\tupled{\modeltuple{m}, \changetuple{\metamodeltuple{M},l}} = \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{l}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$.
+    We know that the sequence of changes between the two prefixes does not perform any changes and thus acts like the identity function, i.e., $\generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{i+1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M},i}) = \identitychange(\modeltuple{m}, \changetuple{\metamodeltuple{M},i})$
+    and thus $\changetuple{\metamodeltuple{M},i}(\modeltuple{m}) = \changetuple{\metamodeltuple{M},k}(\modeltuple{m})$.
+    We also know that all the transformations between the prefixes, i.e., all transformations $\transformation{t}_{l}$ for each $l$ with $i < l \leq k$, do not act like the identity function for their inputs, i.e., $\generalizationfunction{\metamodeltuple{M}, \transformation{t}_{l}}(\modeltuple{m}, \changetuple{\metamodeltuple{M},l-1}) \neq \identitychange(\modeltuple{m}, \changetuple{\metamodeltuple{M},l-1})$.
+    Otherwise, the models affected by the transformation would either have been consistent before, which conflicts with the assumption that the orchestration does not contain a transformation when its models are already consistent, or they would not be consistent afterwards, which conflicts with the assumed correctness of the transformations.
+
+    Thus, each transformation $\transformation{t}_{l} \; (i < l \leq k)$ performs modifications to the change tuple, i.e., adds or removed further elements.
+    This especially applies to $\transformation{t}_{i+1}$.
+    Let us assume that $\transformation{t}_{i+1}$ adds an element (analogous argumentation for the removal).
+    %modifies the change tuple such that it adds or removes further elements.
+    Then there is a model that contains the element after applying the change generated by the transformation, i.e., $\exists s \in \setted{1, \dots, n} : \exists \modelelement{e} : \modelelement{e} \in \change{\metamodel{M}{s},i+1}(\model{m}{s}) \setminus \change{\metamodel{M}{s},i}(\model{m}{s})$.
+    Due to the transformations being monotone, we know that this element was not contained before, especially not in $\model{m}{s}$, as otherwise $\modelelement{e} \in \model{m}{s} \setminus \change{\metamodel{M}{s},i}(\model{m}{s})$ and thus $\model{m}{s} \setminus \change{\metamodel{M}{s},i}(\model{m}{s}) \cap \change{\metamodel{M}{s},i+1}(\model{m}{s}) \neq \emptyset$, which conflicts the definition of monotone transformations for $\transformation{t}_{i+1}$.
+
+    Since $\change{\metamodel{M}{s},k}(\model{m}{s}) = \change{\metamodel{M}{s},i}(\model{m}{s})$, we know that $\modelelement{e} \not\in \change{\metamodel{M}{s},k}(\model{m}{s})$.
+    Thus, there must be a transformation $\transformation{t}_{l}$ with $i+1 < l \leq k$ which, in turn, removes this element, i.e., $\modelelement{e} \in \change{\metamodel{M}{s},l-1}(\model{m}{s}) \setminus \change{\metamodel{M}{s},l}(\model{m}{s})$.
+    Then $\modelelement{e} \in \change{\metamodel{M}{s},l-1}(\model{m}{s}) \setminus \model{m}{s}$ and thus $\change{\metamodel{M}{s},l-1}(\model{m}{s}) \setminus \model{m}{s} \not\subseteq \change{\metamodel{M}{s},l}(\model{m}{s})$, which conflicts the definition of monotone transformations for $\transformation{t}_{l}$.
+
+    In consequence, each transformation $\transformation{t}_{l} \; (i < l \leq k)$ can neither add nor remove an element, thus our assumption that two prefixes that yield the same inconsistent models does not hold, which proves the lemma.
+\end{proof}
+
+With that insight, it is easy to see that given only monotone transformation, no alternation can occur in our algorithm \autoref{algo:orchestration:application}.
 
 \begin{theorem}
-    An application function for monotone transformations either returns a consistent model or produce a sequence of CPRs returning delta that return models of always growing size (i.e. it diverges).
+    Given a set of correct, monotone synchronizing transformations $\transformationset{T}$.
+    Then \autoref{algo:orchestration:application} cannot contain an alternation according to \autoref{def:applyalternation}, as long as $\function{Orchestrate}$ does not return a transformation whose models are already consistent.
 \end{theorem}
+\begin{proof}
+    According to \autoref{lemma:monotonetransformationsnosamestates}, monotone transformations ensure that in an orchestration that does not contains transformations that need to be applied to already consistent models the application of two prefixes never yields the same changes.
+    In consequence, the sequence of $\mathvariable{generatedChanges}$ in the transformation application in 
+    Lines~\autoref{algo:orchestration:application:line:startorchestrate}--\autoref{algo:orchestration:application:line:endorchestrate} of \autoref{algo:orchestration:application} can never contain the same two changes.
+    This would, however, be necessary to fulfill \autoref{def:applyalternation} for alternation.
+\end{proof}
 
-\paragraph{Divergence cannot be avoided}
+In fact, the guarantee of not producing the same state twice is even stronger than non-alternation, because alternation allows to pass the same state multiple times, as long as the same sequence of states is not passed repeatedly and infinitely.
+It does, however, only make sense to pass the same state twice if the orchestration algorithm that selects the next transformation to execute is able to process that situation by trying different execution orders if an alternation occurs.
+Thus, the less strict requirement for alternation is suited to make statements about the orchestration strategy but not about the individual transformations, as it is unlikely to find a property for a single transformation that gives a guarantee that depends on the execution order of transformations, like alternation does.
 
-There are rather equal network, one that terminates after a long time and one that never terminates. 
-Consider the example. The relations are defined in a way such that for any allocation for any of them a consistent tuple of models can be found. However, the transformations are not able to find it because they make "bad" choices from a set of choices that are conflicting. 
-This can be seen in the example that we have already given in \autoref{fig:correctness:no_execution_order}.
+While monotone transformation give the guarantee of non-alternation, monotony according to \autoref{def:monotonetransformation} is not a property that we cannot assume to be fulfilled by all transformations.
+Although is seems intuitive that a transformation should not remove elements that were added before and vice versa, this does also mean that, for example, an attribute value may only be changed once by the transformations.
+This would, however, require the transformations to always make a choice for attributes that fits for all other transformations as well.
+We have seen in different examples, such as the one depicted in \autoref{fig:orchestration:no_upper_bound} and \autoref{fig:orchestration:no_orchestration}, that it may be necessary to change elements multiple times, because the transformations select values with which the models only fulfill their own consistency relation but not those of the other transformations.
+It may take several executions to find a value selection with which the models are consistent to all transformations.
+We might say that the transformations need to \emph{negotiate} a consistent solution.
 
-Thus, systematically avoiding divergence is not possible. 
+Still, the given examples were rather artificial, so they cannot be seen as an indicator for monotony to be not practically achievable.
+It may, at least in some cases, be possible to specify transformations that are monotone.
+Even if only some of the transformations are monotone, or if only specific rules of them are monotone, it improves the chance that an orchestration strategy finds a consistent orchestration.
+Having the knowledge about the benefits of monotony gives a transformation developer the ability to implement it as often as possible.
 
-\textbf{Central insight:} Alternation / Divergence cannot be avoided systematically (like in ordinary programming), if not restricting transformations in a way that may not be reasonable.
+Finally, the possibility to avoid alternation by construction can be combined with the ability of an orchestration strategy to react to alternation.
+We have discussed in \autoref{chap:orchestration:algorithm:alternation} that an orchestration strategy can detect alternation and adapt its strategy of selecting the next transformation in that case.
+In addition, if monotony is given at least for some transformations, the orchestration strategy needs to try less execution orders and thus improves the chance of finding a consistent orchestration.
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=\textwidth]{figures/correctness/orchestration/monotony_counterexample.png}
+%     \caption{Counterexample for monotony}
+%     \label{fig:formal:monotonycounterexample}
+% \end{figure}
+
+
+%\todo{Go on here}
+
+% \begin{itemize}
+%     \item Muss eine Transformation mit jedem beliebigen Delta umgehen können müssen? Eine Einschränkung auf Monotonie würde dies verhindern. Bzw. wir müssten zeigen, dass es Konsistenzrelationen gibt, die unter der Anforderung an Monotonie nicht wiederhergestellt werden können. Bspw. fügt eine andere Transformation 3 Elemente hinzu, wo zwei mit dem anderen entsprechend der Konsistenzrelationen korrelieren und somit keine Witness-Struktur aufgebaut werden kann, die Konsistenz beweist. Das lässt sich durch Hinzufügen weiterer Elemente potentiell nicht auflösen (siehe Beispiele im SoSym-Paper).
+%     \item Refer to synchronization chapter, where we introduced a monotony notion based on transformations being partial-consistency-improving. Here, in contrast, the CPRs cannot be aligned, such that we cannot, for example, expect one transformation not to lead to a reduction of consistency regarding consistency relations of other, previously executed transformations.
+% \end{itemize}
+% \begin{itemize}
+%     \item Im Allgemeinen könnte eine Transformation beliebige dieser Deltasequenzen modifizieren. Wir verlangen jedoch, dass eine Transformation nur Deltas anhängt, also die Sequenzen länger werden
+%     \item Genauer beschränken wir auch, welche Sequenzen eine Transformation sehen und ändern darf, genau gesagt darf sie die Sequenzen von zwei Modellen sehen und eine davon verlängern.
+%     \item Hier kommt bereits der Unterschied zu bisherigen Transformationen, denn die sehen nur Deltas an einem Modell und erzeugen Deltas an dem anderen. Das ist bei uns schon gänzlich anders. Bidirektionale Transformationen unterstützen das im Übrigen auch nicht, sondern sind nur Spezifikationen, aus denen sich Wiederherstellungsroutinen für beide Richtungen ableiten lassen (siehe Stevens 2010)
+% \end{itemize}
+
+% \paragraph{Idea:} Require monotony to avoid alternation
+
+% We would have to relax the definition of transformation to be monotone, because if a transformation is monotone, it may only append information, but this is not always possible, as can be seen in the following example. A monotone transformation must be able to return bottom if it cannot make further changes to restore consistency to the relation.
+
+% \begin{definition}[Monotone Transformation]
+%     Transformation gets models M and deltas D and produces new deltas D'. Taking the union of the original models M and the new models D'(M), then D(M) must be a subset of that, because other elements would have been added and removed afterwards or elements would have been changes once by D and again in a different way by D'.
+
+%     Generally, monotony could also mean that only the same complete model state is not passed twice. \todo{Why dont we do that?}
+% \end{definition}
+
+% This would mean that each transformation only appends changes, i.e., if an element was added/removed, the transformation may not do the inverse. The same applies to attribute/reference changes: if an attribute/reference was already changes it may not be changed again.
+% This way, it is by design impossible to pass through the same state again. Actually, if a monotone transformation returns bottom, the network has to terminate with a failure.
+% However, this is hard restriction to transformations. It leads to the fact that in some networks that actually have a simple solution no solution is found at all. This can be easily seen at the example in \autoref{fig:formal:monotonycounterexample}. In the example adding "aa" to the left model, any execution order of the transformations leads to the situation that a previous change must be revoked to result in a consistent state. However, it is possible to derive a consistent state for that input change.
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=\textwidth]{figures/correctness/orchestration/monotony_counterexample.png}
+%     \caption{Counterexample for monotony}
+%     \label{fig:formal:monotonycounterexample}
+% \end{figure}
+
+% One could now argue that there are binary relations in the example, which may never be fulfilled at all. We will later discuss how far relations that cannot be fulfilled should be restricted. However, in general, this is wanted behavior, because in general it may be necessary that transformations produce intermediate states that are not yet consistent with each other. Otherwise this would means that each transformation is always able to directly deliver a state that is consistent to all other relations, which is especially not possible, because other transformations may add further information to the models. More precisely, a relation may consider <a model consistent to all other models that contain any additional information not affected by the transformation. For example, a UML class model may be considered consistent to all Java models with any implementation of the specified methods, thus to an infinite number of models. Now saying that it should not be allowed that the transformation selects one with an empty implementation because that is not consistent to another relations induced by another transformation, such as the relationship to a component model, does not make any sense. Thus having those relation elements that may be considered locally consistent but will never occur in a globally consistent tuple of models does not make sense.
+% In the example, we can see that such an inconsistent intermediate state is passed through and afterwards a consistent tuple of models is reached if not requiring monotony.
+% In consequence, requiring monotony from transformations is a too strict requirement, because it is necessary to run through states that may be changed later on.
+
+% \begin{theorem}
+%     An application function for monotone transformations either returns a consistent model or produce a sequence of CPRs returning delta that return models of always growing size (i.e. it diverges).
+% \end{theorem}
+
+% \paragraph{Divergence cannot be avoided}
+
+% There are rather equal network, one that terminates after a long time and one that never terminates. 
+% Consider the example. The relations are defined in a way such that for any allocation for any of them a consistent tuple of models can be found. However, the transformations are not able to find it because they make "bad" choices from a set of choices that are conflicting. 
+% This can be seen in the example that we have already given in \autoref{fig:correctness:no_execution_order}.
+
+% Thus, systematically avoiding divergence is not possible. 
+
+% \textbf{Central insight:} Alternation / Divergence cannot be avoided systematically (like in ordinary programming), if not restricting transformations in a way that may not be reasonable.
 
 
 
