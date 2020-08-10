@@ -1,4 +1,4 @@
-\section{Design Space for the Orchestration Function} % and orchestration function
+\section{The Orchestration Problem} % Design Space for the Orchestration Function} % and orchestration function
 
 \mnote{Undefined when application function is expected to return consistent models}
 To recapitulate, the definition of an application function for transformation networks, given in \autoref{def:applicationfunction}, requires an application function $\appfunction{\orcfunction{\transformationset{T}}}$ to accept models and changes to them and yields either a set of models or $\bot$.
@@ -25,6 +25,7 @@ Precisely, we define an orchestration and a consistent orchestration as follows.
 The definition of an orchestration function allows it to determine an arbitrary long sequence of transformations, also including each transformation multiple times.
 While we introduced this general notion to avoid unnecessary restrictions, in the following we show the necessity of having this general notion, rather than allowing each transformation to be executed only once, as proposed by existing work, such as \cite{stevens2020BidirectionalTransformationLarge-SoSym}.
 From the insight that we need to allow transformations to be executed multiple times, we derive and discuss when we expect the application function to return consistent models, to finally come up with a notion of \emph{optimality} for the orchestration function determining the execution order.
+This leads to the definition of the central \emph{orchestration problem} that we want a transformation network to solve.
 
 % Discuss options for realizing the functions:
 % Orchestration returns only sequence with each transformation executed once vs. arbitrary number of executions
@@ -240,8 +241,8 @@ In the following, we thus, for first, allow an arbitrary number of executions of
 % Let us, for first, assume that transformations need an arbitrary number of executions.
 
 
-\subsection{The Orchestration Problem} %Expected Behavior} % Failure Cases} %When to Return $\bot$?}
-\label{chap:orchestration:design_space:problem}
+\subsection{Orchestration Function Behavior} %The Orchestration Problem %Expected Behavior} % Failure Cases} %When to Return $\bot$?}
+\label{chap:orchestration:problem:function_behavior}
 
 \mnote{Necessity to define when application function returns $\bot$}
 The application function is defined to return models only when they can be derived by applying transformations in an order delivered by the orchestration function and otherwise to return $\bot$.
@@ -357,15 +358,6 @@ Since that conflicts our assumption of independent development and modular reuse
 In conclusion, we expect the application function to deliver consistent models whenever a consistent orchestration, i.e., an execution order that yields consistent models, exists.
 Thus, we want to ensure that the orchestration function is able to always find such an orchestration, if it exists.
 We define this as an \emph{optimality} property in the following.
-
-The problem to find a consistent orchestration whenever it is exists is the central subject of the following sections.
-We will prove the decidability of that problem, discuss how we can make it decidable and propose strategies to deal with its undecidable.
-We define the problem as follows.
-
-\begin{definition}[Orchestration Problem]
-    \label{def:orchestrationproblem}
-    The problem to find a consistent orchestration of transformations for given inputs (models and changes to them) if it exists is called the orchestration problem.
-\end{definition}
 
 % "has a resolution" bei Stevens entspricht im Prinzip Kompatibilität
 % "is resolvable" bei Stevens entspricht im Prinzip "orchestration exists"
@@ -490,7 +482,7 @@ Thus, we apply the notion of \emph{optimality} to that function accordingly by r
 \end{definition}
 
 \mnote{Optimal application function requires optimal orchestration function}
-According to the defined behavior of an application function, an optimal applicaion function requires an optimal orchestration function.
+According to the defined behavior of an application function, an optimal application function requires an optimal orchestration function.
 
 \begin{lemma}[Optimal Application Function]
     \label{lemma:optimalapplicationfunction}
@@ -503,22 +495,14 @@ According to the defined behavior of an application function, an optimal applica
     Thus, the orchestration function must deliver a sequence for such inputs that yields consistent models, which is equivalent to $\orcfunction{\transformationset{T}}$ being optimal.
 \end{proof}
 
-\mnote{Different approaches to achieve optimality}
-We can distinguish two approaches to ensure that the orchestration function is optimal, i.e., that it does always find a consistent orchestration if it exists.
-Let $P_{i}$ be the problem space, i.e., all possible transformation execution orders for an input $i$ of models and a change to them and let $S_{i}$ be the solution space with those orders that yield consistent models.
-\begin{properdescription}
-    \item[Strategy Definition:] Define a strategy that explores the problem space $P_{i}$ to find one of the sequences in the solution space $S_{i}$, if $S_{i} \neq \emptyset$.
-    \item[Transformation Restriction:] Define a \emph{well-behavedness} property for the transformations that ensures that executing the transformations in any order often enough, they yield consistent models if $S_{i} \neq \emptyset$, i.e., for any given input $i$ there is an $n \in \mathbb{N}$ such that $\forall s \in P_{i} : \abs{s} > n \Rightarrow s \in S_{i}$.
-\end{properdescription}
+\mnote{The orchestration problem}
+The problem to find a consistent orchestration whenever it is exists, i.e., to find an optimal orchestration function, is the central subject of the following sections.
+This is what we denote as the \emph{orchestration problem}.
+We prove that the problem is undecidable, discuss how we can make it decidable and propose strategies to deal with its undecidability.
+Finally, we come up with a discussion of conservatively approximating a solution to the problem.
+We define the problem as follows.
 
-%Unfortunately, optimality is a property that we cannot request from an orchestration function. Optimality would mean that the orchestration function can decide whether there is sequence of transformations that leads to consistent models and thus terminate.
-
-\mnote{No restrictions to transformations}
-In the latter case, the orchestration function may return any order of the transformations, as long as the sequence is long enough to be optimal.
-This means, performing an iterative execution of the transformations leads to a consistent result, comparable to a fixed-point iteration.
-Since optimality is a property of an orchestration function with respect to a set of transformations, defining a \emph{well-behavedness} property as a restriction for transformations to easy finding an optimal orchestration function will potentially not concern a single transformation but the set of them.
-This can easily contradict our assumption of independent development and reuse or lead to restrictions of transformation that are not practical anymore.
-Thus, we first follow the former approach and investigate the possibility to find an optimal orchestration function without restricting the transformations.
-%Optimality of an orchestration function means that it can decide whether there is a sequence of transformations that leads to consistent models and thus terminates.
-In the following, we therefore define a general algorithm that realizes an application function and investigate how we can ensure that its orchestration function is optimal.
-
+\begin{definition}[Orchestration Problem]
+    \label{def:orchestrationproblem}
+    The problem to find a consistent orchestration of transformations for given inputs (models and changes to them) if it exists is called the orchestration problem.
+\end{definition}

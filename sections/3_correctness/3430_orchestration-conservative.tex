@@ -1,200 +1,235 @@
-\section{Restriction of Transformation Networks}
+\section{Conservative Approximation of the Orchestration Problem}
 
-\mnote{Restrictions either transformation-local or for complete network}
-We have discussed that it is necessary to restrict the transformations as an input of the application function to avoid that it is undecidable whether a consistent orchestration of them exists for given models and changes.
-Those restrictions can be at two levels:
-\begin{properdescription}
-    \item[Transformation:] Restrictions only concern the single transformation. Thus, if each transformation fulfills a specific property, the application function is able to decide whether a consistent orchestration exists.
-    \item[Network:] Restrictions concern the complete network, i.e., the combination of transformations. Only a set of transformations can have an appropriate property that enables the application function to decide the orchestration problem, but not each transformation on its own.
-\end{properdescription}
+We found that we cannot achieve optimality (undecidability) for arbitrary transformations, we cannot restrict transformation such that we achieve decidability and thus optimality.
+So, we need to deal with situation can we cannot resolve all networks.
+Conclude: Conservativeness rather than correctness or achieving optimality (but improving the latter one)
 
-\mnote{Find that all restrictions are impractical}
-Since we assume transformations to be developed and reused independently, restrictions to single transformations are of special interest.
-It is, however, easy to see that it will unlikely be possible to define practical restrictions to single transformations that make the orchestration problem decidable.
-We will see that even impractical restrictions do not make the problem decidable.
-Additionally, we discuss possible restrictions to complete networks.
-We discuss properties that obviously provide the ability to avoid divergence and alternation in the states of a network, namely monotony and confluence.
-Unfortunately, we will show that those restrictions are impractical.
+\todo{Question whether having no upper bound is only a theoretical or also a practical problem. The given example is rather artificial, so we may stop in practice without excluding relevant cases}
 
-% \todo{Maybe conflucence and monotony are rather restrictions of the application function (i.e. conservative operations) rather then restrictions of the transformation?}
+\todo{Remove much of the following}
 
-% \begin{itemize}
-%     \item Restrictions must, in the best case, be local to a transformation, i.e., they should be fulfillable without knowing with which other transformations the transformation shall be combined
-%     \item Can this ever be the case?
-% \end{itemize}
+\mnote{Achieving a correct application function}
+The definition of the application function basically ensures that the function either returns $\bot$ or executes the \modellevelconsistencypreservationrules given by the orchestration function to retrieve a changes tuple of models.
+It is considered \emph{correct} if it ensures that its result is either $\bot$ or a consistent model tuple by executing the \modellevelconsistencypreservationrules given by the orchestration function.
+% A correct application function thus has to ensure that its result is either $\bot$ or a consistent model tuple by executing the \modellevelconsistencypreservationrules given by the orchestration function.
+In consequence, the application function can be realized by simply executing the result of the orchestration function and check whether the resulting model tuple is consistent or not and return an appropriate result.
+Such a realization is generic and does not depend on the actual consistency preservation rules and orchestration function but represents a generic behavior.
+Additionally, this gives an implementation of that function the ability to present a faulty result to the user, which eases finding out why no consistent state was reached.
 
-% \begin{itemize}
-%     \item Discuss different restrictions we may apply to synchronizing transformations and networks
-%     \item We conclude that none of them is practically
-%     \item This does not mean that there is no restriction, but we were not able to find one
-%     \item Maybe also discuss history-ignorance
-% \end{itemize}
+\mnote{Correctness is not crucial}
+Finally, correctness is not crucial, because correctness can easily be achieved by performing any execution of transformations and just ensuring that we terminate at some point in time and then decide whether the resulting models are consistent or not and appropriately deliver the result.
 
-% Lösungsoptionen (Grad der Einschränkung an die Transformationen) --  überdeckt sich mit der Klassifizierung hierüber -> zusammenführen
-% \begin{itemize}
-%     \item Hohe Einschränkung: Jede beliebige Reihenfolge von ausgeführten Transformationen führt letztendlich zu einem korrekten Ergebnis (Fixpunktiteration -- Allquantifizierung) -- Hippokratie-Eigenschaft sorgt dafür, dass keine Transformation wieder etwas ändert, wenn Konsistenz bereits hergestellt ist.
-%     Diese Eigenschaft ist in der Praxis möglicherweise zu strikt, da sie sehr starke Anforderungen an die Transformationen stellen müsste. Dafür wäre aber die Anwendungsfunktion trivial.
-%     \item Mittlere Einschränkung: Es gibt eine Reihenfolge von ausgeführten Transformationen für jede Änderung die terminiert (Existenzquantifizierung) und die Ausführungsfunktion findet diese Reihenfolge.
-%     Utopisch, dass die Anwendungsfunktion aus (potentiell sehr mächtigen) Transformationen die richtige Reihenfolge errechnen kann. Dafür aber (möglicherweise) weniger Anforderungen an die Transformationen (zumindest nicht mehr Anforderungen, denn die Allquantifizierung induziert die Existenzquantifizierung). Eine Funktion könnte dann zumindest nach best-effort versuchen, die richtige Reihenfolge zu finden und konservativ abbrechen, wenn sie diese nicht finden kann (also entweder konsistent terminieren oder terminieren mit der Aussage, dass es entweder keine solche Reihenfolge gibt -- bei relaxierten Anforderungen -- oder dass es sie nicht finden kann).  
-%     \item Geringe Einschränkung: Es gibt potentiell keine Reihenfolge der Transformationen, die bei einer Änderung zu einer konsistenten Lösung kommt. Hier müsste die Ausführungsfunktion entsprechend einen Fehler ausgeben.
-% \end{itemize}
+\mnote{How to define an orchestration function that is as optimal as possible?}
+The remaining difficulty is how to define an orchestration function that fulfills the definition, i.e., to find a finite sequence of transformations, and also one that improves optimality, as an \emph{optimal} function can never be given.
+Although the definition of the orchestration function proposes a closed description of that function, in practice such a function will not have a closed form but will be realized as an algorithm that dynamically decides which transformation to execute next.
+Therefore the arising problem is that the length of the sequence to execute is not known a priori. Therefore, we need some abortion criterion. When a consistent result is found, this criterion is easy. But since we do not know whether a sequence exist, we need an abortion criterion that is reasonable and does not cut off the process although a consistent solution could be found, thus reducing optimality.
+A simple realization for that algorithm to deliver a finite sequence of transformations would be to define a fixed termination criterion, such as a specific number of transformation executions. However, there is no upper bound for the number of executed transformations necessary to achieve consistency. Still, a fixed number (even 0) could be defined for the number of executed transformations to fulfill the definition. Hence, optimality would be 0 then as a consistent result is never reached. We therefore discuss in the following how to define an appropriate orchestration function and how to optimize it.
+
+\mnote{Achieving a correct application function}
+The definition of the application function basically ensures that the function either returns $\bot$ or executes the \modellevelconsistencypreservationrules given by the orchestration function to retrieve a changes tuple of models.
+It is considered \emph{correct} if it ensures that its result is either $\bot$ or a consistent model tuple by executing the \modellevelconsistencypreservationrules given by the orchestration function.
+% A correct application function thus has to ensure that its result is either $\bot$ or a consistent model tuple by executing the \modellevelconsistencypreservationrules given by the orchestration function.
+In consequence, the application function can be realized by simply executing the result of the orchestration function and check whether the resulting model tuple is consistent or not and return an appropriate result.
+Such a realization is generic and does not depend on the actual consistency preservation rules and orchestration function but represents a generic behavior.
+Additionally, this gives an implementation of that function the ability to present a faulty result to the user, which eases finding out why no consistent state was reached.
+
+\mnote{Correctness is not crucial}
+Finally, correctness is not crucial, because correctness can easily be achieved by performing any execution of transformations and just ensuring that we terminate at some point in time and then decide whether the resulting models are consistent or not and appropriately deliver the result.
+
+\mnote{How to define an orchestration function that is as optimal as possible?}
+The remaining difficulty is how to define an orchestration function that fulfills the definition, i.e., to find a finite sequence of transformations, and also one that improves optimality, as an \emph{optimal} function can never be given.
+Although the definition of the orchestration function proposes a closed description of that function, in practice such a function will not have a closed form but will be realized as an algorithm that dynamically decides which transformation to execute next.
+Therefore the arising problem is that the length of the sequence to execute is not known a priori. Therefore, we need some abortion criterion. When a consistent result is found, this criterion is easy. But since we do not know whether a sequence exist, we need an abortion criterion that is reasonable and does not cut off the process although a consistent solution could be found, thus reducing optimality.
+A simple realization for that algorithm to deliver a finite sequence of transformations would be to define a fixed termination criterion, such as a specific number of transformation executions. However, there is no upper bound for the number of executed transformations necessary to achieve consistency. Still, a fixed number (even 0) could be defined for the number of executed transformations to fulfill the definition. Hence, optimality would be 0 then as a consistent result is never reached. We therefore discuss in the following how to define an appropriate orchestration function and how to optimize it.
 
 
-\subsection{Options in Consistency Relations}
 
-\mnote{Consistency preservation rules may select contradictory options in consistency relations}
-We have seen in the examples and the discussion in \autoref{chap:orchestration:design_space:problem} that an essential reason for the non-existence of a consistent orchestration is the existence of options within consistency relations.
-This means that a condition element is allowed to correspond to to different condition elements to be considered consistent, like we have seen for the mapping of names in \autoref{fig:orchestration:no_orchestration}.
-Different transformations can define different such options for specific elements, such that some of these options can never exist in globally consistent models, but only the ones that overlap between the consistency relations of all transformations can occur there.
-Compatibility of the consistency relations ensures that there is at least one such element in the overlap of the consistency relations, because if there was no consistent set of models containing the condition element the relations would be considered incompatible.
-Unfortunately, each transformation can only select one of these options to restore consistency when a condition element is added and if all transformations choose an element that is not in the overlap of the consistency relations, they will never find a consistent set of models.
 
-\mnote{Reduce expressiveness by each condition element only in one consistency relation pair}
-In consequence, an obvious option to reduce expressiveness of transformations in order to make the orchestration problem decidable by ensuring that a consistent orchestration does always exist would be to restrict consistency relations, such that each condition element is only allowed to occur in a single consistency relation pair of a consistency relation.
-Thus, each condition element has a unique corresponding element to which it is considered consistent.
-Then, the consistency preservation rules cannot select between different options to restore consistency and if the relations are compatible, all consistency relations relate elements in an equal way, thus the transformations must find exactly those elements.
 
-\mnote{Consistency relation restriction does not solve the problem}
-Although that approach will at least reduce the number of cases in which no consistent orchestration is found in our algorithm, there are still inputs for which no consistent orchestration exists.
-Since we do not restrict the transformation in what they are allowed to do, they can perform arbitrary changes to restore consistency.
-This especially includes that they may always returns changes that yield the same two models, which are consistent to that transformation but not to any models that can be delivered by the other transformations.
-% Since we do not restrict the transformation in what they are allowed to do, they can perform arbitrary changes that restore consistency, such that alternations in the execution can occur.
-% Consider three metamodels $\metamodel{A}, \metamodel{B}, \metamodel{C}$ with the following consistency relations and consistency preservation rules:
-% \begin{align*}
-%     &
-%     \consistencyrelation{CR}{AB} = \setted{\tupled{\model{a}{1}, \model{b}{1}}, \tupled{\model{a}{2}, \model{b}{3}}, \tupled{\model{a}{3}, \model{b}{2}, \tupled{\model{a}{4}, \model{b}{4}} \\
-%     &
-%     \consistencypreservationrule{\consistencyrelation{AB}}(\model{a}, \model{b}, \change{\metamodel{A}}, \change{\metamodel{B}}) = \begin{cases}
-%     \end{cases}
-%     &
-%     \consistencyrelation{CR}{BC} = \setted{\tupled{\model{b}{1}, \model{c}{1}}, \tupled{\model{b}{2}, \model{c}{3}}, \tupled{\model{b}{3}, \model{c}{2}, \tupled{\model{b}{4}, \model{c}{4}} \\
-%     &
-%     \consistencyrelation{CR}{AC} = \setted{\tupled{\model{a}{1}, \model{c}{1}}, \tupled{\model{a}{2}, \model{c}{3}}, \tupled{\model{a}{3}, \model{c}{2}, \tupled{\model{a}{4}, \model{c}{4}} \\
-% \end{align*}
 
-\mnote{Example with restriction but without consistent orchestration}
-Let $\class{A}{}$, $\class{B}{}$, $\class{C}{}$ be three classes, each with one attribute $n$ storing a number.
-We define the following metamodels, each only consisting of one of those classes, and consistency relations between them that define that for each element in one model a corresponding the others with the same value of $n$ has to exist.
-These consistency relations are obviously compatible.
-This is a further simplification of our running example that requires persons, residents and employees with the same names.
-Additionally, we define consistency preservation rules, each of them delivering changes that always, i.e., for every input, yield the same models that only consist of one element with a specific value.
-The resulting models are chosen in a way such that they are consistent to the according consistency relation, but not to any of the others.
+\subsection{A Gradual Notion of Optimality}
+%\subsection{Reducing Conservativeness}
+
+Due to Turing-completeness of the network this would mean that the orchestration function can decide whether a Turing machine halts, which is proven impossible.
+Thus, our only goal can be to achieve optimality as far as possible in terms of reducing the degree of conservativeness, i.e., reduce the cases in which no sequence is found although it exists.
+
+We can define a measure for the optimality of an orchestration function:
 \begin{align*}
-    & 
-    \metamodelinstanceset{M}{1} = \mathcal{P}(\metamodelinstances{\class{A}{}}), %\\
-    %& 
-    \metamodelinstanceset{M}{2} = \mathcal{P}(\metamodelinstances{\class{B}{}}), %\\
-    %& 
-    \metamodelinstanceset{M}{3} = \mathcal{P}(\metamodelinstances{\class{C}{}}) \\[1em]
     &
-    \consistencyrelation{CR}{12} = \setted{\tupled{a,b} \in \metamodelinstances{\class{A}{}} \times \metamodelinstances{\class{B}{}} \mid a.n = b.n}, \consistencyrelationset{CR}_{12} = \setted{\consistencyrelation{CR}{12}, \consistencyrelation{CR}{12}^T} \\
-    &
-    \consistencypreservationrule{\consistencyrelationset{CR}_{12}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}) = (\change{\metamodel{M}{1}}', \change{\metamodel{M}{2}}') \\
-    & \formulaskip
-        \mathtext{with} \change{\metamodel{M}{1}}'(\model{m}{1}) = \setted{a \in \metamodelinstances{\class{A}{}} \mid a.n = 1} \land \change{\metamodel{M}{2}}'(\model{m}{2}) = \setted{b \in \metamodelinstances{\class{B}{}} \mid b.n = 1} \\[1em]
-    &
-    \consistencyrelation{CR}{13} = \setted{\tupled{a,c} \in \metamodelinstances{\class{A}{}} \times \metamodelinstances{\class{C}{}} \mid a.n = c.n}, \consistencyrelationset{CR}_{13} = \setted{\consistencyrelation{CR}{13}, \consistencyrelation{CR}{13}^T} \\
-    &
-    \consistencypreservationrule{\consistencyrelationset{CR}_{13}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{3}}) = (\change{\metamodel{M}{1}}', \change{\metamodel{M}{3}}') \\
-    & \formulaskip
-        \mathtext{with} \change{\metamodel{M}{1}}'(\model{m}{1}) = \setted{a \in \metamodelinstances{\class{A}{}} \mid a.n = 2} \land \change{\metamodel{M}{3}}'(\model{m}{3}) = \setted{b \in \metamodelinstances{\class{C}{}} \mid c.n = 2} \\[1em]
-    &
-    \consistencyrelation{CR}{23} = \setted{\tupled{b,c} \in \metamodelinstances{\class{B}{}} \times \metamodelinstances{\class{C}{}} \mid b.n = c.n}, \consistencyrelationset{CR}_{23} = \setted{\consistencyrelation{CR}{23}, \consistencyrelation{CR}{23}^T} \\
-    &
-    \consistencypreservationrule{\consistencyrelationset{CR}_{23}}(\model{m}{2}, \model{m}{3}, \change{\metamodel{M}{2}}, \change{\metamodel{M}{3}}) = (\change{\metamodel{M}{2}}', \change{\metamodel{M}{3}}') \\
-    & \formulaskip
-        \mathtext{with} \change{\metamodel{M}{2}}'(\model{m}{3}) = \setted{b \in \metamodelinstances{\class{B}{}} \mid b.n = 3} \land \change{\metamodel{M}{3}}'(\model{m}{3}) = \setted{c \in \metamodelinstances{\class{C}{}} \mid c.n = 3}
+    Optimality_{\orcfunction{\consistencypreservationruleset{}}} = \frac{\mathtext{\# of model / delta pairs for which the function finds an order that terminate consistently}}{\mathtext{\# of model / delta pairs for which an order that terminates consistently exists}}
 \end{align*}
 
-\mnote{Consistency preservation rules always yield models not consistent to other relations}
-The given consistency relations are compatible, they contain each condition element only in one consistency relation pair, and the consistency preservation rules are correct, as their result is consistent to the consistency relation.
-Still, there is no consistent orchestration of the transformation for any input that is not yet consistent.
-This is because the consistency preservation rules always produce models that are not consistent to the consistency relations between the other models.
-
-\mnote{Exemplary consistency preservation rules perform unreasonable changes}
-One might argue that the defined consistency preservation rules are highly unreasonable and will never occur in that way in practice.
-We would probably assume the consistency preservation rules to preserve the input models and changes in some way instead of returning models that are completely unrelated with the input.
-However, we not yet have an appropriate notion for that.
-Some were on transformations, such as \cite{cheney2017LeastChangeBx-JOT,macedo2016alloy}, proposes a notion of \emph{least change} to ensure that transformations do not perform arbitrary unrelated changes, which could exclude that situations.
-
-\mnote{Restriction of consistency relations is impractical}
-Although the given example is rather artificial and although there might be the additional property of least change, which could further reduce the cases in which no consistent orchestration exists, the essential drawback is that these restrictions are not reasonable.
-Allowing a condition element to occur in multiple consistency relation pairs is essential, because options for elements to considered is necessary, especially if there is a gap in the abstraction of two related metamodels.
-For example, a UML class needs to be able to correspond to all Java classes that provide different implementations of that class.
-Requiring that there is exactly one Java class that is considered consistent to a UML class is obviously not applicable in practice, thus this restriction would make the consistency notion useless.
-
-\mnote{Least change property does even not solve the problem}
-If we, instead, only require some notion of least change, such as that only elements are changed which are involved in a violated consistency relation, this does also not solve the problem.
-In the example in \autoref{fig:orchestration:no_orchestration}, relating the names of employees, residents and persons, we have defined consistency preservation rules that only require changes to elements that actually violate consistency.
-Nevertheless, we have shown that for these consistency preservation rules only specific orchestrations are consistent and that with some modification even no consistent orchestration exists.
-
-\mnote{Unlikely to find practical restrictions that solve the problem}
-In consequence, we found that even a well-defined restriction that is too strong to be applied in practice still cannot ensure that a consistent orchestration exists for possible every input, even if the examples with used to show that on are rather artificial.
-Although this does not serve as a proof for the impossibility for find a suitable restriction that solves the orchestration problem, which is even impossible because there is no unique notion of what an acceptable restriction would be, the investigated case shows that it is unlikely to find practical restrictions that solve the problem, if even impractical restrictions do not solve it.
-
-% Es kann z.B. sein, dass ein Element a ein Element b braucht. Eine andere Transformation braucht zwei as und dafür ein (oder zwei) c. Dann ist (a,b) konsistent und es ist auch kompatibel, weil es mit dem a ein Modell gibt in dem es konsistent ist, nämlich das mit dem zweiten a, aber das Modell mit einem a ist nur lokal konsistent. Wenn das nun immer von der Transformation ausgewählt wird, findet man nie einen konsistenten Zustand.
-
-% - We have seen that selection of options is a problem that leads to the non-existence of orchestrations.
-% - Intended solution: Each object may only have one corresponding element. Then if the object exists, exactly one other has to exist. This ensure that for any model a there is only exactly one consistent b.
-% It can, however, be that a1, b1 and c1 are consistent and a4, b4 and c4 are, but only (a2, b3), (a3, b2), (a2, c3), (a3, c2), (b2, c3), (c3, b2) are consistent. 
-% The relations may still be compatible, because for example (a2, b3, a4), (a3, b2, a5) and so ond could be consistent.
-% Since we have no requirements such as a least change requirement, the transformation may, for every input, return one of the last pairs, although this actually does not make any sense.
-% Then the transformations do only alternate between those models.
-% This seems to be a rather theoretical consideration, because transformations will usually not perform arbitrary unreasonable changes, such as always returning the same models.
-% However, even if we found that we can define an additional property, such as least change, such that requiring each object to only have one corresponding element in the consistency relations together with that property, then still the latter requirement is impractical, as usually an element can correspond to different others.
-% At least in the case when consistency relations gap abstraction levels, this is necessary.
-% For example, a UML class needs to be able to correspond to a Java class with any implementation of its bodies. Restricting it to only one is not practical.
-
-% Although the restriction of relations is already an impractical restriction, it does still not solve the problem.
-% Thus it is unlikely to find restrictions that are practical and solve the problem, although, for sure, it is not formally proven.
-
-% Even some notion of least change that ensure that only elements are changed which are involved in any violated consistency relations will not be sufficient, as the example in \autoref{fig:orchestration:no_orchestration} has shown.
-% There, only elements that are involved in the violated consistency relations are changed.
-%One might argue that in that example the consistency relations contain pairs of elements that can never be created by the consistency preservation rules and thus should not be part of the consistency relations.
-%Gegenargument: Es gibt oft unendlich viele Paare (z.B. alle Implementierung einer Java Klasse mit einer UML-Klasse. Wenn auf der UML-Seite auch noch ein Freiheitsgrad ist, dann wird jede UML-Instanz der Klasse auf eine Standard Java-Klasse abgebildet und jede Java-Klasse auf eine Standard UML-Klasse, aber die Zusatzinformationen kommen erst durch manuellen Anreicherung dazu und sind dadurch vorhanden, aber nicht durch die Transformation)
+In fact, both these numbers usually infinite, an there is an infinite number of possible models and deltas. However, it does finally not matter for us what the actually value is, but only how to improve that value.
+\todo{We have to map that value to compatibility, which reduces the number of potential false orders.}
 
 
-\subsection{Confluence}
-%\todo{Zeigen: Konfluenz führt zu Konvergenz. Aber konfluenz ist zu starke Anforderung, außerdem heißt Konvergenz, dass egal welche Reihenfolge der Transformationen man wählt am Ende immer das gleiche Ergebnis rauskommt. Das muss aber nicht so sein. Gebe Beispiel mit groß klein Schreibung, wo je nach Reihe folge verschieden elosungen rauskommen}
-%\todo{Diss: Konvergenz einführen, hinreichende Eigenschaft? Notwendige Eigenschaft?}
-%\todo{Discuss confluence and convergence!}
+\textbf{Overall Goal:} Find correct orchestration function that improves optimality.
 
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{figures/correctness/orchestration/confluence.png}
-    \caption[Confluence of transformations]{Counterexample for the practicality of confluence}.
-    \label{fig:orchestration:confluence}
-\end{figure}
+There are two ways to improve optimality of the orchestration function:
+\begin{enumerate}
+    \item Optimize the orchestration function, i.e., find a good order (probably this is not possible), at least find an order that helps the developer to find problems
+    \item Optimize the input, i.e., define requirements to the transformations and their relations representing the input to optimize optimality
+\end{enumerate}
+\todo{We need an example for that}
 
-In literature~\cite{stevens2020BidirectionalTransformationLarge-SoSym}, confluence in a transformation network is described as the property that two consistent orchestrations for the same given models and changes always yield the same models.
-Thus, executing transformations in any order such that the result is consistent will deliver the same result.
-It is, however, easy to see that this is an impractical requirement.
+Both goes hand in hand, because restrictions to the input can never lead to an orchestration function that always terminates without leading to unsupported relevant cases.
 
-In the example depicted in \autoref{fig:orchestration:confluence}, derived from the running example, three consistency relations expect for each person, employee and resident two corresponding others to exist.
-They need to have the same name or, in case of the relations between persons and employees, as well as between residents and employees, the employee may have the same name in lower case.
-The consistency preservation rule between persons and employees ensures that an employee with the same name exists, whereas the one between residents and employees ensures that an employee with the name in lower case exists.
-Whenever a person is added, two consistent orchestrations can be distinguished.
-First, the transformation between persons and employees can be executed, either followed or preceded by the one between persons and residents. Then all elements have the same name.
-The models are also consistent to the relation between residents and employees, because the relation allows the names to be equal.
-Second, the transformation between persons and residents can be executed, followed by the one between residents and employees.
-Then the employee has the name in lower case, but still this is consistent to the relation between persons and employees.
+This conform to two approaches:
+\begin{enumerate}
+    \item Dynamic decision about selected transformation and abortion criteria
+    \item Constructive restrictions that ensure that appropriate order is (easily) found
+\end{enumerate}
 
-Apart from that artificial example, such a situation can always occur if transformations have different options for elements to be consistent.
-If there is not a single element that is in the overlap of consistent elements between all transformations, the result may be any of the elements in the overlap.
-And the result may depend on which transformation made the first selection that fell into the overlap.
-Finally, \textcite[p. 14]{stevens2020BidirectionalTransformationLarge-SoSym} also states explicitly that a network will only be confluent under very specific circumstances.
+\todo{Application function can be generically defined, orchestration maybe not? We actually want to ensure that both are generic and none of them has to be defined for a specific project.}
 
-% Another intuitive notion of confluence would require that information flows together in a compatible way, i.e., the execution of a transformation does not violate consistency to other adjacent transformations.
-% Formally this can be described as: A network is confluent when in every cycle of transformations t1,...tn the execution t1...ti-1 and tn,...,ti for any i leads to the same changes in the network.
-% This means it does not matter in which order two transformations propagating information to the same model are executed.
-% This, in consequence, means that the execution of a transformation cycles always yields models that are consistent to all transformations. Although two transformations affected the same model, consistency to the earlier executed one is not destroyed again.
-% Finally, this reduces to the situation that executing each transformation once restores consistency to all transformations, which is, as we have seen, impractical.
+\begin{itemize}
+    \item We conclude that we need to deal with the situation of undecidability. In consequence, orchestration must operate conservatively, i.e., we cannot assume to always find a solution, but if find it, it must be consistent.
+    \item One approach could be to reduce conservativeness. But even if we reduced conservativeness, we would not be able to completely eliminate it and thus have to deal with the situation that the strategy does not find a solution although it may exist.
+    \item We thus propose an approach that helps to identify the reason when the strategy is in the conservative case, i.e., not able to find a solution although it exists.
+\end{itemize}
+
+
+\subsection{Systematic Improvement of Optimality}
+%\paragraph{Avoidance of Non-Termination}
+
+In consequence, we propose to dynamically deal with alternation / divergence.
+To detect alternations, the execution can simply track if a state way already processed. Apart from spatial problems, this does always work.
+Finding divergence is not that easy, because it is generally not possible to define an upper bound for the number of executions of a single transformation.
+This is due to the reason that, again, this conflicts with the Halting problem.
+% We can see this at the simple example in \autoref{fig:formal:noupperboundexample}.
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=\textwidth]{figures/correctness/orchestration/no_upper_bound_example_old.png}
+%     \caption{Example for no upper bound}
+%     \label{fig:formal:noupperboundexample}
+% \end{figure}
+
+% Depending on the value X, the transformations have to be executed X times to result in a consistent state. This value can be arbitrarily chosen, thus an arbitrary number of executions may be necessary to terminate in a consistent state.
+
+% \todo{Moved from single execution section -> revise}
+% \begin{theorem}[Orchestration with Unbounded Executions]
+%     \label{theorem:unbounded_execution}
+%     For any set of transformations $\transformationset{T}$, there can be models $\modeltuple{m}$ and changes $\changetuple{}$ to them for which each possible orchestration function $\orcfunction{\transformationset{T}}$ with whom $\appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{})$ is consistent, such that $\abs{\orcfunction{\transformationset{T}}(\modeltuple{m}, \changetuple{})} > \abs{\transformationset{T}}$.
+% \end{theorem}
+% \begin{proof}
+%     We know from \autoref{lemma:minimal_executions} that $\transformationset{T}_{inc}$ requires at least $4$ executions of $\transformation{T}_{12}$ for the inputs defined in \autoref{lemma:minimal_executions} when selecting $x \geq 5$.
+%     Thus, for any orchestration function, we know that $\abs{\orcfunction{\transformationset{T}}(\modeltuple{m}, \changetuple{})} > 4 > 3 = \abs{\transformationset{T}_{inc}}$.
+%     This proves the theorem by example.
+% \end{proof}
+
+From an engineering perspective, this is still unwanted behavior. We claim that a transformation network that takes thousands of executions of the same transformation to find a consistent state works not as expected and if running into a failure would expose severe problems to find the reasons for that failures.
+Thus, we propose to simply abort the execution after some time to be sure not to run in an endless loop.
+
+Finally, this problem is comparable to ordinary programming, because there the same situations regarding alternation and divergence can occur that result in non-termination of a program.
+As we all know, it is impossible to systematically avoid that, but just possible to carefully develop the program and apply best practices to avoid such situations.
+
+\textbf{Conclusion:} We cannot systematically improve optimality / reduce conservativeness and also not dynamically terminate when divergence is detected. Especially, there is no guarantee wo when also alternation is detected. There can be an arbitrary high number of execution before alternation is detected.
+Thus, we propose an algorithm that terminates deterministically and returns $\bot$ also when it is not able to find a solution in a fixed number of steps, but improves the ability for the transformation developer or user to find out why in specific situation no solution can be found.
 
 
 
-\subsection{Monotony}
+\paragraph{Outlook}
 
-We have discussed in \autoref{chap:orchestration:algorithm:alternation} that alternation, as a specific kind of non-termination scenario, can be avoided by construction of the orchestration function or at least can be detected by the \function{Apply} algorithm.
+We need to deal with the situation that no consistent orchestration exists and that we are not able to find it, even if it exists, as the problem space is arbitrarily large (arbitrary high number of transformation executions).
+This forbids approaches such as backtracking to find an appropriate solution.
+\todo{Discuss Backtracking}
+
+We consider alternation as a possibility to reduce the number of cases in which non-termination can occur, thus improving optimality, but by its dynamic detection as well as its avoidance.
+This is an easy way to improve optimality.
+However, we can never achieve an optimality of 1, thus we have to deal with the situation that some executions will fail.
+We therefore focus on how we may orchestrate the transformations such that the process of finding the reason for not finding a consistent orchestration is supported.
+
+
+
+
+
+\subsection{Dynamic Detection of Alternation} % Divergence and alternation
+\label{chap:orchestration:conservative:alternation}
+
+The proposed algorithm, like any algorithm, is supposed to \emph{terminate} in a specific \emph{state} to be considered correct.
+In our case, a correct state, as required by an application function it implements, is the return of consistent models or $\bot$, which the algorithm fulfills by construction.
+In particular, the algorithm will never return models that are inconsistent, neither because it does not detect that they are inconsistent nor that it detects that they are inconsistent but still returns them.
+From our previous findings regarding decidability, we know that we cannot expect the algorithm to realize an optimal application function.
+Thus, we either need to implement \function{Orchestrate} such that it always returns $\bot$ after a finite number of executions to ensure termination, which results in returning $\bot$ although consistent models are expected, or we allow an arbitrary number of executions to improve the ability to find consistent results but accept that the algorithm may not terminate.
+
+We have discussed that non-termination of the algorithm can occur because no consistent orchestration exists at all or because the algorithm is not able to find it.
+A special case of non-termination is \emph{alternation}, which means that the same states are passed repeatedly. 
+In case of transformation networks, alternation means that from some point in time the subsequent executions of the transformations in Line~\ref{algo:orchestration:application:line:stepcalculation} of \autoref{algo:orchestration:application} repeatedly produce the same sequence of results, i.e., of changes.
+% Non-termination can, in general, manifest in terms of \emph{alternation} or \emph{divergence}, which means that either the same states are passed repeatedly or that an infinite sequence of different states is produced.
+% In case of transformation networks, alternation means from some point in time the subsequent executions of the transformations in Line~\ref{algo:orchestration:application:line:stepcalculation} of \autoref{algo:orchestration:application} repeatedly produce the same sequence of results, i.e., of changes.
+% Divergence means that from some point in time all results, i.e., changes, produced in Line~\ref{algo:orchestration:application:line:stepcalculation} differ.
+In contrast to non-termination in general, the scenario of alternation can at least be avoided by construction.
+% To this end, the history of change produced by the algorithm in Line~\ref{algo:orchestration:application:line:stepcalculation} has to be stored.
+% It can either be used by the \function{Apply} function to detect alternation or by passing it to the \function{Orchestrate} function to influence the selection of transformations to avoid alternation.
+
+\begin{definition}[Alternation of Apply Algorithmus]
+    \label{def:applyalternation}
+    Let there be a number $n$ of execution of the transformation execution loop in Lines~\autoref{algo:orchestration:application:line:startorchestrate}--\autoref{algo:orchestration:application:line:endorchestrate} of \autoref{algo:orchestration:application}, such that for all numbers of execution $> n$ there is a sequence of executed transformations and generated changes that occur at least two times subsequently at the end of the current states of $\mathvariable{executedTransformations}$ and $\mathvariable{generatedChanges}$.
+\end{definition}
+
+The \function{Orchestrate} function receives the history of transformations and changes and is thus able to identify the situation that the same sequence of transformations was already executed and produced equal changes in each application.
+This allows it to implement the function in a way that it does not return the same sequence of transformations when it was already passed and produced the same changes.
+If a concrete realization of the \function{Orchestrate} function is not implemented in a way that it can react to the detection of alternation and produce a different sequence of transformations, it can at least return $\bot$ to ensure termination of \function{Apply}, because repeated execution of the same transformations will still returns the same changes. 
+
+Alternation produces orchestrations that can never yield consistent models, thus they are part of the problem space $P_{i}$ of finding an orchestration for a given input $i$ of models and changes but can never be part of the solution space $S_{i}$ containing the consistent orchestrations.
+Avoid such alternations thus improves the possibility to find a consistent orchestration, because the number of consistent orchestrations to the number of orchestrations that can potentially be applied is improved.
+
+\todo{Maybe add reference to conservative orchestration section for the dynamic detection of alternation, if appropriate.}
+
+%Divergence: If it passes the same changes again, then it either does not pass those changes again 
+
+% Derive from the previous insights that whenever the algorithm does not terminate, we can have two situations: divergence and alternation.
+% Prove that no other options for occurring situation exist!
+
+% Problemraum:
+% \begin{itemize}
+%     \item Ziel ist, dass ein Netzwerk von Transformationen nach einer Änderung in einem konsistenten Zustand terminiert. D.h. Korrektheit stellt Anforderungen an \emph{Terminierung}, sowie den \emph{Zustand} bei Terminierung.
+%     \item Folgende Abweichungen davon können auftreten:
+%     \begin{enumerate}
+%         \item Nicht-Terminierung: Das Netzwerk terminiert nicht. Das bedeutet im Prinzip, dass die Ausführungsfunktion (bzw. der Laufzeit-Algorithmus, der die Funktion dynamisch emuliert) nicht \emph{sound} ist. Soundness der Ausführungsfunktion setzt voraus, dass die berechnet Aufrufsequenz endlich ist. Wenn die Ausführung nicht terminiert, bedeutet das, dass entweder die gleichen Zustände mehrfach durchlaufen werden oder eine Sequenz unendlich vieler Zustände produziert wird. Denn wenn beides nicht der Fall ist, gibt es eine endliche Sequenz unterschiedlicher Zustände, d.h. Terminierung. Das bedeutet, dass es folgende zwei Möglichkeiten gibt:
+%         \begin{itemize}
+%             \item Alternierung: Die gleichen Zustände werden mehrfach durchlaufen.
+%             \item Divergenz: Es werden unendlich viele Zustände produziert.
+%         \end{itemize}
+%         \item Inkonsistente Terminierung: Die Ausführungsfunktion bzw. der Algorithmus beendet die Ausführung, aber in einem inkonsistenten Zustand. Hier lassen sich ebenfalls wieder zwei Fälle unterscheiden.
+%         \begin{itemize}
+%             \item Unerkannte Inkonsistenz: Der Algorithmus terminiert und denkt, der Zielzustand wäre konsistent. Dies bedeutet aber direkt, dass nicht alle Konsistenzrelationen erfüllt sind, was, zumindest in der Theorie, einfach zu prüfen wäre (entweder durch Prüfung der Relationen oder durch Ausführung der hippokratischen Transformationen, die alle nichts tun dürften)
+%             \item Erkannte Inkonsistenz: Der Algorithmus terminiert, wissend dass die Lösung nicht konsistent ist. Dies kann entweder sein, weil eine Transformation für zwei Modelle in einem inkonsistenten Zustand nicht mehr anwendbar ist, oder weil irgendein anderes Abbruchkriterium erreicht ist.
+%         \end{itemize}
+%     \end{enumerate}
+% \end{itemize}
+
+% Assume we have an algorithm that sequentially applies transformations.
+% It stops as soon as a transformation cannot be applied or the models are consistent.
+% Then we need to guarantee termination.
+% We need to avoid that transformations can be applied indefinitely never leading to consistent models.
+
+% Reasons for this situation are alternation and divergence.
+% Prove that if we do not pass the same model state again (alternation) and if there is no indefinite number of model states (divergence), the algorithm terminates.
+% Thus, if we ensure that any execution order of transformations does never lead to alternation and divergence, we know that the algorithm terminates!!
+
+% \begin{itemize}
+%     \item Zeigen, dass es Beispiele gibt, in denen es unabhängig von der Ausführungsreihenfolge immer zu einer Alternierung kommt
+%     \item Zeigen, dass es Beispiele gibt, in denen es unabhängig von der Ausführungsreihenfolge immer zu einer Divergenz kommt.
+%     \item Die Beispiele sollten zeigen, dass wir keine Einschränkungen an die Transformationen machen können, was das Problem aushebelt. D.h. egal welche Einschränkungen ich an die Transformationen definiere, es lassen sich immer Beispiele konstruieren, in denen es keine Ausführungsreihenfolge gibt, in denen sie terminieren.
+%     \item Mathematisch zeigen, dass Alternierung und Divergenz die einzigen Probleme sind. D.h. wenn nicht der gleiche Zustand mehrmals durchlaufen wird (Alternierung) und es nicht unendlich viele Zustände gibt (Divergenz), dann ist die Folge endlich.
+%     %\item Außerdem mathematisch die Abbildung von Transformationen auf Turing-Maschinen zeigen und damit ableiten, dass allgemeine Netzwerke erstmal nicht terminieren müssen (Abbildung auf Halteproblem)
+% \end{itemize}
+
+% To avoid these problems by construction, we discussed before that we need to achieve that P = S, such that the application function can execute transformations in an arbitrary order to achieve consistency.
+
+% Another possibility would be to allow the problems and detect them dynamically and react to them.
+% We will finally discuss that in the last section.
+
+%In the following, we discuss whether and how we may restrict synchronizing transformations, such that an arbitrary execution order can avoid divergence and alternation, such that the algorithm terminates.
+
+
+
+
+\subsection{Monotony for Avoiding Alternation}
+
+We have discussed in \autoref{chap:orchestration:conservative:alternation} that alternation, as a specific kind of non-termination scenario, can be avoided by construction of the orchestration function or at least can be detected by the \function{Apply} algorithm.
 Instead of detecting alternation during orchestration, we may also restrict the transformation network such that no alternation can occur by construction.
 We can achieve this by defining a notion of monotony for the transformations.
 
@@ -308,7 +343,7 @@ Even if only some of the transformations are monotone, or if only specific rules
 Having the knowledge about the benefits of monotony gives a transformation developer the ability to implement it as often as possible.
 
 Finally, the possibility to avoid alternation by construction can be combined with the ability of an orchestration strategy to react to alternation.
-We have discussed in \autoref{chap:orchestration:algorithm:alternation} that an orchestration strategy can detect alternation and adapt its strategy of selecting the next transformation in that case.
+We have discussed in \autoref{chap:orchestration:conservative:alternation} that an orchestration strategy can detect alternation and adapt its strategy of selecting the next transformation in that case.
 In addition, if monotony is given at least for some transformations, the orchestration strategy needs to try less execution orders and thus improves the chance of finding a consistent orchestration.
 
 % \begin{figure}
@@ -395,3 +430,10 @@ In addition, if monotony is given at least for some transformations, the orchest
 %     \item Das ist im allgemeinen aber nicht Fall. Letztendlich trifft jede Transformation lokale Entscheidungen. Beispielsweise könnte jede einzelne Transformation gegeben eine beliebige Änderung immer dieselben Modelle (bzw. Änderungen die dazu führen) zurück liefern (im trivialsten Fall leere Modelle). Dann erfüllt jede Transformation ihre Korrektheitseigenschaft bzgl. ihrer Relation, aber das Netzwerk muss nicht korrekt sein, da bspw. T(A,B) und T(B,C) sich immer für verschiedene Instanzen von B entscheiden. Es gäbe somit nie eine konsistente Lösung für eine beliebige Ausführungsreihenfolge der Transformationen, auch wenn die Relationen das erlauben würden.
 %     \item Beispiel mit Namen, wo eine Transformation immer den großen Namen zurück liefert, die andere immer den kleinen. T(A,B) bildet A auf gleiches B ab und beide auf kleine Schreibweise, obwohl beide erlaubt sind. Erzeuge A="a", dadurch B="a". T(B,C) bildet B auf C ab und beide auf große Schreibweise, obwohl beide erlaubt sind. Somit macht sie das zu B="A" und C="A". Nun wird T(A,B) wieder beide klein machen usw. Allerdings wäre eine insgesamt valide Lösung einfach alle groß oder alle klein zu machen, aber die Transformationen finden diesen Zustand nicht. 
 % \end{itemize}
+
+
+
+
+\subsection{A Conservative Application Algorithm}
+
+Propose Provenance and Reactions Strategy.
