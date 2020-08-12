@@ -35,12 +35,14 @@ Finally, we shortly discuss confluence as a considerable property of transformat
 %Start with defining an algorithm that realizes the application function. (different options depending on when to return $\bot$, discussed later)
 %First option: we assume an oracle that returns the transformation to execute next according to the orchestration function and we stop when consistent models are achieved
 
+\todo{Transformations as variable instead of index and say that our implementation will be independent from concrete network. But in general, once could define it specific for a set of transformations.}
+\todo{Rename generatedChanges and executedTransformation to $\change{generated}$ and new command transformationtuple with index executed}
 \begin{algorithm}
    % \input{algorithms/correctness/synchronization/find_corresponding_elements.tex}
     \begin{algorithmic}[1]
-        \Procedure{$\function{Apply}_{\transformationset{T}}$}{$\modeltuple{m}, \changetuple{\metamodeltuple{M}}$}
-            \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\transformationset{t}, \modeltuple{m}$)
-            \If{$\neq \mathvariable{isConsistent}$}
+        \Procedure{$\function{Apply}_{\transformationset{T}}$}{$\modeltuple{m} = \tupled{\model{m}{1}, \dots, \model{m}{n}}, \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}}$}
+            \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\transformationset{t}, \modeltuple{m})$
+            \If{$\neg \mathvariable{isConsistent}$}
                 \State \Return{$\bot$}
             \EndIf
             \State $\mathvariable{executedTransformations} \leftarrow \tupled{}$
@@ -52,10 +54,10 @@ Finally, we shortly discuss confluence as a considerable property of transformat
                 \State $\mathvariable{generatedChanges}.add(\changetuple{\metamodeltuple{M}})$
                 \State $\transformation{t}_{next}$ $\leftarrow$ $\function{Orchestrate}_{\transformationset{T}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}, \mathvariable{executedTransformations}, \mathvariable{generatedChanges})$
             \EndWhile \label{algo:orchestration:application:line:endorchestrate}
-            \State $\tupled{\model{m}{1}, \dots, \model{m}{n}} \leftarrow \modeltuple{m}$
-            \State $\tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \leftarrow \changetuple{\metamodeltuple{M}}$
+            %\State $\tupled{\model{m}{1}, \dots, \model{m}{n}} \leftarrow \modeltuple{m}$
+            %\State $\tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \leftarrow \changetuple{\metamodeltuple{M}}$
             \State $\modeltuple{m}_{res} \leftarrow \tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \dots, \change{\metamodel{M}{n}}(\model{m}{n})}$
-            \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\transformationset{t}, \modeltuple{m}_{res}$) \label{algo:orchestration:application:line:startconsistencycheck}
+            \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\transformationset{t}, \modeltuple{m}_{res})$ \label{algo:orchestration:application:line:startconsistencycheck}
             \If{$\neq \mathvariable{isConsistent}$}
                 \State \Return{$\bot$}
             \EndIf \label{algo:orchestration:application:line:endconsistencycheck}
