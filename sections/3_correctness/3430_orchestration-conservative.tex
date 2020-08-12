@@ -11,10 +11,10 @@ This potentially prevents the algorithm even further from finding consistent orc
 Based on those previous insights, we assume in this section that the orchestration problem cannot be restricted such that it becomes decidable.
 We accept that any application function and any algorithm that realizes it will only realize a conservative approximation of the orchestration problem.
 This means that it may only return consistent models delivered by a consistent orchestration, but it may not find a consistent orchestration although it exists.
-In this case, we call the function or algorithm, respectively, \emph{conservative}.
+In this case, we say that the function or algorithm, respectively, delivers \emph{false negatives} but no \emph{false positives} and call it \emph{conservative}.
 We investigate how we can define optimality of the application function in gradual rather than a binary way, which is supposed to indicate how likely it is that it finds a consistent orchestration.
-We then first follow the goal of finding means to systematically improve optimality.
-Since there are always cases in which the algorithm does not find a consistent orchestration, we finally propose an algorithm that is supposed to help identifying the reasons for failing in such cases.
+We then follow the goal of finding means to systematically improve optimality.
+Since there are always cases in which the algorithm does not find a consistent orchestration, we propose an algorithm that is supposed to help identifying the reasons for failing in such cases in the subsequent section.
 
 % \begin{itemize}
 %     \item We conclude that we need to deal with the situation of undecidability. In consequence, orchestration must operate conservatively, i.e., we cannot assume to always find a solution, but if find it, it must be consistent.
@@ -101,14 +101,14 @@ So we can introduce a stochastic variable $AppCons_{\modeltuple{m},\changetuple{
 \end{align*}
 The expected value of this variable is then equal to the event $E_{\modeltuple{m},\changetuple{\metamodeltuple{M}}}$ to occur:
 \begin{align*}
-    E(AppCons_{\modeltuple{m},\changetuple{\metamodeltuple{M}}}) = P(AppCons_{\modeltuple{m},\changetuple{\metamodeltuple{M}}} = 1) = P(E_{\modeltuple{m},\changetuple{\metamodeltuple{M}}})
+    \mu(AppCons_{\modeltuple{m},\changetuple{\metamodeltuple{M}}}) = P(AppCons_{\modeltuple{m},\changetuple{\metamodeltuple{M}}} = 1) = P(E_{\modeltuple{m},\changetuple{\metamodeltuple{M}}})
 \end{align*}
 
 \mnote{Number of found consistent orchestration is sum of expected values}
 For an application function that chooses a random orchestration, we can thus express the numerator of $\function{Opt}(\appfunction{\orcfunction{\transformationset{T}}})$ as the sum of expected values of the stochastic variables for all possible inputs.
 \begin{align*}
     &
-    \abs{\setted{\tupled{\modeltuple{m},\changetuple{\metamodeltuple{M}}} \mid \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \mathtext{is consistent to} \transformationset{T}}} = \sum_{\modeltuple{m},\changetuple{\metamodeltuple{M}}} E(AppCons_{\modeltuple{m},\changetuple{\metamodeltuple{M}}}) \\
+    \abs{\setted{\tupled{\modeltuple{m},\changetuple{\metamodeltuple{M}}} \mid \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \mathtext{is consistent to} \transformationset{T}}} = \sum_{\modeltuple{m},\changetuple{\metamodeltuple{M}}} \mu(AppCons_{\modeltuple{m},\changetuple{\metamodeltuple{M}}}) \\
     & \formulaskip
     = \frac{
         \sum_{\modeltuple{m},\changetuple{\metamodeltuple{M}}} \abs{\setted{\tuple{\transformation{t}} \in \transformationset{T}^{< \mathbb{N}} \mid \tuple{\transformation{t}} \mathtext{is consistent orchestration for} \tupled{\modeltuple{m}, \changetuple{\metamodeltuple{M}}}}}
@@ -136,7 +136,21 @@ The application function can, for sure, contain more intelligent logic for deter
 By implementing further mechanisms to make a reasonable selection, the possibility to find a consistent orchestration may be further improved.
 We investigated different orchestration strategies, such as the depth-first or breadth-first propagation of changes, and analyzed them with a simulator developed specifically for that purpose, which is available at GitHub~\cite{orchestrationSimulator}.
 An example of a scenario showing the necessity to execute transformation more than once that we implemented in the simulator is depicted in \autoref{fig:orchestration:simulator}
-For each strategy, however, we found scenarios in which they performed worse than another strategy.
+For each strategy, however, we found categories of transformation networks in which they performed worse than another strategy.
+
+\mnote{Backtracking can be used to explore the problem space}
+Another strategy could be to try different orchestrations as soon as it turns out that one orchestration cannot yield consistent models.
+This can, for example, be achieved by performing backtracking.
+\autoref{algo:orchestration:application} dynamically selects transformations to execute. 
+Thus as soon as the algorithm detects that no further transformations can lead to a consistent orchestration, it can revert the last transformation execution and proceed with another transformation.
+This means that it resets the state of generated changes and executed transformations to the one before the current execution of the orchestration loop and proceeds again with another transformation.
+If all transformations as continuations of one sequence of executed transformation are tried out, the algorithm recursively steps back the iterations of the loop.
+While this approach, in theory, allows to explore the complete problem space $P = \abs{\transformationset{T}^{< \mathbb{N}}}$, it is impractical because the problem space is infinitely large.
+It may, however, be used to try different options in a subset of the problem space, for example, those with a limited length.
+
+% We need to deal with the situation that no consistent orchestration exists and that we are not able to find it, even if it exists, as the problem space is arbitrarily large (arbitrary high number of transformation executions).
+% This forbids approaches such as backtracking to find an appropriate solution.
+% \todo{Discuss Backtracking}
 
 \mnote{Avoiding alternation to improve ability to find consistent orchestration}
 Since it was impossible to find a strategy that is, in general, superior to other investigates strategies, we gave up that direction and focused on finding orchestrations that should be generally avoided.
@@ -487,29 +501,110 @@ In addition, if monotony is given at least for some transformations, the orchest
 % \end{itemize}
 
 
-\subsection{A Conservative Application Algorithm}
+\section{A Conservative Application Algorithm}
+
+\mnote{Correct algorithm that always terminates}
+We have argued why it is inevitable that any algorithm realizing an application function cannot be optimal and thus will not be able to find a consistent orchestration although it exists and, in that case, either return $\bot$ or not even terminate at all.
+Apart from minor improvements, such as the avoidance or detection of alternations, to improve the probability to find a consistent orchestration, or general strategies like backtracking for trying different orchestrations, we did not find systematic ways to improve optimality of the application function.
+Nevertheless, we want to find an algorithm that is at least correct and does always terminate, even if it does implement a systematic way to improve optimality, thus which is conservative.
+
+\mnote{Artificial execution bound can prevent from finding consistent orchestration}
+\autoref{algo:orchestration:application} may not terminate, because it generates an infinitely long orchestrations, thus never leaving the loop in Lines~\ref{algo:orchestration:application:line:startorchestrate}--\ref{algo:orchestration:application:line:endorchestrate}.
+Thus, to ensure termination we need to introduce an upper bound for the number of executed transformations.
+We identified in \autoref{chap:orchestration:decidability:correctness_termination} that there is no upper bound for the number of necessary executions, thus even the shortest consistent orchestration for specific inputs can be arbitrarily long (see example in \autoref{fig:orchestration:no_upper_bound}).
+Any arbitrary bound can prevent the algorithm from finding consistent orchestrations.
+
+\mnote{High numbers of transformation executed are not wanted in practice}
+From an engineers perspective, we may, however, consider the behavior that an arbitrary high number of transformations execution is required to yield consistent models as unwanted behavior.
+Although the examples we have given are valid, they are rather artificial.
+We claim that a transformation network that requires a rather high number of executions compared to the number of contained transformations to find consistent models does not operate as expected.
+In particular, if such a high number of executions is required to find a consistent orchestration, it will be difficult to identify the reason for not finding a consistent execution in case the algorithm returns $\bot$.
+Thus, we introduce an artificial upper bound for the number of transformation executions.
+That bound will be well-defined, such that we can reasonably assume that no more execution are practically necessary.
+
+\mnote{Design goals of orchestration, algorithm and termination}
+In the following, we propose design goals for a conservative application algorithm and the algorithm itself and finally prove its correctness and termination properties.
+The work was developed together with a student in a kind of scientific internship and published in \cite{gleitze2020orchestration}.
+
+% FROM MODELS:
+% Finally, one could question whether it is relevant if an executionstrategy can be guaranteed to terminate. Execution strategies will beused to tell users whether changes they made can be incorporatedinto the other models automatically. In consequence, users shouldreliably and timely get a response. We might compare this situationto merging changes in version control systems. There, users alsowant a reliable and timely response on whether their changes couldbe incorporated automatically, or whether they need to resolveconflicts manually
+
+% From an engineering perspective, unbounded numbers of executions is still unwanted behavior. We claim that a transformation network that takes thousands of executions of the same transformation to find a consistent state works not as expected and if running into a failure would expose severe problems to find the reasons for that failures.
+% Thus, we propose to simply abort the execution after some time to be sure not to run in an endless loop.
+
+% Finally, this problem is comparable to ordinary programming, because there the same situations regarding alternation and divergence can occur that result in non-termination of a program.
+% As we all know, it is impossible to systematically avoid that, but just possible to carefully develop the program and apply best practices to avoid such situations.
+
+% \textbf{Conclusion:} Apart from minor discussed improvements, we cannot systematically improve optimality / reduce conservativeness and also not dynamically terminate when divergence is detected. Especially, there is no guarantee wo when also alternation is detected. There can be an arbitrary high number of execution before alternation is detected.
+% Thus, we propose an algorithm that terminates deterministically and returns $\bot$ also when it is not able to find a solution in a fixed number of steps, but improves the ability for the transformation developer or user to find out why in specific situation no solution can be found.
+
+% \todo{Question whether having no upper bound is only a theoretical or also a practical problem. The given example is rather artificial, so we may stop in practice without excluding relevant cases}
+
+\subsection{Design Goal}
+
+\mnote{Degrees of freedom in algorithm}
+An adapted version of \autoref{algo:orchestration:application:line:endorchestrate} that always terminates has two degrees of freedom.
+First, the execution order of transformations needs to be determined by defining the function \function{Orchestrate}.
+Second, an upper bound for the number of executions of transformations, thus the loop in Lines~\ref{algo:orchestration:application:line:startorchestrate}--\ref{algo:orchestration:application:line:endorchestrate}, needs to be defined.
+
+\mnote{Execution order is important for identfying reasons for failing}
+We have already discussed that improving optimality is not an achievable goal when determining the transformation execution order by the \function{Orchestrate} function.
+Since we know that the algorithm will always produce false negatives, i.e., it will not find a consistent orchestration although it exists, it is important for a transformation developer or user to be able to identify the reasons for that in practice.
+The algorithm can support them in this regard by delivering the final state of the models when the orchestration aborted.
+The execution order that was chosen until that state was reached is of central importance of identifying the reasons for failing.
+Consider that transformations are executed in an arbitrary order and then only some of the models of the final state are actually consistent.
+Apart from investigating the complete sequence of executed transformations, there is clue for the user to find the reasons for the algorithm to fail, thus about \emph{provenance} of the error.
+
+\mnote{Orchstration principle to incrementally restore consistency}
+To improve identifying provenance whenever the algorithm fails, we propose the following principle for determining an orchestration:
+\begin{quote}
+    \enquote{Ensure consistency among the transformations that have already been executed before executing a transformation that has not been executed yet.} \cite{gleitze2020orchestration}
+\end{quote}
+The principle requires that consistency is ensured iteratively for subsets of the transformations and thus the models.
+As long as the models are not consistent to all already executed transformations, the orchestration may only execute those transformations instead of new ones until the models are consistent to all of them.
+This ensures that consistency is preserved after each change in an incremental way, iteratively increasing improving the set of models and transformations for which consistency is restored.
+
+\mnote{Benefits of orchestration principle}
+This approach improves identifying provenance, because it restricts the potentially causal transformations to consider.
+If the algorithm fails after executing a subset of the transformations $\transformationset{T}_{exec} \subseteq \transformationset{T}$.
+Then there is some transformation $\transformation{t} \in \transformationset{T}_{exec}$ that was executed for its first time last.
+Thus, the algorithm found an orchestration of $\transformationset{T}_{exec} \setminus \transformation{t}$ such that the models were consistent to all those transformation, but is was not able to execute $\transformation{t}$ and the transformations in $\transformationset{T}_{exec}$ afterwards, such that the models become consistent to all these transformations.
+This helps the transformation developer or user to understand and find the reason for failing in different ways.
+First, he or she can ignore any transformation in $\transformationset{T} \setminus \transformationset{T}_{exec}$, as the algorithm already failed to preserve consistency according to the other transformations, which can significantly reduce the number of transformations to consider.
+Second, the realization of $\transformation{t}$ is somehow conflicting with the other transformations in $\transformationset{T}_{exec}$. This does not necessarily mean that there is something wrong with $\transformation{t}$, but only that also considering that transformation does either induce the situation that no consistent orchestration anymore or that it cannot be found.
+Third, having a state of the models that is consistent to $\transformationset{T}_{exec} \setminus \transformation{t}$ can be used as a starting point to either identify the occurring problem or to manually restore consistency of the models.
+
+\mnote{Principle does not improve optimality}
+If the algorithm operates according to the introduced principle and is not able to preserve consistency anymore after the orchestration considers an additional transformation $\transformation{t}$, the selected execution order provides the discussed benefits for identifying the reasons for failing.
+There may, however, be another orchestration that is able to ensure consistency to $\transformationset{T}_{exec}$. Executing $\transformation{t}$ earlier or also integrating further transformations in $\transformationset{T}$ before ensuring consistency to all transformations in $\transformationset{T}_{exect}$ can, for sure, lead to the situation that the algorithm finds a consistent orchestration.
+This can reduce optimality of the realized orchestration function, but we claim the discussed benefits to outweigh that.
+
+\mnote{Transformations should react to each sequence of all other transformations}
+We have shown that there is no inherent upper bound for the necessary number of transformation executions.
+Rather than specifying a concrete depending, whether it be fixed or depending on the network size, we derive a reasonable artificial bound for the number of execution from a property that we assume reasonable for possible orchestrations of a set of transformations.
+The idea of that property is that each transformation should be allowed to react to the execution of each possible sequence of all other transformations.
+It should, however, not be necessary that a transformation must be executed again after the other transformations reacted the execution of that transformation.
+Thus, if a transformation was executed after applying the other transformations in any possible order, we expect the models to be consistent to that transformation.
+
+\begin{definition}[Reactive Converging Synchronizing Transformations]
+    A set of synchronizing transformations $\transformationset{T}$ is \emph{reactive converging} with respect to models $\modeltuple{m}$ and changes $\changetuple{\metamodeltuple{M}}$ if in any orchestration of $\transformationset{T}$ in which the last transformation $\transformation{t} \in \transformationset{T}$ of that sequence was executed after all other duplicate-free orders of transformations in that order, the yielded models are consistent to $\transformation{t}$.
+\end{definition}
+
+\mnote{Example for reactive converging transformations}
+The property does not require the other transformation were executed in any order consecutively, but only that the orchestration contains any order of those transformations, but potentially with other transformations in between.
+As an example, assume a set of transformations $\transformation{t}_{1}, \transformation{t}_{2}, \transformation{t}{3}$, which is reactive converging for some input of models and changes.
+After executing them for these models and changes in the order $\tupled{\transformation{t}_{1}, \transformation{t}_{2}, \transformation{t}{3}, \transformation{t}_{1}, \transformation{t}_{2}, \transformation{t}{3}}$, the models yielded by that orchestration may still be inconsistent to $\transformation{t}_{1}$, because it was not executed after the order of the transformations $\tupled{\transformation{t}_{3}, \transformation{t}_{2}}$.
+After executing $\transformation{t}_{1}$ once more, the orchestration must yield consistent models, because $\transformation{t}_{1}$ was executed after the two order of the other transformations $\tupled{\transformation{t}_{2}, \transformation{t}_{3}}$ and $\tupled{\transformation{t}_{3}, \transformation{t}_{2}}$.
+Likewise, $\transformation{t}_{2}$ was executed after $\tupled{\transformation{t}_{1}, \transformation{t}_{3}}$ and $\tupled{\transformation{t}_{3}, \transformation{t}_{1}}$, and $\transformation{t}_{3}$ was executed after $\tupled{\transformation{t}_{1}, \transformation{t}_{2}}$ and $\tupled{\transformation{t}_{2}, \transformation{t}_{1}}$.
 
 
-FROM MODELS:
-Finally, one could question whether it is relevant if an executionstrategy can be guaranteed to terminate. Execution strategies will beused to tell users whether changes they made can be incorporatedinto the other models automatically. In consequence, users shouldreliably and timely get a response. We might compare this situationto merging changes in version control systems. There, users alsowant a reliable and timely response on whether their changes couldbe incorporated automatically, or whether they need to resolveconflicts manually
+\subsection{The Provenance Algorithm}
+\todo{Propose Provenance and Reactions Strategy.}
 
 
+\todo{Discuss that is may make sense to first use transformations between already involved models rather than passing through the complete network.}
 
 
-We need to deal with the situation that no consistent orchestration exists and that we are not able to find it, even if it exists, as the problem space is arbitrarily large (arbitrary high number of transformation executions).
-This forbids approaches such as backtracking to find an appropriate solution.
-\todo{Discuss Backtracking}
-
-From an engineering perspective, unbounded numbers of executions is still unwanted behavior. We claim that a transformation network that takes thousands of executions of the same transformation to find a consistent state works not as expected and if running into a failure would expose severe problems to find the reasons for that failures.
-Thus, we propose to simply abort the execution after some time to be sure not to run in an endless loop.
-
-Finally, this problem is comparable to ordinary programming, because there the same situations regarding alternation and divergence can occur that result in non-termination of a program.
-As we all know, it is impossible to systematically avoid that, but just possible to carefully develop the program and apply best practices to avoid such situations.
-
-\textbf{Conclusion:} Apart from minor discussed improvements, we cannot systematically improve optimality / reduce conservativeness and also not dynamically terminate when divergence is detected. Especially, there is no guarantee wo when also alternation is detected. There can be an arbitrary high number of execution before alternation is detected.
-Thus, we propose an algorithm that terminates deterministically and returns $\bot$ also when it is not able to find a solution in a fixed number of steps, but improves the ability for the transformation developer or user to find out why in specific situation no solution can be found.
-
-\todo{Question whether having no upper bound is only a theoretical or also a practical problem. The given example is rather artificial, so we may stop in practice without excluding relevant cases}
+\subsection{Correctness and Termination}
 
 
-Propose Provenance and Reactions Strategy.
