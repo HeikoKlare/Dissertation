@@ -523,7 +523,7 @@ Thus, we introduce an artificial upper bound for the number of transformation ex
 That bound will be well-defined, such that we can reasonably assume that no more execution are practically necessary.
 
 \mnote{Design goals of orchestration, algorithm and termination}
-In the following, we propose design goals for a conservative application algorithm and the algorithm itself and finally prove its correctness and termination properties.
+In the following, we propose design goals for a conservative application algorithm and the so called \emph{provenance algorithm} itself and finally prove its correctness and termination properties.
 The work was developed together with a student in a kind of scientific internship and published in \cite{gleitze2020orchestration}.
 
 % FROM MODELS:
@@ -540,7 +540,7 @@ The work was developed together with a student in a kind of scientific internshi
 
 % \todo{Question whether having no upper bound is only a theoretical or also a practical problem. The given example is rather artificial, so we may stop in practice without excluding relevant cases}
 
-\subsection{Design Goal}
+\subsection{Design Goals}
 
 \mnote{Degrees of freedom in algorithm}
 An adapted version of \autoref{algo:orchestration:application:line:endorchestrate} that always terminates has two degrees of freedom.
@@ -587,6 +587,7 @@ It should, however, not be necessary that a transformation must be executed agai
 Thus, if a transformation was executed after applying the other transformations in any possible order, we expect the models to be consistent to that transformation.
 
 \begin{definition}[Reactive Converging Synchronizing Transformations]
+    \label{def:reactiveconverging}
     A set of synchronizing transformations $\transformationset{T}$ is \emph{reactive converging} with respect to models $\modeltuple{m}$ and changes $\changetuple{\metamodeltuple{M}}$ if in any orchestration of $\transformationset{T}$ in which the last transformation $\transformation{t} \in \transformationset{T}$ of that sequence was executed after all other duplicate-free orders of transformations in that order, the yielded models are consistent to $\transformation{t}$.
 \end{definition}
 
@@ -599,12 +600,116 @@ Likewise, $\transformation{t}_{2}$ was executed after $\tupled{\transformation{t
 
 
 \subsection{The Provenance Algorithm}
-\todo{Propose Provenance and Reactions Strategy.}
 
+\begin{algorithm}
+	\caption{The provenance algorithm in pseudocode, adapted from \cite{gleitze2020orchestration}.}
+	\label{algo:orchestration:provenance}
+	
+	%\SetDataSty{textsf}
 
-\todo{Discuss that is may make sense to first use transformations between already involved models rather than passing through the complete network.}
+    %\hspace*{\algorithmicindent} \textbf{Input:}\\
+    %\hspace*{\algorithmicindent} \textbf{Output:} 
+    \begin{algorithmic}[1]
+    \Procedure{\function{ProvenanceApply}}{$\transformationset{T}, \modeltuple{m} = \tupled{\model{m}{1}, \dots, \model{m}{n}}, \changetuple{\metamodeltuple{M}}$}
+        \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\transformationset{t}, \modeltuple{m}$)
+        \If{$\neg \mathvariable{isConsistent}$}
+            \State \Return{$\bot$}
+        \EndIf
+        $\tupled{\change{\metamodel{M}{1}, \mathvariable{res}}, \dots, \change{\metamodel{M}{1}, \mathvariable{res}}} \gets \function{Propagate}(\transformationset{T}, \modeltuple{m}, \changetuple{\metamodeltuple{M}})$
+        \State $\modeltuple{m}_{res} \leftarrow \tupled{\change{\metamodel{M}{1},\mathvariable{res}}(\model{m}{1}), \dots, \change{\metamodel{M}{n},\mathvariable{res}}(\model{m}{n})}$
+        \State \Return{$\modeltuple{m}_{res}$}
+    \EndProcedure
+    \vspace{\baselineskip}
+    \Procedure{\function{Propagate}}{$\transformationset{T}, \modeltuple{m} = \tupled{\model{m}{1}, \dots, \model{m}{n}}, \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}}$}
+        \vspace{0.15\baselineskip}
+        \State $\provalgexecuted \gets \emptyset$ \label{line:executed-init}
+        %\State $\mathvariable{accumulatedChanges} \gets \changetuple{\metamodeltuple{M}}$         
+        \vspace{0.3\baselineskip}
+        
+        \For{$\provalgcandidate \in \transformationset{T} \setminus \provalgexecuted \mid \changetuple{\metamodeltuple{M}}.\mathvariable{adjacentTo}(\provalgcandidate)$} \label{line:loop-start}
+            %\vspace{0.15\baselineskip}
+            \State $(\modeltuple{m}, \changetuple{\metamodeltuple{M},\mathvariable{candidate}}) \gets \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{candidate}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ \label{line:first-execution}
+            %\State $\transformationset{T}_{\mathvariable{subnetwork}} \gets \transformationset{T}.\mathvariable{edgeInducedSubgraph}(\transformationset{T}_\mathvariable{executed})$
+            %\State $\changetuple{\metamodeltuple{M},\mathvariable{propagation}} \gets \function{Propagate}(\transformationset{T}_{\mathvariable{subnetwork}}, \modeltuple{m}, \changetuple{\metamodeltuple{M},\mathvariable{candidate}})$ \label{line:recursive-call}
+            \State $\changetuple{\metamodeltuple{M},\mathvariable{propagation}} \gets \function{Propagate}(\provalgexecuted, \modeltuple{m}, \changetuple{\metamodeltuple{M},\mathvariable{candidate}})$ \label{line:recursive-call}
+            %\State $\changetuple{\metamodeltuple{M},\mathvariable{candidate}} \gets \mathvariable{candidate}.\mathvariable{execute}(\mathvariable{accumulatedChanges})$ \label{line:check-execution}
+            \State $\modeltuple{m}_{\mathvariable{propagation}} \gets \tupled{\change{\metamodel{M}{1},\mathvariable{propagation}}(\model{m}{1}), \dots, \change{\metamodel{M}{n},\mathvariable{propagation}}(\model{m}{n})}$
+            \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\provalgcandidate, \modeltuple{m}_{\mathvariable{propagation}})$
+            \If{$\neg \mathvariable{isConsistent}$}
+                \State \Return{$\bot$} \label{line:fail}
+            \EndIf
+            %\vspace{0.3\baselineskip}
+            \State $\changetuple{\metamodeltuple{M}} \gets \changetuple{\metamodeltuple{M},\mathvariable{propagation}}$
+            \State $\provalgexecuted \gets \provalgexecuted \cup \setted{\provalgcandidate}$ \label{line:executed-update}
+        \EndFor
+        \State \Return{$\changetuple{\metamodeltuple{M}}$}
+    \EndProcedure
+    \end{algorithmic}
+	% \Procedure{\(\Propagate\,\mathsf{(}\network,\changes\mathsf{)}\)}{
+	% \vspace{0.15\baselineskip}		
+	% \(\executed\gets\emptyset\)\;																		\label{line:executed-init}
+	% \(\accumulatedChanges\gets\changes\)\;         
+	% \vspace{0.3\baselineskip}
+	
+	% \ForEach{\(\candidate\in\network\mid\candidate\notin\executed\land\accumulatedChanges.\adjacentTo\text{\,(}\candidate\text{)}\)}{	\label{line:loop-start}
+	% \vspace{0.15\baselineskip}
+	% 		\(\candidateChanges\gets\candidate.\execute\,\text{(}\accumulatedChanges\text{)}\)\;			\label{line:first-execution}
+	% 		\(\subnetwork\gets\network.\edgeInducedSubgraph\,\text{(}\executed\)\()\)\;
+	% 		\(\propagationChanges\gets\Propagate\,\text{(}\subnetwork,\candidateChanges\text{)}\)\;			\label{line:recursive-call}
+	% 		\(\candidateChanges\gets\candidate.\execute\,\text{(}\accumulatedChanges\text{)}\)\;			\label{line:check-execution}
+	% 		\lIf{\(\candidateChanges.\adjacentToAny\,\text{(}\executed\text{)}\)}{\(\fail\,\text{()}\)}		\label{line:fail}				
+	% \vspace{0.3\baselineskip}
+	% 		\(\accumulatedChanges\cupgets\propagationChanges\cup\candidateChanges\)\;
+	% 		\(\executed\cupgets\candidate\)\;																\label{line:executed-update}
+	% 	}
+	% \Return\(\accumulatedChanges\)\;
+	% }
+\end{algorithm}
+
+\mnote{Provenance algorithm performs orchestration recursively}
+We propose an algorithm that realizes the discussed design goal in \autoref{algo:orchestration:provenance}.
+The algorithm is a derivation of the general algorithm implementing an application function depicted in \autoref{def:orchestration:application}.
+It first checks for consistency of the given models as a prerequisite for executing the transformations.
+Then the algorithm calls the recursive function \function{Propagate}, which implements the orchestration of transformations and returns a change tuple that is yielded by the determined orchestrations, which delivers consistent models if applied to the input.
+While this behavior is equal to the one in \autoref{def:orchestration:application}, the orchestrate itself is implemented differently in a recursive rather than an iterative manner, which implicitly ensures termination.
+
+\mnote{Recursive orchestration function fulfills principle of incremental consistency restoration}
+The function \function{Propagate} implementing the orchestration in a recursive manner acts as follows:
+It selects one of the transformations as a candidate to execute next.
+This selection ensures that a transformation is selected that is adjacent to any already performed change, such that the transformation needs to perform changes.
+It then applies the transformation using the generalization function $\generalizationfunction{}$.
+Afterwards, it recursively executes the function \function{Propagate} with the subnetwork given by the transformations that have already been executed.
+After that recursive execution it is checked whether the models yielded by the resulting changes are still consistent to the candidate transformation.
+If this consistency check fails, the transformations do not fulfill the definition of being reactive converging according to \autoref{def:orchestration:reactiveconverging}, as we will prove later.
+If the models are consistent to the transformation, the next candidate is picked.
+In effect, the strategy realizes the defined principle in a recursive manner, because after executing a new transformations, the recursive execution ensures consistency to all yet executed transformations.
+
+\begin{figure}
+    \centering
+    \resizebox{\textwidth}{!}{\input{figures/correctness/orchestration/provenance_example.tex}}
+    \caption[Exemplary execution of the provenance algorithm]{%
+    Exemplary execution of the provenance algorithm for a change in the topmost model. 
+    The transformations present to the current execution of \function{Propagate}, as well as the executed and candidate transformations $\provalgexecuted$ and $\provalgcandidate$ are depicted for each iteration (horizontal) and recursion step (vertical).
+}
+    \label{fig:orchestration:provenance_example}
+\end{figure}
+
+\mnote{Exemplary execution of the provenance algorithm}
+\autoref{fig:orchestration:provenance_example} depicts an exemplary execution of the \function{ProvenanceApply} algorithm for a set of four transformations between four metamodels.
+We assume that the algorithm receives four initially consistent models and a change to the topmost one.
+The example shows that in each recursion step only the subnetwork of the already executed transformations in $\provalgexecuted$ is considered.
+Thus, the set of transformations gets smaller in each recursive call of \function{ProvenanceApply}.
 
 
 \subsection{Correctness and Termination}
+
+
+
+\subsection{Provenance Improvement}
+
+Derive from the algorithm how it can improve provenance.
+Currently it does not return necessary states, but the states in which it fails could just be delivered.
+
+\todo{Discuss that is may make sense to first use transformations between already involved models rather than passing through the complete network.}
 
 
