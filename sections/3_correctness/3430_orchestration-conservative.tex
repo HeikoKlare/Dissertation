@@ -646,7 +646,7 @@ Likewise, $\transformation{t}_{2}$ was executed after $\tupled{\transformation{t
             %\State $\changetuple{\metamodeltuple{M},\mathvariable{candidate}} \gets \mathvariable{candidate}.\mathvariable{execute}(\mathvariable{accumulatedChanges})$ \label{line:check-execution}
             \State $\modeltuple{m}_{\mathvariable{propagation}} \gets \tupled{\change{\metamodel{M}{1},\mathvariable{propagation}}(\model{m}{1}), \dots, \change{\metamodel{M}{n},\mathvariable{propagation}}(\model{m}{n})}$
             \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\provalgcandidate, \modeltuple{m}_{\mathvariable{propagation}})$
-            \If{$\neg \mathvariable{isConsistent}$} \label{algo:orchestration:provenance:line:failcheck}
+            \If{$\neg \mathvariable{isConsistent}$} \label{algo:orchestration:provenance:line:bot_failcheck}
                 \State \Return{$\bot$} \label{algo:orchestration:provenance:line:bot_nonreactiveconverging}
             \EndIf
             %\vspace{0.3\baselineskip}
@@ -757,7 +757,7 @@ First, it is easy to see that the algorithm does always terminate and always eit
         \item $\transformation{t}$ was executed and no other transformation that involves $\model{m}{i}$ or $\model{m}{k}$ was executed afterwards. Then the returned models are consistent by definition of correctness for $\transformation{t}$.
         \item $\transformation{t}$ was executed and another transformation $\transformation{t}' \in \transformationset{T}$ that involves $\model{m}{i}$ or $\model{m}{k}$ was executed afterwards.
         Since $\transformation{t}'$ was executed after $\transformation{t}$, $\transformation{t}$ was in $\provalgexecuted$ when $\transformation{t}'$ was the candidate transformation $\provalgcandidate$.
-        Thus, $\transformation{t}$ is executed in the recursion after the first execution of $\transformation{t}'$, thus the result is consistent to $\transformation{t}$ and because of the check in Line~\ref{algo:orchestration:provenance:line:failcheck} after returning from the recursion also to $\transformation{t}'$. Thus, the returned models are consistent to both $\transformation{t}$ and $\transformation{t}'$.
+        Thus, $\transformation{t}$ is executed in the recursion after the first execution of $\transformation{t}'$, thus the result is consistent to $\transformation{t}$ and because of the check in Line~\ref{algo:orchestration:provenance:line:bot_failcheck} after returning from the recursion also to $\transformation{t}'$. Thus, the returned models are consistent to both $\transformation{t}$ and $\transformation{t}'$.
     \end{enumerate}
     The third case can be applied inductively if a transformation is followed by multiple transformations that involve the same models. Thus, all cases lead to a contradiction.
 \end{proof}
@@ -849,7 +849,7 @@ The proposed \autoref{algo:orchestration:application} does only return $\bot$ in
 The necessary information for improving the identification of provenance for the failure is, however, present in the algorithm and can be easily retrieved.
 
 \mnote{Reasons for algorithm to fail}
-The algorithm may fail because it is, at some point, not able to execute a candidate transformation (Line~\ref{algo:orchestration:application:line:bot_application}), or because after executing a new transformation consistency to the previously executed transformations cannot be achieved without letting one of the transformations react to the reaction of all other transformations to its own changes (Line~\ref{algo:orchestration:application:line:bot_failcheck}), which we defined as the property of reactive convergence.
+The algorithm may fail because it is, at some point, not able to execute a candidate transformation (Line~\ref{algo:orchestration:provenance:line:bot_application}), or because after executing a new transformation consistency to the previously executed transformations cannot be achieved without letting one of the transformations react to the reaction of all other transformations to its own changes (Line~\ref{algo:orchestration:provenance:line:bot_failcheck}), which we defined as the property of reactive convergence.
 In that case, we at least know that the after the previous loop iteration consistency regarding all yet executed transformations could be achieved.
 
 \mnote{Relevant information about the failure state}
