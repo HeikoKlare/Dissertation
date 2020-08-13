@@ -716,7 +716,7 @@ The example shows that in each recursion step only the subnetwork of the already
 Thus, the set of transformations gets smaller in each recursive call of \function{ProvenanceApply}.
 
 
-\subsection{Algorithm Properties}
+\subsection{Correctness, Termination and Design Goals}
 
 \mnote{Fulfillment of properties}
 The provenance algorithm was intended to implement a correct application function and to always terminate.
@@ -841,11 +841,32 @@ We did, however, not introduce this as a property that should be fulfilled by tr
 In fact, it is only supposed to be a well-defined property that allows us to define a reasonable upper bound for the execution of transformations and thus to allow us to define an algorithm that always terminates without using a completely arbitrary upper bound for determining when to terminate.
 
 
-\subsection{Provenance Improvement}
+\subsection{Provenance Identification Improvement}
 
-Derive from the algorithm how it can improve provenance.
-Currently it does not return necessary states, but the states in which it fails could just be delivered.
+\mnote{Algorithm does not yield information about failure state}
+We have motivated the provenance algorithm with the idea to improve the ability of a transformation developer or user to find the reason for the algorithm not to yield consistent models for certain inputs.
+The proposed \autoref{algo:orchestration:application} does only return $\bot$ in those situations and thus does not directly support that process.
+The necessary information for improving the identification of provenance for the failure is, however, present in the algorithm and can be easily retrieved.
 
-\todo{Discuss that is may make sense to first use transformations between already involved models rather than passing through the complete network.}
+\mnote{Reasons for algorithm to fail}
+The algorithm may fail because it is, at some point, not able to execute a candidate transformation (Line~\ref{algo:orchestration:application:line:bot_application}), or because after executing a new transformation consistency to the previously executed transformations cannot be achieved without letting one of the transformations react to the reaction of all other transformations to its own changes (Line~\ref{algo:orchestration:application:line:bot_failcheck}), which we defined as the property of reactive convergence.
+In that case, we at least know that the after the previous loop iteration consistency regarding all yet executed transformations could be achieved.
+
+\mnote{Relevant information about the failure state}
+Whenever the \function{Propagate} function fails and returns $\bot$, we know that for the current transformations in $\provalgexecuted$ an orchestration exists that yields the current changes in $\changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}}$, for which we know that applied to the original models the result $\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \dots, \change{\metamodel{M}{n}}(\model{m}{n})}$ is at least consistent to $\provalgexecuted$.
+We also know that the algorithm was not able to ensure consistency to the current candidate transformation $\provalgcandidate$.
+This is exactly the information for which we already discussed in \autoref{chap:orchestration:algorithm:goals} the benefits with respect to the underlying design principle of recursively ensuring consistency for subsets of the transformations for the ability to identify the reasons for not finding a consistent orchestration.
+Thus, implementing the algorithm such that also delivers $\provalgcandidate$, $\provalgexecuted$ and the current changes $\changetuple{\metamodeltuple{M}}$ reduces the necessary model states and transformations to consider for a transformation user or developer to identify why no consistent orchestration was found.
+
+%Unfortunately, the algorithm does help in finding whether no orchestration exists at all or whether only the algorithm was not able to find it.
+%Maybe map that to unapplicability of transformations to non-existence vs. fail after recursive application to non-finding
+
+\mnote{Possible improvement of orchestration to improve locality}
+The algorithm and the ability to identify reasons for the algorithm to fail may be further improved by determining a reasonable order for the execution of transformations in the loop of the \function{Propagate} function.
+The loop at least ensures that no transformations are executed that are not yet affected by any change and thus would not produce changes.
+It can, however, also be reasonable to first select transformations for which both models have already modified before selecting transformations for which only one model has been modified.
+This can further improve locality of the changes made until the algorithm fails, because less models may have been modified until the algorithm fails.
+
+%\todo{Discuss that is may make sense to first use transformations between already involved models rather than passing through the complete network.}
 
 
