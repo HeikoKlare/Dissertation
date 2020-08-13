@@ -541,6 +541,7 @@ The work was developed together with a student in a kind of scientific internshi
 % \todo{Question whether having no upper bound is only a theoretical or also a practical problem. The given example is rather artificial, so we may stop in practice without excluding relevant cases}
 
 \subsection{Design Goals}
+\label{chap:orchestration:algorithm:goals}
 
 \mnote{Degrees of freedom in algorithm}
 An adapted version of \autoref{algo:orchestration:application:line:endorchestrate} that always terminates has two degrees of freedom.
@@ -613,34 +614,44 @@ Likewise, $\transformation{t}_{2}$ was executed after $\tupled{\transformation{t
     \Procedure{\function{ProvenanceApply}}{$\transformationset{T}, \modeltuple{m} = \tupled{\model{m}{1}, \dots, \model{m}{n}}, \changetuple{\metamodeltuple{M}}$}
         \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\transformationset{t}, \modeltuple{m}$)
         \If{$\neg \mathvariable{isConsistent}$}
-            \State \Return{$\bot$}
+            \State \Return{$\bot$} \label{algo:orchestration:provenance:line:bot_input}
         \EndIf
-        $\tupled{\change{\metamodel{M}{1}, \mathvariable{res}}, \dots, \change{\metamodel{M}{1}, \mathvariable{res}}} \gets \function{Propagate}(\transformationset{T}, \modeltuple{m}, \changetuple{\metamodeltuple{M}})$
+        \State $\changetuple{\metamodeltuple{M},\mathvariable{res}} \gets \tupled{\change{\metamodel{M}{1}, \mathvariable{res}}, \dots, \change{\metamodel{M}{1}, \mathvariable{res}}} \gets \function{Propagate}(\transformationset{T}, \modeltuple{m}, \changetuple{\metamodeltuple{M}})$
+        \If{$\changetuple{\metamodeltuple{M},\mathvariable{res}} = \bot$}
+            \State \Return{$\bot$} \label{algo:orchestration:provenance:line:bot_orchestration}
+        \EndIf
         \State $\modeltuple{m}_{res} \leftarrow \tupled{\change{\metamodel{M}{1},\mathvariable{res}}(\model{m}{1}), \dots, \change{\metamodel{M}{n},\mathvariable{res}}(\model{m}{n})}$
-        \State \Return{$\modeltuple{m}_{res}$}
+        \State \Return{$\modeltuple{m}_{res}$} \label{algo:orchestration:provenance:line:return_result}
     \EndProcedure
     \vspace{\baselineskip}
     \Procedure{\function{Propagate}}{$\transformationset{T}, \modeltuple{m} = \tupled{\model{m}{1}, \dots, \model{m}{n}}, \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}}$}
         \vspace{0.15\baselineskip}
-        \State $\provalgexecuted \gets \emptyset$ \label{line:executed-init}
+        \State $\provalgexecuted \gets \emptyset$ \label{algo:orchestration:provenance:line:executed_init}
         %\State $\mathvariable{accumulatedChanges} \gets \changetuple{\metamodeltuple{M}}$         
         \vspace{0.3\baselineskip}
         
-        \For{$\provalgcandidate \in \transformationset{T} \setminus \provalgexecuted \mid \changetuple{\metamodeltuple{M}}.\mathvariable{adjacentTo}(\provalgcandidate)$} \label{line:loop-start}
+        \For{$\provalgcandidate \in \transformationset{T} \setminus \provalgexecuted \mid \changetuple{\metamodeltuple{M}}.\mathvariable{affects}(\provalgcandidate)$} \label{algo:orchestration:provenance:line:loop_start}
             %\vspace{0.15\baselineskip}
-            \State $(\modeltuple{m}, \changetuple{\metamodeltuple{M},\mathvariable{candidate}}) \gets \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{candidate}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ \label{line:first-execution}
+            \State $\mathvariable{appResult} \gets \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{candidate}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ \label{algo:orchestration:provenance:line:first_execution}
+            \If{$\mathvariable{appResult} = \bot$}
+                \State \Return{$\bot$} \label{algo:orchestration:provenance:line:bot_application}
+            \EndIf
+            \State $\tupled{\modeltuple{m}, \changetuple{\metamodeltuple{M},\mathvariable{candidate}}} \gets \mathvariable{appResult}$
             %\State $\transformationset{T}_{\mathvariable{subnetwork}} \gets \transformationset{T}.\mathvariable{edgeInducedSubgraph}(\transformationset{T}_\mathvariable{executed})$
             %\State $\changetuple{\metamodeltuple{M},\mathvariable{propagation}} \gets \function{Propagate}(\transformationset{T}_{\mathvariable{subnetwork}}, \modeltuple{m}, \changetuple{\metamodeltuple{M},\mathvariable{candidate}})$ \label{line:recursive-call}
-            \State $\changetuple{\metamodeltuple{M},\mathvariable{propagation}} \gets \function{Propagate}(\provalgexecuted, \modeltuple{m}, \changetuple{\metamodeltuple{M},\mathvariable{candidate}})$ \label{line:recursive-call}
+            \State $\changetuple{\metamodeltuple{M},\mathvariable{propagation}} \gets \function{Propagate}(\provalgexecuted, \modeltuple{m}, \changetuple{\metamodeltuple{M},\mathvariable{candidate}})$ \label{algo:orchestration:provenance:line:recursive_call}
+            \If{$\changetuple{\metamodeltuple{M},\mathvariable{propagation}} = \bot$}
+                \State \Return{$\bot$} \label{algo:orchestration:provenance:line:bot_recursion}
+            \EndIf
             %\State $\changetuple{\metamodeltuple{M},\mathvariable{candidate}} \gets \mathvariable{candidate}.\mathvariable{execute}(\mathvariable{accumulatedChanges})$ \label{line:check-execution}
             \State $\modeltuple{m}_{\mathvariable{propagation}} \gets \tupled{\change{\metamodel{M}{1},\mathvariable{propagation}}(\model{m}{1}), \dots, \change{\metamodel{M}{n},\mathvariable{propagation}}(\model{m}{n})}$
             \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\provalgcandidate, \modeltuple{m}_{\mathvariable{propagation}})$
-            \If{$\neg \mathvariable{isConsistent}$}
-                \State \Return{$\bot$} \label{line:fail}
+            \If{$\neg \mathvariable{isConsistent}$} \label{algo:orchestration:provenance:line:failcheck}
+                \State \Return{$\bot$} \label{algo:orchestration:provenance:line:bot_nonreactiveconverging}
             \EndIf
             %\vspace{0.3\baselineskip}
             \State $\changetuple{\metamodeltuple{M}} \gets \changetuple{\metamodeltuple{M},\mathvariable{propagation}}$
-            \State $\provalgexecuted \gets \provalgexecuted \cup \setted{\provalgcandidate}$ \label{line:executed-update}
+            \State $\provalgexecuted \gets \provalgexecuted \cup \setted{\provalgcandidate}$ \label{algo:orchestration:provenance:line:executed_update}
         \EndFor
         \State \Return{$\changetuple{\metamodeltuple{M}}$}
     \EndProcedure
@@ -666,21 +677,25 @@ Likewise, $\transformation{t}_{2}$ was executed after $\tupled{\transformation{t
 	% }
 \end{algorithm}
 
+\todo{Adapt because of returning bot after generalization function and after recursive call}
+
 \mnote{Provenance algorithm performs orchestration recursively}
 We propose an algorithm that realizes the discussed design goal in \autoref{algo:orchestration:provenance}.
-The algorithm is a derivation of the general algorithm implementing an application function depicted in \autoref{def:orchestration:application}.
+The algorithm is a derivation of the general algorithm implementing an application function depicted in \autoref{algo:orchestration:application}.
 It first checks for consistency of the given models as a prerequisite for executing the transformations.
 Then the algorithm calls the recursive function \function{Propagate}, which implements the orchestration of transformations and returns a change tuple that is yielded by the determined orchestrations, which delivers consistent models if applied to the input.
-While this behavior is equal to the one in \autoref{def:orchestration:application}, the orchestrate itself is implemented differently in a recursive rather than an iterative manner, which implicitly ensures termination.
+While this behavior is equal to the one in \autoref{algo:orchestration:application}, the orchestrate itself is implemented differently in a recursive rather than an iterative manner, which implicitly ensures termination.
 
 \mnote{Recursive orchestration function fulfills principle of incremental consistency restoration}
 The function \function{Propagate} implementing the orchestration in a recursive manner acts as follows:
 It selects one of the transformations as a candidate to execute next.
-This selection ensures that a transformation is selected that is adjacent to any already performed change, such that the transformation needs to perform changes.
+This selection ensures that a transformation is selected whose models are affected by any already performed change, such that the transformation needs to perform changes.
+Models are affected by a change if any of the two changes in $\change{\metamodeltuple{M}}$ for either of the models that are kept consistent by the selected transformation is not the identity function $\identitychange$.
 It then applies the transformation using the generalization function $\generalizationfunction{}$.
+If the selected transformation is not defined for the given models and changes, the function may return $\bot$ so that the complete algorithm terminates with $\bot$.
 Afterwards, it recursively executes the function \function{Propagate} with the subnetwork given by the transformations that have already been executed.
 After that recursive execution it is checked whether the models yielded by the resulting changes are still consistent to the candidate transformation.
-If this consistency check fails, the transformations do not fulfill the definition of being reactive converging according to \autoref{def:orchestration:reactiveconverging}, as we will prove later.
+If this consistency check fails, the transformations do not fulfill the definition of being reactive converging according to \autoref{def:reactiveconverging}, as we will prove later.
 If the models are consistent to the transformation, the next candidate is picked.
 In effect, the strategy realizes the defined principle in a recursive manner, because after executing a new transformations, the recursive execution ensures consistency to all yet executed transformations.
 
@@ -701,8 +716,129 @@ The example shows that in each recursion step only the subnetwork of the already
 Thus, the set of transformations gets smaller in each recursive call of \function{ProvenanceApply}.
 
 
-\subsection{Correctness and Termination}
+\subsection{Algorithm Properties}
 
+\mnote{Fulfillment of properties}
+The provenance algorithm was intended to implement a correct application function and to always terminate.
+Additionally, it is supposed to deliver consistent models whenever the given transformation fulfill \autoref{def:reactiveconverging} for being reactive converging.
+In the following, we prove that the algorithm actually fulfills these properties.
+
+\mnote{Provenance algorithm terminates and implements correct application function}
+First, it is easy to see that the algorithm does always terminate and always either returns consistent models yielded by an orchestration of the given transformations or $\bot$, which realizes a correct application function according to \autoref{def:applicationfunction} and \autoref{def:applicationfunctioncorrectness}.
+
+\begin{theorem}[Provenance Algorithm Termination]
+    \autoref{algo:orchestration:provenance} terminates for every possible input.
+\end{theorem}
+\begin{proof}
+    The algorithm terminates if \function{CheckConsistency} and \function{Propagate} terminate.
+    We assume termination for the external function \function{CheckConsistency}, because it only validates consistency of the given models.
+    Since \function{CheckConsistency} and $\generalizationfunction{}$ terminate, \function{Propagate} may only be non-terminating because of the loop in Line~\ref{algo:orchestration:provenance:line:loop_start} and the recursive call in Line~\ref{algo:orchestration:provenance:line:recursive_call}.
+    The number of loop executions is limited by the number of given transformations, i.e., $\abs{\transformationset{T}}$, as each iteration selects another transformation and adds it to $\provalgexecuted$, thus after selecting each transformation once, all transformations are in $\provalgexecuted$ and thus the loop condition is not fulfilled.
+    The recursive call receives a set of transformations that is at least one element smaller than the set of transformations given to the calling method, because if $\provalgexecuted = \transformationset{T}$ the loop precondition is not fulfilled. If the given set of transformations is empty, the loop is not entered and thus no recursive call is performed. In consequence, the recursion is never higher than $\abs{\transformationset{T}}$.
+\end{proof}
+
+\begin{theorem}[Provenance Algorithm Correctness] \label{theorem:provenance_correctness}
+    \autoref{algo:orchestration:provenance} realizes a correct application function according to \autoref{def:applicationfunctioncorrectness}.
+\end{theorem}
+\begin{proof}
+    The algorithm receives models and changes to them and returns models being instances of the same metamodels, thus it fulfills the signature of an application function.
+    Additionally, if it returns models they are the result of a consecutive application of transformations in $\transformationset{T}$, as \function{Propagate} calculates the changes, which are applied to the input models to calculate the result, by a repeated application of the generalization function $\generalizationfunction{}$ to transformations in $\transformationset{T}$.
+    Thus, \function{Propagate} implicitly implements an orchestration function according to \autoref{def:orchestrationfunction} and applies the transformations in the determined order to calculate the result delivered by \function{ProvenanceApply}.
+    Thus \function{ProvenanceApply} fulfills \autoref{def:applicationfunction} for an application function.
+
+    Let us assume that \autoref{algo:orchestration:provenance} does not realize a correct application function.
+    \function{ProvenanceApply} may return $\bot$ in Line~\ref{algo:orchestration:provenance:line:bot_input} or Line~\ref{algo:orchestration:provenance:line:bot_orchestration} or models in Line~\ref{algo:orchestration:provenance:line:return_result}.
+    Correctness requires the function to either return $\bot$ or consistent models, which may only be violated by \function{ProvenanceApply} by returning models that are not consistent.
+    This means that for some input models and changes, \function{ProvenanceApply} returns models $\modeltuple{m}_\mathvariable{res}$ there is a transformation $\transformation{t} \in \transformationset{T}$, such that $\modeltuple{m}_\mathvariable{res}$, or more specifically two models $\model{m}{i}$ and $\model{m}{k}$, 
+    whose metamodels are related by $\transformation{t}$, is not consistent to $\transformation{t}$.
+    We distinguish three cases:
+    \begin{enumerate}
+        \item $\transformation{t}$ was never executed by \function{Propagate}. This means that the changes $\change{\metamodel{M}{i}}$ and $\change{\metamodel{M}{k}}$ in $\change{\metamodeltuple{M}}$ of the two models that are kept consistent by $\transformation{t}$ were always empty, i.e., $\identitychange$, because otherwise $\transformation{t}$ would have been selected in the loop header. Since the initial models $\model{m}{i}$ and $\model{m}{k}$ were consistent to $\transformation{t}$, the returned models are still consistent, because only the identity function is applied to them.
+        \item $\transformation{t}$ was executed and no other transformation that involves $\model{m}{i}$ or $\model{m}{k}$ was executed afterwards. Then the returned models are consistent by definition of correctness for $\transformation{t}$.
+        \item $\transformation{t}$ was executed and another transformation $\transformation{t}' \in \transformationset{T}$ that involves $\model{m}{i}$ or $\model{m}{k}$ was executed afterwards.
+        Since $\transformation{t}'$ was executed after $\transformation{t}$, $\transformation{t}$ was in $\provalgexecuted$ when $\transformation{t}'$ was the candidate transformation $\provalgcandidate$.
+        Thus, $\transformation{t}$ is executed in the recursion after the first execution of $\transformation{t}'$, thus the result is consistent to $\transformation{t}$ and because of the check in Line~\ref{algo:orchestration:provenance:line:failcheck} after returning from the recursion also to $\transformation{t}'$. Thus, the returned models are consistent to both $\transformation{t}$ and $\transformation{t}'$.
+    \end{enumerate}
+    The third case can be applied inductively if a transformation is followed by multiple transformations that involve the same models. Thus, all cases lead to a contradiction.
+\end{proof}
+
+\mnote{Complexity of provenance algorithm}
+In addition to these essential properties, we can also derive the upper bound for the number of transformation executions by the algorithm.
+
+\begin{theorem}[Provenance Algorithm Complexity]
+    \autoref{algo:orchestration:provenance} executes transformation at most $\mathcal{O}(2^\transformationset{T})$ times.
+\end{theorem}
+\begin{proof}
+	Let $T(m)$ denote the number of transformation executions the algorithm invokes for a set of transformations $\transformationset{T}$ with $m = \abs{\transformationset{T}}$.
+	The set $\provalgexecuted$ is initialized to be empty (Line~\ref{algo:orchestration:provenance:line:executed_init}) and grows by one transformation every iteration of the loop (Line~\ref{algo:orchestration:provenance:line:executed_update}).
+    It follows that the recursive call in Line~\ref{algo:orchestration:provenance:line:recursive_call} receives a set of transformations that contains one more transformation in each iteration.
+    Thus, given $m$ transformations, \function{Propagate} executes each of them in the loop and then makes recursive calls for $0$ to $m-1$ transformations:
+	\begin{align*}
+	T(m)&	=m+\sum_{i=0}^{m-1}T(i)&	T(0)&	=0\\
+	&	=2+2\,T(m-1)\\
+	&	=2*(2^{m}-1) \in \mathcal{O}(2^m) & & \qedhere
+	\end{align*}
+\end{proof}
+
+\mnote{Provenance algorithm fulfills design principle}
+Finally, the algorithm was constructed in order to implement the principle defined in \autoref{chap:orchestration:algorithm:goals} to ensure consistency among the transformations that have already been executed before executing a transformation that has not been executed yet.
+
+\begin{theorem}[Provenance Algorithm Design Principle]
+    \autoref{algo:orchestration:provenance} ensures consistency among the transformations that have already been executed before executing a transformation that has not been executed yet.
+\end{theorem}
+\begin{proof}
+	After the recursive call in Line~\ref{algo:orchestration:provenance:line:recursive_call}, the current model tuple $\modeltuple{m}_{\mathvariable{propagation}}$ is consistent with all executed transformations in $\provalgexecuted$ (see \autoref{theorem:provenance_correctness}). % and
+%	\Cref{thm:strategy-correct} applies for every recursive execution of the strategy. 
+	%no changes to models involved  to an executed synx are allowed.% after the recursive call in \cref{line:recursive-call}.
+%	Hence,
+	% \executed is either empty or 
+%	the current model assignment is consistent with all transformations in \executed whenever the algorithm executes a new transformation in \cref{line:first-execution}.
+\end{proof}	
+
+\mnote{Provenance algorithm implements optimal application function for reactive converging transformations}
+We have given \autoref{def:reactiveconverging} for specifying the property of a transformation set to be reactive converging.
+This property defines that we do not want transformations to be required to react to changes they performed themselves if all other transformation have been executed afterwards, as we assume this to be a reasonable property that induces an upper bound for the number of transformation executions.
+We have used that property as a design goal for the proposed algorithm and can now show that the algorithm actually always returns consistent models when the transformations fulfill that property, which means that the algorithm implements an optimal application function.
+
+\begin{theorem}[Provenance Algorithm Optimality]
+    If the transformation set $\transformationset{T}$ passed to \autoref{algo:orchestration:provenance} is reactive converging according to \autoref{def:reactiveconverging} and if the consistency preservation rules of all transformations $\transformation{t} \in \transformationset{T}$ are total functions, the algorithm implements an optimal application function.
+\end{theorem}
+\begin{proof}
+    We will show that the algorithm does not return $\bot$ when the input models are consistent, thus an orchestration is always found.
+    This is even stronger than optimality, because it means that for every input with consistent models a consistent orchestration exists.
+
+    Since optimality allows the algorithm to return $\bot$ when the input models are inconsistent, returning $\bot$ in Line~\ref{algo:orchestration:provenance:line:bot_input} is valid.
+    The algorithm returns $\bot$ in Line~\ref{algo:orchestration:provenance:line:bot_orchestration} if \function{Propagate} returns $\bot$, thus we show that \function{Propagate} does not return $\bot$.
+    \function{Propagate} returns $\bot$ in Line~\ref{algo:orchestration:provenance:line:bot_application} if the application of a selection transformation in Line~\ref{algo:orchestration:provenance:line:first_execution} returns $\bot$. By assumption, all transformations are total, thus the application can never return $\bot$.
+    \function{Propagate} returns $\bot$ in Line~\ref{algo:orchestration:provenance:line:bot_recursion} if a recursive call returns $\bot$. If the loop in that recursive call is executed, the arguments for not returning $\bot$ apply recursively. If the loop is not executed in the recursion than the input changes are returned, which are not $\bot$.
+    
+    Finally, \function{Propagate} returns $\bot$ in Line~\ref{algo:orchestration:provenance:line:bot_nonreactiveconverging} if the models yielded by the recursive call are not consistent with the transformation that is the candidate $\provalgcandidate$ in that loop iteration.
+    Since the transformation set is reactive converging, this can only be the case if not all orders of the transformations currently in $\provalgexecuted$ have been executed yet.
+    We show that all transformation in $\provalgexecuted$ have been executed by induction.
+    In the first iteration of the loop only the candidate of that iteration is executed and $\provalgexecuted$ is empty, thus the statement is trivially true.
+    Let us assume that in a loop iteration with $\abs{\provalgexecuted} = i-1$ all orchestrations of transformations in $\provalgexecuted$ have been executed in Line~\ref{algo:orchestration:provenance:line:bot_nonreactiveconverging}, but that in the following loop iteration with $\abs{\provalgexecuted} = i$ this is not true.
+    This means that there is an order $\tupled{\transformation{t}_{1}, \dots, \transformation{t}_{i}}$ of the transformations in $\provalgexecuted$, in which they have not been executed yet.
+    Let $\transformation{t}$ be the candidate $\provalgcandidate$ of the last iteration with $\abs{\provalgexecuted} = i-1$. Let $k$ be the index of $\transformation{t}$ in that sequence, i.e., $\transformation{t} = \transformation{t}_{k}$. Then per induction assumption the sequence $\tupled{\transformation{t}_{1}, \dots, \transformation{t}_{k}}$ has been executed in one of the previous iterations of the loop. 
+    Afterwards $\transformation{t}$ was executed in Line~\ref{algo:orchestration:provenance:line:first_execution}.
+    Additionally, the sequence $\tupled{\transformation{t}_{k+1}, \dots, \transformation{t}_{i}}$ has been executed in the recursive call in Line~\ref{algo:orchestration:provenance:line:recursive_call} by induction assumption.
+    Hence, the transformations have been executed in the order $\tupled{\transformation{t}_{1}, \dots, \transformation{t}_{i}}$, which is a contradiction to our assumption.
+
+    In consequence, \function{Propagate} never returns $\bot$ and thus also \function{ProvenanceApply} does not return $\bot$, except for inconsistent input models. Since we have already proven that the algorithm terminates always and implements a correct application function, it also implements an optimal application function.
+\end{proof}
+
+\mnote{Assumptions for optimality are usually not fulfilled}
+Optimality can, however, only be guaranteed under rather specific conditions.
+Apart from the necessary fulfillment of the property to be reactive converging, the transformations need to be able to handle any input, thus any combination of models and changes, as otherwise selecting a transformation may lead to \function{Propagate} returning $\bot$, because the transformation cannot be applied.
+In practice, this assumption will usually not be fulfilled.
+Nevertheless, it is theoretically possible to define such transformations and at least it leads to well-defined conditions for when we can assume the algorithm to realize an optimal orchestration function.
+
+\mnote{Orchestration problem is non-existent for given assumptions}
+Although this means that under that specific conditions the algorithm is able to decide the orchestration problem, the problem is actually trivially solved in that case, because for every input there is a consistent orchestration, thus the problems is actually non-existent for these assumptions.
+
+\mnote{Assumptions allow algorithm definition for well-defined requirements}
+Finally, it is also an open question how far we can assume sets of transformations to be reactive converging in practice.
+We did, however, not introduce this as a property that should be fulfilled by transformations, as it is obviously hard to ensure or even analyze that property.
+In fact, it is only supposed to be a well-defined property that allows us to define a reasonable upper bound for the execution of transformations and thus to allow us to define an algorithm that always terminates without using a completely arbitrary upper bound for determining when to terminate.
 
 
 \subsection{Provenance Improvement}
