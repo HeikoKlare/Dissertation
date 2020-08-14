@@ -35,12 +35,12 @@ Finally, we shortly discuss confluence as a considerable property of transformat
 %Start with defining an algorithm that realizes the application function. (different options depending on when to return $\bot$, discussed later)
 %First option: we assume an oracle that returns the transformation to execute next according to the orchestration function and we stop when consistent models are achieved
 
-\todo{Transformations as variable instead of index and say that our implementation will be independent from concrete network. But in general, once could define it specific for a set of transformations.}
+%\todo{Transformations as variable instead of index and say that our implementation will be independent from concrete network. But in general, once could define it specific for a set of transformations.}
 \todo{Rename generatedChanges and executedTransformation to $\change{generated}$ and new command transformationtuple with index executed}
 \begin{algorithm}
    % \input{algorithms/correctness/synchronization/find_corresponding_elements.tex}
     \begin{algorithmic}[1]
-        \Procedure{$\function{Apply}_{\transformationset{T}}$}{$\modeltuple{m} = \tupled{\model{m}{1}, \dots, \model{m}{n}}, \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}}$}
+        \Procedure{$\function{Apply}$}{$\transformationset{T}, \modeltuple{m} = \tupled{\model{m}{1}, \dots, \model{m}{n}}, \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}}$}
             \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\transformationset{t}, \modeltuple{m})$
             \If{$\neg \mathvariable{isConsistent}$}
                 \State \Return{$\bot$}
@@ -83,9 +83,12 @@ It also encodes the orchestration function, because in contrast to the mathemati
 As soon as all transformation delivered by the orchestration are executed, it returns the resulting models if they are consistent or otherwise returns $\bot$.
 
 \mnote{Algorithm is independent from concrete transformations}
-An application function according to \autoref{def:applicationfunction} is parametrized by the set of transformations $\transformationset{T}$ it is supposed to be executed on and a transformation network according to \autoref{def:transformationnetwork} is defined to consistent of a set of transformations and an application function, which may suggest to define this function specific for one network.
-\autoref{algo:orchestration:application} is, however, independent from the concrete network and is able to process any set of transformations.
-It thus realizes not one application function, but actually a family of application functions for all possible transformation sets $\transformationset{T}$.
+An application function according to \autoref{def:applicationfunction} is parametrized by an orchestration function, which, in turn, is parametrized by the set of transformations $\transformationset{T}$ that it is supposed to be executed on.
+A transformation network according to \autoref{def:transformationnetwork} is defined to consist of a set of transformations and an application function, which may suggest that both the application as well as the orchestration function can be defined specific for one network.
+\autoref{algo:orchestration:application} reflects this by assuming an \function{Orchestrate} function that is specific for a set of transformations.
+It may, however, be implemented by a generic function that works independent from the concrete transformations and, instead, accepts them as a parameter.
+We do, however, focus on a general algorithm and \function{Orchestrate} that can be applied to any set of transformations.
+In that case, the algorithm does not realize a single application function, but actually a family of application functions for all possible transformation sets $\transformationset{T}$.
 
 \mnote{Algorithm dynamically selects next transformation}
 The dynamic selection of transformations is realized by an \function{Orchestrate} function and stops as soon as no further transformations to apply are delivered.
@@ -106,7 +109,8 @@ The \function{Orchestrate} function may implement different strategies, which we
 The most simple strategy would be to execute the same order of transformations iteratively, thus always executing that transformation who was not executed for the longest time.
 Another reasonable strategy would be to manage a queue of transformation and after executing one transformation to enqueue all transformations that are adjacent to the metamodels of the two models that were modified by the transformation if they are not yet enqueued.
 This ensures that those transformation are executed next which can process changes that have just been produced by another transformation.
-We will later discuss specific strategies.
+Both these strategies are independent from the concrete transformations and could thus be implemented in a function that can be used for any set of transformations $\transformationset{T}$.
+In \autoref{chap:orchestration:algorithm}, we will discuss a specific orchestration strategy.
 Until then, the concrete strategy is not important and any of the exemplified ones can be imagined.
 
 \mnote{Assumed further functions of algorithm}
@@ -131,7 +135,7 @@ Due to their simplicity, we do not provide an explicit implementation of these t
 
 % Gen is the generalization function, CheckConsistency is generalized consistency checker which just checks for the appropriate models in the tuple.
 
-\todo{transformation set should be parameter, not one application/orchestration function per transformation set}
+%\todo{transformation set should be parameter, not one application/orchestration function per transformation set}
 
 
 \subsection{Correctness and Termination of the Algorithm}
