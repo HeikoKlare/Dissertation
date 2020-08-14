@@ -41,7 +41,7 @@ The work was developed together with a student in a kind of scientific internshi
 \label{chap:orchestration:algorithm:goals}
 
 \mnote{Degrees of freedom in algorithm}
-An adapted version of \autoref{algo:orchestration:application:line:endorchestrate} that always terminates has two degrees of freedom.
+An adapted version of \autoref{algo:orchestration:application} that always terminates has two degrees of freedom.
 First, the execution order of transformations needs to be determined by defining the function \function{Orchestrate}.
 Second, an upper bound for the number of executions of transformations, thus the loop in Lines~\ref{algo:orchestration:application:line:startorchestrate}--\ref{algo:orchestration:application:line:endorchestrate}, needs to be defined.
 
@@ -92,9 +92,9 @@ Thus, if a transformation was executed after applying the other transformations 
 \mnote{Example for reactive converging transformations}
 The property does not require the other transformation were executed in any order consecutively, but only that the orchestration contains any order of those transformations, but potentially with other transformations in between.
 As an example, assume a set of transformations $\transformation{t}_{1}, \transformation{t}_{2}, \transformation{t}{3}$, which is reactive converging for some input of models and changes.
-After executing them for these models and changes in the order $\tupled{\transformation{t}_{1}, \transformation{t}_{2}, \transformation{t}{3}, \transformation{t}_{1}, \transformation{t}_{2}, \transformation{t}{3}}$, the models yielded by that orchestration may still be inconsistent to $\transformation{t}_{1}$, because it was not executed after the order of the transformations $\tupled{\transformation{t}_{3}, \transformation{t}_{2}}$.
-After executing $\transformation{t}_{1}$ once more, the orchestration must yield consistent models, because $\transformation{t}_{1}$ was executed after the two order of the other transformations $\tupled{\transformation{t}_{2}, \transformation{t}_{3}}$ and $\tupled{\transformation{t}_{3}, \transformation{t}_{2}}$.
-Likewise, $\transformation{t}_{2}$ was executed after $\tupled{\transformation{t}_{1}, \transformation{t}_{3}}$ and $\tupled{\transformation{t}_{3}, \transformation{t}_{1}}$, and $\transformation{t}_{3}$ was executed after $\tupled{\transformation{t}_{1}, \transformation{t}_{2}}$ and $\tupled{\transformation{t}_{2}, \transformation{t}_{1}}$.
+After executing them for these models and changes in the order $\sequenced{\transformation{t}_{1}, \transformation{t}_{2}, \transformation{t}{3}, \transformation{t}_{1}, \transformation{t}_{2}, \transformation{t}{3}}$, the models yielded by that orchestration may still be inconsistent to $\transformation{t}_{1}$, because it was not executed after the order of the transformations $\sequenced{\transformation{t}_{3}, \transformation{t}_{2}}$.
+After executing $\transformation{t}_{1}$ once more, the orchestration must yield consistent models, because $\transformation{t}_{1}$ was executed after the two order of the other transformations $\sequenced{\transformation{t}_{2}, \transformation{t}_{3}}$ and $\sequenced{\transformation{t}_{3}, \transformation{t}_{2}}$.
+Likewise, $\transformation{t}_{2}$ was executed after $\sequenced{\transformation{t}_{1}, \transformation{t}_{3}}$ and $\sequenced{\transformation{t}_{3}, \transformation{t}_{1}}$, and $\transformation{t}_{3}$ was executed after $\sequenced{\transformation{t}_{1}, \transformation{t}_{2}}$ and $\sequenced{\transformation{t}_{2}, \transformation{t}_{1}}$.
 
 
 \subsection{The Provenance Algorithm}
@@ -108,20 +108,24 @@ Likewise, $\transformation{t}_{2}$ was executed after $\tupled{\transformation{t
     %\hspace*{\algorithmicindent} \textbf{Input:}\\
     %\hspace*{\algorithmicindent} \textbf{Output:} 
     \begin{algorithmic}[1]
-    \Procedure{\function{ProvenanceApply}}{$\transformationset{T}, \modeltuple{m} = \tupled{\model{m}{1}, \dots, \model{m}{n}}, \changetuple{\metamodeltuple{M}}$}
-        \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\transformationset{t}, \modeltuple{m}$)
+    \Procedure{\function{ProvenanceApply}}{$\transformationset{T}, \modeltuple{m} %= \tupled{\model{m}{1}, \dots, \model{m}{n}}
+    , \changetuple{\metamodeltuple{M}}$}
+        \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\transformationset{T}, \modeltuple{m}$)
         \If{$\neg \mathvariable{isConsistent}$}
             \State \Return{$\bot$} \label{algo:orchestration:provenance:line:bot_input}
         \EndIf
-        \State $\changetuple{\metamodeltuple{M},\mathvariable{res}} \gets \tupled{\change{\metamodel{M}{1}, \mathvariable{res}}, \dots, \change{\metamodel{M}{1}, \mathvariable{res}}} \gets \function{Propagate}(\transformationset{T}, \modeltuple{m}, \changetuple{\metamodeltuple{M}})$
+        \State $\changetuple{\metamodeltuple{M},\mathvariable{res}} \gets %\tupled{\change{\metamodel{M}{1}, \mathvariable{res}}, \dots, \change{\metamodel{M}{1}, \mathvariable{res}}} \gets 
+        \function{Propagate}(\transformationset{T}, \modeltuple{m}, \changetuple{\metamodeltuple{M}})$
         \If{$\changetuple{\metamodeltuple{M},\mathvariable{res}} = \bot$}
             \State \Return{$\bot$} \label{algo:orchestration:provenance:line:bot_orchestration}
         \EndIf
-        \State $\modeltuple{m}_{res} \leftarrow \tupled{\change{\metamodel{M}{1},\mathvariable{res}}(\model{m}{1}), \dots, \change{\metamodel{M}{n},\mathvariable{res}}(\model{m}{n})}$
+        \State $\modeltuple{m}_{res} \leftarrow \changetuple{\metamodeltuple{M},\mathvariable{res}}(\modeltuple{m})$
         \State \Return{$\modeltuple{m}_{res}$} \label{algo:orchestration:provenance:line:return_result}
     \EndProcedure
     \vspace{\baselineskip}
-    \Procedure{\function{Propagate}}{$\transformationset{T}, \modeltuple{m} = \tupled{\model{m}{1}, \dots, \model{m}{n}}, \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}}$}
+    \Procedure{\function{Propagate}}{$\transformationset{T}, \modeltuple{m} %= \tupled{\model{m}{1}, \dots, \model{m}{n}}
+    , \changetuple{\metamodeltuple{M}} %= \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}}
+    $}
         \vspace{0.15\baselineskip}
         \State $\provalgexecuted \gets \emptyset$ \label{algo:orchestration:provenance:line:executed_init}
         %\State $\mathvariable{accumulatedChanges} \gets \changetuple{\metamodeltuple{M}}$         
@@ -141,7 +145,7 @@ Likewise, $\transformation{t}_{2}$ was executed after $\tupled{\transformation{t
                 \State \Return{$\bot$} \label{algo:orchestration:provenance:line:bot_recursion}
             \EndIf
             %\State $\changetuple{\metamodeltuple{M},\mathvariable{candidate}} \gets \mathvariable{candidate}.\mathvariable{execute}(\mathvariable{accumulatedChanges})$ \label{line:check-execution}
-            \State $\modeltuple{m}_{\mathvariable{propagation}} \gets \tupled{\change{\metamodel{M}{1},\mathvariable{propagation}}(\model{m}{1}), \dots, \change{\metamodel{M}{n},\mathvariable{propagation}}(\model{m}{n})}$
+            \State $\modeltuple{m}_{\mathvariable{propagation}} \gets \changetuple{\metamodeltuple{M},\mathvariable{propagation}}(\modeltuple{m})$ %\tupled{\change{\metamodel{M}{1},\mathvariable{propagation}}(\model{m}{1}), \dots, \change{\metamodel{M}{n},\mathvariable{propagation}}(\model{m}{n})}$
             \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\provalgcandidate, \modeltuple{m}_{\mathvariable{propagation}})$
             \If{$\neg \mathvariable{isConsistent}$} \label{algo:orchestration:provenance:line:bot_failcheck}
                 \State \Return{$\bot$} \label{algo:orchestration:provenance:line:bot_nonreactiveconverging}
@@ -314,11 +318,11 @@ We have used that property as a design goal for the proposed algorithm and can n
     We show that all transformation in $\provalgexecuted$ have been executed by induction.
     In the first iteration of the loop only the candidate of that iteration is executed and $\provalgexecuted$ is empty, thus the statement is trivially true.
     Let us assume that in a loop iteration with $\abs{\provalgexecuted} = i-1$ all orchestrations of transformations in $\provalgexecuted$ have been executed in Line~\ref{algo:orchestration:provenance:line:bot_nonreactiveconverging}, but that in the following loop iteration with $\abs{\provalgexecuted} = i$ this is not true.
-    This means that there is an order $\tupled{\transformation{t}_{1}, \dots, \transformation{t}_{i}}$ of the transformations in $\provalgexecuted$, in which they have not been executed yet.
-    Let $\transformation{t}$ be the candidate $\provalgcandidate$ of the last iteration with $\abs{\provalgexecuted} = i-1$. Let $k$ be the index of $\transformation{t}$ in that sequence, i.e., $\transformation{t} = \transformation{t}_{k}$. Then per induction assumption the sequence $\tupled{\transformation{t}_{1}, \dots, \transformation{t}_{k}}$ has been executed in one of the previous iterations of the loop. 
+    This means that there is an order $\sequenced{\transformation{t}_{1}, \dots, \transformation{t}_{i}}$ of the transformations in $\provalgexecuted$, in which they have not been executed yet.
+    Let $\transformation{t}$ be the candidate $\provalgcandidate$ of the last iteration with $\abs{\provalgexecuted} = i-1$. Let $k$ be the index of $\transformation{t}$ in that sequence, i.e., $\transformation{t} = \transformation{t}_{k}$. Then per induction assumption the sequence $\sequenced{\transformation{t}_{1}, \dots, \transformation{t}_{k}}$ has been executed in one of the previous iterations of the loop. 
     Afterwards $\transformation{t}$ was executed in Line~\ref{algo:orchestration:provenance:line:first_execution}.
-    Additionally, the sequence $\tupled{\transformation{t}_{k+1}, \dots, \transformation{t}_{i}}$ has been executed in the recursive call in Line~\ref{algo:orchestration:provenance:line:recursive_call} by induction assumption.
-    Hence, the transformations have been executed in the order $\tupled{\transformation{t}_{1}, \dots, \transformation{t}_{i}}$, which is a contradiction to our assumption.
+    Additionally, the sequence $\sequenced{\transformation{t}_{k+1}, \dots, \transformation{t}_{i}}$ has been executed in the recursive call in Line~\ref{algo:orchestration:provenance:line:recursive_call} by induction assumption.
+    Hence, the transformations have been executed in the order $\sequenced{\transformation{t}_{1}, \dots, \transformation{t}_{i}}$, which is a contradiction to our assumption.
 
     In consequence, \function{Propagate} never returns $\bot$ and thus also \function{ProvenanceApply} does not return $\bot$, except for inconsistent input models. Since we have already proven that the algorithm terminates always and implements a correct application function, it also implements an optimal application function.
 \end{proof}
@@ -350,7 +354,9 @@ The algorithm may fail because it is, at some point, not able to execute a candi
 In that case, we at least know that the after the previous loop iteration consistency regarding all yet executed transformations could be achieved.
 
 \mnote{Relevant information about the failure state}
-Whenever the \function{Propagate} function fails and returns $\bot$, we know that for the current transformations in $\provalgexecuted$ an orchestration exists that yields the current changes in $\changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}}$, for which we know that applied to the original models the result $\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \dots, \change{\metamodel{M}{n}}(\model{m}{n})}$ is at least consistent to $\provalgexecuted$.
+Whenever the \function{Propagate} function fails and returns $\bot$, we know that for the current transformations in $\provalgexecuted$ an orchestration exists that yields the current changes in $\changetuple{\metamodeltuple{M}}$ %= \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}}$
+, for which we know that applied to the original models the result $\changetuple{\metamodeltuple{M}}(\modeltuple{m})$%\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \dots, \change{\metamodel{M}{n}}(\model{m}{n})}$
+is at least consistent to $\provalgexecuted$.
 We also know that the algorithm was not able to ensure consistency to the current candidate transformation $\provalgcandidate$.
 This is exactly the information for which we already discussed in \autoref{chap:orchestration:algorithm:goals} the benefits with respect to the underlying design principle of recursively ensuring consistency for subsets of the transformations for the ability to identify the reasons for not finding a consistent orchestration.
 Thus, implementing the algorithm such that also delivers $\provalgcandidate$, $\provalgexecuted$ and the current changes $\changetuple{\metamodeltuple{M}}$ reduces the necessary model states and transformations to consider for a transformation user or developer to identify why no consistent orchestration was found.

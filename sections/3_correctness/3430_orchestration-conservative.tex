@@ -57,7 +57,9 @@ It indicates for how many inputs of models and changes the application function 
 This can be seen as a fitness function for the optimality $\function{Opt}$ of an application function:
 \begin{align*}
     &
-    \function{Opt}(\appfunction{\orcfunction{\transformationset{T}}}) = \frac{
+    \function{Opt}(\appfunction{\orcfunction{\transformationset{T}}}) \\
+    &\formulaskip
+    = \frac{
         \abs{\setted{%\modeltuple{m} \in \metamodeltupleinstanceset{M},\changetuple{\metamodeltuple{M}} \in \changeuniverse{\metamodeltuple{M}}} 
         \tupled{\modeltuple{m},\changetuple{\metamodeltuple{M}}} \mid \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \mathtext{is consistent to} \transformationset{T}}}
     }{
@@ -84,12 +86,12 @@ The probability that this event occurs is given by the ratio between the number 
 \begin{align*}
     &
     P(E_{\modeltuple{m},\changetuple{\metamodeltuple{M}}}) = \frac{
-        \abs{\setted{\tuple{\transformation{t}} \in \transformationset{T}^{< \mathbb{N}} \mid \tuple{\transformation{t}} \mathtext{is consistent orchestration for} \tupled{\modeltuple{m}, \changetuple{\metamodeltuple{M}}}}}
+        \abs{\setted{\sequence{\transformation{t}} \in \transformationset{T}^{< \mathbb{N}} \mid \sequence{\transformation{t}} \mathtext{is consistent orchestration for} \tupled{\modeltuple{m}, \changetuple{\metamodeltuple{M}}}}}
     }{
         \abs{\transformationset{T}^{< \mathbb{N}}}
     }
 \end{align*}
-Here, the denominator is the size of what we previously introduced as the problem space $P = \abs{\transformationset{T}^{< \mathbb{N}}}$ containing all possible orchestrations, and the numerator is the size of what we previously introduced as the solution space $S_{i} = \abs{\setted{\tuple{\transformation{t}} \in \transformationset{T}^{< \mathbb{N}} \mid \tuple{\transformation{t}} \mathtext{is consistent orchestration for} \tupled{\modeltuple{m}, \changetuple{\metamodeltuple{M}}}}}$, which contains all consistent orchestrations for for an input of models and changes.
+Here, the denominator is the size of what we previously introduced as the problem space $P = \abs{\transformationset{T}^{< \mathbb{N}}}$ containing all possible orchestrations, and the numerator is the size of what we previously introduced as the solution space $S_{i} = \abs{\setted{\sequence{\transformation{t}} \in \transformationset{T}^{< \mathbb{N}} \mid \sequence{\transformation{t}} \mathtext{is consistent orchestration for} \tupled{\modeltuple{m}, \changetuple{\metamodeltuple{M}}}}}$, which contains all consistent orchestrations for for an input of models and changes.
 
 \mnote{Expected value for finding a consistent orchestration}
 So we can introduce a stochastic variable $AppCons_{\modeltuple{m},\changetuple{\metamodeltuple{M}}}$, which assigns the values $0$ and $1$ to the events $E_{\modeltuple{m},\changetuple{\metamodeltuple{M}}}$ and its complementary:
@@ -111,7 +113,7 @@ For an application function that chooses a random orchestration, we can thus exp
     \abs{\setted{\tupled{\modeltuple{m},\changetuple{\metamodeltuple{M}}} \mid \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \mathtext{is consistent to} \transformationset{T}}} = \sum_{\modeltuple{m},\changetuple{\metamodeltuple{M}}} \mu(AppCons_{\modeltuple{m},\changetuple{\metamodeltuple{M}}}) \\
     & \formulaskip
     = \frac{
-        \sum_{\modeltuple{m},\changetuple{\metamodeltuple{M}}} \abs{\setted{\tuple{\transformation{t}} \in \transformationset{T}^{< \mathbb{N}} \mid \tuple{\transformation{t}} \mathtext{is consistent orchestration for} \tupled{\modeltuple{m}, \changetuple{\metamodeltuple{M}}}}}
+        \sum_{\modeltuple{m},\changetuple{\metamodeltuple{M}}} \abs{\setted{\sequence{\transformation{t}} \in \transformationset{T}^{< \mathbb{N}} \mid \sequence{\transformation{t}} \mathtext{is consistent orchestration for} \tupled{\modeltuple{m}, \changetuple{\metamodeltuple{M}}}}}
     }{
         \abs{\transformationset{T}^{< \mathbb{N}}}
     }
@@ -232,7 +234,7 @@ In contrast to non-termination in general, the scenario of alternation can at le
 
 \begin{definition}[Alternation of Apply Algorithmus]
     \label{def:applyalternation}
-    Let there be a number $n$ of execution of the transformation execution loop in Lines~\autoref{algo:orchestration:application:line:startorchestrate}--\autoref{algo:orchestration:application:line:endorchestrate} of \autoref{algo:orchestration:application}, such that for all numbers of execution $> n$ there is a sequence of executed transformations and generated changes that occur at least two times subsequently at the end of the current states of $\mathvariable{executedTransformations}$ and $\mathvariable{generatedChanges}$.
+    Let there be a number $n$ of execution of the transformation execution loop in Lines~\autoref{algo:orchestration:application:line:startorchestrate}--\autoref{algo:orchestration:application:line:endorchestrate} of \autoref{algo:orchestration:application}, such that for all numbers of execution $> n$ there is a sequence of executed transformations and generated changes that occur at least two times subsequently at the end of the current states of $\applyalgexecuted$ and $\applyalggenerated$.
 \end{definition}
 
 \mnote{Orchestrate function can detect alternation}
@@ -241,7 +243,7 @@ This allows it to implement the function in a way that it does not return the sa
 If a concrete realization of the \function{Orchestrate} function is not implemented in a way that it can react to the detection of alternation and produce a different sequence of transformations, it can at least return $\bot$ to ensure termination of \function{Apply}, because repeated execution of the same transformations will still returns the same changes. 
 
 \mnote{Avoiding alternation improved possibility to find consistent orchestration}
-Alternation produces orchestrations that can never yield consistent models, thus they are part of the problem space $P = {\transformationset{T}^{< \mathbb{N}}}$ of finding an orchestration for a given input $i$ of models and changes but can never be part of the solution space $S_{i} = \abs{\setted{\tuple{\transformation{t}} \in \transformationset{T}^{< \mathbb{N}} \mid \tuple{\transformation{t}} \mathtext{is consistent orchestration for} \tupled{\modeltuple{m}, \changetuple{\metamodeltuple{M}}}}}$ containing the consistent orchestrations.
+Alternation produces orchestrations that can never yield consistent models, thus they are part of the problem space $P = {\transformationset{T}^{< \mathbb{N}}}$ of finding an orchestration for a given input $i$ of models and changes but can never be part of the solution space $S_{i} = \abs{\setted{\sequence{\transformation{t}} \in \transformationset{T}^{< \mathbb{N}} \mid \sequence{\transformation{t}} \mathtext{is consistent orchestration for} \tupled{\modeltuple{m}, \changetuple{\metamodeltuple{M}}}}}$ containing the consistent orchestrations.
 Avoiding such alternations thus reduces the problem space without affecting the solution space and thus improves the possibility to find a consistent orchestration, as shown in the previous subsection.
 
 %Divergence: If it passes the same changes again, then it either does not pass those changes again 
@@ -309,7 +311,7 @@ Second, since each transformation is developed independently from all others, we
 We thus define a different notion of monotony for transformations as follows.
 \begin{definition}[Monotone Synchronizing Transformation]
     \label{def:monotonetransformation}
-    Let $\metamodeltuple{M} = \metamodelsequence{M}{n}$ be metamodels and let $\transformation{t}$ be a synchronizing transformation. We call $\transformation{t}$ monotone if it does not change elements that were already changed, i.e.
+    Let $\metamodeltuple{M} = \setted{\metamodelsequence{M}{n}}$ be metamodels and let $\transformation{t}$ be a synchronizing transformation. We call $\transformation{t}$ monotone if it does not change elements that were already changed, i.e.
     \begin{align*}
         &
         \forall \modeltuple{m} = \tupled{\model{m}{1}, \dots, \model{m}{n}} \in \metamodeltuple{M}, \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} : \\
@@ -346,10 +348,10 @@ Additionally,
 
 \mnote{Orchestrations of monotone transforamtion yield squences of pairwise different model states}
 Having only monotone transformations ensures that each orchestration, which does not apply a transformation to already consistent models, yields a sequence of pairwise different model states, if the transformations are sequentially applied.
-\begin{lemma}
+\begin{lemma}[Montone Transformation Orchestration Prefixes]
     \label{lemma:monotonetransformationsnosamestates}
     Let $\transformationset{T}$ be a set of correct monotone synchronizing transformations for a tuple of metamodels $\metamodeltuple{M}$.
-    Then for all models and changes, as well as any orchestration $\tupled{\transformation{t}_{1}, \dots, \transformation{t}_{m}}  \; (\transformation{i} \in \transformationset{T})$ that does contain a transformation when its models are already consistent, then prefixes of that orchestration only yield the same models if those prefixes are consistent orchestrations, i.e.
+    Then for all models and changes, as well as any orchestration $\sequenced{\transformation{t}_{1}, \dots, \transformation{t}_{m}}  \; (\transformation{i} \in \transformationset{T})$ that does not contain a transformation when its models are already consistent, the prefixes of that orchestration only yield the same models if those prefixes are consistent orchestrations, i.e.
     \begin{align*}
         &
         \forall \modeltuple{m} \in \metamodeltupleinstanceset{M}, \changetuple{\metamodeltuple{M}} \in \changetuple{\metamodeltuple{M}} : \forall i, k \in \setted{1, \dots, m} : \\
@@ -357,11 +359,11 @@ Having only monotone transformations ensures that each orchestration, which does
         \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{i}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \\
         & \formulaskip 
         \Rightarrow
-        \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concat \dots \concat \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \consistenttomath \transformationset{T}
+        \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \consistenttomath \transformationset{T}
         \end{align*}
 \end{lemma}
 \begin{proof}
-    Assume that there are two prefixes $\tupled{\transformation{t}_{1}, \dots, \transformation{t}_{i}}$ and $\tupled{\transformation{t}_{1}, \dots, \transformation{t}_{k}}$ of an orchestration, $i < k$ without loss of generality, such that they yield the same inconsistent models, i.e., $\generalizationfunction{\metamodeltuple{M}, \transformation{t}_{i}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ although $\generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ is not consistent to $\transformationset{T}$.
+    Assume that there are two prefixes $\sequenced{\transformation{t}_{1}, \dots, \transformation{t}_{i}}$ and $\sequenced{\transformation{t}_{1}, \dots, \transformation{t}_{k}}$ of an orchestration, $i < k$ without loss of generality, such that they yield the same inconsistent models, i.e., $\generalizationfunction{\metamodeltuple{M}, \transformation{t}_{i}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ although $\generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ is not consistent to $\transformationset{T}$.
     We denote the change tuple delivered by any prefixes of length $l$ as $\changetuple{\metamodeltuple{M},l} = \tupled{\change{\metamodel{M}{1},l}, \dots, \change{\metamodel{M}{n}, l}}$ with $\tupled{\modeltuple{m}, \changetuple{\metamodeltuple{M},l}} = \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{l}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$.
     We know that the sequence of changes between the two prefixes does not perform any changes and thus acts like the identity function, i.e., $\generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{i+1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M},i}) = \identitychange(\modeltuple{m}, \changetuple{\metamodeltuple{M},i})$
     and thus $\changetuple{\metamodeltuple{M},i}(\modeltuple{m}) = \changetuple{\metamodeltuple{M},k}(\modeltuple{m})$.
@@ -373,7 +375,7 @@ Having only monotone transformations ensures that each orchestration, which does
     Let us assume that $\transformation{t}_{i+1}$ adds an element (analogous argumentation for the removal).
     %modifies the change tuple such that it adds or removes further elements.
     Then there is a model that contains the element after applying the change generated by the transformation, i.e., $\exists s \in \setted{1, \dots, n} : \exists \modelelement{e} : \modelelement{e} \in \change{\metamodel{M}{s},i+1}(\model{m}{s}) \setminus \change{\metamodel{M}{s},i}(\model{m}{s})$.
-    Due to the transformations being monotone, we know that this element was not contained before, especially not in $\model{m}{s}$, as otherwise $\modelelement{e} \in \model{m}{s} \setminus \change{\metamodel{M}{s},i}(\model{m}{s})$ and thus $\model{m}{s} \setminus \change{\metamodel{M}{s},i}(\model{m}{s}) \cap \change{\metamodel{M}{s},i+1}(\model{m}{s}) \neq \emptyset$, which conflicts the definition of monotone transformations for $\transformation{t}_{i+1}$.
+    Due to the transformations being monotone, we know that this element was not contained before, especially not in $\model{m}{s}$, as otherwise $\modelelement{e} \in \model{m}{s} \setminus \change{\metamodel{M}{s},i}(\model{m}{s})$ and thus $(\model{m}{s} \setminus \change{\metamodel{M}{s},i}(\model{m}{s})) \cap \change{\metamodel{M}{s},i+1}(\model{m}{s}) \neq \emptyset$, which conflicts the definition of monotone transformations for $\transformation{t}_{i+1}$.
 
     Since $\change{\metamodel{M}{s},k}(\model{m}{s}) = \change{\metamodel{M}{s},i}(\model{m}{s})$, we know that $\modelelement{e} \not\in \change{\metamodel{M}{s},k}(\model{m}{s})$.
     Thus, there must be a transformation $\transformation{t}_{l}$ with $i+1 < l \leq k$ which, in turn, removes this element, i.e., $\modelelement{e} \in \change{\metamodel{M}{s},l-1}(\model{m}{s}) \setminus \change{\metamodel{M}{s},l}(\model{m}{s})$.
@@ -384,13 +386,13 @@ Having only monotone transformations ensures that each orchestration, which does
 
 \mnote{Monotone transformation prevent alternation}
 With that insight, it is easy to see that given only monotone transformation, no alternation can occur in our algorithm \autoref{algo:orchestration:application}.
-\begin{theorem}
+\begin{theorem}[Monotone Transformations Prevent Alternation]
     Given a set of correct, monotone synchronizing transformations $\transformationset{T}$.
     Then \autoref{algo:orchestration:application} cannot contain an alternation according to \autoref{def:applyalternation}, as long as $\function{Orchestrate}$ does not return a transformation whose models are already consistent.
 \end{theorem}
 \begin{proof}
     According to \autoref{lemma:monotonetransformationsnosamestates}, monotone transformations ensure that in an orchestration that does not contains transformations that need to be applied to already consistent models the application of two prefixes never yields the same changes.
-    In consequence, the sequence of $\mathvariable{generatedChanges}$ in the transformation application in 
+    In consequence, the sequence of $\applyalggenerated$ in the transformation application in 
     Lines~\autoref{algo:orchestration:application:line:startorchestrate}--\autoref{algo:orchestration:application:line:endorchestrate} of \autoref{algo:orchestration:application} can never contain the same two changes.
     This would, however, be necessary to fulfill \autoref{def:applyalternation} for alternation.
 \end{proof}

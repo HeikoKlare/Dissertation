@@ -36,28 +36,33 @@ Finally, we shortly discuss confluence as a considerable property of transformat
 %First option: we assume an oracle that returns the transformation to execute next according to the orchestration function and we stop when consistent models are achieved
 
 %\todo{Transformations as variable instead of index and say that our implementation will be independent from concrete network. But in general, once could define it specific for a set of transformations.}
-\todo{Rename generatedChanges and executedTransformation to $\change{generated}$ and new command transformationtuple with index executed}
+%\todo{Rename generatedChanges and executedTransformation to $\change{generated}$ and new command transformationtuple with index executed}
+\newcommand{\applyalgexecuted}{\sequence{\transformation{t}_{\mathvariable{executed}}}}
+\newcommand{\applyalggenerated}{\sequence{\changetuple{\metamodeltuple{M}, \mathvariable{generated}}}}
 \begin{algorithm}
    % \input{algorithms/correctness/synchronization/find_corresponding_elements.tex}
     \begin{algorithmic}[1]
-        \Procedure{$\function{Apply}$}{$\transformationset{T}, \modeltuple{m} = \tupled{\model{m}{1}, \dots, \model{m}{n}}, \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}}$}
-            \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\transformationset{t}, \modeltuple{m})$
+        \Procedure{$\function{Apply}$}{$\transformationset{T}, 
+        \modeltuple{m} %= \tupled{\model{m}{1}, \dots, \model{m}{n}}
+        , \changetuple{\metamodeltuple{M}} %= \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}}
+        $}
+            \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\transformationset{T}, \modeltuple{m})$
             \If{$\neg \mathvariable{isConsistent}$}
                 \State \Return{$\bot$}
             \EndIf
-            \State $\mathvariable{executedTransformations} \leftarrow \tupled{}$
-            \State $\mathvariable{generatedChanges} \leftarrow \tupled{}$
-            \State $\transformation{t}_{next}$ $\leftarrow$ $\function{Orchestrate}_{\transformationset{T}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}, \mathvariable{executedTransformations}, \mathvariable{generatedChanges})$ \label{algo:orchestration:application:line:startorchestrate}
+            \State $\applyalgexecuted \leftarrow \sequenced{}$
+            \State $\applyalggenerated \leftarrow \sequenced{}$
+            \State $\transformation{t}_{next}$ $\leftarrow$ $\function{Orchestrate}_{\transformationset{T}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}, \applyalgexecuted, \applyalggenerated)$ \label{algo:orchestration:application:line:startorchestrate}
             \While{$\transformation{t}_{next} \neq \bot$}
                 \State $(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ $\leftarrow$ $\generalizationfunction{\metamodeltuple{M}, \transformation{t}_{next}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ \label{algo:orchestration:application:line:stepcalculation}
-                \State $\mathvariable{executedTransformation}.add(\transformation{t}_{next})$
-                \State $\mathvariable{generatedChanges}.add(\changetuple{\metamodeltuple{M}})$
-                \State $\transformation{t}_{next}$ $\leftarrow$ $\function{Orchestrate}_{\transformationset{T}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}, \mathvariable{executedTransformations}, \mathvariable{generatedChanges})$
+                \State $\applyalgexecuted \gets \applyalgexecuted + \transformation{t}_{next}$
+                \State $\applyalggenerated \gets \applyalggenerated + \changetuple{\metamodeltuple{M}})$
+                \State $\transformation{t}_{next}$ $\leftarrow$ $\function{Orchestrate}_{\transformationset{T}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}, \applyalgexecuted, \applyalggenerated)$
             \EndWhile \label{algo:orchestration:application:line:endorchestrate}
             %\State $\tupled{\model{m}{1}, \dots, \model{m}{n}} \leftarrow \modeltuple{m}$
             %\State $\tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \leftarrow \changetuple{\metamodeltuple{M}}$
-            \State $\modeltuple{m}_{res} \leftarrow \tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \dots, \change{\metamodel{M}{n}}(\model{m}{n})}$
-            \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\transformationset{t}, \modeltuple{m}_{res})$ \label{algo:orchestration:application:line:startconsistencycheck}
+            \State $\modeltuple{m}_{res} \leftarrow \changetuple{\metamodeltuple{M}}(\metamodeltuple{m})$ %\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \dots, \change{\metamodel{M}{n}}(\model{m}{n})}$
+            \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\transformationset{T}, \modeltuple{m}_{res})$ \label{algo:orchestration:application:line:startconsistencycheck}
             \If{$\neq \mathvariable{isConsistent}$}
                 \State \Return{$\bot$}
             \EndIf \label{algo:orchestration:application:line:endconsistencycheck}
@@ -152,7 +157,7 @@ Due to their simplicity, we do not provide an explicit implementation of these t
 It is designed to be correct, i.e., it only returns models when they are consistent.
 We show that the algorithm fulfills these properties in the following theorem.
 
-\begin{theorem}[Apply Function Correctness]
+\begin{theorem}[Apply Algorithm Correctness]
     The \function{Apply} function in \autoref{algo:orchestration:application} fulfills the functional behavior of an application function as defined in \autoref{def:applicationfunction} and is correct according to \autoref{def:applicationfunctioncorrectness}
 \end{theorem}
 \begin{proof}
@@ -177,10 +182,10 @@ We do, however, need to ensure that the \function{Orchestrate} function returns 
 If we assume that we can achieve optimality for the orchestration function, we would have the guarantee that if a consistent orchestration exists, the function will find it.
 There is, however, no restriction to what the orchestration function may return when there is no orchestration that yields consistent models at all.
 Thus, we have two options to ensure termination:
-\begin{enumerate}
+\begin{properenumerate}
     \item We enable the orchestration function to identify whether a consistent orchestration exists.
     \item We find an upper bound for the number of necessary transformation executions, such that if more transformations were executed, we cannot expect the algorithm to find consistent models anymore and thus abort. 
-\end{enumerate}
+\end{properenumerate}
 
 \mnote{Termination and optimality are conflicting}
 The simplest solution would be to find an upper bound for the number of necessary transformation executions.
@@ -196,7 +201,7 @@ With the example in \autoref{fig:orchestration:necessity_multiple_executions}, i
 Thus, any consistent orchestration contains that transformation at least $x-1$ times.
 While we have used that to show that executing each transformation only once is, in general, not sufficient, we can also easily show the more general statement that we cannot find a maximal length for the orchestration of transformation networks of specific size.
 
-\begin{theorem}[Upper Bound of Shortest Consistent Orchestration]
+\begin{theorem}[Upper Bound for Shortest Consistent Orchestration]
     \label{theorem:orchestration_fixed}
     For every $n$, there is a set of transformations $\transformationset{T}$ such that for specific models $\modeltuple{m}$ and changes $\changetuple{}$ to them for which each possible orchestration function $\orcfunction{\transformationset{T}}$ with whom $\appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{})$ is consistent, delivers a sequence as $\orcfunction{\transformationset{T}}(\modeltuple{m}, \changetuple{})$ with $\abs{\orcfunction{\transformationset{T}}(\modeltuple{m}, \changetuple{})} > n$.
 \end{theorem}
@@ -311,9 +316,9 @@ We define a consistency preservation rule for the transformation between metamod
 with
 \begin{align*}
     &
-    \model{m}{i}' = \tupled{\mathvariable{time}_{\model{m}{i}'}, \mathvariable{cont}_{\model{m}{i}'}, \mathvariable{pos}_{\model{m}{i}'}} \equalsperdefinition \changetuple{\metamodel{M}{i,\TuringMachine}}(\model{m}{i}) \\
+    \model{m}{i}' = \tupled{\mathvariable{time}_{\model{m}{i}'}, \sequence{\mathvariable{cont}_{\model{m}{i}'}}, \mathvariable{pos}_{\model{m}{i}'}} \equalsperdefinition \changetuple{\metamodel{M}{i,\TuringMachine}}(\model{m}{i}) \\
     &
-    \model{m}{k}' = \tupled{\mathvariable{time}_{\model{m}{k}'}, \mathvariable{cont}_{\model{m}{k}'}, \mathvariable{pos}_{\model{m}{k}'}} \equalsperdefinition \changetuple{\metamodel{M}{k,\TuringMachine}}(\model{m}{k}) \\
+    \model{m}{k}' = \tupled{\mathvariable{time}_{\model{m}{k}'}, \sequence{\mathvariable{cont}_{\model{m}{k}'}}, \mathvariable{pos}_{\model{m}{k}'}} \equalsperdefinition \changetuple{\metamodel{M}{k,\TuringMachine}}(\model{m}{k}) \\
     &
     \change{\metamodel{M}{i,\TuringMachine}}'(\model{m}{i}) = 
     \begin{cases}
@@ -321,7 +326,7 @@ with
         \formulaskip\formulaskip 
             \text{if } \mathvariable{time}_{\model{m}{k}'} > \mathvariable{time}_{\model{m}{i}'} \\
         \formulaskip\formulaskip\formulaskip
-            \land \exists \tupled{\mathvariable{cont}_{\model{m}{k}'}[\mathvariable{pos}_{\model{m}{k}'}], \mathvariable{dir},\mathvariable{repl}} \in \Tr(Q(\metamodel{M}{i,\TuringMachine}),Q(\metamodel{M}{k,\TuringMachine}))\\[.4em]
+            \land \exists \tupled{\sequenceindex{\mathvariable{cont}_{\model{m}{k}'}}{\mathvariable{pos}_{\model{m}{k}'}}, \mathvariable{dir},\mathvariable{repl}} \in \Tr(Q(\metamodel{M}{i,\TuringMachine}),Q(\metamodel{M}{k,\TuringMachine}))\\[.4em]
         \change{\metamodel{M}{i,\TuringMachine}}(\model{m}{i}'), \formulaskip 
         \text{else}
     \end{cases} \\
@@ -332,7 +337,7 @@ with
         \formulaskip\formulaskip 
             \text{if } \mathvariable{time}_{\model{m}{i}'} > \mathvariable{time}_{\model{m}{k}'} \\
         \formulaskip\formulaskip\formulaskip
-            \land \exists \tupled{\mathvariable{cont}_{\model{m}{i}'}[\mathvariable{pos}_{\model{m}{i}'}], \mathvariable{dir},\mathvariable{repl}} \in \Tr(Q(\metamodel{M}{i,\TuringMachine}),Q(\metamodel{M}{k,\TuringMachine}))\\[.4em]
+            \land \exists \tupled{\sequenceindex{\mathvariable{cont}_{\model{m}{i}'}}{\mathvariable{pos}_{\model{m}{i}'}}, \mathvariable{dir},\mathvariable{repl}} \in \Tr(Q(\metamodel{M}{i,\TuringMachine}),Q(\metamodel{M}{k,\TuringMachine}))\\[.4em]
         \change{\metamodel{M}{k,\TuringMachine}}(\model{m}{k}'), \formulaskip 
         \text{else}
     \end{cases}
@@ -349,7 +354,7 @@ with
 % 		\end{cases}
 % \end{multline*}
 % }
-where $\mathvariable{cont}|_{\mathvariable{pos} \gets \mathvariable{repl}} \equalsperdefinition \mathvariable{cont}[0\:..\:\mathvariable{pos}-1] \cdot \mathvariable{repl} \cdot \mathvariable{cont}[\mathvariable{pos}+1\:..\:|\mathvariable{cont}|-1]$.
+where $\mathvariable{cont}|_{\mathvariable{pos} \gets \mathvariable{repl}} \equalsperdefinition \sequenceindex{\mathvariable{cont}}{0\:..\:\mathvariable{pos}-1} \cdot \mathvariable{repl} \cdot \sequenceindex{\mathvariable{cont}}{\mathvariable{pos}+1\:..\:|\mathvariable{cont}|-1}$.
 
 \mnote{Consistency relations implied by consistency preservation rules}
 The consistency relations are implicitly given by the fixed points of the consistency preservation rules.
@@ -386,11 +391,11 @@ Let $s \in Q_{\TuringMachine}$ be the initial state of $\TuringMachine$. We set
 We can show that for every Turing machine, this construction of a transformation network out of it solves the halting problem by construction if we are able to solve the orchestration problem.
 First, we show an auxiliary lemma that proves that executing the transformations until all models are consistent terminates if, and only if, the according Turing machine halts.
 
-\begin{lemma}[Transformation Network from Turing Machine]
+\begin{lemma}[Turing Machine to Transformation Network Reduction]
     \label{lemma:turing_machine_construction}
     Executing the transformations of $\transformationset{T}_{\TuringMachine}$ for the models $\modeltuple{m}_{\TuringMachine,x}$ and changes $\changetuple{\metamodeltuple{M},\TuringMachine,x}$ until all models are consistent %no transformations modify the changes any more 
     terminates if, and only if, $\TuringMachine$ halts on input $x$.
-	If executing the transformations terminates with the final changes $\changetuple{\metamodeltuple{M},f}$, then the model in $\modeltuple{m}_{f} = \tupled{\change{1,\metamodeltuple{M},f}(\model{m}{1,\TuringMachine,x}), \dots, \change{n,\metamodeltuple{M},f}(\model{m}{n,\TuringMachine, x})}$ with the highest timestamp contains $\TuringMachine(x)$ as tape content.
+	If executing the transformations terminates with the final changes $\changetuple{\metamodeltuple{M},f}$, then the model in $\modeltuple{m}_{f} = \changetuple{\metamodeltuple{M},f}(\modeltuple{m}_{\TuringMachine,x})$ with the highest timestamp contains $\TuringMachine(x)$ as tape content.
 \end{lemma}
 \begin{proof}
     Let $\changetuple{s}, s \in \mathbb{N}_0$ be the sequence of changes created while executing the transformations and let $\modeltuple{m}_{s} = \tupled{\model{m}{1,s}, \dots, \model{m}{n,s}}\equalsperdefinition \changetuple{s}(\modeltuple{m}_{\TuringMachine,x})$ be the state of the models after applying that change.
@@ -449,7 +454,7 @@ In consequence, the orchestration problem is undecidable.
 According to \autoref{theorem:optimal_application_function_orchestration_problem}, we can only find an optimal application function if the orchestration problem is decidable.
 Thus, we know that we cannot find such a function.
 
-\begin{corollary}[Application Function Optimality]
+\begin{corollary}[Application Function Non-Optimality]
     \label{corollary:nooptimalapplication}
     Let $\appfunction{\orcfunction{\transformationset{T}}}$ be an application function. $\appfunction{\orcfunction{\transformationset{T}}}$ cannot be optimal.
 \end{corollary}
@@ -515,8 +520,8 @@ Thus, we know that we cannot find such a function.
 \mnote{Algorithm cannot terminate and be optimal}
 From this corollary, it also follows that we cannot implement \function{Orchestrate} within the \function{Apply} algorithm in a way that it realizes an optimal application function and terminates always.
 
-\begin{corollary}
-    \function{Apply} according to \autoref{algo:orchestration:application} cannot always terminate and return consistent models whenever an orchestration exists that yields them for every possible input.
+\begin{corollary}[Apply Algorithm Non-Optimality]
+    \function{Apply} according to \autoref{algo:orchestration:application} cannot terminate and return consistent models whenever an orchestration exists that yields them for every possible input.
 \end{corollary}
 \begin{proof}
     If \function{Apply} always terminated and returned consistent models whenever there is an orchestration that yields them, it would implement an optimal application function. %and could be used to realize \function{ExistsOrc} from the proof of \autoref{theorem:nooptimalapplication}.

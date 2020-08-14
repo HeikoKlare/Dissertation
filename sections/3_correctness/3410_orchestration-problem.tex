@@ -16,9 +16,9 @@ Precisely, we define an orchestration and a consistent orchestration as follows.
 
 \begin{definition}[Orchestration]
     Let $\transformationset{T}$ be a set of transformation.
-    We call any sequence of those transformations $\tupled{\transformation{t}_{1}, \transformation{t}_{2}, \dots} \in \transformationset{T}^{< \mathbb{N}} \equalsperdefinition \emptyset \cup \transformationset{T}^1 \cup \transformationset{T}^2 \cup \dots$ an \emph{orchestration} of them.
+    We call any sequence of those transformations $\sequenced{\transformation{t}_{1}, \transformation{t}_{2}, \dots} \in \transformationset{T}^{< \mathbb{N}} \equalsperdefinition \emptyset \cup \transformationset{T}^1 \cup \transformationset{T}^2 \cup \dots$ an \emph{orchestration} of them.
 
-    For models $\modeltuple{m} \in \metamodeltuple{M}$ and changes $\changetuple{\metamodeltuple{M}} \in \changeuniverse{\metamodeltuple{M}}$, we say that an orchestration $\tupled{\transformation{t}_{1}, \dots, \transformation{t}_{n}}$ is \emph{consistent} if, and only if, the subsequent application of the transformations to $\modeltuple{m}$ and $\changetuple{\metamodeltuple{M}}$  is consistent, i.e., $\generalizationfunction{\metamodeltuple{M},\transformation{t}_{n}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M},\transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \consistenttomath \transformationset{T}$.
+    For models $\modeltuple{m} \in \metamodeltuple{M}$ and changes $\changetuple{\metamodeltuple{M}} \in \changeuniverse{\metamodeltuple{M}}$, we say that an orchestration $\sequenced{\transformation{t}_{1}, \dots, \transformation{t}_{n}}$ is \emph{consistent} if, and only if, the subsequent application of the transformations to $\modeltuple{m}$ and $\changetuple{\metamodeltuple{M}}$  is consistent, i.e., $\generalizationfunction{\metamodeltuple{M},\transformation{t}_{n}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M},\transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \consistenttomath \transformationset{T}$.
 \end{definition}
 
 \mnote{Orchestration function is allowed to return arbitrary long sequences of transformations}
@@ -423,31 +423,42 @@ Recall that $\generalizationfunction{\metamodeltuple{M},\transformation{t}}$ is 
 % Formally, this notion looks as follows.
 
 \begin{definition}[Optimal Transformation Orchestration Function]
-    Let $\transformationset{T}$ be a set of transformations for a set of metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$.
+    Let $\transformationset{T}$ be a set of transformations for a set of metamodels $\metamodeltuple{M}% = \tupled{\metamodelsequence{M}{n}}
+    $.
     We say that an orchestration function $\orcfunction{\transformationset{T}}$ for these transformations is \emph{optimal} if it returns a consistent orchestration whenever it exists, i.e.,
     \begin{align*}
         &
-        \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \forall \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} :
-        \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \Rightarrow \\
+        \forall \modeltuple{m} \in \setted{\modeltuple{m}' \in \metamodeltupleinstanceset{M} \mid \modeltuple{m}' \consistenttomath \consistencyrelationset{CR}} : \forall \changetuple{\metamodeltuple{M}} %= \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} 
+        \in \changeuniverse{\metamodeltuple{M}} : \\
+        %\modeltuple{m} \consistenttomath \consistencyrelationset{CR} \Rightarrow \\
         & \formulaskip
-        \bigl[ \bigl(
-            \exists \transformation{t}_{1}, \dots, \transformation{t}_{m} \in \transformationset{} : 
-            \exists \changetuple{\metamodeltuple{M}}' = \tupled{\change{\metamodel{M}{1}}', \dots, \change{\metamodel{M}{n}}'} \in \changeuniverse{\metamodeltuple{M}} :\\
+        %\bigl[ 
+            \bigl(
+            \exists \transformation{t}_{1}, \dots, \transformation{t}_{i} \in \transformationset{T} : 
+            \exists \changetuple{\metamodeltuple{M}}' %= \tupled{\change{\metamodel{M}{1}}', \dots, \change{\metamodel{M}{n}}'} 
+            \in \changeuniverse{\metamodeltuple{M}} : \changetuple{\metamodeltuple{M}}'(\modeltuple{m})
+            \consistenttomath \consistencyrelationset{CR}\\
             & \formulaskip \formulaskip
-            \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{m}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}')\\
-            & \formulaskip \formulaskip
-            \land \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \dots, \change{\metamodel{M}{n}}'(\model{m}{n})} \consistenttomath \consistencyrelationset{CR} \bigr) \\
+            \land \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{i}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}') %\bigr)
+            \\
+            % & \formulaskip \formulaskip
+            %\land \changetuple{\metamodeltuple{M}}'(\modeltuple{m})
+            %\tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \dots, \change{\metamodel{M}{n}}'(\model{m}{n})} 
+            %\consistenttomath \consistencyrelationset{CR} \bigr) \\
             & \formulaskip
-            \Rightarrow \bigl(        
-            \exists \transformation{t}_{1}', \dots, \transformation{t}_{m}' \in \transformationset{} : 
-            \exists \changetuple{\metamodeltuple{M}}'' = \tupled{\change{\metamodel{M}{1}}'', \dots, \change{\metamodel{M}{n}}''} \in \changeuniverse{\metamodeltuple{M}} :\\
+            \Rightarrow %\bigl(        
+            \exists \transformation{t}_{1}', \dots, \transformation{t}_{k}' \in \transformationset{} : 
+            \exists \changetuple{\metamodeltuple{M}}'' %= \tupled{\change{\metamodel{M}{1}}'', \dots, \change{\metamodel{M}{n}}''} 
+            \in \changeuniverse{\metamodeltuple{M}} : \changetuple{\metamodeltuple{M}}''(\modeltuple{m}) \consistenttomath \consistencyrelationset{CR}\\
             & \formulaskip \formulaskip
-            \orcfunction{\transformationset{T}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \tupled{\consistencypreservationrule{1}', \dots, \consistencypreservationrule{m}'} \\
+            \land \orcfunction{\transformationset{T}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \sequenced{\transformation{t}_{1}', \dots, \transformation{t}_{k}'} \\
             & \formulaskip \formulaskip
-            \land \generalizationfunction{\metamodeltuple{M},\transformation{t}_{1}'} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M},\transformation{t}_{m}'}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}'')\\
-            & \formulaskip \formulaskip
-            \land \tupled{\change{\metamodel{M}{1}}''(\model{m}{1}), \dots, \change{\metamodel{M}{n}}''(\model{m}{n})} \consistenttomath \consistencyrelationset{CR}
-        \bigr) \bigr]
+            \land \generalizationfunction{\metamodeltuple{M},\transformation{t}_{1}'} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M},\transformation{t}_{k}'}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}'') %\\
+            % & \formulaskip \formulaskip
+            % \land \changetuple{\metamodeltuple{M}}''(\modeltuple{m})
+            % %\tupled{\change{\metamodel{M}{1}}''(\model{m}{1}), \dots, \change{\metamodel{M}{n}}''(\model{m}{n})} 
+            % \consistenttomath \consistencyrelationset{CR}
+        \bigr) %\bigr]
     \end{align*}
 \end{definition}
 
@@ -461,20 +472,25 @@ Thus, we apply the notion of \emph{optimality} to that function accordingly by r
 
 \begin{definition}[Optimal Transformation Application Function]
     \label{def:optimalapplicationfunction}
-    Let $\transformationset{T}$ be a set of transformations for a set of metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$.
+    Let $\transformationset{T}$ be a set of transformations for a set of metamodels $\metamodeltuple{M} %= \tupled{\metamodelsequence{M}{n}}
+    $.
     We say that an application function $\appfunction{\orcfunction{\transformationset{T}}}$ for these transformations is \emph{optimal} if it returns models that are consistent whenever there is a consistent orchestration of the transformation, i.e.,
     \begin{align*}
         &
-        \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \forall \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} :
-        \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \Rightarrow \\
+        \forall \modeltuple{m} \in \setted{\modeltuple{m}' \in \metamodeltupleinstanceset{M} \mid \modeltuple{m}' \consistenttomath \consistencyrelationset{CR}} : \forall \changetuple{\metamodeltuple{M}} %= \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} 
+        \in \changeuniverse{\metamodeltuple{M}} : \\
+        %\modeltuple{m} \consistenttomath \consistencyrelationset{CR} \Rightarrow \\
         & \formulaskip
         \bigl(
-            \exists \transformation{t}_{1}, \dots, \transformation{t}_{m} \in \transformationset{} : 
-            \exists \changetuple{\metamodeltuple{M}}' = \tupled{\change{\metamodel{M}{1}}', \dots, \change{\metamodel{M}{n}}'} \in \changeuniverse{\metamodeltuple{M}} :\\
+            \exists \transformation{t}_{1}, \dots, \transformation{t}_{m} \in \transformationset{T} : 
+            \exists \changetuple{\metamodeltuple{M}}' %= \tupled{\change{\metamodel{M}{1}}', \dots, \change{\metamodel{M}{n}}'} 
+            \in \changeuniverse{\metamodeltuple{M}} : \changetuple{\metamodeltuple{M}}'(\modeltuple{m}) \consistenttomath \consistencyrelationset{CR}\\
             & \formulaskip \formulaskip
-            \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{m}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}')\\
-            & \formulaskip \formulaskip
-            \land \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \dots, \change{\metamodel{M}{n}}'(\model{m}{n})} \consistenttomath \consistencyrelationset{CR} \bigr) \\
+            \land \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{m}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}') %\\
+            %& \formulaskip \formulaskip
+            %\land \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \dots, \change{\metamodel{M}{n}}'(\model{m}{n})} \consistenttomath \consistencyrelationset{CR} 
+            %\bigr) 
+            \\
             & \formulaskip
             \Rightarrow \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m},\changetuple{\metamodeltuple{M}}) \consistenttomath \consistencyrelationset{CR}
         \bigr)
@@ -484,7 +500,7 @@ Thus, we apply the notion of \emph{optimality} to that function accordingly by r
 \mnote{Optimal application function requires optimal orchestration function}
 According to the defined behavior of an application function, an optimal application function requires an optimal orchestration function.
 
-\begin{lemma}[Optimal Application Function]
+\begin{lemma}[Application / Orchestration Function Optimality]
     \label{lemma:optimalapplicationfunction}
     An application function $\appfunction{\orcfunction{\transformationset{T}}}$ can only be optimal if $\orcfunction{\transformationset{T}}$ is optimal.
 \end{lemma}
@@ -527,7 +543,7 @@ In fact, both these problems are equivalent in the sense that having a solution 
 Since the orchestration function is derived from the goal of finding an optimal application function, it is obviously equivalent to find an optimal application function or to solve the orchestration and the orchestration existence problem.
 As both problems are equivalent, we prove this for the orchestration existence problem.
 
-\begin{theorem}[Optimal Application Function for Orchestration Problem]
+\begin{theorem}[Optimal Application Function / Orchestration Problem]
     \label{theorem:optimal_application_function_orchestration_problem}
     An optimal application function $\appfunction{\orcfunction{\transformationset{T}}}$ can be defined if, and only if, a solution for the orchestration existence problem exists.
 \end{theorem}
