@@ -1,4 +1,5 @@
 \section{A Conservative Application Algorithm}
+\label{chap:orchstration:algorithm}
 
 \mnote{Correct algorithm that always terminates}
 We have argued why it is inevitable that any algorithm realizing an application function cannot be optimal and thus will not be able to find a consistent orchestration although it exists and, in that case, either return $\bot$ or not even terminate at all.
@@ -178,14 +179,12 @@ Likewise, $\transformation{t}_{2}$ was executed after $\sequenced{\transformatio
 	% }
 \end{algorithm}
 
-\todo{Adapt because of returning bot after generalization function and after recursive call}
-
 \mnote{Provenance algorithm performs orchestration recursively}
 We propose an algorithm that realizes the discussed design goal in \autoref{algo:orchestration:provenance}.
 The algorithm is a derivation of the general algorithm implementing an application function depicted in \autoref{algo:orchestration:application}.
 It first checks for consistency of the given models as a prerequisite for executing the transformations.
-Then the algorithm calls the recursive function \function{Propagate}, which implements the orchestration of transformations and returns a change tuple that is yielded by the determined orchestrations, which delivers consistent models if applied to the input.
-While this behavior is equal to the one in \autoref{algo:orchestration:application}, the orchestrate itself is implemented differently in a recursive rather than an iterative manner, which implicitly ensures termination.
+Then the algorithm calls the recursive function \function{Propagate}, which implements the orchestration of transformations and returns a change tuple that is yielded by the determined orchestration, which delivers consistent models if applied to the input models.
+While this behavior is equal to the one in \autoref{algo:orchestration:application}, the orchestration itself is implemented differently in a recursive rather than an iterative manner, which implicitly ensures termination.
 
 \mnote{Recursive orchestration function fulfills principle of incremental consistency restoration}
 The function \function{Propagate} implementing the orchestration in a recursive manner acts as follows:
@@ -194,7 +193,7 @@ This selection ensures that a transformation is selected whose models are affect
 Models are affected by a change if any of the two changes in $\change{\metamodeltuple{M}}$ for either of the models that are kept consistent by the selected transformation is not the identity function $\identitychange$.
 It then applies the transformation using the generalization function $\generalizationfunction{}$.
 If the selected transformation is not defined for the given models and changes, the function may return $\bot$ so that the complete algorithm terminates with $\bot$.
-Afterwards, it recursively executes the function \function{Propagate} with the subnetwork given by the transformations that have already been executed.
+Afterwards, it recursively executes the function \function{Propagate} with the subnetwork given by the transformations that have already been executed and are stored in $\provalgexecuted$.
 After that recursive execution it is checked whether the models yielded by the resulting changes are still consistent to the candidate transformation.
 If this consistency check fails, the transformations do not fulfill the definition of being reactive converging according to \autoref{def:reactiveconverging}, as we will prove later.
 If the models are consistent to the transformation, the next candidate is picked.
