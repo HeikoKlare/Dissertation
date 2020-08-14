@@ -19,7 +19,7 @@ Since optimality is a property of an orchestration function with respect to a se
 This can easily contradict our assumption of independent development and reuse or lead to restrictions of transformation that are not practical anymore.
 
 \mnote{Section summary}
-In the following, we first investigate the possibility to find an optimal orchestration function without restriction the transformations.
+In the following, we first investigate the possibility to find an optimal orchestration function without restricting the transformations.
 We define a general algorithm that realizes an application function, as in practice the function will be realized in terms of an algorithm that dynamically selects the next transformation to execute rather than being an ordinary mathematical function.
 We then discuss its correctness and termination and relate it to the orchestration problem.
 After proving undecidability of the orchestration problem, we discuss the possibilities to restrict transformations such that the problem get decidable.
@@ -82,10 +82,15 @@ In \autoref{algo:orchestration:application}, we propose an algorithm for the app
 It also encodes the orchestration function, because in contrast to the mathematical definition, an algorithm for the orchestration function will not determine a complete sequence of transformations for given models and changes, but dynamically select the next transformation to execute.
 As soon as all transformation delivered by the orchestration are executed, it returns the resulting models if they are consistent or otherwise returns $\bot$.
 
-\todo{Orchestrate must ensure that the returned transformation can be applied (may not be defined). Only the the transformation can be applied afterwards by the gen function.}
+\mnote{Algorithm is independent from concrete transformations}
+An application function according to \autoref{def:applicationfunction} is parametrized by the set of transformations $\transformationset{T}$ it is supposed to be executed on and a transformation network according to \autoref{def:transformationnetwork} is defined to consistent of a set of transformations and an application function, which may suggest to define this function specific for one network.
+\autoref{algo:orchestration:application} is, however, independent from the concrete network and is able to process any set of transformations.
+It thus realizes not one application function, but actually a family of application functions for all possible transformation sets $\transformationset{T}$.
+
 \mnote{Algorithm dynamically selects next transformation}
 The dynamic selection of transformations is realized by an \function{Orchestrate} function and stops as soon as no further transformations to apply are delivered.
 The latter may be the case because the models are already consistent or because no further transformations can be applied.
+It is essential that \function{Orchestrate} does only return a transformation that can be applied to the models and current changes, because otherwise its application by the $\generalizationfunction{}$ in Line~\ref{algo:orchestration:application:line:stepcalculation} would fail.
 The complete logic of the orchestration function is combined with the application of the delivered sequence in Lines~\ref{algo:orchestration:application:line:startorchestrate}--\ref{algo:orchestration:application:line:endorchestrate}.
 Since, in practice, the selection of transformation has to be performed dynamically anyway, an implementation of the orchestration function always needs to apply the transformations.
 Thus a separation of the orchestration function into a separate algorithm, which performs the same steps as in Lines~\ref{algo:orchestration:application:line:startorchestrate}--\ref{algo:orchestration:application:line:endorchestrate} leads to a redundancy by applying the transformations both in the separate orchestration algorithm as well as in the given algorithm.
