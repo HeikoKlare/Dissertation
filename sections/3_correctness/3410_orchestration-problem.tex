@@ -1,4 +1,4 @@
-\section{The Orchestration Problem} % Design Space for the Orchestration Function} % and orchestration function
+\section{Orchestration Goals and Problem Statement} % The Orchestration Problem % Design Space for the Orchestration Function} % and orchestration function
 
 \mnote{Undefined when application function is expected to return consistent models}
 To recapitulate, the definition of an application function for transformation networks, given in \autoref{def:applicationfunction}, requires an application function $\appfunction{\orcfunction{\transformationset{T}}}$ to accept models and changes to them and yields either a set of models or $\bot$.
@@ -495,14 +495,54 @@ According to the defined behavior of an application function, an optimal applica
     Thus, the orchestration function must deliver a sequence for such inputs that yields consistent models, which is equivalent to $\orcfunction{\transformationset{T}}$ being optimal.
 \end{proof}
 
+
+\subsection{The Orchestration Problem}
+
 \mnote{The orchestration problem}
 The problem to find a consistent orchestration whenever it is exists, i.e., to find an optimal orchestration function, is the central subject of the following sections.
 This is what we denote as the \emph{orchestration problem}.
 We prove that the problem is undecidable, discuss how we can make it decidable and propose strategies to deal with its undecidability.
 Finally, we come up with a discussion of conservatively approximating a solution to the problem.
 We define the problem as follows.
-
 \begin{definition}[Orchestration Problem]
     \label{def:orchestrationproblem}
     The problem to find a consistent orchestration of transformations for given inputs (models and changes to them) if it exists is called the orchestration problem.
 \end{definition}
+
+Often, the more general problem of deciding whether a consistent orchestration exists, is sufficient for us.
+\begin{definition}[Orchestration Existence Problem]
+    \label{def:orchestrationexistenceproblem}
+    The question whether a consistent orchestration of transformations for given inputs (models and changes to them) exists is called the orchestration existence problem.
+\end{definition}
+
+In fact, both these problems are equivalent in the sense that having a solution for one of them also delivers a solution for the other.
+\begin{theorem}[Orchestration and Existence Problem Equivalence]
+    The orchestration problem can be solved if, and only if, the orchestration existence problem can be solved.
+\end{theorem}
+\begin{proof}
+    If a solution for the orchestration problem exists, it directly induces a solution for the orchestration existence problem, because if we find a consistent orchestration whenever it exists, we also know whether it exists.
+    If a solution for the orchestration existence problem exists and we know that a consistent orchestration exists, we can find it by systematically testing all orchestrations of growing size until a consistent orchestration is found. Since we know that such an orchestration exists, this test must terminate, even if it may take an impractically long time.
+\end{proof}
+
+Since the orchestration function is derived from the goal of finding an optimal application function, it is obviously equivalent to find an optimal application function or to solve the orchestration and the orchestration existence problem.
+As both problems are equivalent, we prove this for the orchestration existence problem.
+
+\begin{theorem}[Optimal Application Function for Orchestration Problem]
+    \label{theorem:optimal_application_function_orchestration_problem}
+    An optimal application function $\appfunction{\orcfunction{\transformationset{T}}}$ can be defined if, and only if, a solution for the orchestration existence problem exists.
+\end{theorem}
+\begin{proof}
+    An optimal $\appfunction{\orcfunction{\transformationset{T}}}$ returns consistent models whenever there is a consistent orchestration.
+    With such a function, we are able to decide whether such an orchestration exists or not.
+    \begin{align*}
+        \function{ExistsOrc}(\transformationset{T},\modeltuple{m},\changetuple{\metamodeltuple{M}}) =
+            \begin{cases}
+                \textsc{true}, & \appfunction{\orcfunction{}}(\transformationset{T}, \modeltuple{m},\changetuple{\metamodeltuple{M}}) \consistenttomath \transformationset{T} \\
+                \textsc{false}, & otherwise
+            \end{cases}
+    \end{align*}
+    $\function{ExistsOrc}$ returns \textsc{true} if, any only if, a consistent orchestration exists.
+    $\appfunction{\orcfunction{}}$ does, per definition, only return consistent models when there is an orchestration that yields them.
+    Additionally, it does always return consistent models when an orchestration that yields them exists, because it is optimal.
+\end{proof}
+
