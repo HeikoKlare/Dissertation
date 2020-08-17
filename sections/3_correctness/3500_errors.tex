@@ -3,13 +3,61 @@
 }
 \label{chap:errors}
 
-\todo{Discuss problem of default values}
+\mnote{Discuss error as the result of failing in achieving correctness}
+In the previous chapters, we have introduced a notion of correctness for transformation networks and discussed how we can achieve or analyze different kinds of correctness for the different artifacts of the transformation network, namely the consistency relations, the consistency preservation rules and the application function.
+It may, however, easily occur that a transformation developer defines transformations that do not adhere to all these kinds of correctness, be it because of missing knowledge about them or by accident.
 
-Problem statement: We now know what correctness means and how to constructively achieve or at least analyze it. We, however, want to know what may happen if correctness was not achieved by any reason.
-We want to have systematic knowledge what kinds of problems can occur, what types of reasons there are and how they manifest.
-We want to derive how many of the typical problems we can systematically resolve with our contributions, i.e., how relevant the problems that we solve are (how often they occur).
+\mnote{Classification of consistency specification and categorization of errors}
+In this chapter, we thus discuss what may happen if correctness was not achieved.
+The possible types of errors that can occur depend on the abstraction level provided by the formalism or language to specify a transformation in.
+We thus first propose a classification of specification levels for transformations.
+We then systematically derive a categorization of potential \emph{failures}, i.e., the unwanted results the application algorithm may yield, the \emph{faults} that led to the mistakes, i.e., the errors in the implementation of the transformation, and finally the causing \emph{mistakes}, i.e. the errors made by a developer when analyzing and defining consistency that led to an implementation fault.
+Finally, we relate the possible types of mistakes, faults and failures to the correctness notions that we have introduced before to evaluate how far the proposed solutions can avoid those errors.
+
+\mnote{Subordinate contributions}
+This chapter thus constitutes our contribution \contributionref{contrib:correctness:errors}, which consists of three subordinate contributions: a classification of consistency specification levels, a categorization of potential errors, and a relation of the categorization to the yet discussed correctness notions and measures to achieve them.
+\todo{Finally update goals}
+It answers the following research question:
+
+\researchquestionrepeat{rq:correctness:errors}
+
+\mnote{Benefits of contributions}
+As the central goal of this chapter, we classify the possible types of errors to derive systematic knowledge about mistakes that can be made and failures that can arise from them.
+First, this helps transformations developers to identify the reasons for arising failures.
+Second, it allows us to identify which relevant errors we can avoid or detect with the approaches proposed in the previous chapters and how relevant the problems that we solve with them are.
+The latter will be part of our subsequent evaluation at a case study.
+
+\mnote{Publication of results}
+Several of the insights regarding errors in transformation networks are results of the two master's theses by \textcite{syma2018ma} and \textcite{saglam2020ma}, who investigated errors that occurred when combining independently developed transformations in two case studies.
+Essential results from the former thesis were published in \owncite{klare2019icmt} and are part of the following discussion in revised form.
+
+%Problem statement: We now know what correctness means and how to constructively achieve or at least analyze it. We, however, want to know what may happen if correctness was not achieved by any reason.
+%We want to have systematic knowledge what kinds of problems can occur, what types of reasons there are and how they manifest.
+%We want to derive how many of the typical problems we can systematically resolve with our contributions, i.e., how relevant the problems that we solve are (how often they occur).
+
+
+Network errors cannot be avoided by construction, thus it good that appropriate orchestration strategy resolves them.
+--> Final section: How to handle the errors: Network errors by conservative strategy to fail safely -> we do not reach failure state but detect the failure; transformation errors by construction
+--> Trace back failures to errors
+--> Termination can always be ensured, then terminating inconsistently; if then, e.g., duplication occur, then can (but must not be) because of missing synchronization. We will see in evaluation that missing synchronization is the main source of duplications.
+
+Failures can occur because of different conceptual and technical mistakes.
+We do not consider technical mistakes, e.g., missing handling of null or comparable things.
+We do not consider conceptual mistakes regarding correctness of a single transformation (unidirectional). I.e., if a single transformation does not ensure consistency in one direction appropriately, we do not consider that a relevant mistake. Mistakes regarding synchronization, however (occurring with concurrent changes but not changes in one of the models), are relevant.
+We assume that transformations are correct, i.e., CPRs correct w.r.t. their relations
+
+Inkompatible Constraints und inkompatible Optionsauswahl lässt sich oft gar nicht unterscheiden, insb. wenn Constraints nicht explizit angegeben sind. Dann sind Constraints implizit durch CPRs definiert. Es könnte aber auch sein, dass die (vom Entwickler gedachten) Constraints relaxierter sind und dann das Problem die Optionsauswahl ist und nicht die Inkompatibilität von Constraints.
 
 \todo{Unterschied Klassifizierung/Kategorisierung: Klassifizierung benötigt Klassifizierungsdimension, Kategorisierung nicht}
+Klassifizierung: Wir packen Spezifikationsszenarien in vordefinierte Klassen, entsprechend ihrem Abstraktionsgrad
+Kategorisierung: Wir identifizieren Kategorien von Mistakes/Faults/Failures und diskutieren deren Vollständigkeit
+Im Unterschied sind bei der Kategorisierung die Kategorien vorher nicht bekannt.
+
+\todo{Discuss problem of default values}
+
+Weitere Fehlertypen diskutieren / explizit ausschließen, insb. Implementierungsfehler, technische Fehler. Diese führen i.d.R. aber auch dazu, dass eine Transformation nicht korrekt ist.
+Wir nehmen wir Korrektheit einer Transformation an!
+In der Evaluation werden wir das noch entsprechend unterscheiden.
 
 \todo{Ziel dieses Kapitels: Wie hängen Korrektheitsdefinition voneinander ab (Hierarchie/Ebenen), was passiert, wenn einzelne Korrektheiten nicht erfüllt sind? Welche Fehler treten auf? Und wie häufig passiert das? (Letzteres eher als Evaluation verkaufen)}
 
@@ -17,82 +65,136 @@ We want to derive how many of the typical problems we can systematically resolve
 
 \todo{Discuss errors by two unidirectional transformations not adhering to the same consistency relation, which we already teasered in \autoref{chap:synchronization} and have seen in the case study}
 
-\begin{copiedFrom}{ICMT}
+
 
 \section{The Consistency Specification Process}
 \todo{Process and levels from ICMT to identify how levels depend on each other (restructure according to relations (compatibility), individual transformations and networks), and derive which errors occur and how they depend on each other}
 
+The process of specifying consistency between multiple models can be considered at different conceptual levels depending on the knowledge a developer must have to ensure correctness at that level.
+For example, at the lowest level a developer may only know that a transformation shall be used within a network without knowing the concrete network, which only allows to exclude specific errors, whereas further errors are relevant and need to be considered when having knowledge about the other transformations to combine it with.
+In addition, depending on the level of abstraction that a specification formalism, such as a transformation language, provides, the developer must only deal with some of these levels as the language abstracts from the other, which determines the resulting challenges a developer has to deal with.
+%In \autoref{chap:correctness:notions_consistency:monolithic_modular}, we have introduced the separation between a modular and monolithic notion of consistency.
+%Although we focus on a modular notion of consistency in this thesis, we will see how a monolithic notion relates to the error potentials of modular specifications.
+In consequence, these levels are supposed to mean that at each of them specific kinds of mistakes can be made and that a formalism may ensure correctness with respect to one of those levels and the ones below, whereas the transformation developer is still responsible for avoiding mistakes at the levels above.
+%even if abstraction is lifted to that appropriate level, thus correctness as the lower levels is ensures, specific potential mistakes can still be made.
+
+We distinguish three such levels.
+%They are supposed to mean that even if abstraction is lifted to that appropriate level, thus correctness as the lower levels is ensures, specific potential mistakes can still be made.
+%At the \emph{global level}, we consider the ($n$-ary) relation and/or transformation between all involved models.
+%At the \emph{modularization level}, we consider the combination of modular, binary relations and synchronizing transformations between the involved models.
+%At the \emph{transformation level}, we consider the synchronization of transformation between two models.
+%
+At the \emph{transformation level}, we consider the specific properties, especially synchronization, of a single transformation to be used in a, more precisely any, transformation network.
+At the \emph{relation network level}, we consider the interplay of the binary consistency relations of a concrete set of transformations.
+At the \emph{rule network level}, we consider the interplay of the consistency preservation rules of a concrete set of transformations.
+These levels depend on each other, because, for example, consistency preservation rules cannot properly work together if each on its own is not at least synchronizing and thus correct at the transformation level.
+On the other hand, a transformation can be correct at the transformation level without being correct at the relation and rule network level.
+
+All these levels are relevant during the consistency specification process.
+As mentioned before, a specification formalism, usually a transformation language, provides a specific level of abstractions associated with one of the conceptual levels introduced above, which relieves the developer from dealing with potential problems of the lower levels.
+For example, using an imperative, unidirectional transformation language requires the developer to ensure synchronization of transformations at the transformation level, compatibility of the relations at the relation network level, as well as interoperability of the consistency preservation rules at the rule network level.
+If, however, a language relieves the developer from manually ensuring synchronization, for example, using keys for matching existing elements in \gls{QVTR}, the developer must only deal with potential problems arising at the higher levels.
+In this case, the transformation engine ensures correctness at the transformation level, but the developer still has to ensure it for the other levels.
+
+These levels are especially different in what knowledge they require to be able to deal with and even avoid potential errors.
+For the transformation level, it is sufficient to know that a transformation may be used in a transformation network without knowing the concrete network.
+For the relation network level, at least the relations of the other transformations in the network must be known.
+Finally, for the rule network level, the transformations of the complete network must be known.
+This influences how far errors at the different levels can be avoided, first, because of the required knowledge to do so and, second, because of the possibility to ensure correctness at all.
+% Remark: correctness for rules -> decidability
+
 %\todoHeiko{Annahme: Immer nur Änderung an einem Modell (keine Synchronisation)}
 
-The process of specifying consistency between $n>2$ types of models using a network of \acp{BX} can be separated into different conceptual levels.
-We distinguish three such levels:
-At the \emph{global level}, we describe the ($n$-ary) relations between all involved model types.
-At the \emph{modularization level}, we split these global relations into modular, binary relations.
-Finally, at the \emph{operationalization level}, we define preservation of consistency %after changes 
-according to the modular relations.
-That classification forms our contribution \ref{contrib:levels}.
+%The process of specifying consistency between $n>2$ types of models using a network of \acp{BX} can be separated into different conceptual levels.
+%We distinguish three such levels:
+%At the \emph{global level}, we describe the ($n$-ary) relations between all involved model types.
+%At the \emph{modularization level}, we split these global relations into modular, binary relations.
+%Finally, at the \emph{operationalization level}, we define preservation of consistency %after changes 
+%according to the modular relations.
+%That classification forms our contribution \ref{contrib:levels}.
 
-All of these levels have to be considered during the consistency specification process.
-A developer specifies consistency on one of these levels, depending on the abstraction level that the transformation language provides, and the transformation engine finally derives an operationalization from that.
-Although a developer does not specify consistency on multiple levels, he or she has to think about the levels on and above the one consistency is specified on.
-For example, to define an operationalization, the developer must be aware of the modular consistency relations.
+%All of these levels have to be considered during the consistency specification process.
+%A developer specifies consistency on one of these levels, depending on the abstraction level that the transformation language provides, and the transformation engine finally derives an operationalization from that.
+%Although a developer does not specify consistency on multiple levels, he or she has to think about the levels on and above the one consistency is specified on.
+%For example, to define an operationalization, the developer must be aware of the modular consistency relations.
 %If a developer only specifies the modular consistency relations, the transformations engine has to derive an appropriate operationalization.
 %In the end, to preserve consistency, an operationlization has to be derived from a specification on any of those levels.
-The benefit of clearly separating these levels is that they have different potentials for mistakes, faults, and resulting failures. 
-Consequently, avoiding a specific kind of mistake, which is related to one of the identified levels, completely prevents a specific category of failures.
-We exemplify these levels in \autoref{fig:properties:levels_overview} and explain them in more detail in the following.
+%The benefit of clearly separating these levels is that they have different potentials for mistakes, faults, and resulting failures. 
+%Consequently, avoiding a specific kind of mistake, which is related to one of the identified levels, completely prevents a specific category of failures.
+%We exemplify these levels in \autoref{fig:properties:levels_overview} and explain them in more detail in the following.
 
 %\todoHeiko{Give an example for mistakes here! Maybe one example for every level as well?}
 
 \subsection{Consistency Specification Levels}
-\label{chap:properties:levels}
+%\label{chap:properties:levels}
 
-\begin{figure}
-    \centering
+In the following, we introduce the three mentioned levels more precisely.
+They represent a revised version of the three levels we have presented in \owncite{klare2019icmt}.
+In that work, we have discussed the \emph{global} level, which considers the global knowledge in terms of the overall, $n$-ary relation between all involved models.
+We have, however, discussed different correctness notions in \autoref{chap:correctness:notions_correctness} and argued why we do not consider a \emph{monolithic} notion of consistency, which conforms to the \emph{global} specification level, as we do not assume this global knowledge to be represented explicitly, such that it would make sense to explicitly consider correctness according to it.
+
+
+%\begin{figure}
+    %\centering
 %    \includegraphics[angle=-90, width=\textwidth]{figures/levels_overview.pdf}
-    \input{figures/properties/levels_overview.tex}
-    \caption{Examples for Abstraction Levels in the Consistency Specification Process}
-    \label{fig:properties:levels_overview}
-\end{figure}
+%    \input{figures/properties/levels_overview.tex}
+    %\caption{Examples for Abstraction Levels in the Consistency Specification Process}
+    %\label{fig:properties:levels_overview}
+%\end{figure}
 
 %\todoHeiko{Definieren was Correctness auf jedem der Levels heißt. System: Richtig bzgl. den tatsächlichen Konsistenzbeziehungen, Modularization: Richtig bzgl. der globalen Spezifikation, Operationalization: Korrekte Ergebnisse nach Änderungen bzgl. der modularen Spezifikationen}
 
-\subsubsection*{Level 1 (\emph{Global}):}
-At the most abstract level, we consider the knowledge about all actual consistency relations between the involved model types.
-This knowledge can be represented by an $n$-ary relation between all model types, containing all tuples of consistent instances of the $n$ model types according to a consistency specification (\autoref{def:consistency_specification}). 
-We refer to this as a \emph{global} consistency specification.
+\subsubsection*{Level 1 (\emph{Transformation}):}
+At the first level, we do only consider the knowledge that a transformation shall be used in a transformation network.
+According to our formalism presented in \autoref{chap:correcntess:formalization}, this means that the transformation needs to be \emph{synchronizing}.
+We have discussed in \autoref{chap:synchronization} how synchronization can be achieved with ordinary transformation languages.
+Correctness at this level is given by the fulfillment of the synchronization property for a transformation.
 
-\subsubsection*{Level 2 (\emph{Modularization}):} 
-At the second level, the global knowledge of the first level is separated into partial, binary consistency relations that, in combination, represent the overall knowledge about consistency in the system.
-These relations should not contain any contradictions.
-We do not necessarily need to describe relations between all pairs of model types, since some may not share information that may become inconsistent, or some may be represented transitively across other relations.
-%This does also comprise the selection of a network structure that is capable of representing the full system knowledge.
-%Mathematically speaking, on this level the knowledge on this level 
-This knowledge 
-can be represented by up to $\frac{n*(n-1)}{2}$ binary relations, each containing all pairs of instances of two of the model types that are consistent.
-This corresponds to a set of binary consistency specifications according to \autoref{def:consistency_specification}.
-We refer to these as \emph{modular} consistency specifications.\\[-1em]
+\subsubsection*{Level 2 (\emph{Relation Network}):}
+At the second level, we consider the knowledge about the concrete network in which the transformations shall be used, but restricted to their relations.
+In consequence, it would be possible that the relations between all models are known, e.g., because there is a common understanding of the relations, which may also be documented.
+We have discussed in \autoref{chap:compatibility} that \emph{compatibility} is a relevant property of the consistency relations in a transformation network to ensure that the transformations are able to find consistent models after changes.
+Correctness at this level is thus given by the consistency relations being compatible.
 
-\noindent\textit{Remark:} 
-%\begin{remark*}
-Although in theory not all kinds of $n$-ary relations can be separated into binary relations~\cite{stevens2020BidirectionalTransformationLarge-SoSym}, we assume that all consistency relations considered in an automated consistency preservation process can be expressed by binary relations.
-We shortly discussed why this is a reasonable assumption in \autoref{chap:properties:terminology}.
+\subsubsection*{Level 3 (\emph{Rule Network}):}
+At the third level, we consider the knowledge about the complete transformations of a concrete network, thus especially also the consistency preservation rules that preserve consistency.
+We have discussed in \autoref{chap:orchestration} the problem of orchestrating these rules and also discussed several issues that may prevent an algorithm from finding a consistent orchestration, such as the selection of an option from different possibilities provided by a consistency relation to restore consistency.
+
+% At the most abstract level, we consider the knowledge about all actual consistency relations between the involved model types.
+% This knowledge can be represented by an $n$-ary relation between all model types, containing all tuples of consistent instances of the $n$ model types according to a consistency specification (\autoref{def:consistency_specification}). 
+% We refer to this as a \emph{global} consistency specification.
+
+% \subsubsection*{Level 2 (\emph{Modularization}):} 
+% At the second level, the global knowledge of the first level is separated into partial, binary consistency relations that, in combination, represent the overall knowledge about consistency in the system.
+% These relations should not contain any contradictions.
+% We do not necessarily need to describe relations between all pairs of model types, since some may not share information that may become inconsistent, or some may be represented transitively across other relations.
+% %This does also comprise the selection of a network structure that is capable of representing the full system knowledge.
+% %Mathematically speaking, on this level the knowledge on this level 
+% This knowledge 
+% can be represented by up to $\frac{n*(n-1)}{2}$ binary relations, each containing all pairs of instances of two of the model types that are consistent.
+% This corresponds to a set of binary consistency specifications according to \autoref{def:consistency_specification}.
+% We refer to these as \emph{modular} consistency specifications.\\[-1em]
+
+% \noindent\textit{Remark:} 
+% %\begin{remark*}
+% Although in theory not all kinds of $n$-ary relations can be separated into binary relations~\cite{stevens2020BidirectionalTransformationLarge-SoSym}, we assume that all consistency relations considered in an automated consistency preservation process can be expressed by binary relations.
+% We shortly discussed why this is a reasonable assumption in \autoref{chap:properties:terminology}.
 %As stated by \textcite{stevens2020BidirectionalTransformationLarge-SoSym}, this is a reasonable assumption, because it is hard enough for people to think about and specify binary relations.
 %Additionally, the separation into binary relations is the extreme case, which we explicitly consider here, nevertheless our finding also apply to a modularization into consistency specifications of higher arity.
 %\end{remark*}
 
 %\todoHeiko{Definieren, wie man mit mehrere CPS Konsistenz erreicht -> Zum Ziel der Arbeit kommen, dass man modulare CPS bel. Veschalten kann, um zu Konsistenz zu kommen.}  
-\subsubsection*{Level 3 (\emph{Operationalization}):}
-At this level, the consistency preservation is operationalized in terms of binary consistency preservation specifications according to \autoref{def:consistency_preservation_specification}. % for modular consistency specifications %after \autoref{def:consistency_specification} 
-%on the second level.
-%This requires the definition of update operations that restore consistency after user changes.
-As discussed in \autoref{chap:properties:terminology}, we consider a set of consistency preservation specifications that can be composed to restore consistency.
-In contrast to a single \ac{BX}, an operationalization in %arbitrary
-networks of \acp{BX} has to deal with confluence of information.
-This can lead to problems, such as overwrites or duplications of information, whenever a change can be propagated across at least two paths in the network of \acp{BX} to the same model.
-%It especially requires an identification of matching elements in different consistency preservation specifications to avoid duplicate element creations or insertions. 
-%For example, if an element is propagated from a model of $\mathcal{M}_1$ to a model of $\mathcal{M}_2$ and from this model to one of $\mathcal{M}_3$, then an additional consistency preservation specification from $\mathcal{M}_1$ to $\mathcal{M}_3$ must consider the already existing element instead of creating an additional or overwriting the existing one.
-We have seen an example, in which such multiple transformation paths cannot be avoided, in \autoref{fig:properties:motivational_example}.
+% \subsubsection*{Level 3 (\emph{Operationalization}):}
+% At this level, the consistency preservation is operationalized in terms of binary consistency preservation specifications according to \autoref{def:consistency_preservation_specification}. % for modular consistency specifications %after \autoref{def:consistency_specification} 
+% %on the second level.
+% %This requires the definition of update operations that restore consistency after user changes.
+% As discussed in \autoref{chap:properties:terminology}, we consider a set of consistency preservation specifications that can be composed to restore consistency.
+% In contrast to a single \ac{BX}, an operationalization in %arbitrary
+% networks of \acp{BX} has to deal with confluence of information.
+% This can lead to problems, such as overwrites or duplications of information, whenever a change can be propagated across at least two paths in the network of \acp{BX} to the same model.
+% %It especially requires an identification of matching elements in different consistency preservation specifications to avoid duplicate element creations or insertions. 
+% %For example, if an element is propagated from a model of $\mathcal{M}_1$ to a model of $\mathcal{M}_2$ and from this model to one of $\mathcal{M}_3$, then an additional consistency preservation specification from $\mathcal{M}_1$ to $\mathcal{M}_3$ must consider the already existing element instead of creating an additional or overwriting the existing one.
+% We have seen an example, in which such multiple transformation paths cannot be avoided, in \autoref{fig:properties:motivational_example}.
 %We refer to these as modular consistency preservation specifications.
 
 %\todoHeiko{Maybe call this recombination of modularized knowledge? Makes fokus more on operationalization/ consistency preservation, as that is where the problems occur}
@@ -143,15 +245,10 @@ This conforms to the notion of \emph{correctness} already defined for \acp{BX}~\
 % %We therefore assume that the developer ensures that no mistakes on the system level are made by knowing about
 
 
-\end{copiedFrom} % ICMT
-
-
-
-\begin{copiedFrom}{ICMT}
-%FORMERLY: \section{Issues in Networks of Bidirectional Transformations}
-%\label{sec:classification}
 
 \section{Issues in Transformation Networks}
+
+\todo{Matrix for avoidability (there should be some text for that later): network rule not avoidable, network relation analyzable, transformation achievable by construction}
 
 In this section, we %first identify and 
 categorize potential \emph{failures} that can occur when executing \acp{BX} in a network to preserve consistency.
@@ -172,6 +269,9 @@ Such strategies are discussed in \autoref{chap:prevention}.
 %     \item Mistakes on all levels may introduce failures in the execution of the operationalization of consistency constraint preservation
 %     \item We summarize potential failures, identify their causes (mistakes and faults) and then categorize and relate them
 % \end{itemize}
+
+\subsection{Mistakes, Faults and Failures}
+\todo{Introduce terms}
 
 \subsection{Potential Failures}
 \label{chap:errors:failures}
@@ -415,7 +515,8 @@ In the following, we discuss one strategy to avoid mistakes at the modularizatio
 Developers can use these strategies to build networks that are free of faults, or can use them to fix mistakes if failures occur.
 
 
-\end{copiedFrom} % ICMT
+
+
 
 
 \section{Summary}
@@ -425,5 +526,5 @@ Developers can use these strategies to build networks that are free of faults, o
     We found that we can assign different kinds of mistakes to different specification levels, depending on the necessary knowledge about the transformation network.
     In addition, specific kinds of failures are caused by specific kinds of mistakes.
     Thus, if a specific failure occurs, one knows that a specific kind of mistake is the reason for that failure and helps to locate the problems.
-    Finally, due to our insights about compatibility and synchronizing transformations, we are able to avoid specific mistakes and thus failures already by construction of a single transformation, whereas other can be avoided by analyzing the transformations for compatibility.
+    Finally, due to our insights about compatibility and synchronizing transformations, we are able to avoid specific mistakes and thus failures already by construction of a single transformation, whereas others can be avoided by analyzing the transformations for compatibility.
 \end{insight}
