@@ -7,22 +7,23 @@
 In the previous chapters, we have introduced a notion of correctness for transformation networks and discussed how we can achieve or analyze different kinds of correctness for the different artifacts of the transformation network, namely the consistency relations, the consistency preservation rules and the application function.
 It may, however, easily occur that a transformation developer defines transformations that do not adhere to all these kinds of correctness, be it because of missing knowledge about them or by accident.
 
-\mnote{Classification of consistency specification and categorization of errors}
+\mnote{Proposal for specification levels and categorization of errors}
 In this chapter, we thus discuss what may happen if correctness was not achieved.
-The possible types of errors that can occur depend on the abstraction level provided by the formalism or language to specify a transformation in.
-We thus first propose a classification of specification levels for transformations.
-We then systematically derive a categorization of potential \emph{failures}, i.e., the unwanted results the application algorithm may yield, the \emph{faults} that led to the mistakes, i.e., the errors in the implementation of the transformation, and finally the causing \emph{mistakes}, i.e. the errors made by a developer when analyzing and defining consistency that led to an implementation fault.
-Finally, we relate the possible types of mistakes, faults and failures to the correctness notions that we have introduced before to evaluate how far the proposed solutions can avoid those errors.
+The possible types of errors that can occur depend on the abstraction level at which the specification is performed. 
+This depends on the existing knowledge, i.e., whether the transformation is to be used in a transformation network, or even in which network it is to be used, but also on the abstraction provided by the formalism or language to specify a transformation or transformation network, respectively, in.
+We thus first propose a distinction of such specification levels for transformation networks.
+We then systematically derive a categorization of potential \emph{failures}, i.e., the unwanted results the application algorithm may yield, the \emph{faults} that led to the mistakes, i.e., the errors in the implementation of the transformation, and finally the causing \emph{mistakes}, i.e., the errors made by a developer due to his knowledge that led to an implementation fault.
+Finally, we discuss how the possible types of mistakes, faults and failures can be detected or avoided and how this relates to the correctness notions and approaches to achieve them that we have introduced so far.
 
 \mnote{Subordinate contributions}
-This chapter thus constitutes our contribution \contributionref{contrib:correctness:errors}, which consists of three subordinate contributions: a classification of consistency specification levels, a categorization of potential errors, and a relation of the categorization to the yet discussed correctness notions and measures to achieve them.
+This chapter thus constitutes our contribution \contributionref{contrib:correctness:errors}, which consists of three subordinate contributions: a separation of knowledge-dependent specification levels for transformation network, a categorization of potential errors in transformation networks, and a discussion of the possibilities to detect and avoid errors with respect to the yet discussed correctness notions and measures to achieve them.
 \todo{Finally update goals}
 It answers the following research question:
 
 \researchquestionrepeat{rq:correctness:errors}
 
 \mnote{Benefits of contributions}
-As the central goal of this chapter, we classify the possible types of errors to derive systematic knowledge about mistakes that can be made and failures that can arise from them.
+As the central goal of this chapter, we categorize the possible types of errors to derive systematic knowledge about mistakes that can be made and failures that can arise from them.
 First, this helps transformations developers to identify the reasons for arising failures.
 Second, it allows us to identify which relevant errors we can avoid or detect with the approaches proposed in the previous chapters and how relevant the problems that we solve with them are.
 The latter will be part of our subsequent evaluation at a case study.
@@ -35,40 +36,19 @@ Essential results from the former thesis were published in \owncite{klare2019icm
 %We want to have systematic knowledge what kinds of problems can occur, what types of reasons there are and how they manifest.
 %We want to derive how many of the typical problems we can systematically resolve with our contributions, i.e., how relevant the problems that we solve are (how often they occur).
 
+% \todo{Unterschied Klassifizierung/Kategorisierung: Klassifizierung benötigt Klassifizierungsdimension, Kategorisierung nicht}
+% Klassifizierung: Wir packen Spezifikationsszenarien in vordefinierte Klassen, entsprechend ihrem Abstraktionsgrad
+% Kategorisierung: Wir identifizieren Kategorien von Mistakes/Faults/Failures und diskutieren deren Vollständigkeit
+% Im Unterschied sind bei der Kategorisierung die Kategorien vorher nicht bekannt.
+% RESULTAT: Nicht nötig, wir machen nur Kategorisierung
 
-Network errors cannot be avoided by construction, thus it good that appropriate orchestration strategy resolves them.
---> Final section: How to handle the errors: Network errors by conservative strategy to fail safely -> we do not reach failure state but detect the failure; transformation errors by construction
---> Trace back failures to errors
---> Termination can always be ensured, then terminating inconsistently; if then, e.g., duplication occur, then can (but must not be) because of missing synchronization. We will see in evaluation that missing synchronization is the main source of duplications.
+%\todo{Ziel dieses Kapitels: Wie hängen Korrektheitsdefinition voneinander ab (Hierarchie/Ebenen), was passiert, wenn einzelne Korrektheiten nicht erfüllt sind? Welche Fehler treten auf? Und wie häufig passiert das? (Letzteres eher als Evaluation verkaufen)}
 
-Failures can occur because of different conceptual and technical mistakes.
-We do not consider technical mistakes, e.g., missing handling of null or comparable things.
-We do not consider conceptual mistakes regarding correctness of a single transformation (unidirectional). I.e., if a single transformation does not ensure consistency in one direction appropriately, we do not consider that a relevant mistake. Mistakes regarding synchronization, however (occurring with concurrent changes but not changes in one of the models), are relevant.
-We assume that transformations are correct, i.e., CPRs correct w.r.t. their relations
-
-Inkompatible Constraints und inkompatible Optionsauswahl lässt sich oft gar nicht unterscheiden, insb. wenn Constraints nicht explizit angegeben sind. Dann sind Constraints implizit durch CPRs definiert. Es könnte aber auch sein, dass die (vom Entwickler gedachten) Constraints relaxierter sind und dann das Problem die Optionsauswahl ist und nicht die Inkompatibilität von Constraints.
-
-\todo{Unterschied Klassifizierung/Kategorisierung: Klassifizierung benötigt Klassifizierungsdimension, Kategorisierung nicht}
-Klassifizierung: Wir packen Spezifikationsszenarien in vordefinierte Klassen, entsprechend ihrem Abstraktionsgrad
-Kategorisierung: Wir identifizieren Kategorien von Mistakes/Faults/Failures und diskutieren deren Vollständigkeit
-Im Unterschied sind bei der Kategorisierung die Kategorien vorher nicht bekannt.
-
-\todo{Discuss problem of default values}
-
-Weitere Fehlertypen diskutieren / explizit ausschließen, insb. Implementierungsfehler, technische Fehler. Diese führen i.d.R. aber auch dazu, dass eine Transformation nicht korrekt ist.
-Wir nehmen wir Korrektheit einer Transformation an!
-In der Evaluation werden wir das noch entsprechend unterscheiden.
-
-\todo{Ziel dieses Kapitels: Wie hängen Korrektheitsdefinition voneinander ab (Hierarchie/Ebenen), was passiert, wenn einzelne Korrektheiten nicht erfüllt sind? Welche Fehler treten auf? Und wie häufig passiert das? (Letzteres eher als Evaluation verkaufen)}
-
-\todo{Compatibility not achievable by construction, synchronization achievable by construction; rest is orchestration? Only by construction of network is a tree (modularization level)}
-
-\todo{Discuss errors by two unidirectional transformations not adhering to the same consistency relation, which we already teasered in \autoref{chap:synchronization} and have seen in the case study}
+\todoLater{Discuss errors by two unidirectional transformations not adhering to the same consistency relation, which we already teasered in \autoref{chap:synchronization} and have seen in the case study. What is meant by that? It there really a teaser in that chapter?}
 
 
-
-\section{The Consistency Specification Process}
-\todo{Process and levels from ICMT to identify how levels depend on each other (restructure according to relations (compatibility), individual transformations and networks), and derive which errors occur and how they depend on each other}
+\section{Knowledge Levels in Transformation Network Specification}
+%\todo{Process and levels from ICMT to identify how levels depend on each other (restructure according to relations (compatibility), individual transformations and networks), and derive which errors occur and how they depend on each other}
 
 The process of specifying consistency between multiple models can be considered at different conceptual levels depending on the knowledge a developer must have to ensure correctness at that level.
 For example, at the lowest level a developer may only know that a transformation shall be used within a network without knowing the concrete network, which only allows to exclude specific errors, whereas further errors are relevant and need to be considered when having knowledge about the other transformations to combine it with.
@@ -137,7 +117,7 @@ This influences how far errors at the different levels can be avoided, first, be
 
 %\todoHeiko{Give an example for mistakes here! Maybe one example for every level as well?}
 
-\subsection{Consistency Specification Levels}
+\subsection{Knowledge-Dependent Specification Levels}
 %\label{chap:properties:levels}
 
 In the following, we introduce the three mentioned levels more precisely.
@@ -281,9 +261,11 @@ It does, however, not make sense from a knowledge perspective to ensure compatib
 
 
 
-\section{Issues in Transformation Networks}
+\section{Errors in Transformation Networks}
 
 \todo{Matrix for avoidability (there should be some text for that later): network rule not avoidable, network relation analyzable, transformation achievable by construction}
+
+\todo{Discuss problem of default values, or more general \enquote{special cases}?}
 
 In this section, we %first identify and 
 categorize potential \emph{failures} that can occur when executing \acp{BX} in a network to preserve consistency.
@@ -307,6 +289,7 @@ Such strategies are discussed in \autoref{chap:prevention}.
 
 \subsection{Mistakes, Faults and Failures}
 \todo{Introduce terms}
+
 
 \subsection{Potential Failures}
 \label{chap:errors:failures}
@@ -355,6 +338,19 @@ For example, an element is created by transformations $\mathcal{M}_1 \rightarrow
 
 \subsection{Mistakes and Faults}
 \label{chap:errors:mistakes}
+
+Failures can occur because of different conceptual and technical mistakes.
+We do not consider technical mistakes, e.g., missing handling of null or comparable things.
+We do not consider conceptual mistakes regarding correctness of a single transformation (unidirectional). I.e., if a single transformation does not ensure consistency in one direction appropriately, we do not consider that a relevant mistake. Mistakes regarding synchronization, however (occurring with concurrent changes but not changes in one of the models), are relevant.
+We assume that transformations are correct, i.e., CPRs correct w.r.t. their relations
+
+Weitere Fehlertypen diskutieren / explizit ausschließen, insb. Implementierungsfehler, technische Fehler. Diese führen i.d.R. aber auch dazu, dass eine Transformation nicht korrekt ist.
+Wir nehmen wir Korrektheit einer Transformation an!
+In der Evaluation werden wir das noch entsprechend unterscheiden.
+
+Inkompatible Constraints und inkompatible Optionsauswahl lässt sich oft gar nicht unterscheiden, insb. wenn Constraints nicht explizit angegeben sind. Dann sind Constraints implizit durch CPRs definiert. Es könnte aber auch sein, dass die (vom Entwickler gedachten) Constraints relaxierter sind und dann das Problem die Optionsauswahl ist und nicht die Inkompatibilität von Constraints.
+
+
 
 %\todoErik{Ich dachte immer, \enquote{Mistakes} machen nur Menschen}
 Developers or the transformation engine can make different kinds of mistakes on each of the specification levels, which lead to faults in the specification and finally to different kinds of failures during consistency preservation.
@@ -523,7 +519,16 @@ Finally, the missing element matching at the operationalization level can lead t
 
 %Categorize the detected Causes/Mistakes into three categories, which map to the steps identified in the first subsection. Two categories have to be resolved by user and, especially, are only resolvable in the moment when concrete transformations are combined (explain why!). One category can be solved by applying appropriate pattern, explained in the next section. Each category resolution is an assumption of the next (e.g. pattern matching does not make any sense when transformations are incompatible or at least the failures than can occur may differ).
 
-\section{Avoiding Errors}
+\section{Detection and Avoidance of Errors}
+
+Network errors cannot be avoided by construction, thus it good that appropriate orchestration strategy resolves them.
+--> Final section: How to handle the errors: Network errors by conservative strategy to fail safely -> we do not reach failure state but detect the failure; transformation errors by construction
+--> Trace back failures to errors
+--> Termination can always be ensured, then terminating inconsistently; if then, e.g., duplication occur, then can (but must not be) because of missing synchronization. We will see in evaluation that missing synchronization is the main source of duplications.
+
+\todo{Compatibility not achievable by construction, synchronization achievable by construction; rest is orchestration? Only by construction if network is a tree (modularization level)}
+
+
 
 %At the system level, mistakes can only be avoided by careful requirements elicitation. 
 %Since occurring mistakes on that level represent non-conformance with a usually informal notion of consistency, such mistakes cannot be automatically avoided or detected.
