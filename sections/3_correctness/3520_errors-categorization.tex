@@ -70,8 +70,9 @@ Duplications of elements are of special importance, because they are the essenti
 
 \begin{figure}
     \centering
-    \input{figures/correctness/errors/categorization.tex}
-    \caption{Categorization and Dependencies of Mistakes, Faults and Failures}
+    \input{figures/correctness/errors/categorization.tex}\\
+    \includegraphics[width=\textwidth]{figures/correctness/errors/categorization.jpg}
+    \caption[Categorization of mistakes, faults and failures]{Categorization and dependencies of mistakes, faults and failures.}
     \label{fig:errors:categorization}
 \end{figure}
 
@@ -141,141 +142,200 @@ Then, if transformations are non-synchronizing, they return an actually inconsis
 \subsection{Mistake and Fault Types}
 \label{chap:errors:categorization:mistakes}
 
-Failures can occur because of different conceptual and technical mistakes.
-We do not consider technical mistakes, e.g., missing handling of null or comparable things.
-We do not consider conceptual mistakes regarding correctness of a single transformation (unidirectional). I.e., if a single transformation does not ensure consistency in one direction appropriately, we do not consider that a relevant mistake. Mistakes regarding synchronization, however (occurring with concurrent changes but not changes in one of the models), are relevant.
-We assume that transformations are correct, i.e., CPRs correct w.r.t. their relations
+% Failures can occur because of different conceptual and technical mistakes.
+% We do not consider technical mistakes, e.g., missing handling of null or comparable things.
+% We do not consider conceptual mistakes regarding correctness of a single transformation (unidirectional). I.e., if a single transformation does not ensure consistency in one direction appropriately, we do not consider that a relevant mistake. Mistakes regarding synchronization, however (occurring with concurrent changes but not changes in one of the models), are relevant.
+% We assume that transformations are correct, i.e., CPRs correct w.r.t. their relations
 
-Weitere Fehlertypen diskutieren / explizit ausschließen, insb. Implementierungsfehler, technische Fehler. Diese führen i.d.R. aber auch dazu, dass eine Transformation nicht korrekt ist.
-Wir nehmen wir Korrektheit einer Transformation an!
-In der Evaluation werden wir das noch entsprechend unterscheiden.
+% Weitere Fehlertypen diskutieren / explizit ausschließen, insb. Implementierungsfehler, technische Fehler. Diese führen i.d.R. aber auch dazu, dass eine Transformation nicht korrekt ist.
+% Wir nehmen wir Korrektheit einer Transformation an!
+% In der Evaluation werden wir das noch entsprechend unterscheiden.
 
-Inkompatible Constraints und inkompatible Optionsauswahl lässt sich oft gar nicht unterscheiden, insb. wenn Constraints nicht explizit angegeben sind. Dann sind Constraints implizit durch CPRs definiert. Es könnte aber auch sein, dass die (vom Entwickler gedachten) Constraints relaxierter sind und dann das Problem die Optionsauswahl ist und nicht die Inkompatibilität von Constraints.
+\todo{Inkompatible Constraints und inkompatible Optionsauswahl lässt sich oft gar nicht unterscheiden, insb. wenn Constraints nicht explizit angegeben sind. Dann sind Constraints implizit durch CPRs definiert. Es könnte aber auch sein, dass die (vom Entwickler gedachten) Constraints relaxierter sind und dann das Problem die Optionsauswahl ist und nicht die Inkompatibilität von Constraints.}
 
-
-
-%\todoErik{Ich dachte immer, \enquote{Mistakes} machen nur Menschen}
-Developers or the transformation engine can make different kinds of mistakes on each of the specification levels, which lead to faults in the specification and finally to different kinds of failures during consistency preservation.
+\mnote{Mistakes and faults derived from the specification levels}
+Developers can make different kinds of mistakes at each of the specification levels, which lead to faults in the implementation and finally to different kinds of failures during transformation execution.
 In the following, we derive mistakes and faults from the specification levels, depicted in \autoref{fig:errors:categorization}.
 
-\subsubsection{Global Level}
-Regarding global consistency specifications for a set of model types, two basic mistakes can be made. 
-These mistakes concern compliance of the defined consistency specification with the actual notion of consistency between the involved model types.
-First, a specification can be incomplete (\emph{underspecified}), which means that some consistency constraints are missed. 
-As a result, the consistency specification according to \autoref{def:consistency_specification} would contain more tuples of models than are actually consistent to each other. 
-%%As a result, if one would define the consistency specification according to \autoref{def:consistency_specification}, more tuples of models would be in the relation than are actually consistent to each other. 
-%Incomplete consistency specifications can lead to \emph{false positives}, when investigating whether a given tuple of models is consistent or not.
-Another potential mistake are too restricted (\emph{overspecified}) consistency specifications, which means that additional, faulty consistency constraints are considered. 
-As a result, actually consistent tuples of models would be missing in the consistency specification according to \autoref{def:consistency_specification}. 
-%As a result, if one would define the consistency specification according to \autoref{def:consistency_specification}, actually consistent tuples of models would not be in the relation. 
-%This %, in contrast, 
-%can lead to \emph{false negatives}, because actually consistent models are identified as inconsistent.
+\mnote{Technical mistakes excluded, transformations assumed to be correct}
+We explicitly focus on conceptual mistakes and faults concerned with the development of transformation networks.
+This especially excludes two types of mistakes:
+\begin{properdescription}
+    \item[Technical mistakes:] We do not consider technical and careless mistakes that are due to misuse of the transformation language, a coding error such as a missing handling of null values or comparable mistakes.
+    \item[Transformation incorrectness:] We do not consider any kind of mistakes that leads to incorrect transformations. We assume that transformations are correct, i.e., that the consistency preservation rules produce results that are consistent with their consistency relations. Thus any mistake related to the transformations handling changes in only of the models are out of scope, as they are part of research regarding the individual bidirectional transformations on their own. Mistakes regarding synchronization of transformations, i.e., the case that changes were performed to both models, are, however, relevant.
+\end{properdescription}
+In fact, technical mistakes usually also lead to incorrectness of the transformations.
 
-\begin{figure}[bt]
-    \centering
-%    \includegraphics[angle=-90, width=\textwidth]{figures/levels_overview.pdf}
-    \input{figures/correctness/errors/mistakes_specification_levels.tex}
-    \caption{Examples for Mistakes on Different Specification Levels}
-    \label{fig:errors:mistakes_specification_levels}
-\end{figure}
 
-\subsubsection{Modularization Level}
-When developers modularize the global consistency specification by defining binary consistency specifications, these modular specifications can be non-compliant with the global one. 
-Two kinds of mistakes, similar to those at the global level, can be distinguished, regarding compliance of modular and global specifications. %, but regarding compliance of modular and global specifications rather than between the global specification and the actual notion of consistency.
-First, modular consistency specifications can be incomplete (\emph{underspecified}), so that there are global constraints which are not covered by them. 
-The modular consistency specifications $\mathit{CS}_{1,2}$, $\mathit{CS}_{2,3}$ and $\mathit{CS}_{1,3}$ in \autoref{fig:errors:mistakes_specification_levels} are incomplete iff
-%For three model types $\mathcal{M}_1, \mathcal{M}_2$ and $\mathcal{M}_3$ with a global consistency specification $\mathit{CS}$, the binary specifications $\mathit{CS}_{1,2}$, $\mathit{CS}_{2,3}$ and $\mathit{CS}_{1,3}$, as depicted in \autoref{fig:levels_overview} are underspecified iff 
-%\todoHeiko{Hier die Grafik aus dem Level-Kapitel übernehmen}
-\begin{align*}
-    & \exists M_1, M_2, M_3 : \\
-    & \hspace{1em} (M_1, M_2) \in \mathit{CS}_{1,2} \land (M_2, M_3) \in \mathit{CS}_{2,3} \land (M_1, M_3) \in \mathit{CS}_{1,3} \land (M_1, M_2, M_3) \not\in \mathit{CS}
-\end{align*}
-This finally leads to \emph{false positives} when investigating whether a given tuple of models is consistent regarding the global specification. %as actually inconsistent models (regarding the global specification) are identified as consistent. %investigating whether a given set of models is consistent regarding the global specification or not, because actually inconsistent models regarding $\mathit{CS}$ are consistent according to all modular relations $\mathit{CS}_{1,2}$, $\mathit{CS}_{2,3}$ and $\mathit{CS}_{1,3}$.
-%This finally leads to \emph{false positives} when investigating whether a given set of models is consistent regarding the global specification or not, because actually inconsistent models regarding $CS$ are consistent according to all modular relations $\mathit{CS}_{1,2}$, $\mathit{CS}_{2,3}$ and $\mathit{CS}_{1,3}$.
-%\todoHeiko{Das folgende eher zu Avoidance Strategy? Überlapp vorhanden?}
-%Such incomplete specifications can especially occur if constraints between two types of models are not expressed at all (so the consistency specification covers all model pairs), but are only transitively defined over two or more other relations. 
-%For example, if $\mathit{CS}_{1,3}$ shall be omitted and transitively expressed across $\mathit{CS}_{1,2}$ and $\mathit{CS}_{2_3}$, the following must hold:
+\subsubsection*{\LevelTransformation Level}
+
+Correctness at the \leveltransformation level requires each transformation to be synchronizing.
+We have discussed in \autoref{chap:synchronization:achieving} that the essential requirement to make ordinary transformations synchronizing is the matching of existing elements, because transformations that were not developed for the synchronization case do usually not assume elements to be already existing but to be either added by changes that are processed by the transformation or created by the transformation itself.
+
+The mistake a transformation developer can make at this level is not to consider that synchronization is necessary, potentially because he does not even know that it is necessary. Then the transformation may be correct, but not synchronizing.
+In the implementation this manifests as the absence of necessary matchings of elements.
+We have already discussed that this finally leads to the duplicate creation or insertion of model elements when executing such transformations.
+
+
+\subsubsection*{\LevelNetworkRelation Level}
+
+The \levelnetworkrelation level concerns correctness of the consistency relations in a transformation network.
+In general, we can distinguish two notions of correctness for them, like we have discussed in \autoref{chap:correctness:notions_correctness}.
+First, the relations must reflect some intended, probably informal notion of consistency.
+If the relations miss to reflect some of the constraints of that consistency notion or if they reflect additional constraints that are not part of that notion, the relations may be considered incorrect.
+Second, the relations have to be compatible.
+As discussed in \autoref{chap:compatibility}, this is necessary to enable the consistency preservation rules to find consistent models at all.
+In the worst case, there may not be a single tuple of models that is consistent to all consistency relations when they are incompatible.
+
+The first correctness notion, however, only concerns a single consistency relations rather than the combination of them.
+We thus assume it to be correct, as we assume each single transformation to be already correct.
+Finally, the results would not be even interesting, because additional constraints do not lead to failures but, in the worst case, only lead to not finding consistent models although they would exist, and missing constraints simply lead to inconsistent models, as the result does not fulfill the constraints of the existing, informal notion of consistency.
+
+Thus, the relevant correctness notion is the one of compatibility.
+A transformation developer, or potentially a group of transformation developers, can make the mistakes of having incompatible knowledge about the consistency constraints encoded into the transformations.
+This, in consequence leads to a fault in the implementation of transformations, which may perform a contradicting generation or modification of model elements, for which no orchestration of the transformation may yield consistent models.
+Depending on operation of the application algorithm, this can lead to different types of failures.
+If the transformations are executed with an artificial execution bound, the algorithm will terminate with inconsistent models, which may be returned or not, depending on whether it checks consistency.
+Depending on whether the execution order of transformations is fixed or not, the inconsistency will be deterministic or not.
+If the algorithm does not implement such an artificial bound, the fault can also lead to non-termination of the algorithm, because the execution of transformations will never lead to consistent models.
+
+
+\subsubsection*{\LevelNetworkRule Level}
+
+The \levelnetworkrule level concerns correctness of the complete transformations of a network.
+We did not give a precise definition of what this correctness means.
+In \autoref{chap:orchestration}, we have discussed assumption to transformation to enable an application function to solve the orchestration function, which could be a reasonable correctness measure.
+We have, however, also discussed that  we cannot make any practical assumptions to the transformations such that they improve the ability of the application algorithm to find a consistent orchestration if it exists.
+
+We only know from \autoref{chap:orchestration:decidability:restriction} that consistency relations providing multiple options for corresponding elements to consider models consistent can lead to consistency preservation rules that always select elements which are not in the overlap of those options between different transformations.
+In consequence, if transformation developers decide to implement consistency preservation rules that make such contradicting selections or generations of elements, the transformation may fail due to the same reasons as discussed for the \levelnetworkrelation level.
+The causing mistake is here that the transformation developers make contradicting selection of options to restore consistency.
+
+Since we did not define a property that a set of transformations and especially their consistency preservation rules have to fulfill and instead concluded to deal with the orchestration problem by means of a conservative application algorithm, we cannot give a reasonable or even complete overview of potential mistakes transformation developers can make at this level.
+
+
+\todo{Discuss here todo from beginning of section}
+
+% \subsubsection{Global Level}
+% Regarding global consistency specifications for a set of model types, two basic mistakes can be made. 
+% These mistakes concern compliance of the defined consistency specification with the actual notion of consistency between the involved model types.
+% First, a specification can be incomplete (\emph{underspecified}), which means that some consistency constraints are missed. 
+% As a result, the consistency specification according to \autoref{def:consistency_specification} would contain more tuples of models than are actually consistent to each other. 
+% %%As a result, if one would define the consistency specification according to \autoref{def:consistency_specification}, more tuples of models would be in the relation than are actually consistent to each other. 
+% %Incomplete consistency specifications can lead to \emph{false positives}, when investigating whether a given tuple of models is consistent or not.
+% Another potential mistake are too restricted (\emph{overspecified}) consistency specifications, which means that additional, faulty consistency constraints are considered. 
+% As a result, actually consistent tuples of models would be missing in the consistency specification according to \autoref{def:consistency_specification}. 
+% %As a result, if one would define the consistency specification according to \autoref{def:consistency_specification}, actually consistent tuples of models would not be in the relation. 
+% %This %, in contrast, 
+% %can lead to \emph{false negatives}, because actually consistent models are identified as inconsistent.
+
+% \begin{figure}[bt]
+%     \centering
+% %    \includegraphics[angle=-90, width=\textwidth]{figures/levels_overview.pdf}
+%     \input{figures/correctness/errors/mistakes_specification_levels.tex}
+%     \caption{Examples for Mistakes on Different Specification Levels}
+%     \label{fig:errors:mistakes_specification_levels}
+% \end{figure}
+
+% \subsubsection{Modularization Level}
+% When developers modularize the global consistency specification by defining binary consistency specifications, these modular specifications can be non-compliant with the global one. 
+% Two kinds of mistakes, similar to those at the global level, can be distinguished, regarding compliance of modular and global specifications. %, but regarding compliance of modular and global specifications rather than between the global specification and the actual notion of consistency.
+% First, modular consistency specifications can be incomplete (\emph{underspecified}), so that there are global constraints which are not covered by them. 
+% The modular consistency specifications $\mathit{CS}_{1,2}$, $\mathit{CS}_{2,3}$ and $\mathit{CS}_{1,3}$ in \autoref{fig:errors:mistakes_specification_levels} are incomplete iff
+% %For three model types $\mathcal{M}_1, \mathcal{M}_2$ and $\mathcal{M}_3$ with a global consistency specification $\mathit{CS}$, the binary specifications $\mathit{CS}_{1,2}$, $\mathit{CS}_{2,3}$ and $\mathit{CS}_{1,3}$, as depicted in \autoref{fig:levels_overview} are underspecified iff 
+% %\todoHeiko{Hier die Grafik aus dem Level-Kapitel übernehmen}
 % \begin{align*}
-%     & \forall M_1 \in \mathcal{M}_1 : \forall M_2 \in \mathcal{M}_2 : \forall M_3 \in \mathcal{M}_3 : \\
-%     & \hspace{1em} \mathit{CS}(M_1, M_2, M_3) \iff \mathit{CS}_{1,2}(M_1, M_2) \land \mathit{CS}_{2,3}(M_2, M_3)
+%     & \exists M_1, M_2, M_3 : \\
+%     & \hspace{1em} (M_1, M_2) \in \mathit{CS}_{1,2} \land (M_2, M_3) \in \mathit{CS}_{2,3} \land (M_1, M_3) \in \mathit{CS}_{1,3} \land (M_1, M_2, M_3) \not\in \mathit{CS}
 % \end{align*}
-%\begin{align*}
-    %& \forall M_1, M_2, M_3 : (M_1, M_2, M_3) \in \mathit{CS} \Leftrightarrow (M_1, M_2) \in \mathit{CS}_{1,2} \land (M_2, M_3) \in \mathit{CS}_{2,3}
-%\end{align*}
-%If this transitive relation misses or is even unable to express certain direct constraints, inconsistent models would be idenitified as consistent. %\todoHeiko{Das transitive muss man wohl an einem Beispiel erklären, am besten Ref. zu Intro}
-Modular consistency specifications cannot only be incomplete because of an actual specification mistake, but also because of $n$-ary relations on the global level that cannot be expressed by a set of binary relations.
-We excluded that case by our assumption made in \autoref{chap:properties:levels}, as otherwise a modularization into binary relations would not be possible at all.
-If such cases have to be supported, the modularization would have to be extended to also consider $n$-ary relations.
+% This finally leads to \emph{false positives} when investigating whether a given tuple of models is consistent regarding the global specification. %as actually inconsistent models (regarding the global specification) are identified as consistent. %investigating whether a given set of models is consistent regarding the global specification or not, because actually inconsistent models regarding $\mathit{CS}$ are consistent according to all modular relations $\mathit{CS}_{1,2}$, $\mathit{CS}_{2,3}$ and $\mathit{CS}_{1,3}$.
+% %This finally leads to \emph{false positives} when investigating whether a given set of models is consistent regarding the global specification or not, because actually inconsistent models regarding $CS$ are consistent according to all modular relations $\mathit{CS}_{1,2}$, $\mathit{CS}_{2,3}$ and $\mathit{CS}_{1,3}$.
+% %\todoHeiko{Das folgende eher zu Avoidance Strategy? Überlapp vorhanden?}
+% %Such incomplete specifications can especially occur if constraints between two types of models are not expressed at all (so the consistency specification covers all model pairs), but are only transitively defined over two or more other relations. 
+% %For example, if $\mathit{CS}_{1,3}$ shall be omitted and transitively expressed across $\mathit{CS}_{1,2}$ and $\mathit{CS}_{2_3}$, the following must hold:
+% % \begin{align*}
+% %     & \forall M_1 \in \mathcal{M}_1 : \forall M_2 \in \mathcal{M}_2 : \forall M_3 \in \mathcal{M}_3 : \\
+% %     & \hspace{1em} \mathit{CS}(M_1, M_2, M_3) \iff \mathit{CS}_{1,2}(M_1, M_2) \land \mathit{CS}_{2,3}(M_2, M_3)
+% % \end{align*}
+% %\begin{align*}
+%     %& \forall M_1, M_2, M_3 : (M_1, M_2, M_3) \in \mathit{CS} \Leftrightarrow (M_1, M_2) \in \mathit{CS}_{1,2} \land (M_2, M_3) \in \mathit{CS}_{2,3}
+% %\end{align*}
+% %If this transitive relation misses or is even unable to express certain direct constraints, inconsistent models would be idenitified as consistent. %\todoHeiko{Das transitive muss man wohl an einem Beispiel erklären, am besten Ref. zu Intro}
+% Modular consistency specifications cannot only be incomplete because of an actual specification mistake, but also because of $n$-ary relations on the global level that cannot be expressed by a set of binary relations.
+% We excluded that case by our assumption made in \autoref{chap:properties:levels}, as otherwise a modularization into binary relations would not be possible at all.
+% If such cases have to be supported, the modularization would have to be extended to also consider $n$-ary relations.
 
-Second, a modular specification can be too restricted (\emph{overspecified}) regarding the global consistency specification if additional constraints are added. 
-The modular consistency specifications in \autoref{fig:errors:mistakes_specification_levels} are overspecified iff
-\begin{align*}
-    & \exists M_1, M_2, M_3 : \\
-    & \hspace{1em} (M_1, M_2, M_3) \in \mathit{CS} \land \big[ (M_1, M_2) \not\in \mathit{CS}_{1,2} \lor (M_2, M_3) \not\in \mathit{CS}_{2,3} \lor (M_1, M_3) \not\in \mathit{CS}_{1,3} \big]
-\end{align*}
-In \autoref{fig:errors:mistakes_specification_levels}, omitting the dashed relation in $\mathit{CS}_{2,3}$ would lead to such an overspecifiation.
-Overspecifications lead to additional constraints regarding the global specification, but also, and more severe, to contradicting constraints regarding other modular specifications.
-In case of contradictions, the modular consistency specifications cannot be fulfilled at the same time.
-In such a case, the graph of consistency relations %, as shown in \autoref{fig:mistakes_specification_levels}, 
-would contain no cylces, i.e. sets of models that are consistent to each other.
-We have discussed an example for such contradicting specifications %in the motivating example 
-in \autoref{chap:properties:levels}, where constraints for transferring an employee name contradicted. % contains contradicting constraints for transferring the name. % to other types of models.
-%In this case, when several binary specifications are combined to keep multiple models consistency, the resulting fault are incompatible binary specifications in the sense that different relations cannot hold at the same time because they are based on different global consistency specifications.
-Such mistakes lead to \emph{false negatives} as actually consistent models (regarding the global specification) are identified as inconsistent. %, when investigating whether a given set of models is consistent regarding the global specification or not, because actually consistent models regarding $\mathit{CS}$ are not consistent according to the modular relations $\mathit{CS}_{1,2}$, $\mathit{CS}_{2,3}$ and $\mathit{CS}_{1,3}$.
-
-%\begin{itemize}
-    %\item inadequate structure
-    %\item missing knowledge about other modular relation
-%\end{itemize}
-
-\subsubsection{Operationalization Level}
-The types of mistakes that can be made at the operationalization level are different from those at the other levels, because this level does not concern the definition of consistency specifications (\autoref{def:consistency_specification}), but of consistency \emph{preservation} specifications (\autoref{def:consistency_preservation_specification}).
-Such specifications are faulty if no composition of them exists that returns a consistent tuple of models for each possible change. % it does not lead to a consistent state after making modifications to a consistent tuple of models.
-In \autoref{fig:errors:mistakes_specification_levels}, an exemplary application of a single consistency preservation specification is depicted that leads to models that are not consistent according to the (global and modular) consistency specifications.
-%If no concatenation of CPSs exists that finally returns a consistent set of models for each possible change, the specifications are faulty.
-Let $\mathcal{CPS}$ be a set of consistency preservation specifications  %, e.g. $\mathcal{CPS} := \{\mathit{CPS}_{1}, \ldots, \mathit{CPS}_{m}\}$
-for the binary consistency specifications $\mathcal{CS}$ % := \{\mathit{CS}_{1,2}, \mathit{CS}_{2,3}, \mathit{CS}_{1,3}\}$ %(where there can be more than one consistency preservation specifications for each consistency specification) 
-%in \autoref{fig:mistakes_specification_levels}. %, metamodels $\mathcal{M}_0, \ldots, \mathcal{M}_n$, 
-and
-let $\mathfrak{M}_{\mathcal{CS}}$ be the set of model tuples that are consistent regarding $\mathcal{CS}$ (cf. \autoref{chap:properties:terminology}). 
-The consistency preservation specifications are faulty iff
+% Second, a modular specification can be too restricted (\emph{overspecified}) regarding the global consistency specification if additional constraints are added. 
+% The modular consistency specifications in \autoref{fig:errors:mistakes_specification_levels} are overspecified iff
 % \begin{align*}
-%     & \exists M_0, M'_0 \in \mathcal{M}_0, M_1, M'_1 \in \mathcal{M}_1, M_2, M'_2 \in \mathcal{M}_2 : \forall \mathit{CPS}_0, \ldots, \mathit{CPS}_k \in \mathcal{CPS} : \\
-%     & \hspace{1em} ((M_0, M''_0), (M_1, M''_1), (M_2, M''_2)) = \mathit{CPS}_0 \circ \dots \circ \mathit{CPS}_k((M_0, M'_0), (M_1, M'_1), (M_2, M'_2)) \\
-%     & \hspace{1em} \Rightarrow \exists \mathit{CS}_{i,j} \in \mathcal{CS} : \neg \mathit{CS}_{i,j}(M''_i, M''_j)
+%     & \exists M_1, M_2, M_3 : \\
+%     & \hspace{1em} (M_1, M_2, M_3) \in \mathit{CS} \land \big[ (M_1, M_2) \not\in \mathit{CS}_{1,2} \lor (M_2, M_3) \not\in \mathit{CS}_{2,3} \lor (M_1, M_3) \not\in \mathit{CS}_{1,3} \big]
+% \end{align*}
+% In \autoref{fig:errors:mistakes_specification_levels}, omitting the dashed relation in $\mathit{CS}_{2,3}$ would lead to such an overspecifiation.
+% Overspecifications lead to additional constraints regarding the global specification, but also, and more severe, to contradicting constraints regarding other modular specifications.
+% In case of contradictions, the modular consistency specifications cannot be fulfilled at the same time.
+% In such a case, the graph of consistency relations %, as shown in \autoref{fig:mistakes_specification_levels}, 
+% would contain no cylces, i.e. sets of models that are consistent to each other.
+% We have discussed an example for such contradicting specifications %in the motivating example 
+% in \autoref{chap:properties:levels}, where constraints for transferring an employee name contradicted. % contains contradicting constraints for transferring the name. % to other types of models.
+% %In this case, when several binary specifications are combined to keep multiple models consistency, the resulting fault are incompatible binary specifications in the sense that different relations cannot hold at the same time because they are based on different global consistency specifications.
+% Such mistakes lead to \emph{false negatives} as actually consistent models (regarding the global specification) are identified as inconsistent. %, when investigating whether a given set of models is consistent regarding the global specification or not, because actually consistent models regarding $\mathit{CS}$ are not consistent according to the modular relations $\mathit{CS}_{1,2}$, $\mathit{CS}_{2,3}$ and $\mathit{CS}_{1,3}$.
+
+% %\begin{itemize}
+%     %\item inadequate structure
+%     %\item missing knowledge about other modular relation
+% %\end{itemize}
+
+% \subsubsection{Operationalization Level}
+% The types of mistakes that can be made at the operationalization level are different from those at the other levels, because this level does not concern the definition of consistency specifications (\autoref{def:consistency_specification}), but of consistency \emph{preservation} specifications (\autoref{def:consistency_preservation_specification}).
+% Such specifications are faulty if no composition of them exists that returns a consistent tuple of models for each possible change. % it does not lead to a consistent state after making modifications to a consistent tuple of models.
+% In \autoref{fig:errors:mistakes_specification_levels}, an exemplary application of a single consistency preservation specification is depicted that leads to models that are not consistent according to the (global and modular) consistency specifications.
+% %If no concatenation of CPSs exists that finally returns a consistent set of models for each possible change, the specifications are faulty.
+% Let $\mathcal{CPS}$ be a set of consistency preservation specifications  %, e.g. $\mathcal{CPS} := \{\mathit{CPS}_{1}, \ldots, \mathit{CPS}_{m}\}$
+% for the binary consistency specifications $\mathcal{CS}$ % := \{\mathit{CS}_{1,2}, \mathit{CS}_{2,3}, \mathit{CS}_{1,3}\}$ %(where there can be more than one consistency preservation specifications for each consistency specification) 
+% %in \autoref{fig:mistakes_specification_levels}. %, metamodels $\mathcal{M}_0, \ldots, \mathcal{M}_n$, 
+% and
+% let $\mathfrak{M}_{\mathcal{CS}}$ be the set of model tuples that are consistent regarding $\mathcal{CS}$ (cf. \autoref{chap:properties:terminology}). 
+% The consistency preservation specifications are faulty iff
+% % \begin{align*}
+% %     & \exists M_0, M'_0 \in \mathcal{M}_0, M_1, M'_1 \in \mathcal{M}_1, M_2, M'_2 \in \mathcal{M}_2 : \forall \mathit{CPS}_0, \ldots, \mathit{CPS}_k \in \mathcal{CPS} : \\
+% %     & \hspace{1em} ((M_0, M''_0), (M_1, M''_1), (M_2, M''_2)) = \mathit{CPS}_0 \circ \dots \circ \mathit{CPS}_k((M_0, M'_0), (M_1, M'_1), (M_2, M'_2)) \\
+% %     & \hspace{1em} \Rightarrow \exists \mathit{CS}_{i,j} \in \mathcal{CS} : \neg \mathit{CS}_{i,j}(M''_i, M''_j)
+% % %    & \exists M_0, M'_0 \in \mathcal{M}_0, \ldots M_n, M'_n \in \mathcal{M}_n : \nexists \mathit{CPS}_0, \ldots, \mathit{CPS}_k \in \mathcal{CPS} : \\
+% % %    & \hspace{1em} ((M_0, M''_0), \dots, (M_n, M''n)) := \mathit{CPS}_0 \circ \dots \circ \mathit{CPS}_k((M_0, M'_0), \dots, (M_n, M'_n)) \\
+% % %    & \hspace{1em} \land \exists \mathit{CS}_{i,j} \in \mathcal{CS} : \neg \mathit{CS}_{i,j}(M''_i, M''_j)
+% % \end{align*}
+% \begin{align*}
+%     & \exists (M_1, \dots, M_n) \in \mathfrak{M}_{\mathcal{CS}}, (M'_1, \dots, M'_n) \in \mathcal{M}_1 \times \dots \times \mathcal{M}_n: \forall \mathit{CPS}_1, \ldots, \mathit{CPS}_k \in \mathcal{CPS} : \\
+%     %& \exists M_1, M'_1 \in \mathcal{M}_1, \dots, M_n, M'_n \in \mathcal{M}_n : \forall \mathit{CPS}_1, \ldots, \mathit{CPS}_k \in \mathcal{CPS} : \\
+%     & \hspace{1em} \mathit{CPS}_1 \circ \dots \circ \mathit{CPS}_k \big((M_1, M'_1), \dots, (M_n, M'_n) \big) = \big( (M_1, M''_1), \dots, (M_n, M''_n) \big)\\
+%     & \hspace{2em} \land \exists \mathit{CS}_{i,j} \in \mathcal{CS} : (M''_i, M''_j) \notin \mathit{CS}_{i,j}
 % %    & \exists M_0, M'_0 \in \mathcal{M}_0, \ldots M_n, M'_n \in \mathcal{M}_n : \nexists \mathit{CPS}_0, \ldots, \mathit{CPS}_k \in \mathcal{CPS} : \\
 % %    & \hspace{1em} ((M_0, M''_0), \dots, (M_n, M''n)) := \mathit{CPS}_0 \circ \dots \circ \mathit{CPS}_k((M_0, M'_0), \dots, (M_n, M'_n)) \\
 % %    & \hspace{1em} \land \exists \mathit{CS}_{i,j} \in \mathcal{CS} : \neg \mathit{CS}_{i,j}(M''_i, M''_j)
 % \end{align*}
-\begin{align*}
-    & \exists (M_1, \dots, M_n) \in \mathfrak{M}_{\mathcal{CS}}, (M'_1, \dots, M'_n) \in \mathcal{M}_1 \times \dots \times \mathcal{M}_n: \forall \mathit{CPS}_1, \ldots, \mathit{CPS}_k \in \mathcal{CPS} : \\
-    %& \exists M_1, M'_1 \in \mathcal{M}_1, \dots, M_n, M'_n \in \mathcal{M}_n : \forall \mathit{CPS}_1, \ldots, \mathit{CPS}_k \in \mathcal{CPS} : \\
-    & \hspace{1em} \mathit{CPS}_1 \circ \dots \circ \mathit{CPS}_k \big((M_1, M'_1), \dots, (M_n, M'_n) \big) = \big( (M_1, M''_1), \dots, (M_n, M''_n) \big)\\
-    & \hspace{2em} \land \exists \mathit{CS}_{i,j} \in \mathcal{CS} : (M''_i, M''_j) \notin \mathit{CS}_{i,j}
-%    & \exists M_0, M'_0 \in \mathcal{M}_0, \ldots M_n, M'_n \in \mathcal{M}_n : \nexists \mathit{CPS}_0, \ldots, \mathit{CPS}_k \in \mathcal{CPS} : \\
-%    & \hspace{1em} ((M_0, M''_0), \dots, (M_n, M''n)) := \mathit{CPS}_0 \circ \dots \circ \mathit{CPS}_k((M_0, M'_0), \dots, (M_n, M'_n)) \\
-%    & \hspace{1em} \land \exists \mathit{CS}_{i,j} \in \mathcal{CS} : \neg \mathit{CS}_{i,j}(M''_i, M''_j)
-\end{align*}
-%\todoHeiko{Das ist nicht so schön, weil nicht klar ist, welche CS to welcher CPS gehört und so}
-%This means that there can be changes for which no execution of consistency preservation specifications is able to properly restore consistency. 
+% %\todoHeiko{Das ist nicht so schön, weil nicht klar ist, welche CS to welcher CPS gehört und so}
+% %This means that there can be changes for which no execution of consistency preservation specifications is able to properly restore consistency. 
 
-In practice, mistakes at the operationalization level occur due to missing identification of equal elements in different consistency preservation specifications. 
-In our motivational example (\autoref{fig:properties:motivational_example}), %consider that an employee is created in the scheduling system for an employee created in the task management system after introducing one in the personnel management system.
-consider that an employee is created in the personnel management system, transformed to the task management system and from that to the scheduling system.
-The additional direct specification between personnel management and scheduling system has to consider the already created employee rather than instantiating a new one.
-%We consider %this case and 
-%options to avoid such problems in \autoref{sec:avoiding:matching}.
-%In our example, if a class is created in Java after creating a UML class for a ADL component through appropriate consistency preservation specifications and the consistency preservation specification between ADL and Java also defines the creation of a class in Java, it is necessary that the already existing class is considered rather than creating a new class. We will consider this case and options to avoid such problems in \autoref{sec:avoiding:matching}.
+% In practice, mistakes at the operationalization level occur due to missing identification of equal elements in different consistency preservation specifications. 
+% In our motivational example (\autoref{fig:properties:motivational_example}), %consider that an employee is created in the scheduling system for an employee created in the task management system after introducing one in the personnel management system.
+% consider that an employee is created in the personnel management system, transformed to the task management system and from that to the scheduling system.
+% The additional direct specification between personnel management and scheduling system has to consider the already created employee rather than instantiating a new one.
+% %We consider %this case and 
+% %options to avoid such problems in \autoref{sec:avoiding:matching}.
+% %In our example, if a class is created in Java after creating a UML class for a ADL component through appropriate consistency preservation specifications and the consistency preservation specification between ADL and Java also defines the creation of a class in Java, it is necessary that the already existing class is considered rather than creating a new class. We will consider this case and options to avoid such problems in \autoref{sec:avoiding:matching}.
 
-% \begin{itemize}
-%     \item unknown connection of elements in consistency specifications
-%     \item Really, really make an example here, to distinguish from modularization level!!
-% \end{itemize}
+% % \begin{itemize}
+% %     \item unknown connection of elements in consistency specifications
+% %     \item Really, really make an example here, to distinguish from modularization level!!
+% % \end{itemize}
 
-%In the following, we call all mistakes on modularization and operationalization level \emph{interoperability issues}, as they are all concerned with modularized specifications that have to interoperate. 
+% %In the following, we call all mistakes on modularization and operationalization level \emph{interoperability issues}, as they are all concerned with modularized specifications that have to interoperate. 
 
 
 \subsection{Causal Chains}
+
+\todo{We discussed most causal chains, reflect them here in the example. Discuss benefits of causal chains}
 
 \begin{figure}
     \centering
