@@ -1,15 +1,8 @@
+\newcommand{\hdistance}{7em}
+\newcommand{\classwidth}{6em}
+
 \newcommand{\classdistance}{5em}
-\newcommand{\classwidth}{5em}
 \newcommand{\objectwidth}{6.3em}
-
-% #1: height
-% #2: width
-% #3: positioning options
-% #4: name
-\newcommand{\modeltypebgtextabove}[4]{\node[fill=lightgray!20, text depth=#1, minimum width=#2, #3] {\small \textit{#4}};}
-\newcommand{\modeltypebgtextbelow}[4]{\node[fill=lightgray!20, text height=#1, minimum width=#2, #3] {\small \textit{#4}};}
-
-\usetikzlibrary{positioning,arrows.meta,shapes.misc,matrix}
 
 \begin{tikzpicture}[
     consistency preservation/.style={-latex, consistency changed element, font=\small},
@@ -17,160 +10,144 @@
     legend/.style={font=\footnotesize},
     mininode/.style={inner sep=.25em},
 ]
-% requires styles: consistency related element, user changed element, consistency changed element
-% requires tikzuml
 
-\pgfdeclarelayer{bg}
-\pgfsetlayers{bg,main}
+% LEVEL 1 ERROR
+\coordinate (failure_l1_anchor) at (0,0);
+\node[above=0.5em of failure_l1_anchor] {\textbf{\LevelTransformation Level Mistake} ($R_{PE}, R_{PR}, R_{ER}$)};
 
-% METAMODEL
+\umlobjectvarwidth[, fill=white, below=0 of failure_l1_anchor, anchor=north]{l1_employee}{}{
+: Employee}{
+name="Alice Avid"
+}{\objectwidth}
 
-\umlclassvarwidth{mm_task_employee}{}{Employee}{
-name\\
-\dots
-}{\classwidth}    
+\umlobjectvarwidth[, fill=white, below left=0.4*\classdistance and \classdistance+\classwidth of l1_employee.north, anchor=north] {l1_person}{}{
+: Person}{
+firstname="Alice"
+lastname="Avid"
+}{\objectwidth}
 
-\umlclassvarwidth[, below left=0.4*\classdistance and 2.5*\classdistance of mm_task_employee.north, anchor=north]{mm_personnel_employee}{}{
-Employee}{
-firstName\\
-lastName\\
-\dots
-}{\classwidth}
+\umlobjectvarwidth[, fill=white, above right=1em and 2*\classdistance+2*\classwidth of l1_person.center, anchor=south] {l1_resident}{}{
+: Resident}{
+name="Alice Avid"
+}{\objectwidth}
 
-\umlclassvarwidth[, right=5*\classdistance of mm_personnel_employee.north, anchor=north]{mm_scheduling_employee}{}{
-Employee}{
-name\\
-\dots
-}{\classwidth}
+\umlobjectvarwidth[, fill=white, above right=0.5em and 2*\classdistance+2*\classwidth of l1_person.center, anchor=north] {l1_resident_duplicate}{}{
+: Resident}{
+name="Alice Avid"
+}{\objectwidth}
 
-\draw[consistency relation] (mm_personnel_employee.north) |- node[above, pos=0.6] {name = firstName + "\textvisiblespace" + lastName} ([yshift=-0.7em]mm_task_employee.north west);
-\draw[consistency relation]([yshift=-0.7em]mm_task_employee.north east) -| node[above, pos=0.25] {name = name} (mm_scheduling_employee.north);
-\draw[consistency relation] ([yshift=-3em]mm_personnel_employee.north east) -- node[below, pos=0.5, align=left] {
-\textit{Opt. 1}: name = lastName + ",\textvisiblespace" + firstname\\
-\textit{Opt. 2}: name = firstName + "\textvisiblespace" + lastname
-} ([yshift=-3em]mm_scheduling_employee.north west);
-
-% LEGEND
-\coordinate (legend_anchor) at ([yshift=-1.3*\classdistance]mm_task_employee);
-
-\node[draw=darkgray, matrix, legend, nodes=mininode, below=0em of legend_anchor, anchor=north, outer sep=0, inner sep=0.4em, column sep=0.2em, row sep=-0.2em] (legend) {
-    \draw[consistency relation] (0,0) -- (1.4em,0); &
-    \node[consistency related element, anchor=west] {consistency constraint}; \\
-    %
-    \draw[-latex, user changed element] (0,0) -- (1.4em,0); &
-    \node[user changed element, anchor=west] {user change}; \\
-    %
-    \draw[-latex, consistency changed element] (0,0) -- (1.4em, 0); &
-    \node[consistency changed element, anchor=west, align=left] (legend_cpr_label) {consistency preservation};\\
-};
-
-% \draw[consistency relation] (legend_anchor) -- ([xshift=1.5em]legend_anchor);
-% \node[legend, consistency related element, anchor=west] at ([xshift=1.5em]legend_anchor) {consistency constraint};
-
-% \draw[-latex, user changed element] ([yshift=-1em]legend_anchor) -- ([yshift=-1em, xshift=1.5em]legend_anchor);
-% \node[legend, user changed element, anchor=west] at ([yshift=-1em, xshift=1.5em]legend_anchor) {user change};
-
-% \draw[-latex, consistency changed element] ([yshift=-2em]legend_anchor) -- ([yshift=-2em, xshift=1.5em]legend_anchor);
-% \node[legend, consistency changed element, anchor=north west, align=left] (legend_cpr_label) at ([yshift=-1.3em, xshift=1.5em]legend_anchor) {consistency preservation};
-
-%\coordinate (legend_upper_left) at ([xshift=-0.7em, yshift=0.7em]legend_anchor);
-%\begin{pgfonlayer}{bg}
-%    \node[fill=lightgray!30, fit=(legend_upper_left)(legend_cpr_label)] {};
-%\end{pgfonlayer}
+\umlhuman{l1_human}{at ([xshift=1em, yshift=3em]l1_person.north west)}{user changed element}{}{0.5}
+\draw[user change] ([xshift=1em,yshift=1.8em]l1_person.north west) -- node[right, align=center] {1. +} ([xshift=1em]l1_person.north west);
+\draw[consistency preservation] ([yshift=1em]l1_person.east) -- node[above] {2. +} ([yshift=0em]l1_employee.west);
+\draw[consistency preservation] (l1_employee.east) -- node[above] {3. +} (l1_resident.west);
+\draw[consistency preservation] (l1_resident_duplicate.west-|l1_person.east) -- node[below] {4. +} (l1_resident_duplicate.west);
 
 
 % LEVEL 2 ERROR
-\coordinate (failure_l2_anchor) at ([xshift=-2.15*\classdistance, yshift=-2.65*\classdistance]mm_task_employee.north); %([xshift=4*\classdistance]mm_task_employee.north);
+\coordinate (failure_l2_anchor) at ([yshift=-1.8*\classdistance]failure_l1_anchor);
+\node[above=0.5em of failure_l2_anchor] {\textbf{\LevelNetworkRelation Level Mistake} ($R_{PE}, R_{PR}, R_{ER}'$)};
 
-\umlobjectvarwidth[, consistency changed element, fill=white, below=0 of failure_l2_anchor, anchor=north]{l2_task_employee}{}{
+\umlobjectvarwidth[, fill=white, below=0 of failure_l2_anchor, anchor=north]{l2_employee}{}{
 : Employee}{
-name="Alice Do"
+name="Alice Avid"
 }{\objectwidth}
 
-\umlobjectvarwidth[, user changed element, fill=white, below left=1.2*\classdistance and 0.75*\classdistance of l2_task_employee.north, anchor=north] {l2_personnel_employee}{}{
+\umlobjectvarwidth[, fill=white, below=0.7*\classdistance of l2_employee.north, anchor=north]{l2_employee2}{}{
 : Employee}{
-firstName="Alice"
-lastName="Do"
+name="alice avid"
 }{\objectwidth}
 
-\umlobjectvarwidth[, consistency changed element, fill=white, right=1.9*\classdistance of l2_personnel_employee.north, anchor=north] {l2_scheduling_employee}{}{
-: Employee}{
-name="Do, Alice"
+\umlobjectvarwidth[, fill=white, below left=0.4*\classdistance and \classdistance+\classwidth of l2_employee.north, anchor=north] {l2_person}{}{
+: Person}{
+firstname="Alice"
+lastname="Avid"
 }{\objectwidth}
 
-\umlhuman{l2_human}{at ([xshift=1em, yshift=4.5em]l2_personnel_employee.north west)}{user changed element}{}{0.5}
-\draw[user change] ([xshift=1em,yshift=3.3em]l2_personnel_employee.north west) -- node[above right=-0.7em and -0.2em, align=center] {1.\\ \tiny «create»} ([xshift=1em]l2_personnel_employee.north west);
-\draw[consistency preservation] ([xshift=1em]l2_personnel_employee.north) -- node[left=0.2em] {2.} ([xshift=2.5em]l2_task_employee.south west);
-\draw[consistency preservation] ([yshift=-2.5em]l2_personnel_employee.north east) -- node[below] {3.} ([yshift=-2.5em]l2_scheduling_employee.north west);
+\umlobjectvarwidth[, fill=white, below=0.9*\classdistance of l2_person.north, anchor=north]{l2_person2}{}{
+: Person}{
+firstname="alice"
+lastname="avid"
+}{\objectwidth}
 
-\draw[consistency preservation, dashed] ([xshift=-2em]l2_task_employee.south east) -- node[above right=0.3em and 0.2em, anchor=west] {4. \large \Lightning} ([xshift=-1em]l2_scheduling_employee.north);
-\draw[consistency preservation, dashed] ([yshift=-1.5em]l2_scheduling_employee.north west) -- node[above] {5.}  ([yshift=-1.5em]l2_personnel_employee.north east);
-\draw[consistency preservation, dashed] ([xshift=2em]l2_personnel_employee.north) -- node[right=0.2em] {6.} ([xshift=3.5em]l2_task_employee.south west);
+\umlobjectvarwidth[, fill=white, right=2*\classdistance+2*\classwidth of l2_person.center, anchor=center] {l2_resident}{}{
+: Resident}{
+name="alice avid"
+}{\objectwidth}
+
+\umlhuman{l2_human}{at ([xshift=1em, yshift=3em]l2_person.north west)}{user changed element}{}{0.5}
+\draw[user change] ([xshift=1em,yshift=1.8em]l2_person.north west) -- node[right, align=center] {1. +} ([xshift=1em]l2_person.north west);
+\draw[consistency preservation] ([yshift=1em]l2_person.east) -- node[above] {2. +} ([yshift=0em]l2_employee.west);
+\draw[consistency preservation] (l2_employee.east) -- node[above] {3. +} ([yshift=1em]l2_resident.west);
+\draw[consistency preservation] ([yshift=0em]l2_resident.south) |- node[pos=0.75, above] {4. +} (l2_person2.east);
+\draw[consistency preservation] ([yshift=1em]l2_person2.east) -- node[above] {5. +} ([yshift=-0.5em]l2_employee2.west);
 
 
 % LEVEL 3 ERROR
-\coordinate (failure_l3_anchor) at ([xshift=4.3*\classdistance]failure_l2_anchor);
+\coordinate (failure_l3_anchor) at ([yshift=-2.6*\classdistance]failure_l2_anchor);
+\node[above=0.5em of failure_l3_anchor] {\textbf{\LevelNetworkRule Level Mistake} ($R_{PE}, R_{PR}', R_{ER}$)};
 
-\umlobjectvarwidth[, consistency changed element, fill=white, below=0 of failure_l3_anchor, anchor=north]{l3_task_employee}{}{
+\umlobjectvarwidth[, fill=white, below=0 of failure_l3_anchor, anchor=north]{l3_employee}{}{
 : Employee}{
-name="Alice Do"
+name="Alice Avid"
 }{\objectwidth}
 
-\umlobjectvarwidth[, user changed element, fill=white, below left=1.2*\classdistance and 1.15*\classdistance of l3_task_employee.north, anchor=north] {l3_personnel_employee}{}{
+\umlobjectvarwidth[, fill=white, below=1.7*\classdistance of l3_employee.north, anchor=north]{l3_employee2}{}{
 : Employee}{
-firstName="Alice"
-lastName="Do"
+name="Avid Alice"
 }{\objectwidth}
 
-\umlobjectvarwidth[, consistency changed element, fill=white, below right=0.5em and 1.9*\classdistance of l3_personnel_employee.center, anchor=south] {l3_scheduling_employee}{}{
-: Employee}{
-name="Alice Do"
+\umlobjectvarwidth[, fill=white, below left=0.5*\classdistance and \classdistance+\classwidth of l3_employee.north, anchor=north] {l3_person}{}{
+: Person}{
+firstname="Alice"
+lastname="Avid"
 }{\objectwidth}
 
-\umlobjectvarwidth[, consistency changed element, fill=white, below right=1em and 1.9*\classdistance of l3_personnel_employee.center, anchor=north] {l3_scheduling_employee_duplicate}{}{
-: Employee}{
-name="Alice Do"
+\umlobjectvarwidth[, fill=white, below=0.9*\classdistance of l3_person.north, anchor=north]{l3_person2}{}{
+: Person}{
+firstname="Avid"
+lastname="Alice"
 }{\objectwidth}
 
-\umlhuman{l3_human}{at ([xshift=1em, yshift=4.5em]l3_personnel_employee.north west)}{user changed element}{}{0.5}
-\draw[user change] ([xshift=1em,yshift=3.3em]l3_personnel_employee.north west) -- node[above right=-0.7em and -0.2em, align=center] {1.\\ \tiny «create»} ([xshift=1em]l3_personnel_employee.north west);
-\draw[consistency preservation] ([xshift=1em]l3_personnel_employee.north) -- node[left=0.3em] {2.} ([xshift=2em]l3_task_employee.south west);
-\draw[consistency preservation] ([xshift=-2em]l3_task_employee.south east) -- node[above right=-0.5em and 0.2em] {3.} ([xshift=-1em]l3_scheduling_employee.north);
-\draw[consistency preservation] ([yshift=1em]l3_personnel_employee.south east) -- node[below=0.2em] {4.} ([yshift=-1em]l3_scheduling_employee_duplicate.north west);
+\umlobjectvarwidth[, fill=white, right=2*\classdistance+2*\classwidth of l3_person.center, anchor=center] {l3_resident}{}{
+: Resident}{
+name="Alice Avid"
+}{\objectwidth}
 
-\begin{pgfonlayer}{bg}
-    \modeltypebgtextabove{4.8em}{1.5*\classwidth}{above=1.7em of mm_task_employee.north, anchor=north}{Task Management}
-    \modeltypebgtextbelow{6.4em}{1.5*\classwidth}{below=1.7em of mm_personnel_employee.south, anchor=south}{Personnel Data\vphantom{g}}
-    \modeltypebgtextbelow{5.2em}{1.5*\classwidth}{below=1.7em of mm_scheduling_employee.south, anchor=south}{Scheduling}
+\umlobjectvarwidth[, fill=white, below=0.7*\classdistance of l3_resident.north, anchor=north]{l3_resident2}{}{
+: Resident}{
+name="Avid Alice"
+}{\objectwidth}
 
-    \modeltypebgtextabove{4.1em}{1.27*\objectwidth}{above=1.7em of l2_task_employee.north, anchor=north}{Task Management}
-    \modeltypebgtextbelow{5.6em}{1.27*\objectwidth}{below=1.7em of l2_personnel_employee.south, anchor=south}{Personnel Data\vphantom{g}}
-    \modeltypebgtextbelow{4.8em}{1.27*\objectwidth}{below=1.7em of l2_scheduling_employee.south, anchor=south}{Scheduling}
-    
-    \modeltypebgtextabove{4.1em}{1.27*\objectwidth}{above=1.7em of l3_task_employee.north, anchor=north}{Task Management}
-    \modeltypebgtextbelow{5.6em}{1.27*\objectwidth}{below=1.7em of l3_personnel_employee.south, anchor=south}{Personnel Data\vphantom{g}}
-    \modeltypebgtextbelow{8.3em}{1.27*\objectwidth}{below=1.7em of l3_scheduling_employee_duplicate.south, anchor=south}{Scheduling}
-\end{pgfonlayer}
+\umlhuman{l3_human}{at ([xshift=1em, yshift=3em]l3_person.north west)}{user changed element}{}{0.5}
+\draw[user change] ([xshift=1em,yshift=1.8em]l3_person.north west) -- node[right, align=center] {1. +} ([xshift=1em]l3_person.north west);
+\draw[consistency preservation] ([yshift=1.5em]l3_person.east) -- node[above] {2. +} ([yshift=0em]l3_employee.west);
+\draw[consistency preservation] ([yshift=0em]l3_employee.east) -- node[above] {3. +} ([yshift=1em]l3_resident.west);
+\draw[consistency preservation] ([yshift=-0em]l3_resident.west) -- node[above] {4. -} ([yshift=0em]l3_person.east);
+\draw[consistency preservation] ([yshift=-0.5em]l3_resident.west) -- node[above] {4. +} ([yshift=1em]l3_person2.east);
+\draw[consistency preservation] ([yshift=-1em]l3_person2.east) -- node[above] {5. +} ([yshift=0.5em]l3_employee2.west);
+\draw[consistency preservation] ([yshift=1em]l3_person.east) -- node[below] {5. -} ([yshift=-0.5em]l3_employee.west);
+\draw[consistency preservation] ([yshift=0.5em]l3_employee2.east) -- node[above] {6. +} ([yshift=-0.5em]l3_resident2.west);
+\draw[consistency preservation] ([yshift=-0.5em]l3_employee.east) -- node[below] {6. -} ([yshift=0.5em]l3_resident.west);
+\draw[consistency preservation] ([yshift=-1em]l3_resident.west) -- node[below] {7. -} ([yshift=0.5em]l3_person2.east);
+\draw[consistency preservation] (l3_resident2.south) |- ++(-5.3*\classdistance, -0.6*\classdistance) node[pos=0.85, above] {7. +} |- (l3_person.west);
 
+% LEGEND
+%\coordinate (legend_anchor) at ([xshift=1.5*\classwidth,yshift=-2.7*\classdistance]employee);
+\coordinate[below=0.4*\classdistance of l3_employee2.south] (legend_anchor);
 
-% LABELS AND LINES
+\node[draw=darkgray, matrix, legend, nodes=mininode, below=0em of legend_anchor, anchor=north, outer sep=0, inner sep=0.4em, column sep=0.2em, row sep=-0.2em] (legend) {
+    %\draw[consistency relation] (0,0) -- (1.4em,0); &
+    %\node[consistency related element, anchor=west] {consistency constraint}; \\
+    %
+    \draw[-latex, user changed element] (0,0) -- (1.4em,0); &
+    \node[user changed element, anchor=west] {user change}; & 
+    %
+    \node {}; &
+    %
+    \draw[-latex, consistency changed element] (0,0) -- (1.4em, 0); &
+    \node[consistency changed element, anchor=west, align=left] (legend_cpr_label) {transformation};\\
+};
 
-\coordinate (y_verticalline) at ([yshift=2.4*\classdistance]l2_personnel_employee.west);
-\draw[draw=gray, very thin] ([xshift=-0.05*\objectwidth]y_verticalline-|l2_personnel_employee.west) -- node[below=0.2em] (l2_label) {Level 2 Mistake \textit{(Opt. 1)}} ([xshift=-1em]y_verticalline-|legend.west);
-
-%\node[below=0.4em, anchor=south west, align=left, font=\mediumfont] (l2_label) {Level 2 Mistake \textit{(Opt. 1)}}; 
-
-%{Consistency Preservation with
-%\node[above=2em of failure_l2_anchor, align=center, font=\smallerfont {Consistency Preservation with \textit{Opt. 1}\\ \textit{(Error on Level 2)}};
-
-\draw[draw=gray, very thin] ([xshift=0.05*\objectwidth]y_verticalline-|l3_scheduling_employee.east) -- node[below=0.2em] (l3_label) {Level 3 Mistake \textit{(Opt. 2)}} ([xshift=1em]y_verticalline-|legend.east);
-%\draw[dashed] ([yshift=2.4*\classdistance]l2_personnel_employee.west) -- node[below=0.2em, font=\mediumfont] (l2_label) {Level 2 Mistake \textit{(Opt. 1)}} ([xshift=-1em, yshift=2.4*\classdistance]l2_personnel_employee.west-|legend.west);
-
-%\node[anchor=south east, align=left, font=\mediumfont] (l3_label) at (l2_label.south-|l3_scheduling_employee.east) {Level 3 Mistake \textit{(Opt. 2)}};
-%\node[above=2em of failure_l3_anchor, align=center, font=\smallerfont] {Consistency Preservation with \textit{Opt. 2}\\ \textit{(Error on Level 3)}};
-%\draw[dashed] ([yshift=0.4em]l3_scheduling_employee.east|-l3_label.north) -- ([xshift=1em, yshift=0.4em]l3_label.north-|legend.east);
-
-\draw[draw=gray, very thin] ([yshift=-1em]legend.south) -- ([yshift=-2.8*\classdistance]legend.south);
 
 \end{tikzpicture}
 

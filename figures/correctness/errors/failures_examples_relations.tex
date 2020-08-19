@@ -1,0 +1,103 @@
+\newcommand{\hdistance}{7em}
+\newcommand{\classwidth}{6em}
+
+\newcommand{\classdistance}{5em}
+\newcommand{\objectwidth}{6.3em}
+
+\begin{tikzpicture}[
+    consistency preservation/.style={-latex, consistency changed element, font=\small},
+    user change/.style={-latex, user changed element, font=\small},
+    legend/.style={font=\footnotesize},
+    mininode/.style={inner sep=.25em},
+]
+
+% Person
+\umlclassvarwidth{person}{}{Person\sameheight}{
+firstname\\
+lastname
+}{\classwidth}
+
+% Employee
+\umlclassvarwidth[,above right=2em and \hdistance of person.north east, anchor=south]{employee}{}{Employee\sameheight}{
+name
+}{\classwidth}
+
+\umlclassvarwidth[,below right=2em and \hdistance of employee.south, anchor=north west]{resident}{}{Resident\sameheight}{
+name
+}{\classwidth}
+
+
+% CONSISTENCY RELATIONS
+\draw[consistency relation] (person.north) |- node[pos=0, above left] {$p$} node[pos=0.75, above] {$R_{PE}$} node[pos=1, above left] {$e$} (employee.west);
+\draw[consistency relation] (employee.east) -| node[pos=0, above right] {$e$} node[pos=0.3, above] {$R_{ER}$ / $R'_{ER}$} 
+node[pos=1, above right] {$r$} (resident.north);
+\draw[consistency relation] (resident.west) -- node[pos=0, below left] {$r$} node[pos=0.5, below] {$R_{PR} / R'_{PR}$} node[pos=1, below right] {$p$} (resident.west-|person.east);
+
+%\draw[consistency relation 2] (person.east) -- node[pos=0, below right] {$p$} ++(0.35*\hdistance,0) -- node[pos=0, right=0.5em] {$R_{PER}$} node[pos=1, above left] {$e$} ([yshift=1em]employee.south west);
+%\draw[consistency relation 2, ->] ([xshift=0.35*\hdistance]person.east) -- node[pos=1, below left] {$r$} ([yshift=-1em]resident.north west);
+
+% \node[consistency related element 2, below left=5em and 2.5em of person.south west, anchor=north west] (relations1) {
+% $\begin{aligned}
+%     R_{PER} =\; &
+%             \setted{\tupled{p,e,r} \mid \\
+%             & p.firstname + "\text{\textvisiblespace}" + p.lastname = e.name = r.name\\
+%             & \land p.address = r.address%\\
+%             %& 
+%             \land p.income = e.salary\\
+%             & \land e.socsecnumber = r.socsecnumber
+%         }
+% \end{aligned}$
+% };
+
+%\node[consistency related element, below=0.5em of relations1.south west, anchor=north west] {
+\node[consistency related element, below left=1em and 0em of person.south west, anchor=north west] {
+$\begin{aligned}
+    R_{PE} =\; &
+            \setted{\tupled{p,e} \mid %\\
+            %& 
+            p.firstname + "\text{\textvisiblespace}" + p.lastname = e.name%\\
+            %& \land p.income = e.salary
+        }\\[0.3em]
+    R_{PR} =\; &
+            \setted{\tupled{p,r} \mid %\\
+            %& 
+            p.firstname + "\text{\textvisiblespace}" + p.lastname = r.name%\\
+            %& \land p.address = r.address
+        }\\
+    R'_{PR} =\; &
+            \setted{\tupled{p,r} \mid %\\
+            %& 
+            p.lastname + "\text{\textvisiblespace}" + p.firstname = r.name%\\
+            %& \land p.address = r.address
+    }\\[0.3em]
+    R_{ER} =\; &
+            \setted{\tupled{e,r} \mid %\\
+            %& 
+            e.name = r.name%\\
+            %& \land e.socsecnumber = r.socsecnumber
+        }\\
+    R'_{ER} =\; &
+            \setted{\tupled{e,r} \mid %\\
+            %& 
+            e.name.toLower = r.name%\\
+            %& \land e.socsecnumber = r.socsecnumber
+        }
+\end{aligned}$
+};
+
+% % LEGEND
+% \coordinate (legend_anchor) at ([xshift=1.5*\classwidth,yshift=-2.7*\classdistance]employee);
+
+% \node[draw=darkgray, matrix, legend, nodes=mininode, below=0em of legend_anchor, anchor=north, outer sep=0, inner sep=0.4em, column sep=0.2em, row sep=-0.2em] (legend) {
+%     \draw[consistency relation] (0,0) -- (1.4em,0); &
+%     \node[consistency related element, anchor=west] {consistency constraint}; \\
+%     %
+%     \draw[-latex, user changed element] (0,0) -- (1.4em,0); &
+%     \node[user changed element, anchor=west] {user change}; \\
+%     %
+%     \draw[-latex, consistency changed element] (0,0) -- (1.4em, 0); &
+%     \node[consistency changed element, anchor=west, align=left] (legend_cpr_label) {consistency preservation};\\
+% };
+
+\end{tikzpicture}
+
