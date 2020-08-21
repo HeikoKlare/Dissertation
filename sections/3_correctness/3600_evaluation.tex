@@ -3,15 +3,31 @@
 }
 \label{chap:correctness_evaluation}
 
-\todo{Discuss that the formalism is proven correct. We only valide the error classification and the prevention 
-strategies.
-Additional goal: Find how likely specific kinds of errors are to know how relevant the different error categories are.
-}
+\mnote{Several statements validated by proof}
+In the preceding chapters, we have discussed several aspects of a well-defined notion of consistency and correctness of its preservation in transformation networks.
+Based on the assumptions we made, we were able to prove several statements regarding decidability of problems and the effects of approaches we proposed, such as the analysis of compatibility or the construction of synchronizing transformations.
+Thus, several insights presented so far have been validated by proof.
 
-\todo{Note that the Vitruv implementation has no CheckConsistency method but uses hippocratic transformations and aborts if no further changes occur by executing the transformations. Thus consistency relations are implicitly encoded in the consistency preservation rules by being their fixed points.}
+\mnote{Evaluation of applicability by empirical evaluation in case study}
+Still, there are several interesting and relevant questions that we will validate by empirical evaluation at case studies.
+These especially concern the applicability of our approaches and also, at least implicitly, the appropriateness of our formalism.
+This involves the investigation of how often the conservative algorithms for analyzing compatibility and orchestrating transformations succeed and whether the approach for constructing synchronizing transformations is sufficient.
+In addition, we will identify how relevant the different correctness notions are regarding how prone they are to not being fulfilled and thus the probability that developers may make different kinds of mistakes.
+We will especially find that transformations not being synchronizing is the most relevant mistakes that can be made and that most other mistakes are due to incompatibilities.
+Thus, applying our approaches for constructing synchronizing transformations and analyzing compatibility would solve most issues, at least in the considered case studies.
 
-We have shown that we cannot define an orchestration that is always correct and optimal. However, we presented techniques to optimize as far as possible.
-We evaluate here, in how many cases this is sufficient in practice. To do so, we have the case study (Torsten / Timur) where we identified issues. We map them to our approaches and show that at least in this case study almost all problems would have been detected with them.
+\mnote{GQM plan for each topic}
+For each of the topics, we provide a plan according to the \gls{GQM} approach, for which the original idea was presented by \textcite{basili1984GQM-TSE}.
+We define goals that we want to achieve with our evaluation, derive questions that we answer to identify whether we reached the underlying goal, and define metrics whose results we use to get a quantitative measure for answering the questions.
+
+
+%\todo{Discuss that the formalism is proven correct. We only valide the error classification and the prevention 
+%strategies.
+%Additional goal: Find how likely specific kinds of errors are to know how relevant the different error categories are.
+%}
+
+%We have shown that we cannot define an orchestration that is always correct and optimal. However, we presented techniques to optimize as far as possible.
+%We evaluate here, in how many cases this is sufficient in practice. To do so, we have the case study (Torsten / Timur) where we identified issues. We map them to our approaches and show that at least in this case study almost all problems would have been detected with them.
 
 \begin{itemize}
     \item Correctness notion argued, nothing to evaluate: could be evaluated in user study that assumptions for that notion regarding the process are reasonable, but out of scope
@@ -20,16 +36,38 @@ We evaluate here, in how many cases this is sufficient in practice. To do so, we
     \item Orchestration (Usefulness): Regarding orchestration, we have proven the proposed strategy to be correct. We, however, provide a scenario-based discussion to evaluate the usefulness of the strategy to find the cause for a network not being able to resolve a change.
 \end{itemize}
 
+
+\todo{Make unified table for each GQM plan}
+
 \section{Compatibility}
 
 Positive: Compatibility is proven
 Negative: Non-compatibility may be proven (or not)
 
-\gqm{}{The analysis can be used to find contradictions in specifications}
-{Correctness: Is compatibility always given if the analysis finds it?}
-{Precision: Ratio of true positives to true positives + false positives (false positives have to be 0)}
-\qm{Usefulness (Conservativeness): How often does the analysis not prove compatibility although it is given? (how conservative is it?)}
-{Recall: Ratio of true positives to true positives + false negatives (false negatives indicate conservative case)}
+{
+\newcommand{\innerrowspacing}{0.3em}
+\newcommand{\outerrowspacing}{1em}
+\begin{table}
+    \begin{tabular}{p{8em} p{20em}}
+        \toprule
+        \goal{Compatibility} & Show that the analysis can be used by transformation developers to find incompatibilities in consistency relations of a transformation network. \\\addlinespace[\innerrowspacing]
+        \question{Correctness} & Is compatibility always given if the analysis finds it? \\\addlinespace[\innerrowspacing]
+        \metric & \metrictext{Precision: Ratio of true positives to true positives + false positives (false positives have to be 0)} \\\addlinespace[\outerrowspacing]
+        \question{Applicability%Usefuleness/Conservativeness
+        } & How often does the analysis not prove compatibility although it is given? (how conservative is it?) \\\addlinespace[\innerrowspacing]
+        \metric & \metrictext{Recall: Ratio of true positives to true positives + false negatives (false negatives indicate conservative case)}\\
+        \bottomrule
+    \end{tabular}
+    \caption[Goals, questions and metrics for compatibility]{Goals, questions and metrics for compatibility evaluation}
+    \label{tab:correctness_evaluation:gqm_compatibility}
+\end{table}
+}
+
+% \gqm{}{Show that the analysis can be used by transformation developers to find incompatibilities in consistency relations of a transformation network.}
+% {Correctness: Is compatibility always given if the analysis finds it?}
+% {Precision: Ratio of true positives to true positives + false positives (false positives have to be 0)}
+% \qm{Usefulness (Conservativeness): How often does the analysis not prove compatibility although it is given? (how conservative is it?)}
+% {Recall: Ratio of true positives to true positives + false negatives (false negatives indicate conservative case)}
 
 
 \begin{copiedFrom}{SoSym MPM4CPS}
@@ -390,6 +428,8 @@ In our case study, %introduced in \autoref{sec:evaluation:methodology},
 we did observe any time-consuming scenarios.
 However, transformation networks with more and larger transformations and especially many cycles need to be investigated to make generalizable statements on the performance.
 
+\todo{Not shown that compatibility notion is reasonable. We derived it theoretically, but whether its actually fits to some intuitive notion of incompatibility and covers all cases of consistency relations that do actually not fit together and could be detected automatically, is unclear.
+Maybe the notion is even to restricted because it is necessary to pass such states that are not forbidden, but as discussed, this is really unlikely, because the models can never occur in any consistent tuple of models.}
 
 From Slides:
 \begin{itemize}
@@ -431,6 +471,8 @@ Applicability:
 
 \section{Errors and Synchronization}
 
+\todo{Note that the Vitruv implementation has no CheckConsistency method but uses hippocratic transformations and aborts if no further changes occur by executing the transformations. Thus consistency relations are implicitly encoded in the consistency preservation rules by being their fixed points.}
+
 Wir betrachten Transformation in Reactions.
 Synchronisation durch mehrfache Ausführung der Transformationen in beide Richtungen.
 Orchestrierung: FIFO für Transformationen, an denen Modelle geändert wurden. Kein Abbruchkriterium, d.h. es kann zu Nicht-Terminierung kommen. Aber: nach Korrigieren der Fehler keine Nicht-Terminierung mehr (obwohl das nicht so sein muss, siehe Orch-Kapitel). Limitierung: Hier wenig Optionsauswahl, d.h. in den meisten Fällen entscheiden sich die Transformationen für ein Element und habe keine Auswahl.
@@ -440,19 +482,46 @@ Falls wir keinen Baum garantieren können: In this case, the consistency specifi
 
 Case study in which we identified errors when combining independently developed transformations and check whether the classification is correct. We correct the mistakes according to the categorization and especially applied the patterns for making the transformation synchronizing to find whether that solves the problem of transformations not being correct in the context of a network. Additionally, we want to find how often specific types of errors occurs to have an indicator for their severity and how relevant the errors we solve by our synchronization pattern are.
 
-\gqm{Classification}{The relation between mistakes, faults and failures in the classification is correct.}
-{Completeness: Can all occuring failes be classified according to the classification?}
-{Identified failures ratio: Ration between number of occured failures and classified failues}
-\qm{Correctness: Are identified failures caused by mistakes they are related to according to the classification?}
-{Resolved failures ratio: Ration of resolved failures to total failures}
-\qm{Relevance: How relevant are specific types of mistakes, how often do they occur at all?}
-{Number of occurences of each type of mistake in relation to number of all mistakes occurences}
+{
+\newcommand{\innerrowspacing}{0.3em}
+\newcommand{\outerrowspacing}{1em}
+\begin{table}
+    \begin{tabular}{p{8em} p{20em}}
+        \toprule
+        \goal{Categorization} & Show that the relations between mistakes, faults and failures in the categorization for transformation network errors are correct. \\\addlinespace[\innerrowspacing]
+        \question{Completeness} & Can all occurring failures be categorized according to the categorization? \\\addlinespace[\innerrowspacing]
+        \metric & \metrictext{Identified failures ratio: Ration between number of occured failures and classified failues} \\\addlinespace[\outerrowspacing]
+        \question{Correctness} & Are identified failures caused by mistakes they are related to according to the classification? \\\addlinespace[\innerrowspacing]
+        \metric & \metrictext{Resolved failures ratio: Ration of resolved failures to total failures}\\\addlinespace[\outerrowspacing]
+        \question{Relevance} & How relevant are specific types of mistakes, how often do they occur at all? \\\addlinespace[\innerrowspacing]
+        \metric & \metrictext{Number of occurences of each type of mistake in relation to number of all mistakes occurences}\\\addlinespace[\innerrowspacing]
+        \midrule\addlinespace[\innerrowspacing]
+        %
+        \goal{Synchronization} & Show that the approach for matching elements avoids failures due to \leveltransformation level mistakes by construction. \\\addlinespace[\innerrowspacing]
+        \question{Correctness} & Does the application of synchronization techniques lead to correct synchronizing transformations? \\\addlinespace[\innerrowspacing]
+        \metric & \metrictext{Ratio of changes that are propagated correctly after applying the techniques to those that are not propagated correctly} \\\addlinespace[\outerrowspacing]
+        \question{Relevance} & Does the application of synchronization techniques resolve any incorrectnesses? \\\addlinespace[\innerrowspacing]
+        \metric & \metrictext{Ratio of changes that are propagated correctly after applying the techniques to those that were propagated correctly before}\\
+        \bottomrule
+    \end{tabular}
+    \caption[Goals, questions and metrics for errors and synchronization]{Goals, questions and metrics for errors and synchronization evaluation}
+    \label{tab:correctness_evaluation:gqm_synchronization}
+\end{table}
+}
 
-\gqm{Synchronization}{The approach for matching elements avoids failures due to \leveltransformation level mistakes by construction.}
-{Correctness: Does the application of synchronization techniques lead to correct synchronizing transformations?}
-{Ratio of changes that are propagated correctly after applying the techniques to those that are not propagated correctly}
-\qm{Relevance: Does the application of synchronization techniques resolve any incorrectnesses?}
-{Ratio of changes that are propagated correctly after applying the techniques to those that were propagated correctly before}
+% \gqm{Categorization}{Show that the relations between mistakes, faults and failures in the categorization for transformation network errors are correct.}
+% {Completeness: Can all occuring failes be classified according to the classification?}
+% {Identified failures ratio: Ration between number of occured failures and classified failues}
+% \qm{Correctness: Are identified failures caused by mistakes they are related to according to the classification?}
+% {Resolved failures ratio: Ration of resolved failures to total failures}
+% \qm{Relevance: How relevant are specific types of mistakes, how often do they occur at all?}
+% {Number of occurences of each type of mistake in relation to number of all mistakes occurences}
+
+% \gqm{Synchronization}{Show that the approach for matching elements avoids failures due to \leveltransformation level mistakes by construction.}
+% {Correctness: Does the application of synchronization techniques lead to correct synchronizing transformations?}
+% {Ratio of changes that are propagated correctly after applying the techniques to those that are not propagated correctly}
+% \qm{Relevance: Does the application of synchronization techniques resolve any incorrectnesses?}
+% {Ratio of changes that are propagated correctly after applying the techniques to those that were propagated correctly before}
 
 % \gqm{Applicability}{The techniques can be applied independently to single transformations}
 % {Are there cases in which information about other transformations are necessary to solve issues?}
@@ -620,6 +689,8 @@ They would have to be developed in a schema similar to the one proposed by \text
 
 \end{copiedFrom} % ICMT
 
+Threats:
+- The transformation were not constructed synchronizing, thus obviously many synchronization errors occur. If the scenario is foreseen, there may be much less errors at this level and more at the others -> need to perform further evaluation were developer know about necessity to use transformations in a network to properly construct them and then see how often that still fails.
 
 
 \section{Orchestration}
@@ -629,9 +700,25 @@ Usefulness of the strategy to identify the cause for the network failing to reso
 Showing it empirically requires high effort.
 We thus provide a scenario-based discussion showing that the strategy is beneficial in reasonable cases.
 
-\gqm{Usefulness}{The orchestration strategy helps to find the cause for the network not being able to resolve a change}
-{Is it easier to find the reasons for the network not being able to resolve a change with the proposed strategy than with other strategies?}
-{Number of transformations to consider as a reason or comparable}
+{
+\newcommand{\innerrowspacing}{0.3em}
+\newcommand{\outerrowspacing}{1em}
+\begin{table}
+    \begin{tabular}{p{8em} p{20em}}
+        \toprule
+        \goal{Orchestration} & Show that the orchestration strategy helps transformation developers to find the cause for a transformation network not being able to find a consistent orchestration.\\\addlinespace[\innerrowspacing]
+        \question{Usefulness} & Is it easier to find the reasons for the network not being able to resolve a change with the proposed strategy than with other strategies? \\\addlinespace[\innerrowspacing]
+        \metric & \metrictext{Number of transformations to consider as a reason or comparable} \\
+        \bottomrule
+    \end{tabular}
+    \caption[Goals, questions and metrics for orchestration]{Goals, questions and metrics for orchestration evaluation}
+    \label{tab:correctness_evaluation:gqm_orchestration}
+\end{table}
+}
+
+% \gqm{Usefulness}{Show that the orchestration strategy helps transformation developers to find the cause for a transformation network not being able to find a consistent orchestration.}
+% {Is it easier to find the reasons for the network not being able to resolve a change with the proposed strategy than with other strategies?}
+% {Number of transformations to consider as a reason or comparable}
 
 
 
