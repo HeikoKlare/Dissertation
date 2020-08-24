@@ -1,0 +1,271 @@
+\section{Errors, Orchestration and Synchronization}
+
+\todo{Note that the Vitruv implementation has no CheckConsistency method but uses hippocratic transformations and aborts if no further changes occur by executing the transformations. Thus consistency relations are implicitly encoded in the consistency preservation rules by being their fixed points.}
+
+Wir betrachten Transformation in Reactions.
+Synchronisation durch mehrfache Ausführung der Transformationen in beide Richtungen.
+Orchestrierung: FIFO für Transformationen, an denen Modelle geändert wurden. Kein Abbruchkriterium, d.h. es kann zu Nicht-Terminierung kommen. Aber: nach Korrigieren der Fehler keine Nicht-Terminierung mehr (obwohl das nicht so sein muss, siehe Orch-Kapitel). Limitierung: Hier wenig Optionsauswahl, d.h. in den meisten Fällen entscheiden sich die Transformationen für ein Element und habe keine Auswahl.
+
+\todo{Erkennntis uas Iterationen: Solange wir nur einen Baum von Relationen haben, gibt es keine Fehler auf Modularisierungsebene (keine Inkompatibilitäten), diese kommen erst bei Zyklus hinzu (allerdings schon bei internem Zyklus durch Unidirektionalität?). D.h. wie schon voher angegeben sind Inkompatibilitäten per Konstruktion vermieden, wenn wir nur einen Baum von Relationen haben.
+Falls wir keinen Baum garantieren können: In this case, the consistency specifications must be revised whenever non-termination or non-deterministic termination of consistency preservation is observed (see \autoref{fig:correctness:categorization})}
+
+Case study in which we identified errors when combining independently developed transformations and check whether the classification is correct. We correct the mistakes according to the categorization and especially applied the patterns for making the transformation synchronizing to find whether that solves the problem of transformations not being correct in the context of a network. Additionally, we want to find how often specific types of errors occurs to have an indicator for their severity and how relevant the errors we solve by our synchronization pattern are.
+
+\subsection{Goals and Methodology}
+
+\begin{table}
+    \renewcommand{\arraystretch}{1.4}
+    \rowcolors{0}{gray!15}{white}
+    \begin{tabular}{p{8em} p{20em}}
+        \toprule
+        \rowcolor{gray!30}
+        \goal{Categorization} & 
+            Show that the %relations between mistakes, faults and failures in the categorization for transformation network errors are correct. 
+            categorization of mistakes, faults and failures covers all relevant cases and identify relevance of the individual mistake types. \\
+        \question{Completeness} & 
+            \questiontext{Can all occurring failures be categorized according to the categorization?}\\
+        \metric & 
+            \metrictext{Identified failures ratio: Ration between number of occured failures and classified failues} \\
+        \question{Correctness} & 
+            \questiontext{Are identified failures caused by mistakes they are related to according to the classification?} \\
+        \metric & 
+            \metrictext{Resolved failures ratio: Ration of resolved failures to total failures}\\
+        \question{Relevance} & 
+            \questiontext{How relevant are specific types of mistakes, how often do they occur at all?}\\
+        \metric & 
+            \metrictext{Number of occurences of each type of mistake in relation to number of all mistakes occurences}\\
+        \midrule
+        %
+    \end{tabular}
+    \begin{tabular}{p{8em} p{20em}}
+        \rowcolor{gray!30}
+        \goal{Orchestration} & 
+            Find out how relevant undecidability of the orchestration problem is in practice.\\
+        \rowcolors{1}{gray!15}{white}
+        \question{Relevance} & 
+            \questiontext{How often does an algorithm for orchestration fail due to the orchestration problem?} \\
+        \metric & 
+            \metrictext{Ratio of number of algorithm failures due to orchestration problem to all failures} \\
+        \bottomrule
+    \end{tabular}
+    \caption[Goals, questions and metrics for categorization and orchestration]{Goals, questions and metrics for categorization and orchestration evaluation}
+    \label{tab:correctness_evaluation:gqm_categorization}
+\end{table}
+
+Orchestration is also relevant for categorization:
+We have discussed that the orchestration problem can always lead to any kind of distinguished failure, thus making it hard to distinguish whether an actual mistakes by a developer is present or whether the algorithm is simply not able to find a consistent orchestration.
+The evaluation shows that, at least in the considered scenarios, the orchestration problem is not that relevant in practice.
+
+% \gqm{Categorization}{Show that the relations between mistakes, faults and failures in the categorization for transformation network errors are correct.}
+% {Completeness: Can all occuring failes be classified according to the classification?}
+% {Identified failures ratio: Ration between number of occured failures and classified failues}
+% \qm{Correctness: Are identified failures caused by mistakes they are related to according to the classification?}
+% {Resolved failures ratio: Ration of resolved failures to total failures}
+% \qm{Relevance: How relevant are specific types of mistakes, how often do they occur at all?}
+% {Number of occurences of each type of mistake in relation to number of all mistakes occurences}
+
+% \gqm{Synchronization}{Show that the approach for matching elements avoids failures due to \leveltransformation level mistakes by construction.}
+% {Correctness: Does the application of synchronization techniques lead to correct synchronizing transformations?}
+% {Ratio of changes that are propagated correctly after applying the techniques to those that are not propagated correctly}
+% \qm{Relevance: Does the application of synchronization techniques resolve any incorrectnesses?}
+% {Ratio of changes that are propagated correctly after applying the techniques to those that were propagated correctly before}
+
+% \gqm{Applicability}{The techniques can be applied independently to single transformations}
+% {Are there cases in which information about other transformations are necessary to solve issues?}
+% {Ratio of number of fixes that require information about other transformation to total number of fixes with user interactions\\
+% Ratio of number of fixes that require information about other transformation to total number of fixes without user interactions}
+
+\begin{table}
+    \renewcommand{\arraystretch}{1.4}
+    \rowcolors{0}{gray!15}{white}
+    \begin{tabular}{p{8em} p{20em}}
+        \toprule
+        \rowcolor{gray!30}
+        \goal{Synchronization} & 
+            Show that the approach for matching elements avoids failures due to \leveltransformation level mistakes by construction. \\
+        \question{Correctness} & 
+            \questiontext{In how many cases does the application of the approach lead to correct synchronizing transformations?} \\
+        \metric & 
+            \metrictext{Ratio of changes that are propagated correctly after applying the approach to those that are not propagated correctly} \\
+        \question{Applicability} & 
+            \questiontext{In how many cases can the approach (not) be applied?} \\
+        \metric & 
+            \metrictext{Ratio of faults at \leveltransformation level that can be resolved by the approach to all faults at that level}\\
+        \bottomrule
+    \end{tabular}
+    \caption[Goals, questions and metrics for synchronization]{Goals, questions and metrics for synchronization evaluation}
+    \label{tab:correctness_evaluation:gqm_synchronization}
+\end{table}
+
+\begin{copiedFrom}{ICMT}
+
+We have systematically constructed the categorization in \autoref{chap:errors} from the potentials for mistakes that are induced by the different specification levels. % we identified (\autoref{sec:process:levels}).
+To further improve evidence regarding completeness and correctness of %the identified mistakes, resulting failures and their dependencies, we validate that 
+our categorization, we validate it in a case study as our contribution~\ref{contrib:evaluation}.
+The goal is 
+ to show completeness of the identified mistakes and failures, and
+ to investigate correctness of the dependencies between them. % mistakes and resulting failures. %,
+ %and to show appropriateness of the strategies for avoiding mistakes presented in \autoref{sec:avoiding}.
+
+% Evaluation goals:
+% \begin{itemize}
+%     \item Completeness of identified mistakes/failures
+%     \item Correctness of dependencies between failure types and mistakes
+%     \item Appropriateness of matching strategy for avoiding operationalization issues
+% \end{itemize}
+
+\subsubsection*{Process}
+We executed the test cases on a transformation network, which we created as a combination of the existing transformations.
+They were executed until no further changes occurred.
+We then classified the occurring failures according to \autoref{chap:errors:failures}.
+Based on our categorization in \autoref{chap:errors:categorization}, we traced back the failures to mistakes and fixed them according to the strategies discussed in \autoref{chap:prevention}.
+Failures can be hidden by others: 
+For example, an incompatible constraint may produce no failure because the scenarios fail earlier due to missing element matching or vice versa.
+For this reason, we re-executed the process until no further failures occurred.
+Finally, we applied the transformations to the more complex Media Store construction case to validate that all mistakes were fixed.
+
+\subsubsection*{Measurements}
+We measured the number of failures in each of the iterations.
+We relate the number of failures that we were able to categorize to the total number of recognized failures ($\mathit{identifiedFailureRatio} = \frac{\mathit{\#\ of\ categorized\ failures}}{\mathit{\#\ of\ total\ failures}}$) to show completeness of the identified failure types.
+This metric is rather weak, because it does not identify whether a failure is categorized correctly.
+We therefore relate the total number of resolved failures, which are those that do not occur in the subsequent iteration anymore, to the number of detected failures ($\mathit{resolvedFailureRatio} = \frac{\mathit{\#\ of\ resolved\ failures}}{\mathit{\#\ of\ total\ failures}}$).
+If a failure disappears after fixing the causing mistakes, the classification of the failure and also the relation to the causing mistake was correct. %, which is why this metric gives an indicator for the completeness of the identified failure types.
+Therefore, this metric gives an indicator for both completeness of the identified failure types and the relation of mistakes to failures.
+
+%To measure correctness of the dependencies between mistakes and failures, we relate the resolved mistakes to the detected failures ($\frac{\text{# of resolved mistakes}}{\text{# of detected failures}}$.
+%If the number of resolved mistakes is lower than the number of failures, actually failures remain after fixing an mistake, which indicated that some relation between mistake and failure type was wrong.
+
+%\todoHeiko{Wieder reinnehmen: Validierung der Strategien zum Element-Matching?}
+%To validate the appropriateness of our strategy for avoiding mistakes due to missing element matching, we count the kinds of matching techniques according to \autoref{sec:avoiding:matching} that were used.
+
+
+% This, on the one hand, 
+
+% \begin{itemize}
+%     \item Process
+%     \begin{enumerate}
+%         \item Combined execution of consistency preservation specifications on evolution scenarios
+%         \item Identification of failures during execution / in resulting models
+%         \item Fixing mistakes that lead to those failures (based on categorization in \autoref{sec:classification:categorization}
+%         \item Re-execute scenario
+%     \end{enumerate}
+%     \item Important: the number of failures can increase or stagnate after an iteration, because although a failure disappears due to a fixed mistake, another failure can occur because of an mistake that was hidden by the previous one (esp. on different specification levels). E.g. specifications were incompatible ("Impl"-suffix), leading to a loop, so we fixed that and afterwards a multiple instantiation problems occurs, because now objects are mapped to the same object in another model, leading to a matching problem.
+%     \item Interpretation
+%     \begin{itemize}
+%         \item What we measure is the number of failures regarding a specific type, so we relate all metrics to the number of identified failures
+%         \item Completeness of the failure catalog: If failure cannot be categorized with our catalog in \autoref{sec:classification}, our identified failure types are incomplete: Metric: $\frac{\# of categorized failures}{\# of total failures}$
+%         \item The previous metric is rather weak, because categorizing a failure does not mean that it is categorized correctly, so we try to fix the causing mistake and measure the success
+%         \item If failure disappears after fixing mistake, the identified relation between mistake and failure is correct and the failure identification is correct; if failure does not disappear after fixing mistake, either the relation is only incorrect, the failure identification is incorrect or an actual mistake is missing: General failure-/mistake-independent Metric: $\frac{\# of resolved mistakes}{\# of detected failures}$
+%         \item To see whether a certain relation between failure and mistake is wrong, for each failure/mistake: $\frac{\# of resolved mistakes of type}{\# of total failures of type}$; if this metrics is < 1, the failure is caused by a different than the identified mistake
+%         \item Problem: several failures caused by one mistake
+%     \end{itemize}
+% \end{itemize}
+
+
+\subsection{Prototypical Implementation}
+% Context of the implementation, actual implementations
+
+
+\subsection{Case Study}
+The evaluation is based on a case study developed for the Ecore-based \textsc{Vitruvius} framework~\cite{kramer2013b} for consistent system development, which is available on GitHub~\cite{vitruvFrameworkGithub}.
+\textsc{Vitruvius} uses incremental, delta-based consistency preservation. 
+It records atomic changes in models and executes consistency preservation specifications, according to \autoref{def:consistency_preservation_specification}, to inductively preserve consistency.
+Those specifications are written in the Reactions language~\cite{klare2016b}, which is a language for unidirectional transformations at the operationalization level.
+
+The case study is based on consistency between UML class models, instances of the \ac{PCM}, which is an architecture description language for performance prediction~\cite{reussner2016b}, and Java code.
+For these metamodels, different persons have independently developed transformations~\cite{kramer2017a}, especially without knowing about the other transformations with which they shall be combined.
+This made the specifications prone to mistakes at the modularization and operationalization level.
+The specifications are available on GitHub~\cite{vitruvCBSEGithub}.
+For the evaluation, we employ the pairs of unidirectional specifications between \ac{PCM} and UML, as well as between UML and Java.
+Although this induces only two bidirectional specifications, we have four transformations since both directions of the transformations have been specified independently.
+They have to interoperate correctly, may also contradict, and need to perform element matching.
+% In consequence, this is not a drawback or threat in contrast to a case study of at least three independently developed \acp{BX} that are prone to interoperability issues (apart from the fact that it is hard to find such a case study).
+Thus, our scenario is prone to the same mistakes as a scenario with three or more \acp{BX}.
+
+The transformations realize rather trivial constraints between UML and Java.
+Most elements are mapped one-to-one, whereas multi-valued parameters and associations are mapped to collection types in Java.
+The relations between \ac{PCM} and UML were proposed by \textcite{langhammer2015a}.
+Interfaces are equally represented, \ac{PCM} components and data types are mapped to classes in UML.
+%Interfaces and data types are mapped to their counterparts in the different metamodels.
+\ac{PCM} components contain \acp{SEFF}, which are an abstraction of their behavior specification used for performance prediction. 
+Those \acp{SEFF} are mapped to methods in UML and Java.
+In total, the transformations between \ac{PCM} and UML react to 57 change types in \ac{PCM} and 65 change types in UML, and the transformations between UML and Java react to 66 change types in UML and to 48 change types in Java to restore consistency in the other model.
+%consist of reactions to 57 change events in \ac{PCM} that restore consistency to UML, reactions to 67 change types in UML that restore consistency in \ac{PCM}, reactions to 55 change types in UML that restore consistency in Java, and reactions to 48 change types in Java that restore consistency in UML.
+
+In total, we have used 187 test cases that perform different kinds of relevant fine-grained changes in instances of all metamodels, such as insertions, modifications and deletions of all types of elements that have to be kept consistent.
+Additionally, we have simulated the construction of the Media Store system~\cite{strittmatter2016a}, which is a sophisticated case study system for the \ac{PCM}.
+This system is available as a \ac{PCM} model as well as Java code.
+
+% \begin{itemize}
+%     \item Used environment: Implementation in the Ecore-based Vitruvius framework \cite{kramer2013b}~\footnote{\url{http://vitruv.tools}} for consistent system development
+%     \begin{itemize}
+%         \item incremental, inductive, delta-based consistency preservation: recording atomic changes, executing consistency preservation specifications for them, as defined in \autoref{def:consistency_preservation_specification}
+%         \item specifications in the Reactions language (definition on operationalization level)
+%     \end{itemize}
+%     %\item Application strategy: batch, Depth-first, finally irrelevant, as same mistakes can occur with any strategy
+%     \item Metamodels and consistency preservation specifications:
+%     \begin{itemize}
+%         \item UML, PCM and Java
+%         \item Existing specifications: UML $\leftrightarrow$ Java, PCM $\leftrightarrow$ UML, PCM $\leftrightarrow$ Java
+%         \item Independently developed, without knowledge about combined execution $\rightarrow$ black-box development
+%         \item So during combined execution mistakes on modularization and operationalization level possible
+%     \end{itemize}
+%     \item Evolution scenarios:
+%     \begin{itemize}
+%         \item Test suite of \FIXME tests each making different kinds of small changes
+%         \item Simulation of construction of example system: Media Store \cite{strittmatter2016a, reussner2016b}, a case study for PCM with existing specifications in PCM and Java
+%     \end{itemize}
+% \end{itemize}
+
+
+
+\subsection{Results}
+
+We had to perform two iterations of the previously described process.
+In the first iteration, we faced failures due to mistakes at the operationalization level, whereas in the second iteration only failures due to remaining mistakes at the modularization level occurred.
+We have tagged the states before and after the evaluation process in the GitHub repository~\cite{vitruvCBSEGithub}.
+
+%\compactsubsection{Classification}
+
+In the first iteration, all 187 tests failed.
+The reason was that all transformations assumed that new elements are only created by the user or the transformation itself.
+In consequence, we observed multiple instantiations and insertions in 187 cases, which we could trace back to 35 missing matchings of elements in the transformations.
+After adding appropriate matchings, all these failures disappeared in a second iteration, so for the first iteration $\mathit{identifiedFailureRatio = resolvedFailureRatio = 1}$, since all detected failures were identified and resolved.
+
+In the second iteration, 5 new failures occurred.
+Three of them were diverging loops, which were caused by a namespace repeatedly prefixed to the name of classes, interfaces and enumerations in Java.
+The causing mistakes were incompatible constraints: The Java model contains the fully qualified name of a class, whereas the UML model only contains the simple name, which was correctly propagated from UML to Java, but the namespace prefix was not removed in the opposite direction.
+The two other failures were alternating loops, which were caused by alternations of element visibilities.
+For methods and constructors, the visibilities were repeatedly changed due to an inconsistent mapping of visibilities from UML to Java and vice versa.
+%After fixing the mistakes, two failures remained.
+%Nevertheless, the reason for that were technical issues with the transformation engine due to its propagation of atomic changes.
+%Since the original failures also disappeared in this case, we again have $identifiedFailureRatio = resolvedFailureRatio = 1$, since all detected failures were identified and resolved.
+After fixing those mistakes, no failures remained.
+So we again have $\mathit{identifiedFailureRatio = resolvedFailureRatio = 1}$, since all detected failures were identified and resolved. 
+
+Summarizing, we were able to classify and resolve all failures in the case study and trace them back to mistakes with our classification in \autoref{chap:errors}.
+This demonstrates the applicability of our categorization and is an indicator for the completeness and correctness of our catalog.
+Most important, we did not find any failures that were caused by mistakes at a different specification level than we expected.
+To further validate the catalog, we should apply it to further case studies.
+It is however hard to find existing, independently developed transformations between at least three metamodels.
+They would have to be developed in a schema similar to the one proposed by \textcite{kramer2016c}.
+%\todoHeiko{Irgendwie noch sagen, dass wegen das wegen dem hohen Aufwand kein Threat to Validity ist? Oder kommt das nicht gut an?}
+%\todoHeiko{Generell mehr Threats to Validity diskutieren?}
+
+
+%\compactsubsection{Element Matching}
+
+%In \autoref{sec:avoiding:matching}, we presented three levels of matching equal elements across different transformation paths.
+%We used our case study to investigate, which of those levels are necessary in a practical scenario.
+
+\end{copiedFrom} % ICMT
+
+
+\subsection{Discussion}
+
+
+\subsection{Threats to Validity}
+- The transformation were not constructed synchronizing, thus obviously many synchronization errors occur. If the scenario is foreseen, there may be much less errors at this level and more at the others -> need to perform further evaluation were developer know about necessity to use transformations in a network to properly construct them and then see how often that still fails. (future work)
+
+
+\subsection{Limitations}
