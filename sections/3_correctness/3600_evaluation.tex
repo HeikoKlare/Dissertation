@@ -410,44 +410,59 @@ The results of the scenario classification as compatible or not by the implement
 
 
 \subsubsection{Correctness}
-As discussed before, the correctness of our approach in terms of conservative behavior is proven for the formal approach by construction.
-Since the operationalized approach is based on that formalization, correctness is also given by construction provided that the following requirements are fulfilled:
-\begin{enumerate}
-    \item All relevant QVT-R relations are considered, i.e., all QVT-R relations are represented in the property graph to be considered as consistency relations to be checked.
-    \item Consistency rules in QVT-R are defined using variables, so all constructs referring to these variable have to be considered. This especially means that all  template expressions need to be considered for the property graph construction, namely property template items, preconditions and invariants.
-\end{enumerate}
 
-We ensured that all these relevant elements are considered by construction of the approach discussed in \autoref{chap:prevention:compatibility} and \autoref{chap:prevention:compatibility:redundancies}.
-However, the results of the case study further validate that we did not miss any relevant parts of QVT-R relations.
-In fact, the results summarized in \autoref{tab:correctness_evaluation:compatibility_results} show that we have a precision of 1, thus having no incompatible scenarios classified as compatible by error:
+\mnote{Requirements for correctness by construction}
+We have already discussed before that correctness in terms of operating conservative is proven for the formal approach.
+Since the practical approach is derived from that formal approach, correctness is also given by construction as long as the following requirements are fulfilled:
+\begin{properenumerate}
+    \item All relevant \gls{QVTR} relations are considered as consistency relations to be checked, i.e., all \gls{QVTR} relations are represented in the property graph.
+    \item All constructs referring to expressions in \gls{QVTR} relations have to be considered. \gls{QVTR} relations are defined using variables, so all constructs referring to these variable have to be considered. In particular, all template expressions need to be considered for the construction of the property graph, namely property template items, preconditions and invariants.
+\end{properenumerate}
+By construction of the approach presented in \autoref{chap:compatibility:practical_approach}, we ensured that all these relevant elements are considered.
+Additionally, the results of the case study further validate that we did not miss any relevant parts of \gls{QVTR} relations.
 
+\mnote{Metric evaluation shows correctness}
+The results depicted in \autoref{tab:correctness_evaluation:compatibility_results} show that the implementation did not yield any false positives.
+Thus, the implementation operates conservatively as intended, not identifying consistency relations as compatible although they are not.
+This results in a precision value of $1$:
 \begin{align*}
     &
     Precision = \frac{\mathtext{true positives}}{\mathtext{true positives + false positives}} = \frac{12}{12+0} = 1
 \end{align*}
 
+\mnote{Answer to evaluation question}
+On the one hand, this indicates that the practical approach actually conforms to the formal approach thus that the correctness proof applies as well.
+On the other hand, this indicates that the implementation is correct and does not miss any relevant \gls{QVTR} constructs.
+If this was the case, constraints could have been missed, which could have resulted in identifying consistency relations as compatible although they are not.
+Thus, as an answer to \evalquestionref{eq:compatibility:correctness}, the results indicate that we can expect the analysis to operate correctly.
+
 
 \subsubsection{Applicability}
 
-Applicability of the presented approach depends on its degree of conservativeness.
-If it is not able to prove compatibility of compatible transformation networks in too many cases, applicability is reduced.
-In general, the conservative behavior results especially from two reasons:
-\begin{enumerate}
-    \item \autoref{def:leftequalredundancy} for left-equal redundancy, which is used to prove compatibility of a network, may be a too strong requirement for identifying compatibility-preserving consistency relations.
-    \item Consistency relations as defined in \autoref{def:consistencyrelation} are extensional specifications and thus usually enumerate infinite sets of elements, which are impossible to compare programmatically.
-    For that reason, our operationalized approach relies on intensional specifications, which describe how consistent pairs of elements can be derived.
-    These specifications are written in OCL. 
-    However, OCL in general is undecidable, because it can be transformed into first-order logic~\cite{beckert2002ocltranslation}.
-\end{enumerate}
-%%
-%% Discussion of OCL analyzability
-%%
-Especially formulae that contain many quantifiers are hard to analyze.
-For that reason, the number of variables used in a consistency relation is crucial, as these variables are translated to existentially quantified formulae.
-Although not all available OCL constructs might be necessary to describe relevant consistency relations, constructs involving operations on sets and strings are problematic.
-Operation collections are transferred to quantified formulae, which are hard to analyze.
-Reasoning about strings is problematic, because some OCL operations like \texttt{toUpper} and \texttt{toLower} cannot be easily transferred to state-of-the-art SMT solvers like Z3 and thus cannot be considered for detecting redundancy.
-Furthermore, SMT solvers use heuristics, so it not possible to formally evaluate which kinds of relations can be analyzed.
+\mnote{Reasons for conservative behavior}
+We have discussed that applicability of the approach especially depends on how often it fails in terms of not being able to prove compatibility, although the given relations are actually consistent.
+In particular, conservative behavior of the approach can occur for two reasons:
+\begin{properdescription}
+    \item[Redundancy Notion:] Compatibility of consistency relations is proven by identifying relations that follow the definition of left-equal redundancy, as introduced in \autoref{def:leftequalredundancy}. Since this redundancy notion is not proven to be the weakest one that is compatibility-preserving, it may be a too strong requirement for identifying compatibility-preserving consistency relations.
+    \item[Redundancy Undecidability:] \autoref{def:consistencyrelation} for consistency relations relies on an extension specification of consistency, which enumerates usually infinite sets of elements.
+    Since such sets cannot be compared programmatically, our practical approach relies on intensional specifications in \gls{OCL} as used by \gls{QVTR}, which describe how consistent element pairs can be derived.
+    Consistency relations as defined in \autoref{def:consistencyrelation} are extensional specifications and thus usually enumerate infinite sets of elements, which are impossible to compare programmatically.
+    OCL is, however, in general undecidable, because it can be transformed into first-order logic~\cite{beckert2002ocltranslation}.
+\end{properdescription}
+
+\mnote{OCL limitations}
+In particular, the number of quantifiers within a formula influences decidability.
+Since variables in consistency relations are translated to existentially quantified formulae, the number of variables in a consistency relation is crucial for deciding its satisfiability.
+Not all available \gls{OCL} constructs may be necessary to describe relevant consistency relations, still constructs involving operations on sets and strings are especially problematic, because operation on collections are transformed into quantified formulae and string provide problematic \gls{OCL} operations.
+For example, \texttt{toUpper} and \texttt{toLower}, which we have also used in our running example, cannot be easily transformed into formulae for state-of-the-art \gls{SMT} solvers like Z3 and thus cannot be considered for detecting redundancies.
+Additionally, \gls{SMT} solvers use heuristics, so we cannot even systematically evaluate which kinds of relations can be analyzed.
+
+% Especially formulae that contain many quantifiers are hard to analyze.
+% For that reason, the number of variables used in a consistency relation is crucial, as these variables are translated to existentially quantified formulae.
+% Although not all available OCL constructs might be necessary to describe relevant consistency relations, constructs involving operations on sets and strings are problematic.
+% Operation collections are transferred to quantified formulae, which are hard to analyze.
+% Reasoning about strings is problematic, because some OCL operations like \texttt{toUpper} and \texttt{toLower} cannot be easily transferred to state-of-the-art SMT solvers like Z3 and thus cannot be considered for detecting redundancy.
+% Furthermore, SMT solvers use heuristics, so it not possible to formally evaluate which kinds of relations can be analyzed.
 
 %\begin{itemize}
     %\item Relations are usually infinite sets of elements, which are impossible to compare programmatically. For that reason, the operationalized approach uses intensional specifications of element instances and consistency relations (written in OCL). In general, it is impossible to ensure that an OCL expression matches a specification -- undecidability: OCL can be transformed to first-order logic~\cite{beckert2002translating}.
@@ -457,11 +472,9 @@ Furthermore, SMT solvers use heuristics, so it not possible to formally evaluate
     %\item Number of variables is relevant, because they are existentially quantified, so more 
 %\end{itemize}
 
-%%
-%% Recall results
-%%
-Applying the prototypical implementation of our approach to the scenarios introduced in \autoref{sec:evaluation:methodology} led to the result that twelve of the 15 compatible transformation networks were correctly classified as compatible, whereas three were not.
-This leads to a recall value of 80\%.
+\mnote{Metric evaluation show high recall}
+According to the results in \autoref{tab:correctness_evaluation:compatibility_results} from applying our prototypical implementation to the scenarios introduced in \autoref{tab:correctness_evaluation:compatibility_scenarios}, consistency relations were correctly classified as compatible in twelve out of the 15 scenarios, whereas the implementation was not able to prove compatibility in the remaining three scenarios, thus delivering three false negatives.
+This leads to a recall value of \SI{80}{\percent}.
 \begin{align*}
     &
     Recall = \frac{\mathtext{true positives}}{\mathtext{true positives + false negatives}} = \frac{12}{12+3} = 0.8
@@ -478,23 +491,41 @@ This leads to a recall value of 80\%.
 %     \item In Scenario 18, transitive inclusion of sets was defined, which the solver was not able to check properly
 %     \item Scenario 19 is comparable to scenario 18 but considers role names of classes with equivalent identifiers, which the solver was also not able to check properly.
 % \end{itemize}
-The three scenarios that were not classified, although they are actually compatible, are Scenarios 8, 18 and 19 from \autoref{tab:scenarios}.
-In all cases, the SMT solver returned \emph{unknown}, although it should have returned \emph{unsatisfiable}.
-In consequence, in each case an actually consistent consistency relation was not removed, thus the set of relations was not considered compatible although it is.
-More precisely, in scenario 8, a precondition ensures that an element is included in the intersection of two set literals, which the solver was not able to check properly.
-Scenarios 18 and 19 were problematic due to comparable reasons.
-While in Scenario 18 the transitive inclusion of sets was defined, Scenario 19 considers role names of classes with equivalent identifiers, which both the solver was not able to check properly.
-All observed false negatives were due to reasons of undecidability of the translation of OCL constructs to first-order logic.
+This is a first indicator for high applicability of the approach, as it was able to prove compatibility in most of the cases in which the relations were actually compatible.
 
-%%
-%% Summary: Limitations arise from SMT solver
-%%
-To summarize, we found that basic operations on primitive data types, even with non-trivial constraints involving integer equations and string operations, were treated correctly.
-More complex operations and structures requiring many quantifiers led to unprovability by the SMT solver, especially concerning collection operations and role names.
-%In consequence, the reasons for conservative behavior in all cases were limitations of the chosen SMT solver approach, rather than the concept of either the formalized or the operationalized approach.
-Thus, the approach is especially applicable for consistency relations concerning attributes and primitive types.
-However, this limitation does only concern the chosen SMT solver approach, but neither the concept of operationalization nor of the formal framework behind it.
-We did especially not find a scenario, in which our definition of left-equal redundancy was too strict for proving compatibility.
+\mnote{Reasons for false negatives}
+The Scenarios $8$, $18$ and $19$ introduced in \autoref{tab:correctness_evaluation:compatibility_scenarios} were not identified as compatible although they actually are.
+In all cases, the \gls{SMT} solver should have returned \emph{unsatisfiable} although it should have returned \emph{unknown}.
+Thus, in each scenario an actually redundant consistency relation was not removed, thus not identifying the relations as compatible.
+In detail, in Scenario $8$, a precondition ensures that an element is included in the intersection of two set literals, but the solver was not able to check that properly.
+In Scenario $18$, the transitive inclusion of sets was defined, and in Scenario $19$, roles names of classes with equivalent identifiers were considered, which the solver was both not able to check properly as well.
+In summary, all observed false negatives were caused by undecidability of satisfiability of the first-order logic formulae that were derived from the \gls{OCL} constructs.
+
+% The three scenarios that were not classified, although they are actually compatible, are Scenarios 8, 18 and 19 from \autoref{tab:scenarios}.
+% In all cases, the SMT solver returned \emph{unknown}, although it should have returned \emph{unsatisfiable}.
+% In consequence, in each case an actually consistent consistency relation was not removed, thus the set of relations was not considered compatible although it is.
+% More precisely, in scenario 8, a precondition ensures that an element is included in the intersection of two set literals, which the solver was not able to check properly.
+% Scenarios 18 and 19 were problematic due to comparable reasons.
+% While in Scenario 18 the transitive inclusion of sets was defined, Scenario 19 considers role names of classes with equivalent identifiers, which both the solver was not able to check properly.
+% All observed false negatives were due to reasons of undecidability of the translation of OCL constructs to first-order logic.
+
+\mnote{Answer to evaluation question}
+In conclusion, the evaluation has shown that basic operations on primitive data types, even with non-trivial constraints involving integer equations and string operations, were treated correctly.
+This led to a success rate of \SI{80}{\percent}.
+As an answer to \evalquestionref{eq:compatibility:applicability}, the approach was unable to prove compatibility in only \SI{20}{\percent} of the cases, in which more complex operations and structures requiring many quantifiers were involved and led to unprovability by the used \gls{SMT} solver.
+Most importantly, however, this limitation does only concern the chosen \gls{SMT} solver approach, but neither the general concept of the formal framework and approach, nor of the practical realization itself.
+In particular, we did not find a scenario in which our redundancy notion was too strict for proving compatibility.
+Using a different \gls{SMT} solver or, more generally, even a different approach to validate redundancy of consistency relations can even improve the applicability results.
+
+% %%
+% %% Summary: Limitations arise from SMT solver
+% %%
+% To summarize, we found that basic operations on primitive data types, even with non-trivial constraints involving integer equations and string operations, were treated correctly.
+% More complex operations and structures requiring many quantifiers led to unprovability by the SMT solver, especially concerning collection operations and role names.
+% %In consequence, the reasons for conservative behavior in all cases were limitations of the chosen SMT solver approach, rather than the concept of either the formalized or the operationalized approach.
+% Thus, the approach is especially applicable for consistency relations concerning attributes and primitive types.
+% However, this limitation does only concern the chosen SMT solver approach, but neither the concept of operationalization nor of the formal framework behind it.
+% We did especially not find a scenario, in which our definition of left-equal redundancy was too strict for proving compatibility.
 
 
 \subsection{Discussion}
@@ -625,6 +656,8 @@ Additional:
 Although compatibility ensures that for any model element with restrained consistency a consistent model tuple can be found, it does not mean that consistency preservation rules find that model tuple. It only improved the ability to do so.
 
 Unknown how good the approach can be integrated into a development process, continuous execution etc.
+
+Correctness only shown for constructs used in study. If there are further constructs that have not been considered in neither case study nor implementation but are relevant, the results do not generalize.
 
 % \iffalse
 % Functional correctness:
