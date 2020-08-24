@@ -64,21 +64,30 @@ We define goals that we want to achieve with our evaluation, derive questions th
 %     \item Orchestration (Usefulness): Regarding orchestration, we have proven the proposed strategy to be correct. We, however, provide a scenario-based discussion to evaluate the usefulness of the strategy to find the cause for a network not being able to resolve a change.
 % \end{itemize}
 
-
-\todo{Vorgeschlagene Struktur jedes Kapitels:
-1. Goals and Methodology
-(2. Case Study)
-3. (Prototypical) Implementation
-4. Results
-5. Discussion mit Threads
-- Limitations dann einmal allgemein diskutieren, nicht pro Thema
-}
+% \todo{Vorgeschlagene Struktur jedes Kapitels:
+% 1. Goals and Methodology
+% (2. Case Study)
+% 3. (Prototypical) Implementation
+% 4. Results
+% 5. Discussion mit Threads
+% - Limitations dann einmal allgemein diskutieren, nicht pro Thema
+% }
 
 
 \section{Compatibility}
 
-Positive: Compatibility is proven
-Negative: Non-compatibility may be proven (or not)
+In \autoref{chap:compatibility}, we have presented a formal notion of compatibility, an formal approach to prove it, and a practical realization of that approach for consistency relations defined in \gls{QVTR}.
+The compatibility notion is well-defined based on our formalization of transformation networks and a correctness notion for them.
+The formal approach to identify consistency relations of a transformation network to be compatible is based on the insights that specific consistency relation trees are inherently compatible and that the addition and removal of consistency relations fulfilling a specific notion of redundancy preserve compatibility, thus removing redundant relations until a tree remains proves compatibility.
+We have proven correctness of that formal approach by \autoref{theorem:redundancycompatibility}, \autoref{theorem:treecompatibility} and \autoref{corollary:transitiveredundancycompatibility}, such that we do not need to further evaluate its correctness.
+We thus focus on correctness of the practical realization of the approach, as well as applicability of the approach.
+The presented evaluation is based on the evaluation that we presented in \owncite{klare2020compatibility-report}.
+
+
+\subsection{Goals and Methodology}
+
+A tool for proving compatibility could be easily integrated into the process of developing a transformation network in order to assist transformation developers, as it operates fully automated, thus not introducing further developer effort, and improves the ability of the transformation network to find consistent models after changes.
+Thus, the correctness and the applicability of the approach are of special importance.
 
 {
 \newcommand{\innerrowspacing}{0.3em}
@@ -88,16 +97,52 @@ Negative: Non-compatibility may be proven (or not)
         \toprule
         \goal{Compatibility} & Show that the analysis can be used by transformation developers to find incompatibilities in consistency relations of a transformation network. \\\addlinespace[\innerrowspacing]
         \question{Correctness} & Is compatibility always given if the analysis finds it? \\\addlinespace[\innerrowspacing]
-        \metric & \metrictext{Precision: Ratio of true positives to true positives + false positives (false positives have to be 0)} \\\addlinespace[\outerrowspacing]
+        \metric & \metrictext{Precision: Ratio of true positives to true and false positives} \\\addlinespace[\outerrowspacing]
         \question{Applicability%Usefuleness/Conservativeness
-        } & How often does the analysis not prove compatibility although it is given? (how conservative is it?) \\\addlinespace[\innerrowspacing]
-        \metric & \metrictext{Recall: Ratio of true positives to true positives + false negatives (false negatives indicate conservative case)}\\
+        } & How often does the analysis not prove compatibility although it is given? \\\addlinespace[\innerrowspacing]
+        \metric & \metrictext{Recall: Ratio of true positives to true positives and false negatives}\\
         \bottomrule
     \end{tabular}
     \caption[Goals, questions and metrics for compatibility]{Goals, questions and metrics for compatibility evaluation}
     \label{tab:correctness_evaluation:gqm_compatibility}
 \end{table}
 }
+
+\mnote{Empirical evaluation in case study}
+In the subsequently presented empirical evaluation in terms of a case study, we apply the practical realization of the approach to several sets of consistency relations, which are designed to be compatible or not, according to \autoref{def:compatibility}.
+We then apply the algorithm to prove compatibility to these consistency relation sets and analyze whether it properly identifies them to be compatible or not.
+We denote the cases in which the algorithm proves compatibility as \emph{positives} and the ones in which is not able to prove compatibility as \emph{negatives}.
+Since the algorithm operates conservatively, a negative result does not mean that incompatibility is proven, but only that compatibility could not be proven.
+The goal of that evaluation together with the answered questions and evaluated metrics are summarized in \autoref{tab:correctness_evaluation:gqm_compatibility}.
+
+\mnote{Correctness evaluation}
+First, the application of the algorithm to multiple scenarios allows us to validate correctness of the practical realization of the approach.
+Correctness of our approach means that it is able to classify a given set of consistency relations as compatible or otherwise does not reveal a result.
+This especially means that it operates conservatively and does not classify a set of consistency relations as compatible although it is not.
+The algorithm is thus not allowed to produce false positives, which is why we consider the \emph{precision} metric:
+\begin{align*}
+    \formulaskip &
+    Precision = \frac{\mathtext{true positives}}{\mathtext{true positives + false positives}}
+\end{align*}
+This metric needs to be $1$, as otherwise the algorithm produces false positives and would thus, per definition, be incorrect.
+Thus, correctness of the algorithm directly correlates with that metric.
+Analyzing this metrics serves as an indicator that the mapping of our formal approach and the underlying formalism to the practical approach realization and the used \gls{QVTR} language is correct, and especially that it operates conservatively.
+
+\mnote{Applicability evaluation}
+Second, the application of the algorithm to multiple scenarios allows us to validate its applicability.
+The approach uses a fully automated algorithm, thus it does not require any inputs apart from the \gls{QVTR} relations to check.
+Applicability may thus be restricted if the algorithm operates too conservatively, i.e., if it often produces false negatives.
+In those cases, the algorithm operates indeed correctly, but if it is not able to prove compatibility in many cases in which it is actually given, applicability is reduced as the usefulness of the results for a transformation developer are limited.
+For that reason, we analyzed the \emph{recall} metric:
+\begin{align*}
+    &
+    Recall = \frac{\mathtext{true positives}}{\mathtext{true positives + false negatives}}
+\end{align*}
+The higher the number of false positives, the more consistency relations could not be identified as compatible by the algorithm although they actually are, thus reducing the usefulness of the algorithm.
+Applicability of the algorithm thus directly correlates with the recall metric.
+For that reason, we analyzed that metric and the reasons for the cases in which the the algorithm was not able to 
+prove compatibility, i.e., in which it produced false negatives.
+In particular, it is relevant whether those are conceptual issues of the formal approach, such as a too restricted notion of redundancy, or a limitation of the practical approach that may be fixed by a different implementation or a different realization approach.
 
 % \gqm{}{Show that the analysis can be used by transformation developers to find incompatibilities in consistency relations of a transformation network.}
 % {Correctness: Is compatibility always given if the analysis finds it?}
@@ -106,28 +151,8 @@ Negative: Non-compatibility may be proven (or not)
 % {Recall: Ratio of true positives to true positives + false negatives (false negatives indicate conservative case)}
 
 
-\begin{copiedFrom}{SoSym MPM4CPS}
-
-We have conducted a case study to evaluate correctness and applicability of our approach.
-The evaluation focuses on the appropriate operationalization of the formal approach, which is proven correct, and its practical applicability in terms of providing an appropriate level of conservativeness. This defines our contribution \ref{contrib:evaluation}.
-
-
-
-\subsection{Goals}
-
-\paragraph{Correctness}
-Correctness of our approach means that it is able to classify a given set of consistency relations as compatible or otherwise does not reveal a result.
-This especially means that it operates conservatively.
-The formal approach presented in \autoref{chap:formal:approach} is proven correct by \autoref{theorem:redundancycompatibility}, \autoref{theorem:treecompatibility} and \autoref{corollary:transitiveredundancycompatibility}, such that we do not need to further evaluate its correctness.
-For that reason, the correctness evaluation focuses on the operationalized approach presented in \autoref{chap:prevention:compatibility} and \autoref{chap:prevention:compatibility:redundancies}.
-We investigate whether the operationalized approach reveals expected results, indicating that the mapping of our formalism to QVT-R is correct, and especially that it operates conservatively.
-
-\paragraph{Applicability}
-Since the approach defines a fully automated algorithm, which does not require further input apart from the QVT-R relations to check, applicability may only be restricted by inadequate outputs, which are correct but not useful for the user.
-In consequence, we consider applicability of our approach especially in terms of the practicality regarding its degree of conservativeness.
-If the approach is not able to identify compatibility in too many cases, in which relations are actually compatible, applicability would be limited.
-For that reason, we aimed to identify in how many cases the approach is not able to prove compatibility although compatibility is given, and what the reasons for those results are.
-It is of special interest whether those are conceptual issues of the formal approach or a limitation of the operationalization that may be fixed by other realization approaches.
+% We have conducted a case study to evaluate correctness and applicability of our approach.
+% The evaluation focuses on the appropriate operationalization of the formal approach, which is proven correct, and its practical applicability in terms of providing an appropriate level of conservativeness. This defines our contribution \ref{contrib:evaluation}.
 
 % \begin{itemize}
 %     \item Correctness: Focused on operationalized approach, since formal approach is proven correct: Show that algorithm reveals expected results, which indicates that the mapping of the formalism to QVT-R is correct and conservative as expected and that the implementation is correct.
@@ -135,21 +160,159 @@ It is of special interest whether those are conceptual issues of the formal appr
 %     We will also consider the reasons for those non-results, i.e. whether it is a conceptual issue of the formal approach or a limitation of the operationalization.
 % \end{itemize}
 
-\subsection{Methodology}
-\label{sec:evaluation:methodology}
+%\subsection{Methodology}
+%\label{sec:evaluation:methodology}
 
-To empirically evaluate correctness and applicability of our approach, we developed a prototypical implementation and applied it to exemplary case studies.
-We give an overview of that prototype in the subsequent subsection.
-\autoref{tab:scenarios} summarizes the case studies to which we applied the approach.
-Each of those scenarios consists of three or four metamodels and especially comprises primitive data types and operations.
-They were specifically developed to evaluate our approach by defining as many kinds of relations that can be expressed with QVT-R as possible, thus also reflecting edge cases.
+
+% \subsection{Case Study}
+
+% To empirically evaluate correctness and applicability of our approach, we developed a prototypical implementation and applied it to exemplary case studies.
+% We give an overview of that prototype in the subsequent subsection.
+% \autoref{tab:scenarios} summarizes the case studies to which we applied the approach.
+% Each of those scenarios consists of three or four metamodels and especially comprises primitive data types and operations.
+% They were specifically developed to evaluate our approach by defining as many kinds of relations that can be expressed with QVT-R as possible, thus also reflecting edge cases.
+
+% \begin{table}
+%     \centering
+%     \renewcommand{\arraystretch}{1.2}%
+%     %\rowcolors{2}{white}{gray!15}
+%     \setlength\tabcolsep{4 pt}
+%     \begin{tabular}{L{0.5cm} L{7.5cm} C{2cm}}
+%         \toprule
+%         \textbf{\#} & \textbf{Scenario Description} & \textbf{Compatible} \\
+%         \midrule
+%         1 & Three equal String attributes of three metamodels & \cmark\\
+%         2 & Six equal String attributes of three metamodels & \cmark\\
+%         3 & Concatenation of two String attributes & \cmark\\
+%         4 & Double concatenation of four String attributes & \cmark\\
+%         5 & Substring in a String attribute & \cmark\\
+%         6 & Substring in a String attribute with precondition & \cmark\\
+%         7 & Precondition with all primitive datatypes & \cmark\\
+%         8 & Absolute value of Integer attribute with precondition & \cmark\\ 
+%         9 & Transitive equality for three Integer attributes & \cmark\\
+%         10 & Inequalities for three Integer attributes & \cmark\\
+%         11 & Contradictory equalities for three Integer attributes & \xmark\\
+%         12 & Contradictory inequalities for three Integer attributes & \xmark\\
+%         13 & Constant property template items & \cmark\\
+%         14 & Linear equations with three Integer attributes & \cmark\\ 
+%         15 & Contradictory linear equations for three Int. attributes & \xmark\\
+%         16 & Emptiness of various OCL sequence and set literals & \xmark\\
+%         17 & Equal String attributes for four metamodels & \cmark\\
+%         18 & Transitive inclusions in sequences & \cmark\\
+%         19 & Comparison of role names in three metamodels & \cmark\\
+%         \bottomrule
+%     \end{tabular}
+%     \caption[Example scenarios with compatibility classification]{Example scenarios of consistency relations and their compatibility property, from \cite{pepin2019ma}}
+%     \label{tab:scenarios}
+% \end{table}
+
+% %%
+% %% Description of scenarios, definition of ground truth
+% %%
+% We developed 14 compatible and four incompatible transformations, according to our \autoref{def:compatibility} for compatibility.
+% Thus, we know the ground truth regarding compatibility of transformations for each scenario by construction.
+% Applying our prototypical implementation to those scenarios classifies them as compatible (\emph{positives}) or makes no statement about compatibility (\emph{negatives}), i.e., they could either be compatible or not.
+% Considering which of the results are actually correct gives us insights on correctness and applicability.
+
+%%
+%% Correctness interpretation of metrics
+%%
+% The approach is correct, which especially means that it operates conservatively, if it does not classify any transformation networks as compatible although they are not.
+% This means that no \emph{false positives} are allowed to occur or otherwise the approach would, per definition, be incorrect.
+% In other words, the \emph{precision} of the approach has to be 1:
+% \begin{align*}
+%     \formulaskip &
+%     Precision = \frac{\mathtext{true positives}}{\mathtext{true positives + false positives}}
+% \end{align*}
+% %If there are any false positives, the approach is, by definition, not correct.
+
+% %%
+% %% Applicability interpretation of metrics
+% %%
+% Applicability of the approach depends on the degree of conservativeness, i.e., in how many cases it does not identify a transformation network as compatible although it is.
+% This is reflected by the number of \emph{false negatives} and, when compared to the \emph{true positives} known as the \emph{recall}, gives insights on the degree of conservativeness:
+% \begin{align*}
+%     &
+%     Recall = \frac{\mathtext{true positives}}{\mathtext{true positives + false negatives}}
+% \end{align*}
+% A high recall value indicates high applicability of the approach in terms of not being too conservative.
+
+%\begin{itemize}
+    %\item Apply a prototypical implementation of the approach to exemplary case studies.
+    %\item Scenarios are summarized in \autoref{tab:scenarios}, composed of 3 or 4 metamodels, primitive data types and operations.
+    %\item Scenarios only reflect supported QVT-R and OCL constructs, for which an analysis is implemented yet.
+    %\item Define ground truth manually, labeling the inputs with being compatible or not, according to manually checking the definition.
+    %\item We consider positives as relation sets classified as compatible and negatives as those for which no statement about compatibility is made (they may be incompatible, but could also be compatible -- conservativeness)
+    %\item Evaluate results regarding precision (must be 1 if approach is correct): $\frac{true positives}{true positives + false positives}$ -- if there are any false positives, the approach is not correct
+    %\item Evaluate results regarding recall: $\frac{true positives}{true positives + false negatives}$ -- false negatives are which are not classified although they are compatible, i.e. they are those which are not identified as compatible due to the approach being conservative.
+    %\item High recall indicates high applicability, as there are few scenarios in which compatibility is not identified.
+%\end{itemize}
+
+
+\subsection{Prototypical Implementation}
+
+The approach that we presented in \autoref{chap:compatibility:practical_approach} resulted in the implementation of a prototype, which is available in a GitHub repository~\cite{decompositionGithub}.
+%The formal approach of this paper addresses a common problem in the development of cyber-physical systems: inconsistencies lead to the development of incompatible artifacts, which in turn can lead to unexpected behavior. 
+% Therefore, the practicality of our approach matters. A tool for proving compatibility could be easily integrated into the development process of a transformation network in order to assist developers and domain experts.
+%
+%\paragraph{Implementation}
+The prototypical implementation is specific to \gls{QVTR} and the \gls{OCL} constraints used in that language.
+It expects a set of \gls{QVTR} transformations and returns a list of redundant \gls{QVTR} relations.
+Thus, if removing the returned redundant relations from the initial set of transformations yields a set of transformations whose relations do not contain any cycles, i.e., if the form a consistency relation tree, compatibility is proven.
+If cycles within the relations remain, compatibility could not be proven, either because of an actual incompatibility or because of the algorithm not being able to find redundancies to prove compatibility.
+
+Additionally, the implementation validates the given inputs.
+They may be invalid because of two reasons.
+First, they can contain transformations that are not well-formed, i.e., they are syntactically incorrect. In that case, the transformation cannot be processed by the compatibility analysis algorithm at al.
+Second, transformations can be well-formed but invalid, e.g., because two transformations have the same name or a \gls{QVTR} domain pattern uses a nonexistent class.
+Although the algorithm can still be applied to such an input, it may not produce appropriate results, thus such errors are displayed to the transformation developer when applying the algorithm in the parsing step.
+Some errors, such as two transformations having the same name, could even be mitigated by automatically renaming them if such a clash occurs.
+In the evaluation, we only consider valid inputs anyway.
+Finally, the implementation operates completely non-intrusively, thus not altering the transformations in any way.
+
+% The implementation of the procedure takes a set of \qvtr transformations as an input and outputs a list of redundant \qvtr relations. This list must be compared to the initial consistency specification. There are two scenarios: either the delivered specification %without redundant relations 
+% forms a consistency relation tree or there are still cycles left. % after the procedure. 
+% In the former case, compatibility is proven. In the latter case, remaining cycles require the developer's attention. This may be due to incompatibility or the inability of the procedure to prove redundancy.
+
+% In addition to the features of the procedure, the prototype provides an input validation. There are two reasons why a consistency specification may cause the procedure not to operate correctly. First, specifications can be composed of not well-formed transformations, i.e., \qvtr transformations that are syntactically incorrect. In this case, the specification is not usable and the procedure immediately exits. There is another scenario: specifications that are well-formed but not valid. For example, this occurs when two transformations have the same name or when a \qvtr domain pattern uses a nonexistent class. Although this scenario is non-blocking, i.e., the decomposition procedure still produces a result, the output must be interpreted with caution. To assist the developer, the procedure displays semantic errors in the specification at the beginning of the parsing. In the end, the procedure is intended to be non-intrusive, i.e., it is does not alter any artifact and can be used at any moment during the development process, i.e., by logging its results.
+
+%\paragraph{Implementation}
+
+%Technical choices were mostly driven by the support of model-driven engineering technologies. One important initiative to this end is the \ac{MDA}~\cite{mda}. %, an approach of the Object Management Group. 
+The selection of \gls{QVTR} for the practical realization and implementation of the approach was, on the one hand, driven by the recommendation of \gls{QVTR} for defining transformation by the \gls{MDA}~\cite{mda}, and on the other hand by the fact that consistency relations are explicitly defined in \gls{QVTR}, especially in comparison to imperative languages.
+We based the implementation on \gls{EMF} and its Ecore \metametamodel (see \autoref{chap:foundations:formalisms:ecore}) as one of the most common and technically mature modelling frameworks.
+Within \gls{EMF}, implementations of transformation languages are provided through the \emph{Eclipse MMT}~\cite{EclipseMMT} project.
+In particular, the contained \gls{QVTd}~\cite{EclipseQVTd} language provides a parser for \gls{QVTR} transformations, which, in turn, uses \emph{Eclipse OCL}~\cite{EclipseOCL} as an implementation of \gls{OCL}.
+
+% The decomposition procedure makes use of many specifications recommended by the MDA, including \qvtr for the definition of transformations, \ac{EMOF} for metamodels~\cite{mof} and OCL for constraints over metamodels~\cite{ocl}. Eclipse provides an implementation of these languages within the \ac{EMF}~\cite{steinberg2009emf}. As a consequence, metamodels of the decomposition procedure are implemented using \textit{Ecore}, a meta-metamodel that is compliant with \ac{EMOF}. EMF supports a number of model-to-model transformation languages through the \textit{Eclipse MMT} project. In particular, the \textit{QVT Declarative} (QVTd) component provides a parser for QVT-R transformations. As QVT-R relies on OCL, QVTd makes use of \textit{Eclipse OCL}, an implementation of the OCL language.
+
+For finding redundant relations, their \gls{OCL} constraints are transformed into logic formulae, whose satisfiability is then to be validated by an \gls{SMT} solver.
+Most such solver are based on SMT-LIB~\cite{smtlib2017}, which is an initiative that provides a common input and output language for \gls{SMT} solvers.
+Our prototype uses the Z3 theorem prover~\cite{z32008}, which is an \gls{SMT} solver, which can be used Java code and supports a large number of theories.
+
+% Regarding the strategy for redundancy testing, the implementation of the decomposition procedure requires the use of an SMT solver. Most SMT solvers are based on SMT-LIB, an initiative that provides a common input/output language for SMT instances. The prototype relies on the Z3 theorem prover, an SMT solver with a Java binding and a large number of theories supported~\cite{z32008}.
+
+% \todo[inline, color=kit-orange100]{footnote/ref > github URL?}
+%% Conservativeness, etc.
+
+% \begin{itemize}
+%     \item \textbf{Prototype}. We developed an implementation of the decomposition procedure using:
+%         \begin{itemize}
+%             \item QVTd, a partial implementation of QVT-R and QVT-C in Eclipse MMT
+%             \item Z3, an automated theorem prover
+%         \end{itemize}
+% \end{itemize}
+
+
+\subsection{Case Study}
 
 \begin{table}
     \centering
+    \small
     \renewcommand{\arraystretch}{1.2}%
     %\rowcolors{2}{white}{gray!15}
     \setlength\tabcolsep{4 pt}
-    \begin{tabular}{L{0.5cm} L{7.5cm} C{2cm}}
+    \begin{tabular}{L{0.6cm} L{7.1cm} C{2.1cm}}
         \toprule
         \textbf{\#} & \textbf{Scenario Description} & \textbf{Compatible} \\
         \midrule
@@ -174,95 +337,52 @@ They were specifically developed to evaluate our approach by defining as many ki
         19 & Comparison of role names in three metamodels & \cmark\\
         \bottomrule
     \end{tabular}
-    \caption[Example scenarios with compatibility classification]{Example scenarios of consistency relations and their compatibility property, from \cite{pepin2019ma}}
-    \label{tab:scenarios}
+    \caption[Example scenarios with compatibility classification]{Example scenarios of consistency relations and their compatibility property, from \cite{pepin2019ma}.}
+    \label{tab:correctness_evaluation:compatibility_scenarios}
 \end{table}
 
-%%
-%% Description of scenarios, definition of ground truth
-%%
-We developed 14 compatible and four incompatible transformations, according to our \autoref{def:compatibility} for compatibility.
-Thus, we know the ground truth regarding compatibility of transformations for each scenario by construction.
-Applying our prototypical implementation to those scenarios classifies them as compatible (\emph{positives}) or makes no statement about compatibility (\emph{negatives}), i.e., they could either be compatible or not.
-Considering which of the results are actually correct gives us insights on correctness and applicability.
+We applied our just presented prototypical implementation in a case study to 19 scenarios.
+Each of these scenarios consists of three or four metamodels and comprises especially primitive data types and operations.
+The contain pairwise transformations between the metamodels defined in \gls{QVTR}, more specifically its implementation \gls{QVTd}.
+The scenarios are depicted in \autoref{tab:correctness_evaluation:compatibility_scenarios}.
 
-%%
-%% Correctness interpretation of metrics
-%%
-The approach is correct, which especially means that it operates conservatively, if it does not classify any transformation networks as compatible although they are not.
-This means that no \emph{false positives} are allowed to occur or otherwise the approach would, per definition, be incorrect.
-In other words, the \emph{precision} of the approach has to be 1:
-\begin{align*}
-    \formulaskip &
-    Precision = \frac{\mathtext{true positives}}{\mathtext{true positives + false positives}}
-\end{align*}
-%If there are any false positives, the approach is, by definition, not correct.
+It also depicts whether the relations of the transformations in these scenarios are compatible or not.
+In total, 15 of these scenarios contain compatible consistency relations according to \autoref{def:compatibility}, whereas the other four are incompatible.
+Thus, we know for each of the scenarios by construction whether its compatible or not, thus having the ground truth for our evaluations.
+The application of the prototypical implementation to these scenarios yields the results \emph{positive} if it considers the relations compatible, or \emph{negative} if it was not able to prove compatibility.
+Comparing these results with the ground truth in \autoref{tab:correctness_evaluation:compatibility_scenarios} allows us to identify them as true or false positives or negatives, respectively.
 
-%%
-%% Applicability interpretation of metrics
-%%
-Applicability of the approach depends on the degree of conservativeness, i.e., in how many cases it does not identify a transformation network as compatible although it is.
-This is reflected by the number of \emph{false negatives} and, when compared to the \emph{true positives} known as the \emph{recall}, gives insights on the degree of conservativeness:
-\begin{align*}
-    &
-    Recall = \frac{\mathtext{true positives}}{\mathtext{true positives + false negatives}}
-\end{align*}
-A high recall value indicates high applicability of the approach in terms of not being too conservative.
+The scenarios were specifically developed for the evaluation of the approach, thus reflecting as many kinds of relations that can be expressed with \gls{QVTR} as possible and thus also reflecting edge cases.
+The implemented \gls{QVTR} relations used for the case study are also available in the GitHub repository containing the prototypical implementation~\cite{decompositionGithub}.
 
-%\begin{itemize}
-    %\item Apply a prototypical implementation of the approach to exemplary case studies.
-    %\item Scenarios are summarized in \autoref{tab:scenarios}, composed of 3 or 4 metamodels, primitive data types and operations.
-    %\item Scenarios only reflect supported QVT-R and OCL constructs, for which an analysis is implemented yet.
-    %\item Define ground truth manually, labeling the inputs with being compatible or not, according to manually checking the definition.
-    %\item We consider positives as relation sets classified as compatible and negatives as those for which no statement about compatibility is made (they may be incompatible, but could also be compatible -- conservativeness)
-    %\item Evaluate results regarding precision (must be 1 if approach is correct): $\frac{true positives}{true positives + false positives}$ -- if there are any false positives, the approach is not correct
-    %\item Evaluate results regarding recall: $\frac{true positives}{true positives + false negatives}$ -- false negatives are which are not classified although they are compatible, i.e. they are those which are not identified as compatible due to the approach being conservative.
-    %\item High recall indicates high applicability, as there are few scenarios in which compatibility is not identified.
-%\end{itemize}
+% To empirically evaluate correctness and applicability of our approach, we developed a prototypical implementation and applied it to exemplary case studies.
+% We give an overview of that prototype in the subsequent subsection.
+% \autoref{tab:scenarios} summarizes the case studies to which we applied the approach.
+% Each of those scenarios consists of three or four metamodels and especially comprises primitive data types and operations.
+% They were specifically developed to evaluate our approach by defining as many kinds of relations that can be expressed with QVT-R as possible, thus also reflecting edge cases.
+
+% %%
+% %% Description of scenarios, definition of ground truth
+% %%
+% We developed 14 compatible and four incompatible transformations, according to our \autoref{def:compatibility} for compatibility.
+% Thus, we know the ground truth regarding compatibility of transformations for each scenario by construction.
+% Applying our prototypical implementation to those scenarios classifies them as compatible (\emph{positives}) or makes no statement about compatibility (\emph{negatives}), i.e., they could either be compatible or not.
+% Considering which of the results are actually correct gives us insights on correctness and applicability.
 
 
-\subsection{Prototypical Implementation}
-\label{sec:evaluation:prototype}
-
-The decomposition procedure presented in Sections \ref{chap:prevention:compatibility} and~\ref{chap:prevention:compatibility:redundancies} resulted in the implementation of a prototype, which is available on GitHub~\cite{decompositionGithub}. The formal approach of this paper addresses a common problem in the development of cyber-physical systems: inconsistencies lead to the development of incompatible artifacts, which in turn can lead to unexpected behavior. Therefore, the practicality of our approach matters. A tool for proving compatibility could be easily integrated into the development process of a transformation network in order to assist developers and domain experts.
-
-\subsubsection{Features}
-
-The implementation of the procedure takes a set of \qvtr transformations as an input and outputs a list of redundant \qvtr relations. This list must be compared to the initial consistency specification. There are two scenarios: either the delivered specification %without redundant relations 
-forms a consistency relation tree or there are still cycles left. % after the procedure. 
-In the former case, compatibility is proven. In the latter case, remaining cycles require the developer's attention. This may be due to incompatibility or the inability of the procedure to prove redundancy.
-
-In addition to the features of the procedure, the prototype provides an input validation. There are two reasons why a consistency specification may cause the procedure not to operate correctly. First, specifications can be composed of not well-formed transformations, i.e., \qvtr transformations that are syntactically incorrect. In this case, the specification is not usable and the procedure immediately exits. There is another scenario: specifications that are well-formed but not valid. For example, this occurs when two transformations have the same name or when a \qvtr domain pattern uses a nonexistent class. Although this scenario is non-blocking, i.e., the decomposition procedure still produces a result, the output must be interpreted with caution. To assist the developer, the procedure displays semantic errors in the specification at the beginning of the parsing. In the end, the procedure is intended to be non-intrusive, i.e., it is does not alter any artifact and can be used at any moment during the development process, i.e., by logging its results.
-
-\subsubsection{Implementation}
-
-Technical choices are mostly driven by the support of model-driven engineering technologies. One important initiative to this end is the \ac{MDA}~\cite{mda}. %, an approach of the Object Management Group. 
-The decomposition procedure makes use of many specifications recommended by the MDA, including \qvtr for the definition of transformations, \ac{EMOF} for metamodels~\cite{mof} and OCL for constraints over metamodels~\cite{ocl}. Eclipse provides an implementation of these languages within the \ac{EMF}~\cite{steinberg2009emf}. As a consequence, metamodels of the decomposition procedure are implemented using \textit{Ecore}, a meta-metamodel that is compliant with \ac{EMOF}. EMF supports a number of model-to-model transformation languages through the \textit{Eclipse MMT} project. In particular, the \textit{QVT Declarative} (QVTd) component provides a parser for QVT-R transformations. As QVT-R relies on OCL, QVTd makes use of \textit{Eclipse OCL}, an implementation of the OCL language.
-
-Regarding the strategy for redundancy testing, the implementation of the decomposition procedure requires the use of an SMT solver. Most SMT solvers are based on SMT-LIB, an initiative that provides a common input/output language for SMT instances. The prototype relies on the Z3 theorem prover, an SMT solver with a Java binding and a large number of theories supported~\cite{z32008}.
-
-% \todo[inline, color=kit-orange100]{footnote/ref > github URL?}
-%% Conservativeness, etc.
-
-% \begin{itemize}
-%     \item \textbf{Prototype}. We developed an implementation of the decomposition procedure using:
-%         \begin{itemize}
-%             \item QVTd, a partial implementation of QVT-R and QVT-C in Eclipse MMT
-%             \item Z3, an automated theorem prover
-%         \end{itemize}
-% \end{itemize}
-
+\begin{copiedFrom}{SoSym MPM4CPS}
 
 \subsection{Results}
 
 In the following, we present the results of our evaluation regarding the methodology proposed in \autoref{sec:evaluation:methodology} applied to the prototypical implementation introduced in \autoref{sec:evaluation:prototype}.
-The classification results are summarized in \autoref{tab:classificationresults}.
+The classification results are summarized in \autoref{tab:correctness_evaluation:compatibility_results}.
 
 \begin{table}
     \centering
-    \renewcommand{\arraystretch}{1.4}%
+    \small
+    \renewcommand{\arraystretch}{1.2}%
     \setlength\tabcolsep{4 pt}
-    \begin{tabular}{L{2.2cm} C{3cm} C{2.3cm}}
+    \begin{tabular}{L{2cm} C{3.5cm} C{2.3cm}}
         \toprule
          & \textbf{Classified Compatible} & \textbf{Unclassified} \\
          \midrule
@@ -270,8 +390,8 @@ The classification results are summarized in \autoref{tab:classificationresults}
          \textbf{Incompatible} & 0 & 3\\
          \bottomrule
     \end{tabular}
-    \caption[Correctness of compatibility classification results]{Number of scenarios from \autoref{tab:scenarios} regarding actual compatibility and their classification by our approach.}
-    \label{tab:classificationresults}
+    \caption[Correctness of compatibility classification results]{Number of scenarios from \autoref{correctness_evaluation:compatibility_scenarios} regarding actual compatibility and their classification by our approach.}
+    \label{tab:correctness_evaluation:compatibility_results}
 \end{table}
 
 \subsubsection{Correctness}
@@ -380,7 +500,7 @@ In the following, we discuss threats to the validity of our evaluation and discu
 %Discuss different possibility for decomposition and problem regarding "false" decompositions.
 
 
-\subsubsection{Threats to Validity}
+\subsection{Threats to Validity}
 
 Although we designed our evaluation in a way such that it gives us appropriate insights on correctness and applicability of the approach, there may be limitations regarding its internal and external validity. %, especially arising from the case studies.
 
@@ -434,7 +554,7 @@ It may be possible to reduce that problem by taking existing sets of consistency
 
 
 
-\subsubsection{Limitations}
+\subsection{Limitations}
 \label{sec:evaluation:limitations}
 
 Current limitations of our approach especially arise from its operationalization and the limitations of SMT solvers.
@@ -474,7 +594,7 @@ From Slides:
 \end{itemize}
 Both ensure that no false positives are produced
 
-Strictness
+Strictness Limitation
 \begin{itemize}
     \item Formalism cannot (easily) be adapted context-specifically
     \item Example: A String attribute is changed, and the transformations ensure that it starts uppercase
@@ -484,21 +604,23 @@ Strictness
     \end{itemize}
     \item Hard to encode this into a formalism
 \end{itemize}
-Solution: Manually declare redundancies that do not follow the formalism
+Solution: Manually declare redundancies that do not follow the formalism -> Future Work
 
 Additional:
 Although compatibility ensures that for any model element with restrained consistency a consistent model tuple can be found, it does not mean that consistency preservation rules find that model tuple. It only improved the ability to do so.
 
-\iffalse
-Functional correctness:
-    - Theoretical evaluation based on concepts and definitions of this paper
-    -> Functioning of the procedure, algorithms
+Unknown how good the approach can be integrated into a development process, continuous execution etc.
+
+% \iffalse
+% Functional correctness:
+%     - Theoretical evaluation based on concepts and definitions of this paper
+%     -> Functioning of the procedure, algorithms
     
-Applicability:
-    - Empirical evaluation based on an implementation of the decomposition procedure
-    - Interpretation of test results + metric achieved results against expected results
-    -> Example scenarios, execution results
-\fi
+% Applicability:
+%     - Empirical evaluation based on an implementation of the decomposition procedure
+%     - Interpretation of test results + metric achieved results against expected results
+%     -> Example scenarios, execution results
+% \fi
 
 \end{copiedFrom} % SoSym MPM4CPS
 
@@ -517,6 +639,8 @@ Orchestrierung: FIFO für Transformationen, an denen Modelle geändert wurden. K
 Falls wir keinen Baum garantieren können: In this case, the consistency specifications must be revised whenever non-termination or non-deterministic termination of consistency preservation is observed (see \autoref{fig:correctness:categorization})}
 
 Case study in which we identified errors when combining independently developed transformations and check whether the classification is correct. We correct the mistakes according to the categorization and especially applied the patterns for making the transformation synchronizing to find whether that solves the problem of transformations not being correct in the context of a network. Additionally, we want to find how often specific types of errors occurs to have an indicator for their severity and how relevant the errors we solve by our synchronization pattern are.
+
+\subsection{Goals and Methodology}
 
 {
 \newcommand{\innerrowspacing}{0.3em}
@@ -549,7 +673,6 @@ Orchestration is also relevant for categorization:
 We have discussed that the orchestration problem can always lead to any kind of distinguished failure, thus making it hard to distinguish whether an actual mistakes by a developer is present or whether the algorithm is simply not able to find a consistent orchestration.
 The evaluation shows that, at least in the considered scenarios, the orchestration problem is not that relevant in practice.
 
-
 % \gqm{Categorization}{Show that the relations between mistakes, faults and failures in the categorization for transformation network errors are correct.}
 % {Completeness: Can all occuring failes be classified according to the classification?}
 % {Identified failures ratio: Ration between number of occured failures and classified failues}
@@ -568,7 +691,6 @@ The evaluation shows that, at least in the considered scenarios, the orchestrati
 % {Are there cases in which information about other transformations are necessary to solve issues?}
 % {Ratio of number of fixes that require information about other transformation to total number of fixes with user interactions\\
 % Ratio of number of fixes that require information about other transformation to total number of fixes without user interactions}
-
 
 {
 \newcommand{\innerrowspacing}{0.3em}
@@ -604,6 +726,58 @@ The goal is
 %     \item Correctness of dependencies between failure types and mistakes
 %     \item Appropriateness of matching strategy for avoiding operationalization issues
 % \end{itemize}
+
+\subsubsection*{Process}
+We executed the test cases on a transformation network, which we created as a combination of the existing transformations.
+They were executed until no further changes occurred.
+We then classified the occurring failures according to \autoref{chap:errors:failures}.
+Based on our categorization in \autoref{chap:errors:categorization}, we traced back the failures to mistakes and fixed them according to the strategies discussed in \autoref{chap:prevention}.
+Failures can be hidden by others: 
+For example, an incompatible constraint may produce no failure because the scenarios fail earlier due to missing element matching or vice versa.
+For this reason, we re-executed the process until no further failures occurred.
+Finally, we applied the transformations to the more complex Media Store construction case to validate that all mistakes were fixed.
+
+\subsubsection*{Measurements}
+We measured the number of failures in each of the iterations.
+We relate the number of failures that we were able to categorize to the total number of recognized failures ($\mathit{identifiedFailureRatio} = \frac{\mathit{\#\ of\ categorized\ failures}}{\mathit{\#\ of\ total\ failures}}$) to show completeness of the identified failure types.
+This metric is rather weak, because it does not identify whether a failure is categorized correctly.
+We therefore relate the total number of resolved failures, which are those that do not occur in the subsequent iteration anymore, to the number of detected failures ($\mathit{resolvedFailureRatio} = \frac{\mathit{\#\ of\ resolved\ failures}}{\mathit{\#\ of\ total\ failures}}$).
+If a failure disappears after fixing the causing mistakes, the classification of the failure and also the relation to the causing mistake was correct. %, which is why this metric gives an indicator for the completeness of the identified failure types.
+Therefore, this metric gives an indicator for both completeness of the identified failure types and the relation of mistakes to failures.
+
+%To measure correctness of the dependencies between mistakes and failures, we relate the resolved mistakes to the detected failures ($\frac{\text{# of resolved mistakes}}{\text{# of detected failures}}$.
+%If the number of resolved mistakes is lower than the number of failures, actually failures remain after fixing an mistake, which indicated that some relation between mistake and failure type was wrong.
+
+%\todoHeiko{Wieder reinnehmen: Validierung der Strategien zum Element-Matching?}
+%To validate the appropriateness of our strategy for avoiding mistakes due to missing element matching, we count the kinds of matching techniques according to \autoref{sec:avoiding:matching} that were used.
+
+
+% This, on the one hand, 
+
+% \begin{itemize}
+%     \item Process
+%     \begin{enumerate}
+%         \item Combined execution of consistency preservation specifications on evolution scenarios
+%         \item Identification of failures during execution / in resulting models
+%         \item Fixing mistakes that lead to those failures (based on categorization in \autoref{sec:classification:categorization}
+%         \item Re-execute scenario
+%     \end{enumerate}
+%     \item Important: the number of failures can increase or stagnate after an iteration, because although a failure disappears due to a fixed mistake, another failure can occur because of an mistake that was hidden by the previous one (esp. on different specification levels). E.g. specifications were incompatible ("Impl"-suffix), leading to a loop, so we fixed that and afterwards a multiple instantiation problems occurs, because now objects are mapped to the same object in another model, leading to a matching problem.
+%     \item Interpretation
+%     \begin{itemize}
+%         \item What we measure is the number of failures regarding a specific type, so we relate all metrics to the number of identified failures
+%         \item Completeness of the failure catalog: If failure cannot be categorized with our catalog in \autoref{sec:classification}, our identified failure types are incomplete: Metric: $\frac{\# of categorized failures}{\# of total failures}$
+%         \item The previous metric is rather weak, because categorizing a failure does not mean that it is categorized correctly, so we try to fix the causing mistake and measure the success
+%         \item If failure disappears after fixing mistake, the identified relation between mistake and failure is correct and the failure identification is correct; if failure does not disappear after fixing mistake, either the relation is only incorrect, the failure identification is incorrect or an actual mistake is missing: General failure-/mistake-independent Metric: $\frac{\# of resolved mistakes}{\# of detected failures}$
+%         \item To see whether a certain relation between failure and mistake is wrong, for each failure/mistake: $\frac{\# of resolved mistakes of type}{\# of total failures of type}$; if this metrics is < 1, the failure is caused by a different than the identified mistake
+%         \item Problem: several failures caused by one mistake
+%     \end{itemize}
+% \end{itemize}
+
+
+\subsection{Prototypical Implementation}
+% Context of the implementation, actual implementations
+
 
 \subsection{Case Study}
 The evaluation is based on a case study developed for the Ecore-based \textsc{Vitruvius} framework~\cite{kramer2013b} for consistent system development, which is available on GitHub~\cite{vitruvFrameworkGithub}.
@@ -657,55 +831,6 @@ This system is available as a \ac{PCM} model as well as Java code.
 % \end{itemize}
 
 
-\subsection{Methodology}
-
-\subsubsection*{Process}
-We executed the test cases on a transformation network, which we created as a combination of the existing transformations.
-They were executed until no further changes occurred.
-We then classified the occurring failures according to \autoref{chap:errors:failures}.
-Based on our categorization in \autoref{chap:errors:categorization}, we traced back the failures to mistakes and fixed them according to the strategies discussed in \autoref{chap:prevention}.
-Failures can be hidden by others: 
-For example, an incompatible constraint may produce no failure because the scenarios fail earlier due to missing element matching or vice versa.
-For this reason, we re-executed the process until no further failures occurred.
-Finally, we applied the transformations to the more complex Media Store construction case to validate that all mistakes were fixed.
-
-\subsubsection*{Measurements}
-We measured the number of failures in each of the iterations.
-We relate the number of failures that we were able to categorize to the total number of recognized failures ($\mathit{identifiedFailureRatio} = \frac{\mathit{\#\ of\ categorized\ failures}}{\mathit{\#\ of\ total\ failures}}$) to show completeness of the identified failure types.
-This metric is rather weak, because it does not identify whether a failure is categorized correctly.
-We therefore relate the total number of resolved failures, which are those that do not occur in the subsequent iteration anymore, to the number of detected failures ($\mathit{resolvedFailureRatio} = \frac{\mathit{\#\ of\ resolved\ failures}}{\mathit{\#\ of\ total\ failures}}$).
-If a failure disappears after fixing the causing mistakes, the classification of the failure and also the relation to the causing mistake was correct. %, which is why this metric gives an indicator for the completeness of the identified failure types.
-Therefore, this metric gives an indicator for both completeness of the identified failure types and the relation of mistakes to failures.
-
-%To measure correctness of the dependencies between mistakes and failures, we relate the resolved mistakes to the detected failures ($\frac{\text{# of resolved mistakes}}{\text{# of detected failures}}$.
-%If the number of resolved mistakes is lower than the number of failures, actually failures remain after fixing an mistake, which indicated that some relation between mistake and failure type was wrong.
-
-%\todoHeiko{Wieder reinnehmen: Validierung der Strategien zum Element-Matching?}
-%To validate the appropriateness of our strategy for avoiding mistakes due to missing element matching, we count the kinds of matching techniques according to \autoref{sec:avoiding:matching} that were used.
-
-
-% This, on the one hand, 
-
-% \begin{itemize}
-%     \item Process
-%     \begin{enumerate}
-%         \item Combined execution of consistency preservation specifications on evolution scenarios
-%         \item Identification of failures during execution / in resulting models
-%         \item Fixing mistakes that lead to those failures (based on categorization in \autoref{sec:classification:categorization}
-%         \item Re-execute scenario
-%     \end{enumerate}
-%     \item Important: the number of failures can increase or stagnate after an iteration, because although a failure disappears due to a fixed mistake, another failure can occur because of an mistake that was hidden by the previous one (esp. on different specification levels). E.g. specifications were incompatible ("Impl"-suffix), leading to a loop, so we fixed that and afterwards a multiple instantiation problems occurs, because now objects are mapped to the same object in another model, leading to a matching problem.
-%     \item Interpretation
-%     \begin{itemize}
-%         \item What we measure is the number of failures regarding a specific type, so we relate all metrics to the number of identified failures
-%         \item Completeness of the failure catalog: If failure cannot be categorized with our catalog in \autoref{sec:classification}, our identified failure types are incomplete: Metric: $\frac{\# of categorized failures}{\# of total failures}$
-%         \item The previous metric is rather weak, because categorizing a failure does not mean that it is categorized correctly, so we try to fix the causing mistake and measure the success
-%         \item If failure disappears after fixing mistake, the identified relation between mistake and failure is correct and the failure identification is correct; if failure does not disappear after fixing mistake, either the relation is only incorrect, the failure identification is incorrect or an actual mistake is missing: General failure-/mistake-independent Metric: $\frac{\# of resolved mistakes}{\# of detected failures}$
-%         \item To see whether a certain relation between failure and mistake is wrong, for each failure/mistake: $\frac{\# of resolved mistakes of type}{\# of total failures of type}$; if this metrics is < 1, the failure is caused by a different than the identified mistake
-%         \item Problem: several failures caused by one mistake
-%     \end{itemize}
-% \end{itemize}
-
 
 \subsection{Results}
 
@@ -748,8 +873,17 @@ They would have to be developed in a schema similar to the one proposed by \text
 
 \end{copiedFrom} % ICMT
 
-Threats:
-- The transformation were not constructed synchronizing, thus obviously many synchronization errors occur. If the scenario is foreseen, there may be much less errors at this level and more at the others -> need to perform further evaluation were developer know about necessity to use transformations in a network to properly construct them and then see how often that still fails.
+
+\subsection{Discussion}
+
+
+\subsection{Threats to Validity}
+- The transformation were not constructed synchronizing, thus obviously many synchronization errors occur. If the scenario is foreseen, there may be much less errors at this level and more at the others -> need to perform further evaluation were developer know about necessity to use transformations in a network to properly construct them and then see how often that still fails. (future work)
+
+
+\subsection{Limitations}
+
+
 
 
 \section{Orchestration Algorithm}
@@ -758,6 +892,9 @@ Correctness of the proposed strategy is proven.
 Usefulness of the strategy to identify the cause for the network failing to resolve a change can, however, not be proven easily.
 Showing it empirically requires high effort.
 We thus provide a scenario-based discussion showing that the strategy is beneficial in reasonable cases.
+
+
+\subsection{Goals and Methodology}
 
 {
 \newcommand{\innerrowspacing}{0.3em}
@@ -784,10 +921,22 @@ We thus provide a scenario-based discussion showing that the strategy is benefic
 % {Is it easier to find the reasons for the network not being able to resolve a change with the proposed strategy than with other strategies?}
 % {Number of transformations to consider as a reason or comparable}
 
+\subsection{Scenarios}
+
+
+\subsection{Discussion}
+
+
+\subsection{Threats to Validity}
+
+
+\subsection{Limitations}
+Well-defined design property only fulfilled for reactive converging transformations, whose property cannot easily be guaranteed nor analyzed.
+We argued why this is still reasonable but some property that gives further guarantees and is at least analyzable would even be butter, but it questionable whether such a property will be ensured anyway, as it can easily restrict expressiveness of transformations too much, as discussed in that chapter for other property that restrict expressiveness.
 
 
 
-\section{Limitations}
+\section{Overall Limitations}
 
 \begin{itemize}
     \item No concurrent editing support. May partially be resolved by synchronizing transformations, however as we do not make assumptions to these current changes (rather than the assumptions we make to the transformations), the changes of two user can be conflicting. This has to be addressed -> future work
@@ -804,3 +953,5 @@ Considered only structural relations (see foundations): Need to investigate beha
 \section{Summary}
 
 Summarize central findings and limitations, especially also relevance of errors that we resolve by construction, how many we can potentially (but not evaluated) find by analysis.
+
+
