@@ -89,24 +89,28 @@ The presented evaluation is based on the evaluation that we presented in \owncit
 A tool for proving compatibility could be easily integrated into the process of developing a transformation network in order to assist transformation developers, as it operates fully automated, thus not introducing further developer effort, and improves the ability of the transformation network to find consistent models after changes.
 Thus, the correctness and the applicability of the approach are of special importance.
 
-{
-\newcommand{\innerrowspacing}{0.3em}
-\newcommand{\outerrowspacing}{1em}
 \begin{table}
+    \renewcommand{\arraystretch}{1.4}%
+    \rowcolors{1}{gray!15}{white}
     \begin{tabular}{p{8em} p{20em}}
         \toprule
-        \goal{Compatibility} & Show that the analysis can be used by transformation developers to find incompatibilities in consistency relations of a transformation network. \\\addlinespace[\innerrowspacing]
-        \question{Correctness} & Is compatibility always given if the analysis finds it? \\\addlinespace[\innerrowspacing]
-        \metric & \metrictext{Precision: Ratio of true positives to true and false positives} \\\addlinespace[\outerrowspacing]
-        \question{Applicability%Usefuleness/Conservativeness
-        } & How often does the analysis not prove compatibility although it is given? \\\addlinespace[\innerrowspacing]
-        \metric & \metrictext{Recall: Ratio of true positives to true positives and false negatives}\\
+        \rowcolor{gray!30}
+        \goal{Compatibility} &
+            Show that the analysis can be used by transformation developers to find incompatibilities in consistency relations of a transformation network. \\
+        \question[eq:compatibility:correctness]{Correctness} & 
+            \questiontext{Is compatibility always given if the analysis finds it?} \\
+        \metric & 
+            \metrictext{Precision: Ratio of true positives to true and false positives} \\
+        \question[eq:compatibility:applicability]{Applicability%Usefuleness/Conservativeness
+        } & 
+            \questiontext{How often does the analysis not prove compatibility although it is given?} \\
+        \metric & 
+            \metrictext{Recall: Ratio of true positives to true positives and false negatives}\\
         \bottomrule
     \end{tabular}
     \caption[Goals, questions and metrics for compatibility]{Goals, questions and metrics for compatibility evaluation}
     \label{tab:correctness_evaluation:gqm_compatibility}
 \end{table}
-}
 
 \mnote{Empirical evaluation in case study}
 In the subsequently presented empirical evaluation in terms of a case study, we apply the practical realization of the approach to several sets of consistency relations, which are designed to be compatible or not, according to \autoref{def:compatibility}.
@@ -116,7 +120,7 @@ Since the algorithm operates conservatively, a negative result does not mean tha
 The goal of that evaluation together with the answered questions and evaluated metrics are summarized in \autoref{tab:correctness_evaluation:gqm_compatibility}.
 
 \mnote{Correctness evaluation}
-First, the application of the algorithm to multiple scenarios allows us to validate correctness of the practical realization of the approach.
+First, the application of the algorithm to multiple scenarios allows us to validate correctness of the practical realization of the approach according to \evalquestionref{eq:compatibility:correctness}.
 Correctness of our approach means that it is able to classify a given set of consistency relations as compatible or otherwise does not reveal a result.
 This especially means that it operates conservatively and does not classify a set of consistency relations as compatible although it is not.
 The algorithm is thus not allowed to produce false positives, which is why we consider the \emph{precision} metric:
@@ -129,7 +133,7 @@ Thus, correctness of the algorithm directly correlates with that metric.
 Analyzing this metrics serves as an indicator that the mapping of our formal approach and the underlying formalism to the practical approach realization and the used \gls{QVTR} language is correct, and especially that it operates conservatively.
 
 \mnote{Applicability evaluation}
-Second, the application of the algorithm to multiple scenarios allows us to validate its applicability.
+Second, the application of the algorithm to multiple scenarios allows us to validate its applicability according to \evalquestionref{eq:compatibility:applicability}.
 The approach uses a fully automated algorithm, thus it does not require any inputs apart from the \gls{QVTR} relations to check.
 Applicability may thus be restricted if the algorithm operates too conservatively, i.e., if it often produces false negatives.
 In those cases, the algorithm operates indeed correctly, but if it is not able to prove compatibility in many cases in which it is actually given, applicability is reduced as the usefulness of the results for a transformation developer are limited.
@@ -250,6 +254,7 @@ In particular, it is relevant whether those are conceptual issues of the formal 
 
 
 \subsection{Prototypical Implementation}
+\label{chap:correctness_evaluation:compatibility:implementation}
 
 The approach that we presented in \autoref{chap:compatibility:practical_approach} resulted in the implementation of a prototype, which is available in a GitHub repository~\cite{decompositionGithub}.
 %The formal approach of this paper addresses a common problem in the development of cyber-physical systems: inconsistencies lead to the development of incompatible artifacts, which in turn can lead to unexpected behavior. 
@@ -305,6 +310,7 @@ Our prototype uses the Z3 theorem prover~\cite{z32008}, which is an \gls{SMT} so
 
 
 \subsection{Case Study}
+\label{chap:correctness_evaluation:compatibility:case_study}
 
 \begin{table}
     \centering
@@ -370,12 +376,7 @@ The implemented \gls{QVTR} relations used for the case study are also available 
 % Considering which of the results are actually correct gives us insights on correctness and applicability.
 
 
-\begin{copiedFrom}{SoSym MPM4CPS}
-
 \subsection{Results}
-
-In the following, we present the results of our evaluation regarding the methodology proposed in \autoref{sec:evaluation:methodology} applied to the prototypical implementation introduced in \autoref{sec:evaluation:prototype}.
-The classification results are summarized in \autoref{tab:correctness_evaluation:compatibility_results}.
 
 \begin{table}
     \centering
@@ -390,9 +391,15 @@ The classification results are summarized in \autoref{tab:correctness_evaluation
          \textbf{Incompatible} & 0 & 3\\
          \bottomrule
     \end{tabular}
-    \caption[Correctness of compatibility classification results]{Number of scenarios from \autoref{correctness_evaluation:compatibility_scenarios} regarding actual compatibility and their classification by our approach.}
+    \caption[Correctness of compatibility classification results]{Number of scenarios from \autoref{tab:correctness_evaluation:compatibility_scenarios} regarding actual compatibility and their classification by our approach.}
     \label{tab:correctness_evaluation:compatibility_results}
 \end{table}
+
+We applied the prototypical implementation of our practical approach to prove compatibility introduced in \autoref{chap:correctness_evaluation:compatibility:implementation} to the case study explained in \autoref{chap:correctness_evaluation:compatibility:case_study}.
+The results of the scenario classification as compatible or not by the implementation are summarized in \autoref{tab:correctness_evaluation:compatibility_results}.
+
+\begin{copiedFrom}{SoSym MPM4CPS}
+
 
 \subsubsection{Correctness}
 As discussed before, the correctness of our approach in terms of conservative behavior is proven for the formal approach by construction.
@@ -404,7 +411,7 @@ Since the operationalized approach is based on that formalization, correctness i
 
 We ensured that all these relevant elements are considered by construction of the approach discussed in \autoref{chap:prevention:compatibility} and \autoref{chap:prevention:compatibility:redundancies}.
 However, the results of the case study further validate that we did not miss any relevant parts of QVT-R relations.
-In fact, the results summarized in \autoref{tab:classificationresults} show that we have a precision of 1, thus having no incompatible scenarios classified as compatible by error:
+In fact, the results summarized in \autoref{tab:correctness_evaluation:compatibility_results} show that we have a precision of 1, thus having no incompatible scenarios classified as compatible by error:
 
 \begin{align*}
     &
@@ -642,32 +649,44 @@ Case study in which we identified errors when combining independently developed 
 
 \subsection{Goals and Methodology}
 
-{
-\newcommand{\innerrowspacing}{0.3em}
-\newcommand{\outerrowspacing}{1em}
 \begin{table}
+    \renewcommand{\arraystretch}{1.4}
+    \rowcolors{0}{gray!15}{white}
     \begin{tabular}{p{8em} p{20em}}
         \toprule
-        \goal{Categorization} & Show that the %relations between mistakes, faults and failures in the categorization for transformation network errors are correct. 
-        categorization of mistakes, faults and failures covers all relevant cases and identify relevance of the individual mistake types.
-        \\\addlinespace[\innerrowspacing]
-        \question{Completeness} & Can all occurring failures be categorized according to the categorization? \\\addlinespace[\innerrowspacing]
-        \metric & \metrictext{Identified failures ratio: Ration between number of occured failures and classified failues} \\\addlinespace[\outerrowspacing]
-        \question{Correctness} & Are identified failures caused by mistakes they are related to according to the classification? \\\addlinespace[\innerrowspacing]
-        \metric & \metrictext{Resolved failures ratio: Ration of resolved failures to total failures}\\\addlinespace[\outerrowspacing]
-        \question{Relevance} & How relevant are specific types of mistakes, how often do they occur at all? \\\addlinespace[\innerrowspacing]
-        \metric & \metrictext{Number of occurences of each type of mistake in relation to number of all mistakes occurences}\\\addlinespace[\innerrowspacing]
-        \midrule\addlinespace[\innerrowspacing]
+        \rowcolor{gray!30}
+        \goal{Categorization} & 
+            Show that the %relations between mistakes, faults and failures in the categorization for transformation network errors are correct. 
+            categorization of mistakes, faults and failures covers all relevant cases and identify relevance of the individual mistake types. \\
+        \question{Completeness} & 
+            \questiontext{Can all occurring failures be categorized according to the categorization?}\\
+        \metric & 
+            \metrictext{Identified failures ratio: Ration between number of occured failures and classified failues} \\
+        \question{Correctness} & 
+            \questiontext{Are identified failures caused by mistakes they are related to according to the classification?} \\
+        \metric & 
+            \metrictext{Resolved failures ratio: Ration of resolved failures to total failures}\\
+        \question{Relevance} & 
+            \questiontext{How relevant are specific types of mistakes, how often do they occur at all?}\\
+        \metric & 
+            \metrictext{Number of occurences of each type of mistake in relation to number of all mistakes occurences}\\
+        \midrule
         %
-        \goal{Orchestration} & Find out how relevant undecidability of the orchestration problem is in practice.\\\addlinespace[\innerrowspacing]
-        \question{Relevance} & How often does an algorithm for orchestration fail due to the orchestration problem? \\\addlinespace[\innerrowspacing]
-        \metric & \metrictext{Ratio of number of algorithm failures due to orchestration problem to all failures} \\
+    \end{tabular}
+    \begin{tabular}{p{8em} p{20em}}
+        \rowcolor{gray!30}
+        \goal{Orchestration} & 
+            Find out how relevant undecidability of the orchestration problem is in practice.\\
+        \rowcolors{1}{gray!15}{white}
+        \question{Relevance} & 
+            \questiontext{How often does an algorithm for orchestration fail due to the orchestration problem?} \\
+        \metric & 
+            \metrictext{Ratio of number of algorithm failures due to orchestration problem to all failures} \\
         \bottomrule
     \end{tabular}
     \caption[Goals, questions and metrics for categorization and orchestration]{Goals, questions and metrics for categorization and orchestration evaluation}
     \label{tab:correctness_evaluation:gqm_categorization}
 \end{table}
-}
 
 Orchestration is also relevant for categorization:
 We have discussed that the orchestration problem can always lead to any kind of distinguished failure, thus making it hard to distinguish whether an actual mistakes by a developer is present or whether the algorithm is simply not able to find a consistent orchestration.
@@ -692,23 +711,27 @@ The evaluation shows that, at least in the considered scenarios, the orchestrati
 % {Ratio of number of fixes that require information about other transformation to total number of fixes with user interactions\\
 % Ratio of number of fixes that require information about other transformation to total number of fixes without user interactions}
 
-{
-\newcommand{\innerrowspacing}{0.3em}
-\newcommand{\outerrowspacing}{1em}
 \begin{table}
+    \renewcommand{\arraystretch}{1.4}
+    \rowcolors{0}{gray!15}{white}
     \begin{tabular}{p{8em} p{20em}}
         \toprule
-        \goal{Synchronization} & Show that the approach for matching elements avoids failures due to \leveltransformation level mistakes by construction. \\\addlinespace[\innerrowspacing]
-        \question{Correctness} & In how many cases does the application of the approach lead to correct synchronizing transformations? \\\addlinespace[\innerrowspacing]
-        \metric & \metrictext{Ratio of changes that are propagated correctly after applying the approach to those that are not propagated correctly} \\\addlinespace[\outerrowspacing]
-        \question{Applicability} & In how many cases can the approach (not) be applied? \\\addlinespace[\innerrowspacing]
-        \metric & \metrictext{Ratio of faults at \leveltransformation level that can be resolved by the approach to all faults at that level}\\
+        \rowcolor{gray!30}
+        \goal{Synchronization} & 
+            Show that the approach for matching elements avoids failures due to \leveltransformation level mistakes by construction. \\
+        \question{Correctness} & 
+            \questiontext{In how many cases does the application of the approach lead to correct synchronizing transformations?} \\
+        \metric & 
+            \metrictext{Ratio of changes that are propagated correctly after applying the approach to those that are not propagated correctly} \\
+        \question{Applicability} & 
+            \questiontext{In how many cases can the approach (not) be applied?} \\
+        \metric & 
+            \metrictext{Ratio of faults at \leveltransformation level that can be resolved by the approach to all faults at that level}\\
         \bottomrule
     \end{tabular}
     \caption[Goals, questions and metrics for synchronization]{Goals, questions and metrics for synchronization evaluation}
     \label{tab:correctness_evaluation:gqm_synchronization}
 \end{table}
-}
 
 \begin{copiedFrom}{ICMT}
 
@@ -896,26 +919,23 @@ We thus provide a scenario-based discussion showing that the strategy is benefic
 
 \subsection{Goals and Methodology}
 
-{
-\newcommand{\innerrowspacing}{0.3em}
-\newcommand{\outerrowspacing}{1em}
 \begin{table}
+    \renewcommand{\arraystretch}{1.4}
+    \rowcolors{0}{gray!15}{white}
     \begin{tabular}{p{8em} p{20em}}
         \toprule
-        \goal{Orchestration Problem} & Find out how relevant undecidability of the orchestration problem is in practice.\\\addlinespace[\innerrowspacing]
-        \question{Relevance} & How often does an algorithm for orchestration fail due to the orchestration problem? \\\addlinespace[\innerrowspacing]
-        \metric & \metrictext{Number of } \\\addlinespace[\innerrowspacing]
-        \midrule\addlinespace[\innerrowspacing]
-        %
-        \goal{Orchestration} & Show that the orchestration strategy helps transformation developers to find the cause for a transformation network not being able to find a consistent orchestration.\\\addlinespace[\innerrowspacing]
-        \question{Usefulness} & Is it easier to find the reasons for the network not being able to resolve a change with the proposed strategy than with other strategies? \\\addlinespace[\innerrowspacing]
-        \metric & \metrictext{Number of transformations to consider as a reason or comparable} \\
+        \rowcolor{gray!30}
+        \goal{Orchestration} & 
+            Show that the orchestration strategy helps transformation developers to find the cause for a transformation network not being able to find a consistent orchestration.\\
+        \question{Usefulness} & 
+            \questiontext{Is it easier to find the reasons for the network not being able to resolve a change with the proposed strategy than with other strategies?} \\
+        \metric &
+            \metrictext{Number of transformations to consider as a reason or comparable} \\
         \bottomrule
     \end{tabular}
     \caption[Goals, questions and metrics for orchestration]{Goals, questions and metrics for orchestration evaluation}
     \label{tab:correctness_evaluation:gqm_orchestration}
 \end{table}
-}
 
 % \gqm{Usefulness}{Show that the orchestration strategy helps transformation developers to find the cause for a transformation network not being able to find a consistent orchestration.}
 % {Is it easier to find the reasons for the network not being able to resolve a change with the proposed strategy than with other strategies?}
