@@ -450,54 +450,78 @@ Using a different \gls{SMT} solver or, more generally, even a different approach
 % We did especially not find a scenario, in which our definition of left-equal redundancy was too strict for proving compatibility.
 
 
-\begin{copiedFrom}{SoSym MPM4CPS}
-
 \subsection{Discussion}
 
-%%
-%% Benefits of the approach
-%%
-The presented approach aims to support developers of transformation networks to independently develop individual transformations, i.e., parts of the network, without aligning the consistency relations on which the transformations are based a priori, but allows them to check their compatibility during or after development.
-For that reasons, it provides a benefit by automating a process that currently requires manual effort by either aligning consistency relations with each other or by defining test cases, which are able to validate but not to verify compatibility, i.e., which cannot make any all-quantified statements about compatibility.
-Even if the approach had a high degree of conservativeness, the approach would be beneficial for the combination of independently developed transformation.
-First, there is still a chance that the approach is able to prove compatibility for a given set of relations.
-Second, if the approach is not able to prove compatibility, it may still find some redundant relations and thus reduces the effort for the user to investigate the remaining relations for contradictions.
-It would even be possible to define an interactive approach, combining the removal of redundant relations by proof and by user decision, as we will propose in \autoref{sec:futurework:compatibilityprocess}.
-%
-In the following, we discuss threats to the validity of our evaluation and discuss limitations of both the approach and our evaluation.
+\mnote{Result summary}
+The evaluation of our compatibility analysis approach has shown that in the scenarios considered in the case study it operates correctly and shows a low degree of conservativeness, i.e., it is not able to validate compatibility in only few cases.
+This indicates correctness and high applicability of the approach.
+Still, there are some threats to the validity of these results, which we will discuss after general conclusions on the benefits of the proposed approach.
 
-%\subsubsection{Algorithmic Degrees of Freedom}
-%Discuss different possibility for decomposition and problem regarding "false" decompositions.
+\mnote{General benefits due to full automation}
+In general, the approach is supposed to support transformation developers in designing transformation networks by checking compatibility of transformations, or more precisely their underlying consistency relations, during their individual development or when combining them to a network.
+In \autoref{chap:compatibility:informal:prevention} with the example depicted in \autoref{fig:compatibility:unwanted_behavior}, we have shown incompatible consistency relations can prevent the transformations from finding consistent models.
+Thus, incompatibilities will eventually lead to failing transformation network, which, in turn, require transformation developers to find the reasons for that.
+Our approach provides a benefit by preventing such issues or at least by supporting the developer in finding the reasons for them when running the analysis after a failure occurs.
+Due to its full automation, no further effort than running the analysis is necessary.
+Additionally, a manual process of ensuring compatibility or finding incompatibilities requires manual alignment of transformations with each other or the defining of test cases, which are only able to validate compatibility, but not to verify it.
+Thus, such manual techniques can only make existentially quantified statements about the existence of incompatibilities, whereas our approach can make universally quantified statements about the absence of incompatibilities.
+
+\mnote{Benefits even with high degree of conservativeness}
+Finally, even if the proposed approach had a high degree of conservativeness, i.e., if it produces a higher degree of false negatives in other scenarios than our evaluation, the approach still provides benefits.
+First, the approach may still be able to prove compatibility at least in few cases.
+Second, even if the approach cannot prove compatibility, it may at least detect some redundant relations and thus reduces the effort for the transformation developer to find incompatible relations.
+If this is often necessary, it would be possible to define in interactive approach in which the removal of redundant relations by proof of the approach and by user decision is combined, which we will proposed in future work in \autoref{chap:futurework:correctness:compatibility:process}.
+In such a process, the user could be asked to manually find and declare redundant relations if the automated approach is not able to find further ones.
+Afterwards, the automated approach can proceed.
 
 
-\subsection{Threats to Validity}
+% %%
+% %% Benefits of the approach
+% %%
+% The presented approach aims to support developers of transformation networks to independently develop individual transformations, i.e., parts of the network, without aligning the consistency relations on which the transformations are based a priori, but allows them to check their compatibility during or after development.
+% For that reasons, it provides a benefit by automating a process that currently requires manual effort by either aligning consistency relations with each other or by defining test cases, which are able to validate but not to verify compatibility, i.e., which cannot make any all-quantified statements about compatibility.
+% Even if the approach had a high degree of conservativeness, the approach would be beneficial for the combination of independently developed transformation.
+% First, there is still a chance that the approach is able to prove compatibility for a given set of relations.
+% Second, if the approach is not able to prove compatibility, it may still find some redundant relations and thus reduces the effort for the user to investigate the remaining relations for contradictions.
+% It would even be possible to define an interactive approach, combining the removal of redundant relations by proof and by user decision, as we will propose in \autoref{sec:futurework:compatibilityprocess}.
+% %
+% In the following, we discuss threats to the validity of our evaluation and discuss limitations of both the approach and our evaluation.
 
-Although we designed our evaluation in a way such that it gives us appropriate insights on correctness and applicability of the approach, there may be limitations regarding its internal and external validity. %, especially arising from the case studies.
+
+\subsubsection{Threats to Validity}
+
+\mnote{Limitations of external validity}
+We have designed the evaluation carefully, such that it gives us appropriate insights regarding correctness and applicability of the approach.
+Still, due to limitations in complexity of the considered scenarios there are threats especially regarding external validity of the results.
+This is why we emphasized that all results only serve as an indicator for the properties to be shown.
 
 %\paragraph{Internal Validity}
-\paragraph{Scenario Selection}
-We developed the scenarios specifically for the evaluation of our approach.
-Due to that reason, they may not be sufficiently representative for actual transformation networks. 
-However, the scenarios were specifically designed to test different aspects of the approach.
-They represent an extensive set of consistency relations and especially different types of relations, also considering edge cases that may be rare in practical scenarios.
-That even provides a benefit regarding practical consistency relation specifications.
+\mnote{Scenario selection}
+The evaluation scenarios of the case study were developed specifically for the evaluation of the proposed approach.
+Thus, they may potentially not sufficiently represent actual transformation networks.
+On the other hand, the scenarios were designed to test different aspects of the approach, they represent an extensive set of consistency relations and also consider edge cases.
+Scenarios not developed for the evaluation may not or only rarely cover specific and edge cases.
+In fact, most meaningful results could potentially be achieved with a combination of externally developed scenarios and evaluation-specific scenarios.
+However, the limited availability of scenarios, especially of scenarios developed with the tools we used for the prototype and those containing incompatibility, prevents this.
 
-\paragraph{Scenario Complexity}
-The scenarios only comprise OCL constructs that are currently supported by our approach.
-This may be a bias, because unsupported constructs are not covered by the evaluation.
-However, the algorithm would not deliver any results in such scenarios anyway, thus applying it to them would not give further insights.
-Additionally, the unsupported constructs are only a limitation of the current implementation and not a conceptual limitation of the approach.
-Finally, the limitation in complexity of the relations may also lead to the fact that we do not cover cases that actually occur in practice but for which our definition for redundancy is too strong to prove compatibility.
-This is an actual limitation that has to be considered in further evaluations.
+\mnote{Scenario complexity}
+The defined scenarios only contain \gls{OCL} constructs that the approach currently supports.
+Thus, unsupported constructs are not covered by the evaluation, which may be a bias.
+The algorithm would, however, not yield a result in such scenarios anyway, thus this would not give further insights.
+Additionally, this is only a limitation of the implementation rather than a conceptual limitation of the approach.
+The actual threat in this is that more complex relations, which are currently not supported by the implementation, are not covered by our definition of redundancy anymore.
+That would be an actual limitation not only of the implementation but also the formal approach.
+In consequence, this has to be further evaluated in subsequent evaluations.
 
-\paragraph{Scenario Size}
-The considered scenarios are rather small, as they only consider up to four metamodels and only few consistency relations.
-Actual consistency relations will involve larger metamodels and consistency relations.
-However, the inductive characteristics of our approach makes it independent from the number of metamodels and relations to consider.
-One property affected by the scenario size is the performance of the approach, which we discuss in \autoref{sec:evaluation:limitations}.
+\mnote{Scenario size}
+The considered scenarios only consider up to four metamodels with pairwise consistency relations.
+Actual transformation networks will probably contain more and larger metamodels and consistency relations.
+This is, however, not a threat to validity regarding correctness, because the inductive definition of the approach makes it independent from the number of metamodels and relations to consider.
+It may only affect applicability, as increasing size may lead to logic formulae which the \gls{SMT} solver is not able to resolve anymore.
+The size of scenarios may especially affect the performance and scalability of the approach, which we did not analyze in our evaluation and discuss in the subsequent limitations.
 
 % In consequence, some of these scenarios may be rare in practice, such that 
-% Scenario selection (artifical): Scenarios were specifically developed to test different aspects of the operationalized approach. Thus, they may not be representative for actual specifications used in transformation networks.
+% Scenario selection (artificial): Scenarios were specifically developed to test different aspects of the operationalized approach. Thus, they may not be representative for actual specifications used in transformation networks.
 % But: Scenarios provide an extensive set of relations, concerning different types of relations and as different scenarios as possible. Some of the scenarios may be rare in practice, even giving a benefit explicitly specifying them.
 % Discuss: Especially affects appropriateness of redundancy definition (relations not complex enough)
 
@@ -509,79 +533,105 @@ One property affected by the scenario size is the performance of the approach, w
 % But: Would not make sense, since the algorithm does not deliver any results for such relations.
 % But: Is not a conceptual limitation but only a limitation of the current implementation.
 
-\paragraph{Conclusion}
-In consequence, our evaluation only gives an initial indicator for the applicability of our approach due to the limited set and complexity of scenarios.
-To improve evidence in external validity, applying the approach to further, more practical transformation networks would be beneficial.
+\mnote{Conclusion of threats}
+In consequence, our evaluation gives an initial indicator for the correctness and applicability of our approach based on well-selected evaluation scenarios but potentially restricted in external validity due to the limited set and complexity of scenarios.
+To improve evidence in external validity, applying the approach to further and larger transformation networks would be beneficial.
 However, acquiring such a networks is difficult.
-At least existing networks contain transformations that are aligned with each other and thus do not allow to validate cases in which consistency relations are actually incompatible.
-It may be possible to reduce that problem by taking existing sets of consistency relations and manually extending them with either redundant or incompatible consistency relations, checking whether the approach is able to correctly remove the added redundant relations or detect incompatibility.
+Especially in existing network, transformations can be expected to be aligned with each other, thus not containing incompatibilities and limiting the evaluation to positive cases.
+A possibility to reduce that problem would be the manual extension or alternation of such networks by adding transformations with redundant or incompatible consistency relations.
+This would directly deliver a ground truth against which the results of the approach on these modified network can be validated.
 
 %\paragraph{External Validity}
-
 % Only initial results regarding correctness and applicability due to limited set of scenarios.
 % But: Conservativeness is proven.
 % But: Hard to acquire further transformation networks, especially those in which the transformations were not developed together and are thus aligned. Problem may be reduced by simulated redundancy, i.e., taking a set of compatible consistency relations and adding redundant one, validating whether our approach is able to remove them again and deliver a compatible network.
 
 
+\subsubsection{Limitations}
 
-\subsection{Limitations}
-\label{sec:evaluation:limitations}
+\mnote{Implementation and evaluation limitations}
+We discuss two types of limitations of our approach.
+First, we consider limitations of the current state of implementation.
+Second, we discuss limitations of the current state of evaluation, which may have masked limitations of the current concept.
 
-Current limitations of our approach especially arise from its operationalization and the limitations of SMT solvers.
-Additionally, we are currently only able to argue for the benefits and performance of our approach, but further evaluation would be necessary to validate these arguments.
+% Current limitations of our approach especially arise from its operationalization and the limitations of SMT solvers.
+% Additionally, we are currently only able to argue for the benefits and performance of our approach, but further evaluation would be necessary to validate these arguments.
 
-\paragraph{Operationalized Approach}
-The operationalized approach has both fundamental and technical limitations.
-First, SMT solvers are limited in a way that they are not able to analyze all types of expressions regarding satisfiability.
-In consequence, even if all kinds of \qvtr respectively OCL constructs can be transformed into appropriate logic formulae, it may not be able to check them for satisfiability, as we have seen in the applicability evaluation.
-Second, we do not yet provide a translation for all kinds of OCL constructs to logic formulae, such that not all \qvtr relations are supported.
-However, this is a technical limitations that can be solved by implementing these translations.
+\mnote{Practical approch realization}
+The proposed practical approach for \gls{QVTR} has fundamental as well as technical limitations.
+First, \gls{SMT} solvers are limited such that they cannot analyze all kinds of formulae regarding satisfiability.
+Thus, even if we can transform all kinds of \gls{QVTR} and \gls{OCL} constructs into logic formulae, they cannot necessarily be checked for satisfiability, as we have shown in the applicability evaluation.
+Second, we do not yet support all kinds of \gls{QVTR} relations, as we do not yet provide a transformation for all kinds of \gls{OCL} constructs into logic formulae.
+This is, however, only a technical limitation that can be solved by additional implementation effort.
+We discuss this as future work in \autoref{chap:futurework:correctness:compatibility:completion}.
+Additionally, we discuss the ability to use completely different realization approaches to circumvent limitations of \gls{SMT} solvers as future work in \autoref{chap:futurework:correctness:compatibility:alternatives}.
 
-\paragraph{Benefits Evaluation}
-We did not provide an evaluation for the claimed benefits of our approach.
-This is due to two reasons.
-First, we already argued why the approach provides a benefit anyway due to being fully automated and not requiring further input.
-Second, to the best of our knowledge, there are no competitive approaches to compare our approach with.
-In consequence, only an empirical study in which the approach is practically applied would give further insights to its benefits for a user, apart from the obvious benefits given by the automation of a currently manual process.
-%No benefits analyzed: To the best of our knowledge no other approaches to compare with. Claim that automating a process that would have to be performed manually always provides a benefit.
+\mnote{Benefits evaluation}
+We have not provided an evaluation for the benefits that we claim for our approach.
+First, to the best of our knowledge, there are not competitive approaches to compare our one with.
+Second, it automates a manual process without requiring additional effort, thus compared to the baseline of performing the process manually it provides any inherent and essential benefit.
+Thus, further empirical evaluation in a user study could only provide a quantitative measure of the benefits rather than the qualitative one we give by argumentation.
+Such an evaluation could especially consider a development process in which the approach is used and evaluate whether that whole process improves by using our approach.
+We discuss such a process as future work in \autoref{chap:futurework:correctness:compatibility:process}.
 
-\paragraph{Performance Evaluation}
-We did neither formally evaluate nor measure performance of our approach.
-If the approach required to much time to be executed on a set of transformations, its applicability would be reduced.
-SMT solvers, such as the used Z3 solver, depend on heuristics, which makes their performance unpredictable.
+\mnote{Optimality of compatibility notion}
+The notion of compatibility was developed from the goal of finding contradictory consistency relations that can prevent transformations from finding consistent models after changes.
+Additionally, it prevents from the specification of contradictory and thus unintended consistency relations.
+Although we have shown at examples that our notion of compatibility fulfills both these notions, it is unclear whether this notion is kind of optimal in the sense that there exists no other notion that covers even more unwanted cases.
+Evaluating the central purpose of the approach to improve the ability of transformations to find consistent models, i.e., to improve dealing with the orchestration problem, is part of our future work (see \autoref{chap:futurework:correctness:compatibility:orchestration}).
+%\todo{future work on benefits for consistency repair}
+%\todo{Not shown that compatibility notion is reasonable. We derived it theoretically, but whether its actually fits to some intuitive notion of incompatibility and covers all cases of consistency relations that do actually not fit together and could be detected automatically, is unclear.
+%Maybe the notion is even to restricted because it is necessary to pass such states that are not forbidden, but as discussed, this is really unlikely, because the models can never occur in any consistent tuple of models.}
+% On the other hand, the compatibility notion may even be too restrictive in two senses.
+% First, it may exclude the consideration of models states that are actually necessary as transient states in a transformation network. As we have discussed in \autoref{chap:compatibility:informal:prevention} this is unlikely because the excluded models can never occur in any consistent tuple of models.
+% This does, however, lead to the situation that specific user inputs are forbidden, although they could be resolved by the transformations.
+% For example, consistency relations may require some string attribute to start uppercase.
+% If the user enters a value starting lowercase, the transformation could easily resolve that.
+% The notion of compatibility, however, forbids that, because no models with the lowercase attribute value can ever be consistent
+
+\mnote{Optimality of redundancy notion}
+We have already discussed that we defined the specific notion of left-equal redundancy (see \autoref{def:leftequalredundancy}), which has the property of being compatibility-preserving (see \autoref{theorem:redundancycompatibility}).
+It is however unclear whether there may be a more relaxed notion of redundancy that is still compatibility-preserving.
+Our implementation follows an even stricter notion of redundancy and still no limitations of applicability occurred.
+If, however, other case studies reveal the necessity of a weaker redundancy notion to be able to prove compatibility in more cases, either the notion used in the implementation needs to be relaxed or even the formal foundation needs to be adapted.
+We discuss that as future work in \autoref{chap:futurework:correctness:compatibility:redundancy}.
+%\todo{Future Work: Relaxation of redundancy}
+
+% From Slides:
+% \begin{itemize}
+%     \item Conservativeness: Undecidability leads to false negatives
+%     \item Strictness: Some formally excluded cases possibly should be allowed
+% \end{itemize}
+% Both ensure that no false positives are produced
+% DAS STIMMT NICHT: Die Transformationen können natürlich einen lowercase Wert zu uppercase machen. Das geht aber unabhängig von Kompatibilität, denn deswegen muss ein lowercase Wert ja noch lange nicht kompatibel sein.
+% Strictness Limitation
+% \begin{itemize}
+%     \item Formalism cannot (easily) be adapted context-specifically
+%     \item Example: A String attribute is changed, and the transformations ensure that it starts uppercase
+%     \begin{itemize}
+%         \item Relations may be incompatible because for lowercase values no globally consistent models exist
+%         \item However, such behavior may be wanted
+%     \end{itemize}
+%     \item Hard to encode this into a formalism
+% \end{itemize}
+% Solution: Manually declare redundancies that do not follow the formalism -> Future Work
+
+\mnote{Performance and scalability evaluation}
+We have neither measured nor formally evaluated the performance and scalability of our approach and especially its practical realization.
+Applicability may be affected if the approach required too much time to be executed.
+\gls{SMT} solvers, such as the used Z3 solver, depend on heuristics, which makes their performance unpredictable.
 Thus, it would be important to evaluate performance of the approach in a case study.
 In our case study, %introduced in \autoref{sec:evaluation:methodology}, 
-we did observe any time-consuming scenarios.
-However, transformation networks with more and larger transformations and especially many cycles need to be investigated to make generalizable statements on the performance.
+we did not observe any time-consuming scenarios.
+However, transformation networks with more and larger transformations and especially many cycles of consistency relations need to be investigated to make generalizable statements on the performance and especially the scalability of the approach.
+Since the approach is applied as an offline analysis, which does not require instant feedback, it must not fulfill real-time requirements.
+Results should, however, still occur in an acceptable amount of time to achieve acceptance of the approach.
+%\todo{Scalability analysis, no performance evaluation made}
 
-\todo{Not shown that compatibility notion is reasonable. We derived it theoretically, but whether its actually fits to some intuitive notion of incompatibility and covers all cases of consistency relations that do actually not fit together and could be detected automatically, is unclear.
-Maybe the notion is even to restricted because it is necessary to pass such states that are not forbidden, but as discussed, this is really unlikely, because the models can never occur in any consistent tuple of models.}
 
-From Slides:
-\begin{itemize}
-    \item Conservativeness: Undecidability leads to false negatives
-    \item Strictness: Some formally excluded cases possibly should be allowed
-\end{itemize}
-Both ensure that no false positives are produced
-
-Strictness Limitation
-\begin{itemize}
-    \item Formalism cannot (easily) be adapted context-specifically
-    \item Example: A String attribute is changed, and the transformations ensure that it starts uppercase
-    \begin{itemize}
-        \item Relations may be incompatible because for lowercase values no globally consistent models exist
-        \item However, such behavior may be wanted
-    \end{itemize}
-    \item Hard to encode this into a formalism
-\end{itemize}
-Solution: Manually declare redundancies that do not follow the formalism -> Future Work
-
-Additional:
-Although compatibility ensures that for any model element with restrained consistency a consistent model tuple can be found, it does not mean that consistency preservation rules find that model tuple. It only improved the ability to do so.
-
-Unknown how good the approach can be integrated into a development process, continuous execution etc.
-
-Correctness only shown for constructs used in study. If there are further constructs that have not been considered in neither case study nor implementation but are relevant, the results do not generalize.
+\todo{Write future work}
+% Additional:
+% Although compatibility ensures that for any model element with restrained consistency a consistent model tuple can be found, it does not mean that consistency preservation rules find that model tuple. It only improved the ability to do so.
 
 % \iffalse
 % Functional correctness:
@@ -594,4 +644,3 @@ Correctness only shown for constructs used in study. If there are further constr
 %     -> Example scenarios, execution results
 % \fi
 
-\end{copiedFrom} % SoSym MPM4CPS
