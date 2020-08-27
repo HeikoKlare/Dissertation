@@ -223,6 +223,11 @@ Although we applied the approach for achieving synchronizing transformations aft
 For the conduction of the case studies presented in the subsequent section, we have used a prototypical implementation in the \vitruv framework (see \autoref{chap:foundations:multiview:vitruv})~\cite{klare2020Vitruv-JSS}.
 It support the view-based development of consistent systems by managing a consistent representation of all information about a software systems, from which views can be derived to be modified by the user.
 Internally, the system is represented as a set of models of existing or newly defined languages, which are kept consistent by means of bidirectional model transformations.
+The transformations operate in an incremental and delta-based way. 
+It is incremental, because it updates the existing models rather than creating new ones upon changes.
+It operates delta-based, as is does not receive the modified state of a model, but a delta between the old and the new state.
+This conforms to what we introduced as a change in our formalism (see \autoref{def:change}).
+To achieve this, the framework records atomic changes to the models, i.e., element creations and deletion, as well as attribute and references changes, as discussed in \autoref{chap:synchronization:achieving:changes} and depicted in \autoref{fig:synchronization:change_feature_model}, and passes them to the transformations.
 Currently, it lacks support for the combination of multiple transformation to a network for keeping multiple models consistent, which is why we implemented our approaches in a case study with that framework.
 
 \mnote{\reactionslanguage for unidirectional consistency preservation rules}
@@ -287,6 +292,22 @@ The implementation of the framework with the \reactionslanguage is available in 
 
 \subsection{Case Studies}
 
+\mnote{Transformations for \gls{PCM}, \gls{UML} and Java}
+We have performed two case studies based on one set of metamodels and transformations between them defined in the \reactionslanguage.
+The case study employs the metamodels \gls{PCM} for component-based software architecture descriptions, \gls{UML} for object-oriented software design, and Java for source code development.
+Transformations are defined between each pair of these metamodels, based on consistency relations that we discuss in more detail in the following.
+We haven chosen these metamodels and transformations for our case studies, because except for one transformation they were explicitly developed independently without the goal of using them within a transformation network, yielding the possibility to evaluate our categorization and resolution approaches.
+The transformations even assumed that they are only executed in one direction after a user change.
+It is difficult to find further comparable examples, because we require transformations whose induced graph contains cycles as otherwise most of the discussed problems do not occur at all.
+If such transformations exist, however, they were usually defined in a way that they properly work together, as otherwise they would not be usable at all.
+
+\mnote{Two sets of underlying consistency relations}
+The used transformations rely on two sets of consistency relations.
+First, the relations between \gls{PCM} and object-oriented design in both \gls{UML} and Java were defined by and explained in detail by \textcite{langhammer2015a, langhammer2017a}.
+He, in particular, proposed different options for relations between \gls{PCM} and Java, which can be generalized to object-oriented design.
+We selected the mapping of architectural components to classes as the one which was most intensively studies and whose implementation is most mature.
+Second, the relations between \gls{UML} and Java reflect the usually implicitly known mapping between the two languages, as both describe the object-oriented structure of a software system in a similar way.
+
 \begin{table}
 	\centering 
     \small
@@ -296,24 +317,39 @@ The implementation of the framework with the \reactionslanguage is available in 
 		\toprule
         \textbf{\gls{PCM} Element}  & \textbf{Object-oriented Design Element} \\
         \midrule
-		Repository            & Three packages: main, contracts, data types\\
-		BasicComponent 		& Package within the main package and a public component realization class within the package \\
-		OperationInterface		   	    & Interface in the contracts package \\
+		Repository              & Three packages: main, contracts, data types\\
+		BasicComponent 		    & Package within the main package and a public component realization class within the package \\
+		OperationInterface		& Interface in the contracts package \\
 		Signature \& parameters & Method \& parameters \\
-		CompositeDatatype     & Class with getter and setter (or appropriate read-only property) for inner types\\
-		CollectionDatatypes   & Class that inherits from a collection type (e.g. \texttt{ArrayList} in Java) \\
+		CompositeDatatype       & Class with getter and setter (or appropriate read-only property) for inner types\\
+		CollectionDatatypes     & Class that inherits from a collection type (e.g. \texttt{ArrayList} in Java) \\
 		RequiredRole		    & Field typed with required interface in the component realization class and constructor parameter for the field in the component realization class\\
 		ProvidedRole		    & Component realization class of providing component implements the provided interface\\
 		\bottomrule
 	\end{tabular}
-	\caption[Consistency relation between PCM and UML/Java]{Consistency relations between elements of the \gls{PCM} repository metamodel and object-oriented design elements (\gls{UML}/Java), adapted from \cite[Table 4.1]{langhammer2017a}.}
+	\caption[Consistency relations between PCM and UML/Java]{Consistency relations between elements of the \gls{PCM} repository metamodel and object-oriented design elements (\gls{UML}/Java), adapted from \cite[Table 4.1]{langhammer2017a}.}
 	\label{tab:correctness_evaluation:errors:pcm_oo_rules}
 \end{table}
 
-\autoref{tab:correctness_evaluation:errors:pcm_oo_rules} shows relations between \gls{PCM} models and object-oriented design, which can be reflected in both \gls{UML} and Java.
-The complete relations were defined by and are explained in detail in \cite{langhammer2015a,langhammer2017a}.
-They were also formalized for the case study in \cite[Section 5]{syma2018ma}.
+\mnote{Relations between \gls{PCM} and object-oriented design}
+\autoref{tab:correctness_evaluation:errors:pcm_oo_rules} shows the relevant consistency relations between \gls{PCM} models and object-oriented design, which can be reflected in both \gls{UML} and Java.
+A \gls{PCM} repository model consists of data types, interfaces and components, which are all contained in one repository.
+The repository is represented as a package structure in object-oriented design.
+Components are represented as a package containing a so called \emph{component realization class}.
+Interfaces with their signatures and parameters are mapped to corresponding object-oriented elements as they are.
+Composite data types are represented as a class containing the composed types and collection data types are represented as subclasses of any collection type.
+Finally, provided and required roles define that a component provides or requires an interface.
+Provided roles are realized by an implementation of the provided interfaces in the component realization class.
+Requires roles, on the contrary, are represented as a field in the component realization class, which must be set via constructor parameter.
 
+\mnote{Transformations between \gls{PCM} and \gls{UML}, as well as \gls{PCM} and Java}
+The preservation of consistency between \gls{PCM} and Java according to these relations using the \reactionslanguage was implemented in the Master's thesis of this thesis' author~\cite{klare2016b} in the context of the dissertation of \textcite{langhammer2017a}.
+At that point in time, the transformation was only defined to be executed once in one direction and, in particular, not to be used in a transformation network.
+In addition, \citeauthor{syma2018ma} defined the bidirectional transformation between \gls{PCM} and \gls{UML} in his Master's thesis~\cite{syma2018a}.
+He also proposed a formal specification of those relations and their preservation~\cite[Section 5]{syma2018ma}.
+This transformation was defined to be used in a transformation network and therefore implement the matching of existing elements according to \autoref{chap:synchronization:achieving:identification} to achieve synchronization of the transformation.
+
+\mnote{Exclusion of behavioral consistency between \gls{PCM} and Java}
 Actually, \gls{PCM} models can also contain \emph{service effect specifications}, which are an abstract specification of the behavior of a service provided by a component.
 Consistency between these behavior specifications in \gls{PCM} and their implementation in Java code was researched in detail by \textcite{langhammer2017a} and is one of the reasons why in this scenario consistency between \gls{PCM} and Java cannot only be expressed across \gls{UML}.
 We do, however, not consider that consistency relation in this case study, because we focus on structural consistency relations, as motivated in \autoref{chap:networks:notions:types}.
@@ -328,27 +364,64 @@ Since these behavioral descriptions share an isolated relation between \gls{PCM}
 		\toprule
         \textbf{\gls{UML} Element}  & \textbf{Java Code Element} \\
         \midrule
-        Package            & Package\\
-		Class            & Class\\
-		Enum		& Enum \\
-		Interface		   	    & Interface \\
-        Method & Method \\
-        Parameter $[$0-1 .. 1$]$ & Parameter of same type \\
-        Parameter $[$0-* .. 2-*$]$ & Parameter of collection type with type parameter \\
-        Field $[$0-1 .. 1$]$     & Field of same type\\
-        Field $[$0-* .. 2-*$]$     & Field of collection type with type parameter\\
-        Association $[$0-1 .. 1$]$   & Field of same type\\
-        Association $[$0-* .. 2-*$]$   & Field of collection type with type parameter\\
+        Package                         & Package\\
+		Class                           & Class\\
+		Enum		                    & Enum \\
+		Interface		   	            & Interface \\
+        Method                          & Method \\
+        Parameter $[$0-1 .. 1$]$        & Parameter of same type \\
+        Parameter $[$0-* .. 2-*$]$      & Parameter of collection type with type parameter \\
+        Field $[$0-1 .. 1$]$            & Field of same type\\
+        Field $[$0-* .. 2-*$]$          & Field of collection type with type parameter\\
+        Association $[$0-1 .. 1$]$      & Field of same type\\
+        Association $[$0-* .. 2-*$]$    & Field of collection type with type parameter\\
 		\bottomrule
 	\end{tabular}
 	\caption[Consistency relation between UML and Java]{Consistency relations between \gls{UML} class models and Java code.}
 	\label{tab:correctness_evaluation:errors:uml_java_rules}
 \end{table}
 
-\autoref{tab:correctness_evaluation:errors:pcm_oo_rules} shows relations between \gls{UML} models and Java models.
-The relations are straight forward and mostly one-to-one mappings, since we only consider Java code elements also present in the abstraction provided by the \gls{UML}.
-The only special cases are fields, which can be expressed as associations in \gls{UML}, as well as parameters, fields and associations, which can have multiplicities in \gls{UML} that have to be expressed as collection types with an appropriate type parameter in Java if higher the upper bound is higher than 1.
+\mnote{Relations between \gls{UML} and Java}
+\autoref{tab:correctness_evaluation:errors:pcm_oo_rules} shows the relevant consistency relations between \gls{UML} models and Java models.
+They reflect the intuitive notion of the relation between \gls{UML} and Java of mostly one-to-one mappings, since we do only consider Java elements that are present in the abstraction provided by the \gls{UML}, i.e., we especially do not consider method bodies.
+The only special cases are fields having a type of another class in Java classes, which can also be expressed as associations in \gls{UML}, as well as parameters, fields and associations, which can have multiplicities in \gls{UML} that have to be expressed as collection types with an appropriate type parameter in Java if the upper bound is higher than 1.
 
+\mnote{Transformations between \gls{UML} and Java}
+The preservation of consistency between \gls{UML} and Java according to these relations was implemented using the \reactionslanguage within a Bachelor's thesis supervised by the author of this thesis.
+Like for the transformation between \gls{PCM} and Java, this one was implemented to be used in one direction only and thus, especially, not to be used in a transformation network.
+
+\mnote{Implementation of transformations with test cases}
+The implementations of all transformations are available in a corresponding GitHub repository of the \vitruv project~\cite{vitruvCBSEGithub}.
+Each of them also contains a sophisticated set of test cases, which were supposed to test each transformation only executed in one direction after changes to one model.
+We reused and extended these test cases for our case study.
+This setup of independently developed transformations and test cases ensures that there is only low risk of the transformations and test cases to be initially aligned with each other, which could result in a bias of the results.
+
+\begin{table}
+    \centering
+    \small
+    \renewcommand{\arraystretch}{1.4}
+    \rowcolors{2}{}{gray!10}
+    \begin{tabular}{L{7em}C{4em}C{4em}C{4em}}
+        \toprule
+        \textbf{$\downarrow$ From} / \textbf{To $\rightarrow$}& \gls{PCM} & \gls{UML} & Java \\
+        \midrule
+        \gls{PCM} & -   & 57    & 40 \\
+        \gls{UML} & 68  & -     & 63 \\
+        Java      & 16  & 49    &   \\
+        \bottomrule
+    \end{tabular}
+    \caption[Complexity of case study transformations]{Complexity of the case study transformations in terms of the number of \reactions in each consistency preservation rule, i.e., the number of change types it is able to react to.}
+    \label{tab:correctness_evaluation:errors:study_complexity}
+\end{table}
+
+\mnote{Complexity of case study transformations}
+To give an impression of the complexity of the transformations, we depict the number of \reactions in each of the six unidirectional consistency preservation rules in \autoref{tab:correctness_evaluation:errors:study_complexity}.
+This conforms to the number of change types each of these consistency preservation rules is able to react to.
+The lower number of \reactions between Java and \gls{PCM} is mainly due to the fact that several elements of the \gls{PCM} are mapped to the same elements in Java.
+For example, components and all kinds of data types are mapped to classes in Java, such that the \reactions in Java must react to less change types and instead make more distinctions within the routines to separate the affected consistency relations.
+
+
+\todo{Go on here}
 
 Zwei Case Studies (Torsten/Timur)
 \gls{PCM}
@@ -419,6 +492,9 @@ PCM<>UML direkt mit Patterns entwickelt, UML<>Java nicht, daher hohe Anzahl Fehl
 PCM-UML: 39 tests
 UML-Java: 110 tests
 + 5 Tests for MediaStore creation as PCM and UML model
+In total, we have used 187 (sic!) test cases that perform different kinds of relevant fine-grained changes in instances of all metamodels, such as insertions, modifications and deletions of all types of elements that have to be kept consistent.
+Additionally, we have simulated the construction of the Media Store system~\cite{strittmatter2016a}, which is a sophisticated case study system for the \ac{PCM}.
+This system is available as a \ac{PCM} model as well as Java code.
 
 Unterschiedliche Anzahl durch unterschiedliche Granularität der Testfälle
 
@@ -437,34 +513,34 @@ Started with PCM<>UML tests, then consecutively added transformations, first UML
 \end{figure}
 
 
-The evaluation is based on a case study developed for the Ecore-based \textsc{Vitruvius} framework~\cite{kramer2013b} for consistent system development, which is available on GitHub~\cite{vitruvFrameworkGithub}.
-\textsc{Vitruvius} uses incremental, delta-based consistency preservation. 
-It records atomic changes in models and executes consistency preservation specifications, according to \autoref{def:consistency_preservation_specification}, to inductively preserve consistency.
-Those specifications are written in the Reactions language~\cite{klare2016b}, which is a language for unidirectional transformations at the operationalization level.
+% The evaluation is based on a case study developed for the Ecore-based \textsc{Vitruvius} framework~\cite{kramer2013b} for consistent system development, which is available on GitHub~\cite{vitruvFrameworkGithub}.
+% \textsc{Vitruvius} uses incremental, delta-based consistency preservation. 
+% It records atomic changes in models and executes consistency preservation specifications, according to \autoref{def:consistency_preservation_specification}, to inductively preserve consistency.
+% Those specifications are written in the Reactions language~\cite{klare2016b}, which is a language for unidirectional transformations at the operationalization level.
 
-The case study is based on consistency between UML class models, instances of the \ac{PCM}, which is an architecture description language for performance prediction~\cite{reussner2016b}, and Java code.
-For these metamodels, different persons have independently developed transformations~\cite{kramer2017a}, especially without knowing about the other transformations with which they shall be combined.
-This made the specifications prone to mistakes at the modularization and operationalization level.
-The specifications are available on GitHub~\cite{vitruvCBSEGithub}.
-For the evaluation, we employ the pairs of unidirectional specifications between \ac{PCM} and UML, as well as between UML and Java.
-Although this induces only two bidirectional specifications, we have four transformations since both directions of the transformations have been specified independently.
-They have to interoperate correctly, may also contradict, and need to perform element matching.
-% In consequence, this is not a drawback or threat in contrast to a case study of at least three independently developed \acp{BX} that are prone to interoperability issues (apart from the fact that it is hard to find such a case study).
-Thus, our scenario is prone to the same mistakes as a scenario with three or more \acp{BX}.
+% The case study is based on consistency between UML class models, instances of the \ac{PCM}, which is an architecture description language for performance prediction~\cite{reussner2016b}, and Java code.
+% For these metamodels, different persons have independently developed transformations~\cite{kramer2017a}, especially without knowing about the other transformations with which they shall be combined.
+% This made the specifications prone to mistakes at the modularization and operationalization level.
+% The specifications are available on GitHub~\cite{vitruvCBSEGithub}.
+% For the evaluation, we employ the pairs of unidirectional specifications between \ac{PCM} and UML, as well as between UML and Java.
+% Although this induces only two bidirectional specifications, we have four transformations since both directions of the transformations have been specified independently.
+% They have to interoperate correctly, may also contradict, and need to perform element matching.
+% % In consequence, this is not a drawback or threat in contrast to a case study of at least three independently developed \acp{BX} that are prone to interoperability issues (apart from the fact that it is hard to find such a case study).
+% Thus, our scenario is prone to the same mistakes as a scenario with three or more \acp{BX}.
 
-The transformations realize rather trivial constraints between UML and Java.
-Most elements are mapped one-to-one, whereas multi-valued parameters and associations are mapped to collection types in Java.
-The relations between \ac{PCM} and UML were proposed by \textcite{langhammer2015a}.
-Interfaces are equally represented, \ac{PCM} components and data types are mapped to classes in UML.
-%Interfaces and data types are mapped to their counterparts in the different metamodels.
-\ac{PCM} components contain \acp{SEFF}, which are an abstraction of their behavior specification used for performance prediction. 
-Those \acp{SEFF} are mapped to methods in UML and Java.
-In total, the transformations between \ac{PCM} and UML react to 57 change types in \ac{PCM} and 65 change types in UML, and the transformations between UML and Java react to 66 change types in UML and to 48 change types in Java to restore consistency in the other model.
+% The transformations realize rather trivial constraints between UML and Java.
+% Most elements are mapped one-to-one, whereas multi-valued parameters and associations are mapped to collection types in Java.
+% The relations between \ac{PCM} and UML were proposed by \textcite{langhammer2015a}.
+% Interfaces are equally represented, \ac{PCM} components and data types are mapped to classes in UML.
+% %Interfaces and data types are mapped to their counterparts in the different metamodels.
+% \ac{PCM} components contain \acp{SEFF}, which are an abstraction of their behavior specification used for performance prediction. 
+% Those \acp{SEFF} are mapped to methods in UML and Java.
+% In total, the transformations between \ac{PCM} and UML react to 57 change types in \ac{PCM} and 65 change types in UML, and the transformations between UML and Java react to 66 change types in UML and to 48 change types in Java to restore consistency in the other model.
 %consist of reactions to 57 change events in \ac{PCM} that restore consistency to UML, reactions to 67 change types in UML that restore consistency in \ac{PCM}, reactions to 55 change types in UML that restore consistency in Java, and reactions to 48 change types in Java that restore consistency in UML.
 
-In total, we have used 187 test cases that perform different kinds of relevant fine-grained changes in instances of all metamodels, such as insertions, modifications and deletions of all types of elements that have to be kept consistent.
-Additionally, we have simulated the construction of the Media Store system~\cite{strittmatter2016a}, which is a sophisticated case study system for the \ac{PCM}.
-This system is available as a \ac{PCM} model as well as Java code.
+% In total, we have used 187 test cases that perform different kinds of relevant fine-grained changes in instances of all metamodels, such as insertions, modifications and deletions of all types of elements that have to be kept consistent.
+% Additionally, we have simulated the construction of the Media Store system~\cite{strittmatter2016a}, which is a sophisticated case study system for the \ac{PCM}.
+% This system is available as a \ac{PCM} model as well as Java code.
 
 % \begin{itemize}
 %     \item Used environment: Implementation in the Ecore-based Vitruvius framework \cite{kramer2013b}~\footnote{\url{http://vitruv.tools}} for consistent system development
@@ -701,5 +777,8 @@ Generell ist eine Untersuchung des Alignments von CPRs sinnvolles \todo{Future W
 
 
 Limitierung: Hier wenig Optionsauswahl, d.h. in den meisten Fällen entscheiden sich die Transformationen für ein Element und habe keine Auswahl.
+
+Alignment der Transformationen: kein Threat, wurde per Konstruktion ausgeschlossen
+
 
 \subsubsection{Limitations}
