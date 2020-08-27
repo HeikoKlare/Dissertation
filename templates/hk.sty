@@ -41,6 +41,9 @@
 % Korrekte Anführungszeichen
 \RequirePackage{csquotes}
 
+% Einheiten
+\RequirePackage{siunitx}
+
 % To/Dos
 \RequirePackage[obeyDraft]{todonotes}
 \makeatletter
@@ -134,19 +137,6 @@
     \textnormal{\ref{#1}}%
 }
 
-% #1: label name
-% #2: question number (without any prefix like RQ)
-% #3: question text
-% \makeatletter
-% \def\researchquestion#1#2#3{\begingroup
-%     \paragraph{\textbf{Research Question #2:}} #3%
-%     \def\@currentlabel{\textit{Research Question #2}}%
-%     \phantomsection\label{#1}%
-%     \def\@currentlabel{\paragraph{\textbf{Research Question #2:}} #3}%
-%     \phantomsection\label{#1_complete}\endgroup
-% }
-% \makeatother
-
 
 % FIGURES
 \usepackage{subcaption}
@@ -184,61 +174,45 @@
     \end{enumerate}
 }
 
-% Mark citations of own work (unclear whether it is necessary)
-\newcommand\owncite[1]{\cite{#1}}
-
 % Proper underline with less space
 \RequirePackage[normalem]{ulem}
 \let\underline\uline
 
-% GQM
-\newcounter{goalcounter}
-\newcounter{questioncounter}[goalcounter]
-\newcounter{metriccounter}[questioncounter]
+
+% Goal-Question-Metric Macros and Counters/Labels
+\newcounter{goal}
+\newcounter{question}[goal]
+\newcounter{metric}[question]
+\renewcommand*\thegoal{%
+    \arabic{goal}%
+}
+\renewcommand*\thequestion{%
+    \arabic{goal}.\arabic{question}%
+}
+\renewcommand*\themetric{%
+    \arabic{goal}.\arabic{question}.\arabic{metric}%
+}
+\newcommand*{\goalautorefname}{Goal}
+\newcommand*{\questionautorefname}{Question}
+\newcommand*{\metricautorefname}{Metric}
+
 \newcommand{\goal}[1]{
-    \stepcounter{goalcounter}%
-    \textbf{Goal \thegoalcounter:\newline (#1)}%
+    \refstepcounter{goal}%
+    \textbf{Goal \thegoal:\newline (#1)}%
 }
-\makeatletter
 \newcommand{\question}[2][]{%
-    \leftskip0.5em    
-    \begingroup%
-    \stepcounter{questioncounter}%
-    Question \thegoalcounter.\thequestioncounter:\newline (#2)%
-    \def\@currentlabel{Question \thegoalcounter.\thequestioncounter\kern0em}%
-    \phantomsection\label{#1}\endgroup%
-}
-\makeatother
-\newcommand{\evalquestionref}[1]{
-    \ref{#1}
+    \leftskip0.5em
+    \refstepcounter{question}%
+    Question \thequestion:\newline (#2)%
+    \label{#1}%
 }
 \newcommand{\questiontext}[1]{
     \leftskip0.5em #1
 }
 \newcommand{\metric}[0]{
-    \stepcounter{metriccounter}%
-    \leftskip1em \textit{Metric \thegoalcounter.\thequestioncounter.\themetriccounter:}%
+    \refstepcounter{metric}%
+    \leftskip1em \textit{Metric \themetric:}%
 }
 \newcommand{\metrictext}[1]{
     \leftskip1em \textit{#1}
 }
-
-% Goal-Question-Metric
-% % 1: Frage
-% % 2: Metrik
-% \newcommand{\qm}[2]{
-%     \textit{Question:} #1\\
-%     \textit{Metric:} #2\\
-% }
-
-% % Goal-Question-Metric
-% % 1: Kategorie
-% % 2: Ziel
-% % 3: Frage
-% % 4: Metrik
-% \newcommand{\gqm}[4]{
-%     \textbf{Goal (#1): #2}\\
-%     \qm{#3}{#4}
-% }
-
-\RequirePackage{siunitx}
