@@ -219,18 +219,73 @@ Although we applied the approach for achieving synchronizing transformations aft
 \subsection{Prototypical Implementation}
 % Context of the implementation, actual implementations
 
+\mnote{\vitruv framework for implementation}
+For the conduction of the case studies presented in the subsequent section, we have used a prototypical implementation in the \vitruv framework (see \autoref{chap:foundations:multiview:vitruv})~\cite{klare2020Vitruv-JSS}.
+It support the view-based development of consistent systems by managing a consistent representation of all information about a software systems, from which views can be derived to be modified by the user.
+Internally, the system is represented as a set of models of existing or newly defined languages, which are kept consistent by means of bidirectional model transformations.
+Currently, it lacks support for the combination of multiple transformation to a network for keeping multiple models consistent, which is why we implemented our approaches in a case study with that framework.
+
+\mnote{\reactionslanguage for unidirectional consistency preservation rules}
+The \vitruv framework provides, among others, the \reactionslanguage~\cite{klare2016b,langhammer2017a} for defining unidirectional consistency preservation rules according to \autoref{def:unidirectionalconsistencypreservationrule}.
+Defining such unidirectional rules for both directions between two metamodels yields a bidirectional transformation according to \autoref{def:bidirectionaltransformation}.
+These transformations only have an explicit representation of the consistency preservation rules, whereas the consistency relations are only implicitly defined as the fixed points of the application of the consistency preservation rules.
+We use the \reactionslanguage for implementing consistency preservation in our case studies.
+
+\mnote{\reactionslanguage uses correspondence model}
+The \reactionslanguage uses a so called \emph{correspondence model} to identify corresponding elements according to the implicitly defined consistency relations and thus implements a witness structure according to \autoref{def:consistency}.
+It enables to trace when elements were changed to update the corresponding element rather than always deleting and adding a corresponding element.
+We have discussed in TODO that this still conforms to our formalism, although we did explicitly omitted any kind of trace model there.
+\todo{Add reference to discussion about trace model in correctness chapter}
+
+\lstinputlisting[%
+float,%
+language=reactions,
+caption={\reaction creating a \gls{UML} class among creation of a \gls{PCM} component. Adapted from \cite{klare2020Vitruv-JSS}.},
+label={lst:correctness_evaluation:errors:reaction_example},
+escapechar=~
+]{listings/correctness/evaluation/reaction_example.tex}
+
+\mnote{Example for \reactions}
+A transformation rule defined in that language is called a \emph{\reaction}.
+To give an impression of how such rules look like, an example that transforms a \gls{PCM} component into a class with appropriate naming in \gls{UML} among its creation is depicted in \autoref{lst:correctness_evaluation:errors:reaction_example}.
+A \reaction specifies after which type of change it should be executed, which, in this case, is the insertion of a component into a repository.
+It may then call one or more reusable \emph{routines} that are supposed to restore consistency according to a consistency relation.
+Such a routine consists of a \emph{match} block, which checks whether a consistency relation applied and retrieves all elements involved into that relation, and an \emph{action} block, which restores consistency after the change.
+In this case, the routine checks that no corresponding class already exists to avoid multiple instantiation and afterwards retrieves an appropriate package in the \gls{UML} model to place the class in.
+It then creates a class, assigns it an appropriate name and adds a correspondence between the elements.
+For the complete explanation of that example, we refer to \cite{klare2020Vitruv-JSS}.
+
+\mnote{Simple orchestration strategy}
+In \autoref{chap:orchestration}, we have discussed different options for the orchestration of transformations in an application algorithm.
+In the \vitruv framework, we have implemented a simple depth first execution of transformation without an artificial execution bound.
+This means, for a given change all transformation involving that changed model are executed consecutively.
+After the execution of each transformation, this approach is recursively applied to the model changed by that transformation, which implements the depth-first execution.
+If the model is not changes, i.e., if the models are already consistent, the recursion aborts.
+This finally finishes the algorithm.
+This results in an algorithm comparable to the provenance algorithm proposed in \autoref{chap:orchestration:algorithm}. as it implements a similar recursion strategy
+In contrast, the implemented strategy, however, does not only consider already executed transformations in the recursion and does not define an execution bound.
+In fact, that implementation may not terminate.
+
+\mnote{Implicit consistency relations in \reactionslanguage}
+Since the transformations defined in the \reactionslanguage only contain implicit consistency relations by the fixed points of their consistency preservation rules, checking consistency for the recursion to abort is conducted by checking whether the transformation performed any changes.
+If this is not the case, the models are considered correct by construction.
+We have already discussed this as an option for the realization of a \function{CheckConsistency} function within an application algorithm in \autoref{chap:orchestration:decidability:algorithm}.
+The implementation of the framework with the \reactionslanguage is available in a GitHub repository~\cite{vitruvFrameworkGithub}.
+
+%\todo{Note that the Vitruv implementation has no CheckConsistency method but uses hippocratic transformations and aborts if no further changes occur by executing the transformations. Thus consistency relations are implicitly encoded in the consistency preservation rules by being their fixed points.}
+
+%Wir betrachten Transformation in Reactions.
+%Synchronisation durch mehrfache Ausführung der Transformationen in beide Richtungen.
+
+%Depth-first propagation von Änderungen.
+
+%Orchestrierung: FIFO für Transformationen, an denen Modelle geändert wurden. Kein Abbruchkriterium, d.h. es kann zu Nicht-Terminierung kommen. Aber: nach Korrigieren der Fehler keine Nicht-Terminierung mehr (obwohl das nicht so sein muss, siehe Orch-Kapitel). 
+
 \begin{copiedFrom}{ICMT}
 
-\todo{Note that the Vitruv implementation has no CheckConsistency method but uses hippocratic transformations and aborts if no further changes occur by executing the transformations. Thus consistency relations are implicitly encoded in the consistency preservation rules by being their fixed points.}
-
-Wir betrachten Transformation in Reactions.
-Synchronisation durch mehrfache Ausführung der Transformationen in beide Richtungen.
-Orchestrierung: FIFO für Transformationen, an denen Modelle geändert wurden. Kein Abbruchkriterium, d.h. es kann zu Nicht-Terminierung kommen. Aber: nach Korrigieren der Fehler keine Nicht-Terminierung mehr (obwohl das nicht so sein muss, siehe Orch-Kapitel). Limitierung: Hier wenig Optionsauswahl, d.h. in den meisten Fällen entscheiden sich die Transformationen für ein Element und habe keine Auswahl.
-
-Depth-first propagation von Änderungen.
 
 
-\subsection{Case Study}
+\subsection{Case Studies}
 
 \begin{table}
 	\centering 
@@ -611,6 +666,7 @@ They would have to be developed in a schema similar to the one proposed by \text
 Falls wir keinen Baum garantieren können: In this case, the consistency specifications must be revised whenever non-termination or non-deterministic termination of consistency preservation is observed (see \autoref{fig:correctness:categorization})}
 
 
+
 %\compactsubsection{Element Matching}
 
 %In \autoref{sec:avoiding:matching}, we presented three levels of matching equal elements across different transformation paths.
@@ -643,5 +699,7 @@ Wir haben diese selection of options im Orchestrierungs-Kapitel diskutiert.
 Hier ist definitiv noch Future Work notwendig um zu untersuchen, wie man Nutzerentscheidungen über mehrere Transformationen hinweg miteinander alignen kann \todo{Future Work}.
 Generell ist eine Untersuchung des Alignments von CPRs sinnvolles \todo{Future Work}.
 
+
+Limitierung: Hier wenig Optionsauswahl, d.h. in den meisten Fällen entscheiden sich die Transformationen für ein Element und habe keine Auswahl.
 
 \subsubsection{Limitations}
