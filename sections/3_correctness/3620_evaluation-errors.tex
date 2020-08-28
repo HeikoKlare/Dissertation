@@ -989,8 +989,6 @@ The results of our case study indicates that assuming transformations to be corr
 % \todo{Erkennntis aus Iterationen: Solange wir nur einen Baum von Relationen haben, gibt es keine Fehler auf Modularisierungsebene (keine Inkompatibilitäten), diese kommen erst bei Zyklus hinzu (allerdings schon bei internem Zyklus durch Unidirektionalität?). D.h. wie schon voher angegeben sind Inkompatibilitäten per Konstruktion vermieden, wenn wir nur einen Baum von Relationen haben.
 % Falls wir keinen Baum garantieren können: In this case, the consistency specifications must be revised whenever non-termination or non-deterministic termination of consistency preservation is observed (see \autoref{fig:correctness:categorization})}
 
-
-
 %\compactsubsection{Element Matching}
 
 %In \autoref{sec:avoiding:matching}, we presented three levels of matching equal elements across different transformation paths.
@@ -999,45 +997,188 @@ The results of our case study indicates that assuming transformations to be corr
 % \end{copiedFrom} % ICMT
 
 
-\todo{Go on here}
-
 \subsection{Discussion}
 
-Central: Most mistakes can be avoided by construction!
+From the two discussed case studies, we can derive several important insights.
+This covers correctness of our categorization and synchronization approach, as well as, and in particular, regarding the relevance of different mistake types and the relevance of the orchestration problem.
 
-Erkenntnis: Multiple Instantiation kann auch durch andere Fehler auftreten, dann sind die Elemente aber unterscheidbar, da die Key-Information, die zur Synchronisierung genutzt wird, verschieden ist -> super für die Praxis.
+\mnote{Most faults avoidable by construction}
+We found that most faults in the case study were due to missing synchronization.
+This is, however, achievable by construction, as we have also validated in the case study.
+The proposed approach for synchronizing transformations can be applied to a single transformation without knowing about the other transformations to combine it with.
+In consequence, a high number of faults in transformation networks can already be avoided by construction of the single transformations.
 
-Erkenntnis: Immer erst Fehler auf Transformationsebene fixen, da diese Fehler auf den anderen Ebenen verdecken.
+\mnote{Synchronization faults hide others}
+In the iterative process of the case studies, we found that the first occurring were multiple instantiations because of missing synchronization.
+Adding the synchronization then revealed further faults, for example, because of incompatible relation.
+First, this is not surprising, because multiple instantiation occur upon creation of elements, which is the first step in consistency preservation.
+Thus, faults due to missing synchronization lead to early failures.
+Second, this shows that faults to missing synchronization can hide further faults.
+Thus, it is important to resolve errors at the \leveltransformation level first, or, in the best case, avoid them.
 
-Erkenntnis: Was wir nicht ausschließen können sind Fehler in den Konsistenzrelationen, die auf der unterschiedlichen Interpretation von Konsistenz basieren. Wenn beispielsweise die Relation UML<>PCM das Repo klein schreibt, Java<>PCM aber das Repo groß schreibt, wird das (korrekterweise) nicht gemacht.
-Hier ist eine andere Auffassung von Korrektheit verletzt (Korrektheit der modularen bzgl. einer einheitlichen globalen Spezifikation), da implizit vorausgesetzt wird, dass in einem globale Verständnis in beiden Fällen auf das gleiche Repository abgebildet wird. (siehe Figure 6.4 in MA Timur).
-Dies war explizit nicht die Art von Korrektheit die wir betrachtet haben, da sie ein anderes Ziel verfolgt. Sie erfordert Kenntnis über die übergeordnete Semantik der Elemente, beispielsweise durch eine globale Konsistenzspezifikation, gegen die man das prüft (siehe entsprechendes Kapitel) oder durch die Abbildung auf einen gemeinsamen Formalismus, der verifizierbar ist.
+\mnote{Multiple instantiation by incompatible relations}
+In the network case study, we detected multiple instantiations due to incompatible consistency relations rather than missing synchronization.
+We have discussed in \autoref{chap:categorization} that this can, theoretically, be the case, but still multiple instantiations are expected to be the consequence of missing synchronization in most cases.
+While this is still given in the case studies, we also found that two kinds of multiple instantiation can be distinguished to identify their cause.
+In case of missing synchronization, an element with the same name or other key information is created.
+For matching existing elements, we proposed to use unique key information, such as names, to identify the existence of an element.
+On the contrary, if the elements differ in their key information but still should be the same, there is a fault in the transformations in terms of incompatible consistency relations, as they use different ways of relating the key information, although it should actually be the same.
 
-In Timurs MA außerdem betrachtet wie sich eine Kategorisierung in too many, incorrect and too few elements auf failures auswirkt. Hieraus konnten jedoch keine relevanten Erkenntnisse gezogen werden, weshalb wir es hier nicht diskutieren und auf die MA verweisen (Table 5.2)
+\mnote{Relevance of orchestration problem}
+Finally, we found undecidability of the orchestration problem not to be relevant in our case studies.
+This does not validate that is not relevant in practice at all, but it is at least an indicator that it is not such a central problem that transformation networks are unlikely to ever work properly.
+Still, this has to validated in further studies to improve external validity of the statement.
+
+%Central: Most mistakes can be avoided by construction!
+
+%Erkenntnis: Multiple Instantiation kann auch durch andere Fehler auftreten, dann sind die Elemente aber unterscheidbar, da die Key-Information, die zur Synchronisierung genutzt wird, verschieden ist -> super für die Praxis.
+
+%Erkenntnis: Immer erst Fehler auf Transformationsebene fixen, da diese Fehler auf den anderen Ebenen verdecken.
+
+%In Timurs MA außerdem betrachtet wie sich eine Kategorisierung in too many, incorrect and too few elements auf failures auswirkt. Hieraus konnten jedoch keine relevanten Erkenntnisse gezogen werden, weshalb wir es hier nicht diskutieren und auf die MA verweisen (Table 5.2)
 
 
 \subsubsection{Threats to Validity}
-- The transformation were not constructed synchronizing, thus obviously many synchronization errors occur. If the scenario is foreseen, there may be much less errors at this level and more at the others -> need to perform further evaluation were developer know about necessity to use transformations in a network to properly construct them and then see how often that still fails. (future work)
 
+In the following, we discuss different possible threats to the validity of the discussed results.
+Due to the limited set of case studies, which especially limits external validity, all results can only be seen as indicators for the statements that we make.
+We will, however, discuss, for which reasons validity of the statements may be actually restricted, distinguished by construct, internal, conclusion and external validity~\cite{wohlin2012validity-Book}. %, i.e., how the case study setup may conflict with the proposed cause-effect relationships, and how the results generalize.
 
-\paragraph{User Interaction}
-Erlaubt Java->PCM, dass man an beliebiger Stelle ein Interface anlegen kann. PCM-UML erlaubt das nur im contracts-Package. Erstellt man ein Interface in einem anderen Package, erstellt PCM-UML nochmal eines im contracts Package, dadurch auch UML-Java und dann matcht UML-PCM, wodurch es bei PCM-Java zwei Abbildungen des Interface gibt. Hier haben wir inkompatible Constraints, aber wenn die Nutzerabfrage für das Matching in beiden Transformationen PCM-Java und PCM-UML eingebaut wird, kann der Nutzer konfligierende Entscheidungen treffen. Um das zu verhindern, müssten die Transformationen aufeinander abgestimmt werden.
+\paragraph{Construct Validity}
+%The case study setup may not be representative to actually draw the given conclusions for different reasons.
+\mnote{Pre-alignment of transformations}
+We assumed the transformations not to be aligned with each other a priori, because otherwise certain errors would not occur at all, thus reducing the number of faults and influencing their distribution.
+We have, however, mitigated this threat by developing each transformation in an isolated project without knowing that is supposed to be combined with other transformations, as well as by giving the development task to different, independent students.
+The only bias may be that the author of this thesis supervised the students that developed the different transformations.
+Still, this is a situation comparable to practice, because the developer may also exchange information, but at least not have an explicit representation of common knowledge.
 
-Generell: Nutzerinteraktion lässt sich bei den Relationen dadurch ausdrücken, dass alle Auswahloptionen als valide consistency relation pairs betrachtet werden.
-Problematisch sind jedoch die consistency preservation rules, da sie es potentiell erlauben konfligierende der condition elements auszuwählen, genauso wie es bei den Transformationen selbst auch passieren kann.
-Wir haben diese selection of options im Orchestrierungs-Kapitel diskutiert.
-Hier ist definitiv noch Future Work notwendig um zu untersuchen, wie man Nutzerentscheidungen über mehrere Transformationen hinweg miteinander alignen kann \todo{Future Work}.
-Generell ist eine Untersuchung des Alignments von CPRs sinnvolles \todo{Future Work}.
+\mnote{Language selection}
+We employed the \reactionslanguage to implement the transformations.
+The language may affect how likely specific faults are to be made.
+For example, the language and the \vitruv framework it is embedded into, use a delta-based approach to consistency preservation, which may already prevent from problems that may occur with a state-based approach to consistency preservation.
+We did, however, explicitly use a language that provides a rather low level abstraction to reduce the change that this influences how prone the implementations are to specific faults.
+For example, using \gls{QVTR}, which already provides the ability to define keys for matching existing elements, would have prevented from specific faults already by construction.
 
+\paragraph{Internal Validity}
 
-Limitierung: Hier wenig Optionsauswahl, d.h. in den meisten Fällen entscheiden sich die Transformationen für ein Element und habe keine Auswahl.
+\mnote{Fixing synchronization instead of by construction}
+Using transformations that were not initially synchronizing and fixing them during the case study leads to two threats to validity. 
+First, this process obviously leads to a high number of faults and failures due to missing synchronizing, which would not have been the case when using transformations that are synchronizing a priori.
+Since we wanted to evaluate how important it is to have synchronizing transformations, this setup was reasonable.
+Still and second, it would be valuable to conduct a case study in which transformations are synchronized before.
+This can give further and more precise insights regarding the relevance of the other types of faults and, more importantly, the process of fixing faults rather than avoiding them may introduce a bias.
+When fixing the faults, additional fixes beyond the application of our synchronization approach may have been performed until the test scenarios succeeded, which cannot occur if transformations are already developed to be synchronizing.
+For these reasons, we plan to perform an appropriate case study in future work, as discussed in \autoref{chap:futurework:correctness:syncrhonization:case_study}.
 
-Bias: Sprache. Vielleicht sind die Reactions so, dass bis auf Element Matching alles richtig funktioniert, was in anderen Sprachen nicht so ist. Insb. wenn nicht delta-based gearbeitet wird.
+%Construct Validity % extent to which experiment setup reflects theory, influenced by participant treatment
+%- Alignment der Transformationen: könnten vorher/ungewollt schon aneinander angepasst sein, daher wenig Fehler. kein Threat, wurde per Konstruktion ausgeschlossen. Allerdings Bias dadurch dass der Autor alle Implementierungen betreut hat. Allerdings wie in echt: Man tauscht sich aus, aber hat keine explizite Definition des gemeinsamen Verständnisses
+% - Categorization/Orchestration: Hier wenig Optionsauswahl, d.h. in den meisten Fällen entscheiden sich die Transformationen für ein Element und hat keine Auswahl. Daher vielleicht wenige Fehler auf höheren Ebenen beobachtet und keine Probleme mit Orchestrierungsproblem und nicht dadurch, dass es generell kein Problem ist. Vielleicht ist das in anderer Studie viel schlimmer.
+% Orchestration Problem: Vielleicht ist die Fallstudie zu sehr gestreamlined, insb. durch wenige Auswahlmöglichkeiten um Konsistenz herzustellen (siehe Option Selection Faults). Für externe Validität der Aussage müsste man sich weitere Studien anschauen, insb. solche wo es mehr Auswahlmöglichkeiten gibt. Wie schon vorher diskutiert ist aber insbesondere die Frage, ob es noch andere relevante Ursache dafür gibt, dass man keine konsistente Orchestrierung findet --> Future Work
+% - Synchronization: The transformation were not constructed synchronizing, thus obviously many synchronization errors occur. If the scenario is foreseen, there may be much less errors at this level and more at the others -> need to perform further evaluation were developer know about necessity to use transformations in a network to properly construct them and then see how often that still fails. (future work, like before)
 
-Alignment der Transformationen: kein Threat, wurde per Konstruktion ausgeschlossen
+%Internal validity % result may indicate relationship, although there is none
+% - Auswahl der Studis für Transformationserstellung
+% - Synchronization: Fixing errors rather than avoiding them may be biased. Maybe without knowing we integrated further fixes that led to non-failing implementations. Thus need to perform evaluation where developers apply our approach (future work).
+% - Synchronization: Bias Sprache. Vielleicht sind die Reactions so, dass bis auf Element Matching alles richtig funktioniert, was in anderen Sprachen nicht so ist. Insb. wenn nicht delta-based gearbeitet wird. Daher waren durch Sprachauswahl gewisse Probleme nicht da, die bei anderen Sprachen vorkämen, und nicht weil sie ga rnicht existieren.
+% - Synchronization: Studie hatte immer eindeutige Key-Informationen. Daher möglicherweise deswegen anwendbar und nicht weil der Ansatz vollständig ist. Andere Studien ohne Key Informationen, falls es das gibt. Allerdings ist das essentielle Komplexität, die durch keinen Ansatz umgangen werden kann. Wenn es keine Informationen gibt um Elemente zu identifizieren ist es egal, ob man die anderen Transformationen kennt oder nicht. Man hätte dann lediglich die Möglichkeit Transformations-übergreifende Trace-Links zu verwenden, um das Problem zu umgehen, da diese dann die nötigen Key-Informationen an die Trace Links statt die Elemente heften.
 
-Orchestration Problem: Vielleicht ist die Fallstudie zu sehr gestreamlined, insb. durch wenige Auswahlmöglichkeiten um Konsistenz herzustellen (siehe Option Selection Faults). Für externe Validität der Aussage müsste man sich weitere Studien anschauen, insb. solche wo es mehr Auswahlmöglichkeiten gibt. Wie schon vorher diskutiert ist aber insbesondere die Frage, ob es noch andere relevante Ursache dafür gibt, dass man keine konsistente Orchestrierung findet --> Future Work
+\paragraph{Conclusion Validity}
+The central threat to conclusion validity is the low amount of data.
+Some fault types occurred only once in the case studies, thus potentially reducing the significance of the results.
+Like we have already discussed, this especially means that the actual values, especially for the relevance of the mistake types, cannot be considered representative.
+Still, we expect the general conclusions regarding relevance to be correct, because the number of test scenarios was high enough and led to a significant amount of failures.
 
-Synchronization: Andere Studien ohne Key Informationen, falls es das gibt. Allerdings ist das essentielle Komplexität, die durch keinen Ansatz umgangen werden kann. Wenn es keine Informationen gibt um Elemente zu identifizieren ist es egal, ob man die anderen Transformationen kennt oder nicht. Man hätte dann lediglich die Möglichkeit Transformations-übergreifende Trace-Links zu verwenden, um das Problem zu umgehen, da diese dann die nötigen Key-Informationen an die Trace Links statt die Elemente heften.
+%Conclusion Validity % draw conclusion about relationships, e.g. not enough data
+% Threat due to few data. Only few faults in the studies. Thus the precise values are not reliable.
+% Still, we expect the conclusion regarding the relevance of the mistake types to be correct.
+% Same regarding other ratios, but only the fault values are low. We have a high number of test cases and of occurring failures, so no threat.
+
+%External Validity % generalizability, improved by making environment more realistic%
+
+\paragraph{External Validity}
+
+\mnote{Number of case studies}
+External validity in terms of generalizability of the results is especially affected by the representativeness of the case studies.
+This this end, a threat may be the low number of performed case studies.
+%Only two studies with the same sets of transformations may reduce generalizability.
+%While in general other studies may be semantically different, they still only consist of models and transformations.
+Our results are, however, not highly depend on the actual contents of a case study, i.e., the contents of the models and the transformations, but rather dependent on the existence of specific patterns, such as the possibility for transformations to select from multiple options to restore consistency, and potentially from the size of a transformation network.
+Especially the evidence of our results regarding relevance of faults at the \levelnetworkrule level needs to be further validated in additional case studies.
+This is, however, difficult due to the limited availability of evaluation scenarios.
+Regarding the size of transformation networks, we do not expect larger networks to reveal further problems, because the problematic situations are those in which changes to the same models are performed across two paths of transformation executions, which already exist with a cycle of three transformations.
+In addition, while the number of case studies is rather low, the considered scenarios within the case studies is not that low, thus representing a comprehensive set of scenarios.
+
+% Even having more than three transformations, we would assume the case of three transforamtion to generalize to an arbitrary number, because problematic are the situations in which information comes from two paths, which is already given with one cycle, thus inductively applied with more transformations and cycles.
+% Real limitation is the low number of options in the consistency relations, which may be different in other scenarios, thus leading to other relevances of mistake type or even to mistakes and faults that we have not yet foreseen.
+% To this end, we can only improve evidence in the generalizability of our results by performing further case studies with different transformation networks.
+% This is, however, difficult due to limited ability. Still, this is a topic for future work.
+
+\mnote{Scenario selection}
+The selection of the scenario for the case studies may have influenced whether specific kinds of mistakes can occur at all.
+In particular, the used transformations can all rely on unique key information for identifying matching elements.
+Thus, we may have identified the synchronization approach to be correct and complete because the case study scenarios do not reflect the problematic cases.
+This is, however, essential complexity that cannot be solved with any comparable approach, because if no unique key information exists, only heuristics to identify elements can be applied.
+To circumvent that problem, it would only be possible that transformations know each other and use trace links generated by the other transformations, such that they can rely on meta data attached to these links to uniquely identify elements.
+This does, however, break the assumption of independent development and thus cannot be achieved by construction of a single transformation.
+
+\mnote{Limited options in consistency relations}
+Finally, the consistency relations in the study do not provide many different options for models to be consistent.
+Thus, the chance that transformations decide to use different, contradictory options to restore consistency, may be unlikely due to the scenario.
+This may have led to only few faults, especially at the \levelnetworkrule level, and thus biased the results.
+It does especially also influence the ability that undecidability of the orchestration problem leads to a failure.
+It is, however, also a consequence of using a transformation language that does not explicitly define consistency relations that led to this result.
+Since consistency relations are only implicitly defined by the consistency preservation rules, a contradictory selection of options manifests as an incompatibility of the implicit consistency relations, as the options to select from are not documented anyway.
+Thus, to mitigate this issue, consistency relations would have to be defined explicitly.
+
 
 \subsubsection{Limitations}
+
+In addition to the discussed results, the case studies also revealed some limitations of our approaches and insights, which represents our starting points for future work.
+
+\mnote{Implementation of element matching}
+Within the case studies, we implemented the matching of existing elements manually, i.e., using the existing constructs provided by the transformation language.
+This is cumbersome task, which is also prone to errors in the accidental complexity of the mechanism due to repetitions of the same logic.
+Since the mechanism is always similar and especially differentiates in the key information used to search for, it could be embedded in an API or language construct to be reusable.
+In future work we thus plan to integrate the approach to achieve synchronization of transformations into a language and validate its applicability, which we propose in \autoref{chap:futurework:correctness:synchronization:integration}.
+
+\mnote{Element matching by semantics}
+In the evaluation, we have detected cases which may be expected to be consequences of incompatibilites, but are actually not.
+For example, the transformation between \gls{UML} and \gls{PCM} creates a repository starting with lowercase, whereas the transformation between Java and \gls{PCM} generated a repository starting upper case.
+Then the repository created by one transformation is not matched by the other, which is correct as the transformations define consistency relations with different capitalizations of the repository.
+Thus, having two repositories is correct in this case, although it may not be expected, but intuitively would be assumed to be incompatible.
+Intuitively, it is expected that both repositories are supposed to represent them same element (cf.~\cite[Figure 6.4]{saglam2020ma}), thus having the same semantics although their uniquely identifying information, the name, is not equal.
+In this case, however, a different notion of correctness is violated that we explicitly excluded for this thesis in \autoref{chap:correctness:notions_correctness:dimensions}.
+This notion assumes a common global knowledge to which the transformations must be correct, thus requiring knowledge about the semantics of the elements, for example, in terms of global specification of consistency or a mapping to common, verifiable formalism.
+We aim to discuss such a correctness notion in future work (see \autoref{chap:futurework:correctness:synchronization:semantic_matching}).
+
+% Erkenntnis: Was wir nicht ausschließen können sind Fehler in den Konsistenzrelationen, die auf der unterschiedlichen Interpretation von Konsistenz basieren. Wenn beispielsweise die Relation UML<>PCM das Repo klein schreibt, Java<>PCM aber das Repo groß schreibt, wird das (korrekterweise) nicht gematcht.
+% Hier ist eine andere Auffassung von Korrektheit verletzt (Korrektheit der modularen bzgl. einer einheitlichen globalen Spezifikation), da implizit vorausgesetzt wird, dass in einem globale Verständnis in beiden Fällen auf das gleiche Repository abgebildet wird. (siehe Figure 6.4 in MA Timur).
+% Dies war explizit nicht die Art von Korrektheit die wir betrachtet haben, da sie ein anderes Ziel verfolgt. Sie erfordert Kenntnis über die übergeordnete Semantik der Elemente, beispielsweise durch eine globale Konsistenzspezifikation, gegen die man das prüft (siehe entsprechendes Kapitel) oder durch die Abbildung auf einen gemeinsamen Formalismus, der verifizierbar ist.
+% -> Semantisches Matching von Elemente (bzgl. zusätzlicher, darüberliegender Semantik) und nicht nur bzgl. irgendwelche Key-Werte. Das erfordert aber Abstimmung der Transformationen, Abbildung auf gemeinsamen Formalismus o.Ä. \autoref{chap:futurework:correctness:synchronization:semantic_matching}
+
+\mnote{Interaction with users}
+In our assumptions in \autoref{chap:introduction:objective:assumptions}, we explicitly excluded semi-automatisms in consistency preservation from the considerations in this thesis.
+Actual transformations can, however, be semi-automated by integrating decisions of users.
+For example, a user may select whether an added class shall represent a component or not.
+In terms of consistency relation, such decision options can be represented by multiple consistency relation pairs, representing all options.
+Within consistency preservation rules, such user decision can, however, be problematic.
+If both the transformation between \gls{UML} and \gls{PCM}, as well as between \gls{UML} and Java ask the user whether a class shall represent a component, this, on the one hand, is annoying if the user is asked twice and, on the other hand, can even lead to the user performing conflicting decisions.
+We have already discussed how the selection of different options by transformations can prevent the network from finding consistent models and in such a case, even worse, only one user decision can be correctly reflected in the result.
+Thus, it is part of our future work to find our how to align user decision across multiple transformations with each other (see \autoref{chap:futurework:correctness:synchronization:user_interaction}).
+
+% Erlaubt Java->PCM, dass man an beliebiger Stelle ein Interface anlegen kann. PCM-UML erlaubt das nur im contracts-Package. Erstellt man ein Interface in einem anderen Package, erstellt PCM-UML nochmal eines im contracts Package, dadurch auch UML-Java und dann matcht UML-PCM, wodurch es bei PCM-Java zwei Abbildungen des Interface gibt. Hier haben wir inkompatible Constraints, aber wenn die Nutzerabfrage für das Matching in beiden Transformationen PCM-Java und PCM-UML eingebaut wird, kann der Nutzer konfligierende Entscheidungen treffen. Um das zu verhindern, müssten die Transformationen aufeinander abgestimmt werden.
+% Generell: Nutzerinteraktion lässt sich bei den Relationen dadurch ausdrücken, dass alle Auswahloptionen als valide consistency relation pairs betrachtet werden.
+% Problematisch sind jedoch die consistency preservation rules, da sie es potentiell erlauben konfligierende der condition elements auszuwählen, genauso wie es bei den Transformationen selbst auch passieren kann.
+% Wir haben diese selection of options im Orchestrierungs-Kapitel diskutiert.
+% Hier ist definitiv noch Future Work notwendig um zu untersuchen, wie man Nutzerentscheidungen über mehrere Transformationen hinweg miteinander alignen kann \todo{Future Work}.
+% Generell ist eine Untersuchung des Alignments von CPRs sinnvolles \todo{Future Work}.
+% \autoref{chap:futurework:correctness:synchronization:user_interaction}
+
+\mnote{Alignment of Consistency preservation rules}
+Finally, we have made important insights regarding synchronization of transformations and compatibility, thus correctness at the \leveltransformation and \levelnetworkrelation levels.
+At the \levelnetworkrule level, however, we only found the selection of contradicting options for consistency to be problematic, but we were neither able to restrict them without reducing expressiveness, nor to define any reasonable notion for correctness at all.
+Thus, it remains an open question, how consistency preservation rules need to be aligned with each other in a transformation network, such that a consistent orchestration of them always exists and, in the best case, that it can easily be found.
+Although the evaluation indicated that this may not be a highly relevant practical problem, having a comprehensive theoretical understand at that level would also be beneficial, which is why we discuss it as future work in \autoref{chap:futurework:correctness:synchronization:cpr_alignment}.
+
+% Generell haben wir gute Erkenntnisse zu Synchronisation und Kompatibilität der Relationen, aber abgesehen von der Problematik der widersprüchlichen Optionsauswahl haben wir bzgl. der CPRs keine Erkenntnis gewonnen, wie diese inkompatibel sein können und daher verhindern, dass konsistente Modelle gefunden werden oder das Orchestrierungsproblem zuschlägt.
+% Das sollte in Future Work genauer geleuchtet werden. "Alignment of CPRs" \autoref{chap:futurework:correctness:synchronization:cpr_alignment}.
