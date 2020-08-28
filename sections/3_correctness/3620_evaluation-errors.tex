@@ -238,6 +238,7 @@ We use the \reactionslanguage for implementing consistency preservation in our c
 
 \mnote{\reactionslanguage uses correspondence model}
 The \reactionslanguage uses a so called \emph{correspondence model} to identify corresponding elements according to the implicitly defined consistency relations and thus implements a witness structure according to \autoref{def:consistency}.
+It consists of \emph{correspondences}, of which each contains two sets of one or more elements.
 It enables to trace when elements were changed to update the corresponding element rather than always deleting and adding a corresponding element.
 We have discussed in TODO that this still conforms to our formalism, although we did explicitly omitted any kind of trace model there.
 \todo{Add reference to discussion about trace model in correctness chapter}
@@ -407,7 +408,7 @@ This setup of independently developed transformations and test cases ensures tha
         \midrule
         \gls{PCM} & -   & 57    & 40 \\
         \gls{UML} & 68  & -     & 63 \\
-        Java      & 16  & 49    &   \\
+        Java      & 16  & 49    & -  \\
         \bottomrule
     \end{tabular}
     \caption[Complexity of case study transformations]{Complexity of the case study transformations in terms of the number of \reactions in each consistency preservation rule, i.e., the number of change types it is able to react to.}
@@ -419,12 +420,6 @@ To give an impression of the complexity of the transformations, we depict the nu
 This conforms to the number of change types each of these consistency preservation rules is able to react to.
 The lower number of \reactions between Java and \gls{PCM} is mainly due to the fact that several elements of the \gls{PCM} are mapped to the same elements in Java.
 For example, components and all kinds of data types are mapped to classes in Java, such that the \reactions in Java must react to less change types and instead make more distinctions within the routines to separate the affected consistency relations.
-
-
-\todo{Go on here}
-
-Zwei Case Studies (Torsten/Timur)
-\gls{PCM}
 
 \begin{table}
     \centering
@@ -478,32 +473,61 @@ Zwei Case Studies (Torsten/Timur)
     \label{tab:correctness_evaluation:errors:test_cases}
 \end{table}
 
-Ausgangspunkt: Tests der uni/bidirektionalen Transformationen
+\mnote{Test cases and comprehensive evaluation scenario}
+The scenarios we have used for our case study, i.e., the changes to which we applied the transformations for preserving consistency, are twofold.
+They consist of existing test cases for the implemented bidirectional transformations and of the simulated construction of an existing, comprehensive system model.
 
-Call it single transformation study
-Torsten: Betrachtung der isolierten Erstellung von bidirektionalen aus unidirektionalen Transformationen
-Trotz Linearität, also keine zusammenlaufenden Propagationspfade, Probleme auf Transformationsebene, weil jede unidirektionale Transformation schon nicht davon ausgegangen ist, dass es mit einer anderen unidirektionalen Zusammenarbeiten muss.
-Das ist äquivalent dazu, wenn mehrere Transformationen zusammenlaufen, da dort die Transformation nicht davon ausgeht, dass eine andere Elemente erzeugt hat, und hier die Transformation nicht davon ausgeht, dass die Rückrichtung die Elemente erzeugt hat, sondern denkt, dass die Informationen immer vom Nutzer kommen.
-Hier fehlte also nicht nur die Prüfung über implicit unique information, wie in \autoref{chap:synchronization:achieving:identification} eingeführt, sondern bereits die Prüfung über explicit unique information (Korrespondenzen) bzgl. der Existenz von Elementen.
+\mnote{Existing test cases}
+We have reused the test cases that were already implemented for the existing bidirectional transformations between \gls{PCM} and \gls{UML} as well as between \gls{UML} and Java.
+These test cases implement fine-grained tests for all possible types of changes according to the consistency relations, i.e., all kinds of relevant insertions, removals and modifications of involved elements.
+They set up minimal models and then perform the changes to be tested.
+Afterwards, they validate that the expected models exist.
+The according test cases are summarized in \autoref{tab:correctness_evaluation:errors:test_cases}, expressing the number of test cases for each underlying consistency relation.
+We have split the test cases between \gls{PCM} and \gls{UML} in two categories, because the second case studies only uses the first of these categories.
+In total, we used $39$ existing test cases between \gls{PCM} and \gls{UML} as well as $110$ test cases between \gls{UML} and Java.
+The gap in these number is for two reasons. First, \gls{UML} and Java share more information, such as visibilities and modifiers of fields and methods, which requires more test cases. Second, the granularity of the test cases differs because they were developed by different persons, thus a test case between \gls{PCM} and \gls{UML} validates more scenarios then one between \gls{UML} and Java.
 
-PCM<>UML direkt mit Patterns entwickelt, UML<>Java nicht, daher hohe Anzahl Fehler in letzterem -> genauer gesagt PCM/UML direkt bidirektional entwickelt, UML/Java nicht, daher dort Unidirektionalitätsfehler (s.u.)
-Änderungen an allen Domänen ausgeführt, insbesondere Media Store-Instanzen in jeder Domäne eingespielt.
+\mnote{Existing case study system}
+In addition, we have used the Media Store system model~\cite{strittmatter2016a}, which is a comprehensive case study system for the \gls{PCM}.
+It represents the architectural description of a system for managing different types of media files, i.e., uploading and downloading them to a database via a web server.
+For this system, representations as a \gls{PCM} model, as well as in Java code exist.
+We simulated the construction of that system by producing a change sequence that would have been executed if the system was developed from scratch and applied the transformation network to these changes to create the other two models.
+This conforms to the \emph{Reconstructive Integration Strategy (RIS)} proposed by \citeauthor{langhammer2017a}~\cite{langhammer2017a,klare2020Vitruv-JSS}.
+Afterwards, we have validated that the expected models, according to the defined consistency relations, were created.
+This is covered by five additional test cases.
 
-PCM-UML: 39 tests
-UML-Java: 110 tests
-+ 5 Tests for MediaStore creation as PCM and UML model
-In total, we have used 187 (sic!) test cases that perform different kinds of relevant fine-grained changes in instances of all metamodels, such as insertions, modifications and deletions of all types of elements that have to be kept consistent.
-Additionally, we have simulated the construction of the Media Store system~\cite{strittmatter2016a}, which is a sophisticated case study system for the \ac{PCM}.
-This system is available as a \ac{PCM} model as well as Java code.
+\mnote{Two case studies}
+Based on these test cases, we have performed two case study.
+In the first \emph{linear network study}, we have realized a linear network by combining two bidirectional transformations. This network does not contain any cycles of bidirectional transformations.
+In the second \emph{circular network study}, we have realized the network of all three bidirectional transformations, thus also containing a cycle of transformations.
 
-Unterschiedliche Anzahl durch unterschiedliche Granularität der Testfälle
+\paragraph{Linear Network Study} \mnote{Two transformations already produce errors}
+In the first study, we restricted ourselves to a linear network by combining the transformations between \gls{PCM} and \gls{UML} as well as between \gls{UML} and Java.
+In this situation no synchronization of transformations would be necessary, because there is always only one path of transformations between two models across which changes can be propagated.
+Thus, it would be sufficient to execute both transformations in one direction after changes in one model to achieve consistency, as long as the transformations are correct.
+A synchronizing bidirectional transformation, however, can require its consistency preservation rules to be executed multiple times, as discussed in \autoref{chap:synchronization:bidirectional:execution}, to let them react to changes in both models and achieve a fixed points by improving partial consistency in each step.
+This means, executing a synchronizing bidirectional transformation in a linear network should terminate after executing one consistency preservation rule once, as the one in the other direction should not react to the generated changes and no further changes that need to be synchronized can exist.
+Since the existing transformations were not developed to be synchronizing, we could thus expect errors to occur here, although no synchronization would be necessary at all.
+For example, if the consistency preservation rule in one direction creates an element and the one in the other direction processes this creation without assuming that this may not be a user change that needs to be processed, it will likely create another corresponding element, due to missing matching of existing elements.
 
+\mnote{One synchronizing and one non-synchronizing transformation}
+The transformation between \gls{PCM} and \gls{UML} was developed in the context of this case study and, purposely, designed to already be synchronizing.
+This allowed us to get an impression of whether it is possible to develop a transformation to be synchronizing by construction.
+The transformation between \gls{UML} and Java was pre-existing and only designed to be executed in one direction.
+Thus, it did neither perform matching of existing elements using implicit unique information to be synchronizing, nor matching of existing elements using explicit unique information, i.e., correspondences, to be executed in both directions without creating duplications of elements.
 
-Call it network study
-Timur: Kopplung der bidirektionalen Transformationen zu Netzwerken
-All tests triggered by changes to PCM.
-Started with PCM<>UML tests, then consecutively added transformations, first UML/Java, each direction on its own, then PCM/Java each direction on its own.
+\mnote{Used test scenarios}
+Based on these transformations, we conducted the already depicted process of executing the existing scenarios of test cases and case study system, identifying the occurring failures, tracing them back to the causing mistakes and then fixing the faults in the implementations to resolve the failures.
+We employed all test cases that we summarized in \autoref{tab:correctness_evaluation:errors:test_cases} without further modifications and in addition the construction simulation of the Media Store system.
 
+\paragraph{Circular Network Study} \mnote{Three transformations with a cycle}
+In the second study, we started with the results of the first study, i.e., we employed the transformations that were already improved due to the identified faults in the first study.
+In addition, we considered the transformation between \gls{PCM} and Java to induce a cycle in the graph of the transformations.
+Consequently, in this study the synchronization scenario occurs, because changes can be propagated across multiple paths of transformations.
+
+\mnote{Used test scenarios}
+Again, we reused existing test cases, but in this study we extended them to not only validate consistency of the two models they were designed for, but of all three models.
+We employed the \emph{PCM $\leftrightarrow$ UML Core} tests depicted in \autoref{tab:correctness_evaluation:errors:test_cases}, which perform different types of changes in \gls{PCM} and \gls{UML} models, and extended them to also validate the generated Java models.
 
 \begin{figure}
     \centering
@@ -512,6 +536,30 @@ Started with PCM<>UML tests, then consecutively added transformations, first UML
     \label{fig:correctness_evaluation:errors:study_phases}
 \end{figure}
 
+\mnote{Incremental addition of transformations}
+Instead of a big bang integration of all transformations, we incrementally added the unidirectional consistency preservation rules to the network to evaluate and resolve the occurring failures in multiple phases.
+These phases are depicted in \autoref{fig:correctness_evaluation:errors:study_phases}.
+We started with a network of the transformation between \gls{PCM} and \gls{UML}, as well as the unidirectional consistency preservation rule between \gls{UML} and Java.
+In the further phases, we completed the bidirectional transformation between \gls{UML} and Java by adding the consistency preservation rule in the reverse directions, and then first added the rule between \gls{PCM} and Java and finally the one in the other direction.
+This also allowed us to evaluate how the topology of the network affects the types of mistakes that lead to failures.
+Although the first two phases were already covered by the linear network study, we still conducted them again because of the extension of the test cases to the third model, which revealed further errors that were not detected before.
+
+% Ausgangspunkt: Tests der uni/bidirektionalen Transformationen
+
+% Call it single transformation study
+% Torsten: Betrachtung der isolierten Erstellung von bidirektionalen aus unidirektionalen Transformationen
+% Trotz Linearität, also keine zusammenlaufenden Propagationspfade, Probleme auf Transformationsebene, weil jede unidirektionale Transformation schon nicht davon ausgegangen ist, dass es mit einer anderen unidirektionalen Zusammenarbeiten muss.
+% Das ist äquivalent dazu, wenn mehrere Transformationen zusammenlaufen, da dort die Transformation nicht davon ausgeht, dass eine andere Elemente erzeugt hat, und hier die Transformation nicht davon ausgeht, dass die Rückrichtung die Elemente erzeugt hat, sondern denkt, dass die Informationen immer vom Nutzer kommen.
+% Hier fehlte also nicht nur die Prüfung über implicit unique information, wie in \autoref{chap:synchronization:achieving:identification} eingeführt, sondern bereits die Prüfung über explicit unique information (Korrespondenzen) bzgl. der Existenz von Elementen.
+
+% PCM<>UML direkt mit Patterns entwickelt, UML<>Java nicht, daher hohe Anzahl Fehler in letzterem -> genauer gesagt PCM/UML direkt bidirektional entwickelt, UML/Java nicht, daher dort Unidirektionalitätsfehler (s.u.)
+% Änderungen an allen Domänen ausgeführt, insbesondere Media Store-Instanzen in jeder Domäne eingespielt.
+
+
+% Call it network study
+% Timur: Kopplung der bidirektionalen Transformationen zu Netzwerken
+% All tests triggered by changes to PCM.
+% Started with PCM<>UML tests, then consecutively added transformations, first UML/Java, each direction on its own, then PCM/Java each direction on its own.
 
 % The evaluation is based on a case study developed for the Ecore-based \textsc{Vitruvius} framework~\cite{kramer2013b} for consistent system development, which is available on GitHub~\cite{vitruvFrameworkGithub}.
 % \textsc{Vitruvius} uses incremental, delta-based consistency preservation. 
@@ -777,6 +825,8 @@ Generell ist eine Untersuchung des Alignments von CPRs sinnvolles \todo{Future W
 
 
 Limitierung: Hier wenig Optionsauswahl, d.h. in den meisten Fällen entscheiden sich die Transformationen für ein Element und habe keine Auswahl.
+
+Bias: Sprache. Vielleicht sind die Reactions so, dass bis auf Element Matching alles richtig funktioniert, was in anderen Sprachen nicht so ist. Insb. wenn nicht delta-based gearbeitet wird.
 
 Alignment der Transformationen: kein Threat, wurde per Konstruktion ausgeschlossen
 
