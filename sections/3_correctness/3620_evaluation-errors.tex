@@ -499,9 +499,13 @@ This is covered by five additional test cases.
 \mnote{Two case studies}
 Based on these test cases, we have performed two case study.
 In the first \emph{linear network study}, we have realized a linear network by combining two bidirectional transformations. This network does not contain any cycles of bidirectional transformations.
+This study was conducted in the Master's thesis of \textcite{syma2018ma} and published in \owncite{klare2019icmt}.
 In the second \emph{circular network study}, we have realized the network of all three bidirectional transformations, thus also containing a cycle of transformations.
+This study was conducted in the Master's thesis of \textcite{saglam2020ma}.
 
-\paragraph{Linear Network Study} \mnote{Two transformations already produce errors}
+\subsubsection*{Linear Network Study} 
+
+\mnote{Two transformations already produce errors}
 In the first study, we restricted ourselves to a linear network by combining the transformations between \gls{PCM} and \gls{UML} as well as between \gls{UML} and Java.
 In this situation no synchronization of transformations would be necessary, because there is always only one path of transformations between two models across which changes can be propagated.
 Thus, it would be sufficient to execute both transformations in one direction after changes in one model to achieve consistency, as long as the transformations are correct.
@@ -520,7 +524,9 @@ Thus, it did neither perform matching of existing elements using implicit unique
 Based on these transformations, we conducted the already depicted process of executing the existing scenarios of test cases and case study system, identifying the occurring failures, tracing them back to the causing mistakes and then fixing the faults in the implementations to resolve the failures.
 We employed all test cases that we summarized in \autoref{tab:correctness_evaluation:errors:test_cases} without further modifications and in addition the construction simulation of the Media Store system.
 
-\paragraph{Circular Network Study} \mnote{Three transformations with a cycle}
+\subsubsection*{Circular Network Study} 
+
+\mnote{Three transformations with a cycle}
 In the second study, we started with the results of the first study, i.e., we employed the transformations that were already improved due to the identified faults in the first study.
 In addition, we considered the transformation between \gls{PCM} and Java to induce a cycle in the graph of the transformations.
 Consequently, in this study the synchronization scenario occurs, because changes can be propagated across multiple paths of transformations.
@@ -615,11 +621,6 @@ Although the first two phases were already covered by the linear network study, 
 
 \subsection{Results and Interpretation}
 
-We present summarized results. Details in theses.
-
-2 iterations in first study: first 154 failures, second 5 failures (fixed all traced faults, then executed again)
-29 iterations in second study: always fixed one fault, then re-executed; exact failure numbers in \cite{saglam2020ma}.
-
 \begin{table}
     \centering
     \small
@@ -649,31 +650,102 @@ We present summarized results. Details in theses.
     \label{tab:correctness_evaluation:errors:mistakes_faults_failures}
 \end{table}
 
-Anzahl failures nicht sehr aussagekräftig, da natürlich abhängig von der Art und Anzahl Tests. Außerdem mehrfache Ausführung und Fehler die sich überlagern. Trotzdem aufgelistet um mal einen Eindruck vom Umfang zu kriegen.
+\mnote{Aggregated mistakes, faults and failures in case studies}
+We present the results of the introduced iterative process of identifying failures, the causing faults and mistakes, as well as fixing the faults to resolve the failures.
+In \autoref{tab:correctness_evaluation:errors:mistakes_faults_failures} we summarize the numbers of faults we found in each case study because of the different mistake types, as well as the numbers of failures they resulted in when executing the test scenarios.
+The detailed analyses can be found in the theses of \textcite{syma2018ma} and \textcite{saglam2020ma}.
+We discuss the aggregated and interpreted results and only go into the details where relevant.
 
-Complete overview in thesis of Timur.
-Make matrix of mistake types and stages with associated numbers of faults and failures.
+\mnote{Fault numbers are representative}
+The presented numbers of faults represent the actual parts of transformations that needed to be fixed.
+For example, each fault due to missing synchronization manifests as a missing matching of existing elements, which needs to be added at one place within the transformations.
+The counted numbers of failures are not that meaningful, but are only supposed to give an impression of the extent of failures.
+This is due to the fact that these numbers are highly dependent on the kind and number of the used test scenarios, as they determine how often a fault manifests in terms of a failure.
+Additionally, faults interfere, as one fault may hide another one as it leads to a failure before the transformation with the other fault applied at all.
+This does also explain why there are more failures than there are test cases, especially in the circular network study.
+There, some missing element matchings only led to failures after another was fixed, thus leading to the same test failing twice because of two faults.
+Finally, the types of failures in the overview are more relevant than the actual numbers of occurrences.
 
+\subsubsection*{Linear Network Study} 
 
+\mnote{Most failures due to missing element matchings}
+We performed two iterations in the linear network study.
+In each iteration, we fixed all faults that we could identify because of the test scenario failures.
+After two iterations, no further failures occurred.
+In total $159$ failures occurred, of which $154$ occurred in the first iteration in terms of multiple instantiations due to missing element matchings.
+These $154$ failures correspond to all test scenarios, as we had in total $149$ existing test cases and five scenarios with the Media Store case study system.
+These failures did, in fact, only occur because the transformations between \gls{UML} and Java did not even contain element matchings using explicit unique information, i.e., correspondences.
+Thus, when Java elements were created by the transformation execution from \gls{UML} to Java, the execution in the inverse direction treated the creation changes as if they were performed by a user and created elements in the \gls{UML} model again.
+This could already be fixed by checking the correspondence model for the existence of correspondences, i.e., by applying element matching based on explicit unique information, according to \autoref{chap:synchronization:achieving:identification}.
 
-Torsten: 159 failures
-154 failures (multiple instantiation) -> 25 missing matchings
-3 failures (non termination with divergence) -> 1 incompatible constraint (fully qualified vs. simple name)
-2 failures (non termination with alternation) -> 1 option selection (visibilities between UML and Java)
-Incompatibilities because of two unidirectional consistency relations that are conflicting.
+\mnote{Incompatible constraints and contradicting options selection}
+In the second iteration, five further failures occurred.
+In all cases, the execution did not terminate because of divergence in three cases and alternation in two cases.
+The reasons for these failures were incompatible constraints and contradicting option selections by the transformations.
+The Java model contains the fully qualified name of a class, whereas the \gls{UML} model only contains the simple name, which was correctly propagated from \gls{UML} to Java, but the namespace prefix was not removed in the opposite direction.
+Thus, the constraints for both directions were incompatible, leading to a repeated addition of the namespace and thus divergence due to an endless extension of the class name.
+This shows that already within a single bidirectional transformation the two unidirectional consistency relations can be incompatible.
+The alternation occurred in terms of visibilities of methods and constructors between \gls{UML} and Java repeatedly changed, because different options for mapping default visibilities exist, for which the consistency preservation rules in both directions chose contradicting ones, thus swapping the visibilities endlessly.
 
+\mnote{Proper synchronization by construction}
+Most importantly, all faults occurred in the transformation between \gls{UML} and Java.
+Thus, the transformation between \gls{PCM} and \gls{UML}, which was developed to be synchronizing with our proposed approach to matching existing elements, operated properly by construction.
 
-Timur: 118 failure
-37 failures (inconsistent termination) -> 12 incorrect transformations
-57 failures (multiple instantiation) -> 13 missing matchings
-24 failures (multiple instantiation) -> 4 incompatible constraints (contradicting name constraints, therefore duplications)
+\subsubsection*{Circular Network Study} 
 
-\todo{Tabelle mit Gegenüberstellung von Failures und Faults machen. Daraus auch kurz analysieren, welche Faults wie viele Failures produzieren.}
-Incorrect transformation are out of scope. Were not counted in first case study.
-There are more failures because of missing matching than test cases exist, because some test cases failed after fixing one missing match again because of another missing match.
-The exact number of each missing match can be found in the MA of Timur.
+\mnote{One iteration for each fault}
+In the circular network study, we performed in total $29$ iterations, which conforms to the $29$ identified faults.
+This is due to the reason that we decided to fix one fault in each iteration.
+We investigated the failures, traced one of them back to a fault, fix that fault and then validated how many failures this resolved.
+This details about the failures resolved by the fix for each fault are described in \cite{saglam2020ma}.
 
-\todo{Analyisieren zu wie vielen Failures ein Mistake führt}
+\mnote{Incorrectness revealed by execution in network}
+Across these iterations, $118$ failures occurred.
+In contrast to the first study, we also counted incorrectness of the transformations in this study, which are actually out of the scope of our evaluation, because we assumed the transformations to be correct, as correctness of individual transformations is a separate and long researched topic.
+It was, however, interesting to see that some faults because of incorrect transformations are only detected when using the transformation in a network rather than using a transformation on its own.
+This is due to the reason that other transformations produce edge cases that were not covered by the transformations and their test cases before.
+For example, the transformations implicitly assumed specific naming schemes within the models, which are not guaranteed to be followed.
+If other transformations then produce models that do not follow this naming schema, this leads to failures that reveals the incorrectness of the transformation.
+In total, twelve faults within incorrect transformations were revealed by $37$ failures during their execution in a network.
+Seven of these faults were revealed in the first two phases of the case study, in which the transformation between \gls{UML} and Java was added (see \autoref{fig:correctness_evaluation:errors:study_phases}).
+They were first revealed in this case study, and especially not in the linear network study, because of further validations added to the test cases.
+
+\mnote{Missing synchronization and incompatible constraints}
+The majority of $57$ failures were multiple instantiations of elements due to missing synchronization. In $13$ cases, matchings of existing elements were missing.
+Additionally, four faults because of incompatible constraints led to $24$ failures in terms of multiple instantiation.
+This is particularly interesting, because in this case multiple instantiation was not caused by missing synchronization, which we expected to be the main reason for multiple instantiation.
+In this case, the incompatible constraints were cased by different, incompatible naming schemes.
+For example, all transformations assume a single \gls{UML} model to exist, but they assume it to have different names, which results in multiple \gls{UML} models being instantiated.
+In practice, such cases can be distinguished from multiple instantiation due to missing synchronization, because the although there are multiple elements where there should only be one, they can be distinguished by differences in their names, or other key information used to identify them.
+
+\mnote{Evaluation of metrics}
+In the following, we use these results to evaluate the defined metrics for answering our evaluation questions depicted in \autoref{tab:correctness_evaluation:gqm_categorization} and \autoref{tab:correctness_evaluation:gqm_synchronization}.
+
+% 2 iterations in first study: first 154 failures, second 5 failures (fixed all traced faults, then executed again)
+% 29 iterations in second study: always fixed one fault, then re-executed; exact failure numbers in \cite{saglam2020ma}.
+
+% Anzahl failures nicht sehr aussagekräftig, da natürlich abhängig von der Art und Anzahl Tests. Außerdem mehrfache Ausführung und Fehler die sich überlagern. Trotzdem aufgelistet um mal einen Eindruck vom Umfang zu kriegen.
+
+% Complete overview in thesis of Timur.
+% Make matrix of mistake types and stages with associated numbers of faults and failures.
+
+% Torsten: 159 failures
+% 154 failures (multiple instantiation) -> 25 missing matchings
+% 3 failures (non termination with divergence) -> 1 incompatible constraint (fully qualified vs. simple name)
+% 2 failures (non termination with alternation) -> 1 option selection (visibilities between UML and Java)
+% Incompatibilities because of two unidirectional consistency relations that are conflicting.
+
+% Timur: 118 failure
+% 37 failures (inconsistent termination) -> 12 incorrect transformations
+% 57 failures (multiple instantiation) -> 13 missing matchings
+% 24 failures (multiple instantiation) -> 4 incompatible constraints (contradicting name constraints, therefore duplications)
+
+% \todo{Tabelle mit Gegenüberstellung von Failures und Faults machen. Daraus auch kurz analysieren, welche Faults wie viele Failures produzieren.}
+% Incorrect transformation are out of scope. Were not counted in first case study.
+% There are more failures because of missing matching than test cases exist, because some test cases failed after fixing one missing match again because of another missing match.
+% The exact number of each missing match can be found in the MA of Timur.
+
+% \todo{Analyisieren zu wie vielen Failures ein Mistake führt}
 
 \subsubsection{Categorization}
 
@@ -775,8 +847,8 @@ We also considered incorrectness of the transformations.
         \end{tikzpicture} \\
         \midrule
         Incorrect Transformation & 5 & 2 & 4 & 1 \\
-        Missing Synchronization     & 0 & 0 & 6 & 7 \\
-        Incompatible Constraints  & 0 & 0 & 2 & 2 \\
+        Missing Synchronization  & 0 & 0 & 6 & 7 \\
+        Incompatible Constraints  0 & 0 & 2 & 2 \\
         Incompatible \newline Option Selection & 0 & 0 & 0 & 0 \\
         \bottomrule
     \end{tabular}
@@ -836,6 +908,8 @@ Falls wir keinen Baum garantieren können: In this case, the consistency specifi
 
 
 \subsection{Discussion}
+
+Erkenntnis: Multiple Instantiation kann auch durch andere Fehler auftreten, dann sind die Elemente aber unterscheidbar, da die Key-Information, die zur Synchronisierung genutzt wird, verschieden ist -> super für die Praxis.
 
 Erkenntnis: Immer erst Fehler auf Transformationsebene fixen, da diese Fehler auf den anderen Ebenen verdecken.
 
