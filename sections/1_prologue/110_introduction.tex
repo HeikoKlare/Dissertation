@@ -3,8 +3,8 @@
 }
 \label{chap:introduction}
 
-In this thesis, we discuss how multiple artifacts of different tools to develop a software or software-intensive system can be kept consistent.
-We research how multiple specifications for consistency and its preservation can be developed independently, such that their combination operates \emph{correctly} and such that they can be \emph{reused} modularly.
+In this thesis, we discuss how multiple artifacts used to develop a software or software-intensive system can be kept consistent by combining transformations between their specification languages.
+We research how multiple transformations, which specify consistency and its preservation, can be developed \emph{independently}, such that their combination operates \emph{correctly} and such that they can be reused \emph{modularly}.
 
 \todo{Check for use of terms \emph{non-intrusive} and \emph{black-block} and add them if missing.}
 
@@ -14,57 +14,62 @@ We research how multiple specifications for consistency and its preservation can
 %%
 \section{Consistency of Multiple Models}
 
-\mnote{System complexity is increasing}
+\mnote{Increasing system complexity}
 Engineers develop software and software-intensive technical systems of ever increasing scale.
-This leads to a continuous increase in complexity of the artifacts used to describe such systems~\cite{murer2011evolution}.
-Engineers inevitably have to deal with the inherent essential complexity, as a direct consequence of the increasing system sizes.
-Tools, however, are supposed to reduce accidental complexity to allow engineers to focus on handling the essential complexity~\cite{brooks1987NoSilverBullet-Computer, fraser2008NoSilverBulletReloaded-Software}.
+This leads to a continual increase in complexity of the artifacts used to describe such systems~\cite{murer2011evolution}.
+As a direct consequence of the increasing system sizes, engineers inevitably have to deal with their inherent essential complexity.
+Various tools support the development process by reducing the accidental complexity to allow engineers to focus on handling the essential complexity~\cite{brooks1987NoSilverBullet-Computer, fraser2008NoSilverBulletReloaded-Software}.
 
 \subsection{Consistency in System Engineering}
 
 \mnote{Fragmented information to deal with essential complexity}
-To better handle the essential complexity, engineers usually use multiple tools to describe and analyze different parts or properties of a system under development by different artifacts, in the following denoted as \emph{models}.
-This reduces the information that different roles have to deal with to what is relevant for their development task.
+To better handle the essential complexity of a system, engineers usually use multiple tools to describe and analyze different parts or properties of a system under development in different artifacts.
+In the following, we denote all these artifacts as \emph{models}.
+This reduces the information to deal with to what is relevant for the development task of each person's role.
 In classical engineering disciplines like construction, mechanical and electrical engineering, this has been common practice for a long time and is often called \emph{\gls{MBSE}}~\cite{estefan2007MbseSurvey}.
-For example, the development of \glspl{ECU} software in automobiles comprises different tools or standards for specifying the system and software architecture, such as SysML~\cite{sysml} or AUTOSAR~\cite{scheid2015autosar}, for defining the behavior, such as MATLAB/Simulink~\cite{simulink} or ASCET~\cite{ascet}, and for defining the deployment on multi-core hardware architectures, such as Amalthea~\cite{amalthea, wolff2014a}.
-In software engineering, such a development methodology is also getting growing attention, often called \emph{\gls{MDSD}}~\cite{stahl2006a}.
+For example, the development of software for \glspl{ECU} in automobiles comprises different tools or standards for specifying the system and software architecture, such as SysML~\cite{sysml} or AUTOSAR~\cite{scheid2015autosar}, for defining the behavior, such as MATLAB/Simulink~\cite{simulink} or ASCET~\cite{ascet}, and for defining the deployment on multi-core hardware architectures, such as Amalthea~\cite{amalthea, wolff2014a}.
+In software engineering, such a development methodology is also getting growing attention.
+It is often referred to as \emph{\gls{MDSD}}~\cite{stahl2006a}.
 Such a development process foresees other artifacts beyond code as primary artifacts to describe the system under construction.
-While code only specifies the functionality of a systems, other tools can be used, for example, for defining the software architecture and its deployment, such as the \gls{UML}~\cite{uml}, analyzing and predicting the software performance, such as the Palladio Simulator~\cite{reussner2016a}, and for specifying the requirements, like IBM Rational Doors~\cite{laplante2012RequirementsEngineering-Book}.
+While code only specifies the functionality of a system, other tools can be used, for example, to define the software architecture and its deployment, such as the \gls{UML}~\cite{uml}, analyzing and predicting the software performance, such as the Palladio Simulator~\cite{reussner2016a}, and for specifying the requirements, like IBM Rational Doors~\cite{laplante2012RequirementsEngineering-Book}.
 
-\mnote{Information fragmentation increases accidental complexity}
-While this \emph{fragmentation} of information across models in different tools eases dealing with the essential complexity of a system, it increases the accidental complexity.
-Since all these models describe the same system, they usually share an overlap of information in terms of implicit \emph{dependencies} or \emph{redundancies}, which can lead to \emph{inconsistencies} if overlapping information is not modified properly across all dependencies and redundancies.
-On a high level, for example, requirements changes have to be reflected in the software architecture and implementation, and modifications of the software architecture have to be reflected in the code.
+\mnote{Accidential complexity due to information fragementation}
+While this \emph{fragmentation} of information across models developed with different tools eases dealing with the essential complexity of a system, it increases accidental complexity.
+Since all these models describe the same system, they usually share an overlap of information in terms of implicit \emph{dependencies} or \emph{redundancies}.
+If modifications of overlapping information are not propagated properly across all dependencies and redundancies, \emph{inconsistencies} can occur.
+For example, requirements changes have to be reflected in the software architecture and implementation, and modifications of the software architecture have to be reflected in the code.
 Since systems are usually developed iteratively and incrementally, there is no strict direction in which changes have to be propagated to preserve consistency, but in general any model can be changed and require updates of others.
 
-\mnote{Fragmented information needs to be kept consistent}
+\mnote{Consistency of fragmented information}
 The overlaps of information, for example in the above mentioned tools for \gls{ECU} software development~\cite{giese2010a}, are often not documented explicitly~\cite{mazkatli2017ase}, but only known by engineers.
 Performing the task of updating overlapping information manually is, however, time-consuming and error-prone.
 The automation of checking and of preserving consistency of information is still poorly supported in current development processes for large systems, as a recent survey has shown \owncite{guissouma2018study}.
-Automating that process is, however, necessary to reduce the accidental complexity induced by the fragmentation of information across multiple models.
+But automating that process is necessary to reduce the accidental complexity induced by the fragmentation of information across multiple models.
 
-\mnote{State of research: transformations to preserve consistency}
-A common approach to automate the process of checking and preserving consistency of models are \emph{model transformations}.
-If models shall or cannot be generated anew after each change, especially \emph{incremental} transformations are of interest.
-Such transformation specify how models have to updated after engineers make changes  to one or some of them instead of generating new models.
-Especially \emph{bidirectional} model transformations~\cite{stevens2010sosym}, which specify the relations between two models and routines how consistency of their instances can be restored after changes in any of them, are well researched.
-System development usually involves more than two tools and thus more than two models to be kept consistent.
+\mnote{Transformations for binary consistency} %State of research: transformations to preserve consistency}
+A common approach to automate the process of checking and preserving consistency of models are \emph{incremental model transformations}.
+%If models shall or cannot be generated anew after each change, especially \emph{incremental} transformations are of interest.
+Tools describe their models in specific languages, for example denoted by \gls{XML} schemas or \glspl{DSL}.
+A transformation specifies how models of one or more of such languages have to be updated after engineers make changes to a model of another language.
+The subclass of \emph{bidirectional} model transformations~\cite{stevens2010sosym}, which specify the relations between two models and routines how consistency of their instances can be restored after changes in any of them, is particularly well researched.
+System development usually involves more than two tools and thus models of more than two languages to be kept consistent.
 The use of transformations to check and preserve consistency between more than two models is, however, less researched~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
-It gained recent attention by a dedicated Dagstuhl seminar~\cite{cleve2019dagstuhl}.
+It gained recent attention in a dedicated Dagstuhl seminar~\cite{cleve2019dagstuhl}.
 
 
 \subsection{Modular and Independent Consistency Specification}
 
 \mnote{Multidrectional transformations vs. networks}
-Two general approaches for consistency of multiple, especially more than two, models by means of transformations are \emph{multidirectional} transformations or the combination of multiple transformations to networks of them.
+Two general approaches for consistency of multiple %, especially more than two, 
+models by means of transformations are \emph{multidirectional} transformations or the combination of multiple transformations to networks of them.
 A single multidirectional transformations is beneficial from a theoretical perspective, because it is not prone to contradictions between the transformations to combine and it provides higher expressiveness~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
-For practical application, however, multidirectional transformations suffer from missing modularity, requiring a single person or team to define the overall relations between all tools.
-It is, however, difficult to think about complex n-ary relations~\cite{stevens2020BidirectionalTransformationLarge-SoSym} and, even worse, the knowledge necessary to define such a relation may not even exist~\owncite{klare2018docsym}.
+For practical application, however, multidirectional transformations suffer from missing modularity, as they require a single person or team to define the overall relations between all languages.
+Additionally, it is difficult to think about complex multiary relations between models of multiple languages~\cite{stevens2020BidirectionalTransformationLarge-SoSym} and, even worse, the knowledge required to define such a relation may not even exist~\owncite{klare2018docsym}.
 
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{figures/prologue/introduction/distributed_knowledge.png}
-    \caption[Tools and distributed knowledge in engineering processes]{Different tools and roles involved in an exemplary software development process and distributed knowledge about the relations between models of the different tools}
+    \caption[Tools and distributed knowledge in engineering processes]{Different tools and roles involved in an exemplary software development process and distributed knowledge about the relations between models of the different tools.}
     \label{fig:introduction:distributed_knowledge}
 \end{figure}
 
@@ -72,45 +77,45 @@ It is, however, difficult to think about complex n-ary relations~\cite{stevens20
 Domain experts deal with the tools and corresponding models they require for their tasks in developing a system.
 Usually, each of them is only concerned with a subset of all tools involved in the development of a system.
 For example, a performance engineer may be concerned with an instance of the \gls{PCM}, which represents a component-based architecture description of the system, to perform an architecture-based prediction of the system's performance and knows how this description is reflected in the system implementation in Java.
-A software architect may use \gls{UML} models for the architecture specification and know how they are related to the implementation as well as to the component-based performance models in \gls{PCM}.
+A software architect may use \gls{UML} models for the architecture specification and know how they are related to the implementation as well as to the component-based architecture models in \gls{PCM}.
 Finally, a requirements engineer may use IBM Rational Doors and know how they have to be reflected in the architecture specification and implementation to consider the models consistent.
 These exemplary relations are depicted in \autoref{fig:introduction:distributed_knowledge}.
-No matter whether this is how knowledge is actually present at the different roles in a concrete scenario, it emphasizes that knowledge about the relations between tools and their models will usually be distributed across different experts as soon as there are several models involved.
+No matter whether this is how knowledge is actually present at the different roles in a concrete scenario, it emphasizes that knowledge about the relations between languages and their models will usually be distributed across different experts as soon as multiple models are involved.
 In large software systems, a single developer cannot know about all model dependencies~\cite{petrenko2008a}.
-In consequence, a process for specifying consistency by means of transformation has to support a kind of \emph{modularity} to foster independent specification of distributed knowledge.
+In consequence, a process for specifying consistency by means of transformations has to support a kind of \emph{modularity} to foster independent specification of distributed knowledge.
 % Maybe discuss that not only binary is case if covered, but also modular multiary case
 
 \mnote{Reuse of consistency specifications}
 Furthermore, an automation especially proposes benefits if it is used often.
-A specification of consistency and its preservation between common tools, for example, \gls{UML} and a programming language such as Java, can be reused across multiple projects.
-Not each project, however, will use exactly the same tools.
-Considering the example in \autoref{fig:introduction:distributed_knowledge}, if the relation between \gls{PCM} and Java was partly expressed indirectly across \gls{UML}, it would not be possible to reuse that specification in another project that only uses \gls{PCM} and Java but omits \gls{UML}.
-Thus parts of specifications, i.e., specification between subsets of the tools in a project, should be reusable, comparable to \gls{COTS}.
-In consequence, a process for specifying consistency by means of transformations has to support \emph{independence} of the modular specifications, such that they can be reused without the others.
+A specification of consistency and its preservation between common languages, such as \gls{UML} and a programming language like Java, can be reused across multiple projects.
+Not each project will, however, use exactly the same tools.
+Considering the example in \autoref{fig:introduction:distributed_knowledge}, if the relation between \gls{PCM} and Java was, at least partly, expressed indirectly across the relations between \gls{PCM} and \gls{UML} as well as \gls{UML} and Java, it would not be possible to reuse that specification in another project that only uses \gls{PCM} and Java but omits \gls{UML}.
+Thus, parts of the consistency specifications, i.e., specifications for subsets of the tools in a project, should be reusable, comparable to \gls{COTS}.
+In consequence, a process for specifying consistency by means of transformations has to support the \emph{independent} specification of \emph{modular} transformations, which can be combined with arbitrary other modular transformations in different contexts.
 
 \mnote{Context assumptions}
-To support the context induced by the previous considerations, we focus on combinations of transformations, be they binary or n-ary, instead of having only a single n-ary transformations.
+To support the context induced by the previous considerations, we focus on combinations of transformations, be they bidirectional or multidirectional, instead of having only a single multidirectional transformation.
 We call such a combination a \emph{transformation network}.
 To summarize the previous considerations, we need to cover the following context assumptions to the specification of the individual transformations of a network:
-\begin{description}
-    \item[Modularity:] Transformations are defined in a modular way, i.e., each transformation does only the specification of consistency and its preservation between a subset of the tools used for a development project.
+\begin{properdescription}
+    \item[Modularity:] Transformations are defined in a modular way, i.e., each transformation does only specify consistency and its preservation for a subset of the tools used in an actual development project.
     \item[Independence:] Transformations are defined independently, i.e., each transformation can be developed without considering the contents of the other transformations to be combined with.
-\end{description}
+\end{properdescription}
 
 
 \subsection{Orchestration of Transformation Networks}
 
-\mnote{Limitations of transformation orchestration strategies}
-Combining several modular and independently developed transformations requires their \emph{orchestration}, i.e., the decision which of the transformations are executed in which order to restore consistency.
-Existing work proposes, for example, to define an execution order explicitly ~\cite{pilgrim2008a, vanhooff2007UniTI-MODELS} or to derive a kind of topologic order~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
-Such approaches either require a manual decision for the orchestration or restrict the execution to specific topologies, such as a directed acyclic graph or tree, which limits the kinds of supported transformation networks.
-In any case, severe assumptions to the individual transformations or the network topology are made.
+\mnote{Limitations of transformation orchestration}
+Combining several modular and independently developed transformations requires their \emph{orchestration}, i.e., the decision in which order the transformations need to be executed to restore consistency.
+Existing work proposes, for example, to define an execution order explicitly ~\cite{pilgrim2008a, vanhooff2007UniTI-MODELS} or to derive a kind of topological order~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
+Such approaches either require a manual decision for the orchestration or restrict the execution to specific topologies, such as directed acyclic graphs or trees. %, which limits the kinds of supported transformation networks.
+In any case, strong assumptions to the individual transformations or the topology of the supported networks are made.
 %To foster distributed development and partial reuse, arbitrary topologies should be supported (Universality, Reusability).
 
-\mnote{Research gap: universal combination of specifications}
-It is yet unclear, how arbitrary modular and independently developed transformations can be combined in a universal way.
+\mnote{(Universal combination of specifications}
+It is yet unclear how arbitrary modular and independently developed transformations can be combined in a universal way.
 %This especially concerns the role of the transformation developer.
-It is neither known how a developer can achieve a \emph{correct} transformation network specification, i.e., transformations and an orchestration of them that delivers consistent models when applied, nor how he or she can improve quality attributes of the network such as %\emph{reusability} and 
+It is neither known how a developer can achieve a \emph{correct} transformation network specification, i.e., transformations and an orchestration of them that delivers consistent models when applied, nor how he or she can systematically improve quality attributes of the network such as %\emph{reusability} and 
 \emph{comprehensibility}.
 %For the role of the transformation user, it is yet unknow how to support him in understanding the reasons whenever transformations fail to deliver consistent models.
 
@@ -121,31 +126,35 @@ It is neither known how a developer can achieve a \emph{correct} transformation 
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{figures/prologue/introduction/overall_process.png}
-    \caption[Process of specifying and executing a transformation network]{The process of specifying and executing a transformation network. Different domain experts specify transformations, which are combined to a transformation network by an orchestration mechanism that decides which transformations have to be executed in which order. If an actual system is developed and a developer modified models, the network is applied to these models and the performed changes to produce a consistent system description again. Artifacts defined by transformation developers are marked green, artifacts at runtime are marked blue and the artifacts for orchestration and application developed in this thesis are marked orange. The assumed and envisioned properties are denoted in red.}
+    \caption[Process of specifying and executing a transformation network]{The process of specifying and executing a transformation network. 
+    % Different domain experts specify transformations, which are combined to a transformation network by an orchestration mechanism that decides which transformations have to be executed in which order. If an actual system is developed and a developer modified models, the network is applied to these models and the performed changes to produce a consistent system description again. 
+    Artifacts defined by transformation developers are marked green, artifacts at runtime are marked blue and the artifacts for orchestration and application developed in this thesis are marked orange. The assumed and envisioned properties are denoted in red.}
     \label{fig:introduction:process_overview}
 \end{figure}
 
 \mnote{Envisioned properties and process}
-Under the assumption of a modular and independent specification of the individual transformation, we aim at an approach for executing transformation networks that have the following properties:
+Under the assumption of a modular and independent specification of the individual transformation, we aim at an approach for executing transformation networks that has the following properties:
 \begin{description}
-    \item[Universality:] The approach shall be able to process transformation networks of arbitrary topology. Especially to support the assumption of independent development, there should be no restriction regarding specific kinds of topologies to be supported.
+    \item[Universality:] The approach shall be able to process transformation networks of arbitrary topology. In particular, specific topologies cannot be assumed or prescribed if the assumption of independent development shall be supported.
+    \item[Non-intrusiveness:] The approach shall be non-intrusive. When independently developed transformations are combined to a network, they should be treated as black-boxes and there should be no need to adapt them to be used together.
     %It must be possible to combine arbitrary specifications. This means that the approach should not restrict which specifications can be combined, especially not which topology, induced by the specifications (such as only a tree) should be supported. In fact, requirements that all specifications have to fulfill may be defined, but apart from that the usability of one specification should not depend on the existence or non-existence of another.
     \item[Correctness:] The approach shall operate correctly. If the approach applies transformations to preserve consistency of models, the result must be consistent or indicate an error.
     %\item[Reusability:] The approach shall improve reusability. This means that the individual transformations shall be reusable independently.
     \item[Comprehensibility:] The approach shall improve comprehensibility. If the transformations are not able to produce models that are actually consistent, it should support the user in finding the reason for that.
 \end{description}
-The envisioned process and artifacts as well as the required properties are depicted in \autoref{fig:introduction:process_overview}.
-\todo{Maybe add non-intrusiveness?}
+The envisioned process with the involved roles, artifacts and required properties is depicted in \autoref{fig:introduction:process_overview}.
+Different domain experts specify transformations, which are combined to a network with an orchestration mechanism that decides in which order transformations have to be executed. If an actual system is developed and a system developer modifies models, the transformations of the network are applied to these models and the performed changes to produce a consistent system description again.
 
 \mnote{Thesis contributions}
 In this thesis, we contribute to support the process of building transformation networks that have the defined properties by providing a formal foundation for transformation networks of arbitrary topology and defining a formal notion of correctness for them.
-We discuss how correctness of a universal approach to orchestrate and apply the transformations of a network network can be achieved by construction or at least by analysis, and which properties the different involved artifacts, such as transformations and their orchestration, have to fulfill for that.
+We discuss how correctness of a universal approach to orchestrate and apply the transformations of a network can be achieved by construction or at least by analysis, and which properties the different involved artifacts, such as transformations and their orchestration, have to fulfill for that.
 The proposed strategy to orchestrate transformations improves comprehensibility in cases when it is not able to execute transformations such that they deliver consistent models.
 Additionally, we classify which kinds of errors can occur when the artifacts are not defined correctly.
 We also analyze how topologies of networks affect the desired properties and propose an approach of defining transformations that resolves trade-offs between the envisioned properties.
+Finally, we propose an approach to integrate artifacts of arbitrary languages into such a consistency process to ensure that all artifacts describing a system can be kept consistent.
 
-\mnote{Towards a detailed problem statement}
-In the following, we first discuss the addressed problem in more detail by considering a specific scenario and generalizing some of the problems to give a first impression of the issues we have to address.
+\mnote{Towards detailed problem statement}
+In the following, we first discuss the addressed problems in more detail by considering a specific scenario and generalizing some of the problems to give a first impression of the issues we have to address.
 Afterwards, we derive our general research goal and define several questions arising from that.
 After more precisely specifying the context and assumptions that we make, we give a detailed overview of our contributions.
 
@@ -157,47 +166,48 @@ After more precisely specifying the context and assumptions that we make, we giv
 \section{Consistency Specification Challenges}
 
 To get an impression of problems arising from the combination of modular transformations, we introduce an exemplary scenario from a software engineering process.
-We motivate why we expect the necessity to have multiple executions of the same transformations and discuss some of the issues that can occur in that context.
+We motivate why we expect that multiple executions of the same transformation can be necessary and discuss some of the issues that can occur in that context.
 Afterwards, we generalize that scenario and derive a more precise problem statement.
 
 \mnote{Software engineering scenario}
-Let us consider an extract of a software engineering scenario, in which three roles using three different tools are involved, according to \autoref{fig:introduction:distributed_knowledge}. 
-A software developers implements the system with an object-oriented programming language such as Java.
+We consider an extract of a software engineering scenario, in which three roles using three different tools are involved, according to \autoref{fig:introduction:distributed_knowledge}. 
+A software developer implements the system with an object-oriented programming language such as Java.
 An architect manages the object-oriented architecture of the system with \gls{UML}. 
-Finally, a performance engineer uses a component-based representation of the architecture with the \gls{PCM} containing an abstract behavior description at the architecture level to predict the system's performance and help to evaluate different design decisions.
+Finally, a performance engineer uses a component-based representation of the architecture with the \gls{PCM} containing an abstract behavior description at the architecture level to predict the system's performance to evaluate different design options.
 
 \mnote{Contents of \gls{PCM}}
-In \gls{PCM}, the basic entities are components, interfaces and datatypes.
+The basic entities in \gls{PCM} models are components, interfaces and datatypes.
 Components are units of reuse that define which interfaces they provide or require and contain abstract service specifications for the operations of the interfaces they provide.
-This allows to assemble a systems of components by connecting components through their interfaces, such that every required interface of one component is provided by a defined other component.
-For the consistency relations between the three languages \gls{PCM}, \gls{UML} and Java, we use the ones proposed by \textcite{langhammer2017a} between \gls{PCM} and object-oriented design, be it \gls{UML} or Java, and the intuitive notion of consistency between \gls{UML} and Java.
+This allows to assemble a system of components by connecting components through their interfaces, such that every required interface of one component is provided by a defined other component.
+For the consistency relations between the three languages \gls{PCM}, \gls{UML} and Java, which specify when models of those languages are to be considered consistent, we use the ones proposed by \textcite{langhammer2017a} between \gls{PCM} and object-oriented design, be it \gls{UML} or Java, and the intuitive notion of consistency between \gls{UML} and Java.
 
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{figures/prologue/introduction/scenario_consistency_relations.png}
-    \caption[Consistency relation for \acrshort{PCM} and \gls{UML}/Java]{Extract of consistency relations between a component-based architecture description in \gls{PCM} and the object-oriented design in \gls{UML}/Java according to \cite{langhammer2017a}.}
+    \caption[Consistency relation for \acrshort{PCM} and \gls{UML}/Java]{Extract of consistency relations between component-based architectures in \gls{PCM} and object-oriented design in \gls{UML}/Java according to \cite{langhammer2017a}. Properties are omitted, each element has a least a name.}
     \label{fig:introduction:scenario_consistency_relations}
 \end{figure}
 
 \mnote{Consistency relations between \gls{PCM}, \gls{UML} and Java}
 Although there are several degrees of freedom to relate \gls{UML} and Java, the extracts that we consider follow a simple one-to-one mapping.
-The relevant relations between \gls{PCM} and object-oriented design are depicted in \autoref{fig:introduction:scenario_consistency_relations}.
+The relevant relations between classes in \gls{PCM} and object-oriented design are depicted in \autoref{fig:introduction:scenario_consistency_relations}.
+%We only depict the classes without their properties. Each of them actually has a least a name.
 This involves a one-to-one mapping between interfaces and the realization of \gls{PCM} components as classes. 
-Provided interfaces in \gls{PCM} are realized by interface implementations. 
+Provided interfaces in a \gls{PCM} model are realized by interface implementations of the class realizing the component. 
 Required interfaces are realized by a field with the type of the interface and constructor parameters that ensure that the required interfaces are set on instantiation of the component.
 
 %% CORRECTNESS
 \subsection{Correctness of Transformation Networks}
 
-The central goal of (software) engineering, and thus also the construction of transformation networks as part of the engineering process, is to achieve \emph{correctness}.
+The central goal of (software) engineering, and thus also the construction of transformation networks as part of the engineering process, is to achieve \emph{correctness} of the developed artifacts.
 
 \subsubsection*{Orchestration Challenge}
 
 % 1. Orchestration problem
-\mnote{Most changes require each transformation to be executed once}
-When we consider transformations between \gls{PCM} and \gls{UML}, as well as between \gls{UML} and Java, they may transfer each modification to the other model.
-For example, adding a \gls{PCM} component creates a class in \gls{UML}, which then creates a class in Java.
-Although in most cases each transformation only needs to be executed once to propagate the information to all other models, there can be situations that require transformation to be executed repeatedly.
+\mnote{Single execution of transformations}
+When we consider transformations between \gls{PCM} and \gls{UML}, as well as between \gls{UML} and Java, they can transfer each modification to the other models.
+For example, adding a \gls{PCM} component creates a class in \gls{UML}, which in turn creates a class in Java.
+Although in most cases each transformation only needs to be executed once, there can be situations that require transformation to be executed repeatedly.
 
 \begin{figure}
     \centering
@@ -206,17 +216,17 @@ Although in most cases each transformation only needs to be executed once to pro
     \label{fig:introduction:scenario_duplicate_execution}
 \end{figure}
 
-\mnote{Scenario with multiple execution of same transformation}
+\mnote{Multiple executions of same transformation}
 In the process depicted in \autoref{fig:introduction:scenario_duplicate_execution}, we assume a system description that contains at least one component and class, respectively, and one interface.
 If a developer adds a field to the Java class having the type of the interface, the transformation between \gls{UML} and Java transfers this field to the corresponding \gls{UML} class.
 The transformation between \gls{UML} and \gls{PCM} detects that the interface is also represented as an architectural interface in the \gls{PCM} model, thus the field is supposed to represent a required interface in the architectural model.
 In consequence, the transformation adds a required interface to the \gls{PCM} component.
 Since the consistency relations prescribe each required interface to be represented as a constructor parameter, the transformation also adds a constructor parameter to the class in the \gls{UML} model.
-This finally requires the transformation between \gls{UML} and Java to be executed again, since the Java code does not yet contain the constructor parameter introduced by the transformation between \gls{PCM} and \gls{UML}.
+This finally requires the transformation between \gls{UML} and Java to be executed again, because the constructor parameter introduced by the transformation between \gls{PCM} and \gls{UML} must also be added to the Java code.
 
 \mnote{Orchestration challenge}
 The example demonstrates that, in general, it is necessary to execute each transformation in a network more than once to achieve a consistent state of the models.
-This is always the case if at least two transformations modify the same model, because then the first transformation may need to react the changes of second one again, like in the example to transformation between \gls{UML} and Java needs to react to the one between \gls{PCM} and \gls{UML}, because both modified the \gls{UML} model.
+This is always the case if at least two transformations modify the same model, because then the first transformation may need to react the changes of second one again, like in the example the transformation between \gls{UML} and Java needs to react to the one between \gls{PCM} and \gls{UML}, because both modified the \gls{UML} model.
 The determination how often and in which order transformations have to be executed is what we call the \emph{orchestration challenge}.
 
 \subsubsection*{Synchronization Challenge}
@@ -225,77 +235,76 @@ The determination how often and in which order transformations have to be execut
 \mnote{Transformation between \gls{PCM} and Java}
 We yet considered that we only have a chain of two transformations, one between \gls{PCM} and \gls{UML} and another between \gls{UML} and Java.
 There may, however, also be an overlap of information between \gls{PCM} and Java that cannot be represented in \gls{UML}, which require to also define a transformation between \gls{PCM} and Java.
-This is especially the case for behavioral properties, which cannot be expressed in UML class models, for example, the functionality defined by Java method implementations and the abstract service specifications in \gls{PCM}.
+This is especially the case for behavioral properties, which cannot be expressed in UML class models, such as the functionality defined by Java method implementations and the abstract service specifications in \gls{PCM}.
 In consequence, the graph induced by the transformation contains a cycle.
 
-\mnote{Transformation may contain redundancies}
+\mnote{Redundancies in transformations}
 Instead of only having a transformation for that overlapping information of \gls{PCM} and Java that cannot be expressed across \gls{UML}, the transformation may also contain the relations already expressed across \gls{UML}.
 The reasons for that can be independent development and reusability.
 Independent development leads to the situation that the developer of the transformation between \gls{PCM} and Java does not know what the transformations to \gls{UML} already express.
-So even if the developer has that information, he may want to express it again to foster reusability, i.e., to use the transformation between \gls{PCM} and Java in projects in which no \gls{UML} is used or when the transformation is not supposed for a specific network of transformations, comparable to \gls{COTS}.
+Even if the developer has that information, he or she may want to express it again to foster reusability, i.e., to use the transformation between \gls{PCM} and Java in projects in which no \gls{UML} is used or when the transformation is not supposed for a specific network of transformations, comparable to \gls{COTS}.
 In consequence, we need to face the situation that multiple transformations propagate the same information, i.e., they contain redundancies.
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{figures/prologue/introduction/scenario_synchronization.png}
+    \includegraphics[width=0.8\textwidth]{figures/prologue/introduction/scenario_synchronization.png}
     \caption[Example for transformation synchronization]{Two transformations propagating the same information to Java.}
     \label{fig:introduction:scenario_synchronization}
 \end{figure}
 
-\mnote{Two transformation paths for Java class creation}
+\mnote{Two transformation paths creating Java class}
 \autoref{fig:introduction:scenario_synchronization} depicts a scenario, in which a user creates a \gls{PCM} component.
-The transformations, in consequence, create a \gls{UML} class and finally, both the transformation between \gls{UML} and Java and the one between \gls{PCM} and Java define the creation of an appropriate Java class.
+The transformations, in consequence, create a \gls{UML} class and, finally, both the transformation between \gls{UML} and Java as well as the one between \gls{PCM} and Java define the creation of an appropriate Java class.
 These transformation now have to consider that there may be another transformation that already created that class.
 Otherwise, there is the risk of creating a duplicate of that class or of overwriting the already created on.
 
 \mnote{Synchronization challenge}
-Such a problem can always occur if two sequences of transformations propagate the same information to the same model, like here to Java.
-In consequence, transformations have to properly deal with that case.
-We call this the \emph{synchronization challenge}.
+Such a problem can always occur if two sequences of transformations propagate the same information to the same model. %, like here to Java.
+How to achieve that transformations deal with such cases constitutes the \emph{synchronization challenge}.
 
 \subsubsection*{Contradiction Challenge}
 % 3. Contradiction problem
 
 \mnote{Equivalence of redundancies}
 We have seen that it may be necessary to redundantly define the same consistency relations in different transformations.
-We have, however, implicitly assumed that these repetitions of the same relations are true redundancies, i.e., express the relations equally.
-This, in turn, requires all developers to have the same \emph{notion of consistency} between the languages.
+This, however, implicitly assumes that they are true redundancies, i.e., that they equally express the relations.
+This, in turn, requires all developers to have the same \emph{notion of consistency} between the different tools.
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.6\textwidth]{figures/prologue/introduction/scenario_contradiction.png}
+    \includegraphics[width=0.8\textwidth]{figures/prologue/introduction/scenario_contradiction.png}
     \caption[Example for transformation contradictions]{Contradicting consistency relations between components in \gls{PCM} and classes in \gls{UML} and Java.}
     \label{fig:introduction:scenario_contradiction}
 \end{figure}
 
-\mnote{Contradicting component and class name relations}
-The example in \autoref{fig:introduction:scenario_contradiction} informally depicts exemplary specifications for the relation between components and classes.
-It is supposed to express that for each a component or class appropriate elements in the other models have to exist with the given name relation.
+\mnote{Contradicting relations}
+The example in \autoref{fig:introduction:scenario_contradiction} informally depicts exemplary consistency relations between components and classes.
+They are supposed to express that for each a component or class appropriate elements in the other models have to exist with the given name relation.
 The constraints for their names can, however, obviously not be fulfilled at the same time.
 While the class representations are supposed to have the same name and the \gls{PCM} is also supposed to have the same name as the \gls{UML} class, it is supposed to have the name of the Java class with an \enquote{Impl} suffix, as proposed by \textcite{langhammer2017a}.
 
 \mnote{Different notions of consistency}
 Such a situation can occur if the developers of the different transformations have different notions of consistency.
-In this case, the performance engineering, who knows about the relation between \gls{PCM} and Java according to the scenario presented in \autoref{fig:introduction:distributed_knowledge}, and the software architect, who knows about the relation between \gls{PCM} and \gls{UML} as well as between \gls{UML} and Java have different notions about how to represent components in object-oriented design.
+In this case, the performance engineering, who knows about the relation between \gls{PCM} and Java according to the scenario presented in \autoref{fig:introduction:distributed_knowledge}, and the software architect, who knows about the relation between \gls{PCM} and \gls{UML} as well as between \gls{UML} and Java, have different notions about how to represent components in object-oriented design.
 
-\mnote{Non-terminate or inconsistent termination due to contradictions}
-If the experts encode the defined relations in transformations that try to preserve them and execute them after any of the elements is added to a model, the transformations will either terminate in an inconsistent state or never terminate at all.
+\mnote{Non-termination or inconsistent termination}
+If the domain experts encode the defined relations in transformations that try to preserve them and execute them after any of the elements is added to a model, the transformations will either terminate in an inconsistent state or never terminate at all.
 Executing the transformation for a finite number of times would always result in an inconsistent state, if not removing the element just added by the user.
 
 \mnote{Contradiction challenge}
-In consequence, it is important to avoid or detect situations in which transformations with such contradicting constraints are combined to a network.
-We call this the \emph{contradiction challenge}
+In consequence, it is important to avoid or detect situations in which transformations with such contradicting constraints in their consistency relations are combined to a network.
+We call this the \emph{contradiction challenge}.
 
 \subsubsection*{Problem Statement}
 
-\mnote{No systematic knowledge on correctness issues}
+\mnote{Systematic knowledge on correctness issues}
 We have discussed three kinds of issues, which can prohibit that a transformation network terminates consistently, and derived according challenges: orchestration, synchronization and contradiction.
 These challenges only exemplify the relevant correctness issues in transformation networks. 
 In fact, it is even not systematically known which issues can occur.
 Thus we derive the following general problem statement:
 
 \begin{problemstatement}
-    It is unknown how to correctly combine modular and independently developed transformations to networks to achieve consistent results.
+    It is unknown how to correctly combine modular and independently developed transformations to networks to yield consistent models after they were changed.
 \end{problemstatement}
 
 %% QUALITY PROPERTIES
@@ -303,23 +312,23 @@ Thus we derive the following general problem statement:
 
 \mnote{Quality properties of networks}
 Like in ordinary (software) engineering, besides the primary goal of producing \emph{correct} artifacts, there are several quality properties that need to be improved.
-They can range from properties relevant for developers, such as reusability and evolvability, to properties relevant for users, such as performance, scalability and reliability.
+They can range from properties that are relevant for developers, such as reusability and evolvability, to properties relevant for users, such as performance, scalability and reliability.
 This similarly applies to transformation networks as artifacts of the (software) engineering process.
 
 \subsubsection*{Properties and Topology Challenge}
 
 \mnote{Focus on development properties}
-In this thesis, we will focus on further properties regarding the development of a transformation network, such as reusability and evolvability, rather than properties of its usage, such as scalability.
+In this thesis, we focus on further properties regarding the development of a transformation network, such as reusability and evolvability, rather than properties of its usage, such as scalability.
 Reusability is of most importance, because transformation may be used in different contexts within different networks of other transformations.
 
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{figures/prologue/introduction/scenario_topologies.png}
-    \caption[Example for network topologies]{Different topologies of transformation networks for \gls{PCM}, \gls{UML} and Java}
+    \caption[Example for network topologies]{Different transformation network topologies for \gls{PCM}, \gls{UML} and Java.}
     \label{fig:introduction:scenario_topologies}
 \end{figure}
 
-\mnote{Topology extremes: tree and dense graphs}
+\mnote{Topology extremes}
 Consider the two networks depicted in \autoref{fig:introduction:scenario_topologies}.
 The networks contain transformation between \gls{PCM} and \gls{UML} as well as between \gls{UML} and Java. 
 One of them additionally contains a transformation between \gls{PCM} and Java.
@@ -328,20 +337,20 @@ the graph induced by transformations may on the one end be a tree, and on the ot
 
 \mnote{Topologies affect properties}
 It is easy to see that properties are directly affected by the network topology.
-A dense graph has to benefit of high reusability, because any subset of languages can be used for a development project without loosing consistency.
-In the example, the tree network is not applicable in development projects using \gls{UML}, because then \gls{PCM} and Java cannot be kept consistent.
-Additionally, a dense graph profits from universality, because arbitrary relations can be expressed, whereas a tree requires that of three language there is always one that can express the overlap of the two others.
+A dense graph has the benefit of high reusability, because any subset of tools can be used for a development project without loosing consistency.
+In the example, the tree network is not applicable in development projects not using \gls{UML}, because then \gls{PCM} and Java cannot be kept consistent.
+Additionally, a dense graph profits from universality, because arbitrary relations can be expressed, whereas a tree requires that of three languages there is always one that can express the overlap of the two others.
 If there are overlaps between \gls{PCM} and Java that cannot be expressed across \gls{UML}, like discussed for behavioral specifications, a tree cannot be defined.
 On the other hand, a tree has the benefit of inherent correctness guarantees.
-There are no two paths of transformations between the same two language.
-Thus, no changes cab be propagated across two paths to the same model, avoiding synchronization problems, and no contradictions can occur.
-This already avoids two of the three introduced challenges regarding correctness.
+There are no two paths of transformations between the same two languages.
+Thus, no changes can be propagated across two paths to the same model.
+This avoid at least two of the three introduced challenges regarding correctness, because neither synchronization problems nor contradictions can occur.
 
 \mnote{Topologies induce trade-offs}
-While each topology improves certain properties, it degrades others at the same time.
+While each kind of topology improves certain properties, it degrades others at the same time.
 In other words, topologies induce trade-offs between different properties.
-For example, a tree improved correctness, but degrades reusability in comparison to a dense graph.
-Finding out how to use this knowledge to mitigate trade-offs and improve different properties at the same time is our \emph{properties and topologies challenge}.
+For example, a tree improves correctness, but degrades reusability in comparison to a dense graph.
+Deriving how to use this knowledge to mitigate trade-offs and improve different properties at the same time is our \emph{properties and topologies challenge}.
 
 \subsubsection*{Language Challenge}
 
@@ -353,22 +362,24 @@ Research approaches did consider approaches and languages for single transformat
 
 \mnote{Language challenge}
 To relieve the developer from the task of following the strategy to a network of transformations to improve different properties, a suited language should be provided.
-Finding how such a language should be designed constitutes our \emph{language challenge}.
+Investigating design options for such a language constitutes our \emph{language challenge}.
 
 \subsubsection*{Integration Challenge}
 
 \mnote{Transformations assume models of specific formalisms}
-Finally, we always assumed that models are developed and thus present in a format to which transformations can be applied.
-Transformation languages have to assume a specific formalism of the languages between they transform~\cite{klare2017models}, thus the models have to follow that formalism.
+Finally, we have implicitly assumed that models are developed and thus represented in a format to which transformations can be applied.
+Languages for specifying transformations, however, have to assume a well-defined formalism of the languages between they transform~\cite{klare2017models}, thus the models have to follow that formalism.
 This is especially problematic for code, which will be relevant for almost every development project.
-Although there are tools that wrap code in a specific formalism, such as JaMoPP~\cite{heidenreich2009a,heidenreich2010a} for using Java code in the Eclipse Modeling Framework, recognizing incremental updates of code are still poorly supported.
+Although there are tools that wrap code in a specific formalism %, such as JaMoPP~\cite{heidenreich2009a,heidenreich2010a} for using Java code in the Eclipse Modeling Framework, 
+recognizing incremental updates of code are still poorly supported.
 
-\mnote{Models are often implicit}
+%\mnote{Models are often implicit}
+\mnote{Access to implicit models}
 Models are often contained implicitly in code.
-This mostly concerns domain models for the software to be developed, but also models of code, such as the Java code representation in the Java Development Tools of the Eclipse Framework~\cite{EclipseJDT}, which has capabilities of recognizing incremental updates.
-
-\mnote{Lifting artifacts to models}
-Lifting such implicit models into a format according to formalisms that allow the application of transformations and transformation languages enables projects using such artifacts to apply transformation techniques to preserve consistency.
+This mostly concerns domain models for the software to be developed, but also models to represent code. %of code, such as the Java code representation in the Java Development Tools of the Eclipse Framework~\cite{EclipseJDT}, which has capabilities of recognizing incremental updates.
+%\mnote{Lifting artifacts to models}
+Lifting such implicit models into a format according to formalisms that allow the application of transformations %and transformation languages 
+enables projects using such artifacts to apply transformation techniques to preserve consistency.
 For all projects containing such artifacts, this can be seen as a preliminary for applying transformation network, as otherwise only the parts of the projects present in an appropriate formalism can be kept consistent.
 In consequence, it can be seen as a \emph{completeness} property of the network.
 We denote this as the \emph{integration challenge}.
@@ -390,18 +401,18 @@ Thus we derive the following problem statement:
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{figures/prologue/introduction/challenges.png}
-    \caption[Problem statements and challenges]{The two central identified problem statements and challenges identified for them}
+    \caption[Problem statements and challenges]{The two identified problem statements and challenges for them.}
     \label{fig:introduction:challenges}
 \end{figure}
 
 \mnote{Summary of problems statements and challenges}
 We have discussed several issues regarding the construction of transformation networks.
 We summarize the problem statements and challenges in \autoref{fig:introduction:challenges}.
-We made two central problem statements, one regarding the correctness of networks and one regarding the improvement of quality properties.
+We made two central problem statements, one regarding the correctness of networks and another regarding the improvement of quality properties.
 Each of these problems is driven by three challenges.
 We identified orchestration, synchronization and contradiction to be central challenges for constructing \emph{correct} transformation networks.
 For the improvement of quality properties, we emphasized that the relation between properties and topologies challenges the identification of a topology to mitigate property trade-offs and to define an appropriate language for that.
-To achieve completeness of a network, we identified the integration challenge to integrate all kinds of artifacts into a transformation-based consistency process.
+To achieve completeness of a network, we identified the integration challenge. % to integrate all kinds of artifacts into a transformation-based consistency process.
 
 
 
