@@ -1,3 +1,23 @@
+%% ENUMERATIONS/DESCRIPTIONS
+% Description with less indentation
+\newenvironment{properdescription}[1][]{
+    \begin{description}[leftmargin=1.5em, #1]
+}{
+    \end{description}
+}
+
+% Enumerations with justification
+\RequirePackage{ragged2e}
+\newenvironment{properenumerate}[1][]{
+    \begin{enumerate}[#1]
+    \justifying
+}{
+    \end{enumerate}
+}
+\newenvironment{nestedenum}{\begin{enumerate}[label*=\itshape \arabic*.]
+	}{\end{enumerate}}
+
+
 %% FIGURES
 \usepackage{subcaption}
 
@@ -51,7 +71,7 @@
 \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 \newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
-% rowcolors
+% Rowcolors
 \RequirePackage[table]{xcolor} % loads also colortbl
 \RequirePackage{multirow} 
 
@@ -91,101 +111,89 @@
 \makeatletter
 \presetkeys{todonotes}{inline}{}
 \makeatother
-
 \newcommand{\todoLater}[1]{}%\ifdraft{\todo[inline,color=kit-red30]{#1}}{}}
 
 
 %% CONTRIBUTIONS
-\RequirePackage{ragged2e}
+\newcounter{outercontribution}
+\newcounter{contribution}[outercontribution]
+\renewcommand*\thecontribution{%
+    \bfseries \arabic{outercontribution}.\arabic{contribution}%
+}
+\newcommand*{\contributionautorefname}{\bfseries C}
+
+% Environment
 \newenvironment{contributions}[1]{
-    \begin{properenumerate}[
-        %labelwidth=5em, 
-        %align=parleft ,
-        leftmargin=*, labelsep=\widthof{ },
-        label=\bfseries C #1.\arabic*,
+    \refstepcounter{outercontribution}
+    \begin{description}[
+        leftmargin=2.5em, widest=C 2.5,
+        font=\normalfont\bfseries,
     ]
-    \setcounter{enumi}{0}
-}{
-    \end{properenumerate}
-}
-
-% #1: label name
-% #2: contribution name
-% #3: question text
-\makeatletter
-\def\contribution#1#2#3{%
-    \global\expandafter\def\csname contribrepeat#1\endcsname{\paragraph{\contributionref{#1} (#2):} #3}%
-    \begingroup%
-    \item \textit{(#2):}\; #3%
-    %\def\@currentlabel{\textnormal{\theenumi}}
-    \phantomsection\label{#1}%
-    \endgroup
-}
-\makeatother
-
-\newcommand{\contributionrepeat}[1]{%
-    \csname contribrepeat#1\endcsname%
-}
-
-\newcommand{\contributionref}[1]{%
-    \textnormal{\ref{#1}}%
-}
-
-
-%% RESEARCH QUESTIONS
-\newenvironment{researchquestions}[1]{
-    \begin{enumerate}[label=\bfseries RQ \arabic*]
-    \setcounter{enumi}{#1-1}
-}{
-    \end{enumerate}
-}
-\newenvironment{subresearchquestions}{
-    \begin{enumerate}[label*=\bfseries .\arabic*]
-}{
-    \end{enumerate}
-}
-
-% #1: label name
-% #2: question text
-\makeatletter
-\def\researchquestion#1#2{%
-    \global\expandafter\def\csname rqrepeat#1\endcsname{\noindent\researchquestionref{#1}: #2}%
-    \begingroup%
-    #2%
-    %\def\@currentlabel{\textnormal{\theenumi}}
-    \phantomsection\label{#1}%
-    \endgroup
-}
-\makeatother
-
-\newcommand{\researchquestionrepeat}[1]{%
-    \csname rqrepeat#1\endcsname%
-}
-
-\newcommand{\researchquestionref}[1]{%
-    \textnormal{\ref{#1}}%
-}
-
-
-%% ENVIRONMENTS
-% Description with less indentation
-\newenvironment{properdescription}[1][]{
-    \begin{description}[leftmargin=1.5em, #1]
 }{
     \end{description}
 }
 
-% Enumerations with justification
-\RequirePackage{enumitem}
-\RequirePackage{ragged2e}
-\newenvironment{properenumerate}[1][]{
-    \begin{enumerate}[#1]
-    \justifying
-}{
-    \end{enumerate}
+% Contribution
+% #1: label name
+% #2: contribution name
+% #3: question text
+\def\contribution#1#2#3{%
+    \global\expandafter\def\csname contribrepeat#1\endcsname{\paragraph{\autoref{#1} (#2):} #3}%
+    \refstepcounter{contribution}
+    \item[\contributionautorefname{} \thecontribution{} \textnormal{\textit{(#2)}:}] #3%
+    \label{#1}%
 }
-\newenvironment{nestedenum}{\begin{enumerate}[label*=\itshape \arabic*.]
-	}{\end{enumerate}}
+
+% Repetition
+\newcommand{\contributionrepeat}[1]{%
+    \csname contribrepeat#1\endcsname%
+}
+
+
+%% RESEARCH QUESTIONS
+\newcounter{researchquestion}
+\newcounter{subresearchquestion}[researchquestion]
+\renewcommand*\theresearchquestion{%
+    \bfseries \arabic{researchquestion}%
+}
+\renewcommand*\thesubresearchquestion{%
+    \bfseries \arabic{researchquestion}.\arabic{subresearchquestion}%
+}
+\newcommand*{\researchquestionautorefname}{\bfseries RQ}
+\newcommand*{\subresearchquestionautorefname}{\bfseries RQ}
+
+% Environments
+\newenvironment{researchquestions}{
+    \begin{description}[font=\normalfont\bfseries,leftmargin=*,widest=RQ 2]
+}{
+    \end{description}
+}
+\newenvironment{subresearchquestions}{
+    \begin{description}[font=\normalfont\bfseries,leftmargin=*,widest=RQ 2.4]
+}{
+    \end{description}
+}
+
+% Questions
+% #1: label name
+% #2: question text
+\def\researchquestion#1#2{%
+    \global\expandafter\def\csname rqrepeat#1\endcsname{\noindent\autoref{#1}: #2}%
+    \refstepcounter{researchquestion}%
+    \item[\researchquestionautorefname{} \theresearchquestion] #2%
+    \label{#1}%
+}
+\def\subresearchquestion#1#2{%
+    \global\expandafter\def\csname rqrepeat#1\endcsname{\noindent\autoref{#1}: #2}%
+    \refstepcounter{subresearchquestion}%
+    \item[\subresearchquestionautorefname{} \thesubresearchquestion] #2%#
+    \label{#1}%
+}
+
+% Repetition
+\newcommand{\researchquestionrepeat}[1]{%
+    \csname rqrepeat#1\endcsname%
+}
 
 
 %% GOAL-QUESTION-METRIC
