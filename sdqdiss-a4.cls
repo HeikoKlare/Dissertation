@@ -5,24 +5,25 @@
 %% burger@kit.edu
 %%
 %% Siehe https://sdqweb.ipd.kit.edu/wiki/Dokumentvorlagen
-%%
-%% {$HeadURL: https://svnserver.informatik.kit.edu/i43/svn/presentations/SDQ-Dissertations-Vorlage/LaTeX-Dateien/sdqdiss-a4.cls $}
-%% {$LastChangedDate: 2018-08-02 14:23:11 +0200 (Do, 02 Aug 2018) $}
-%% {$LastChangedRevision: 1078 $}
-%% {$LastChangedBy: burger $}
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{sdqdiss-a4}[2016/07/16 SDQ Dissertation DIN A4]
-
-\LoadClass[
-	a4paper,
-	fontsize=12pt,
-	headsepline,
-]{scrbook}
+\ProvidesClass{sdqdiss-a4}[2020/05/29 SDQ Dissertation DIN A4]
 
 % Optionen an scrbook durchreichen
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{scrbook}}
 \ProcessOptions\relax
+
+\LoadClass{scrbook}
+
+\KOMAoptions{
+	paper=a4,
+	fontsize=12pt,
+  headsepline,
+  bibliography=totoc,	
+  listof=totoc,
+  headings=optiontoheadandtoc,
+  toc=chapterentrywithdots,
+}
 
 %% ----------------
 %% | Seitenformat |
@@ -113,9 +114,3 @@
 
 % KIT-Rahmen für Titelseite
 \RequirePackage{wallpaper}
-
-%% Formatierung der Inhalts-/Abbildungs-Verzeichnisse
-\RequirePackage{tocstyle}
-\usetocstyle{allwithdot}
-\settocstylefeature[-1]{pagenumberhook}{\normalsize\normalfont}
-\settocstylefeature[-1]{dothook}{\normalsize\normalfont}
