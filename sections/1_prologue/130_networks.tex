@@ -219,10 +219,7 @@ A generic transformation cannot be continuously integrated, because it is not sp
 %% MODELS AND METAMODELS
 %%
 \section{Models and Metamodels}
-
-The most essential elements used for descriptions in this thesis are models and the metamodels describing them.
-We have already introduced in \autoref{chap:foundations} what we consider a model and that we adhere to the modelling formalism defined by the \gls{MOF}.
-We use a sufficiently simplified notion of models, metamodels, and their elements, for which we give an overview in \autoref{tab:networks:elements}.
+\label{chap:networks:models}
 
 \begin{table}
     \centering
@@ -268,49 +265,77 @@ We use a sufficiently simplified notion of models, metamodels, and their element
     \label{tab:networks:elements}
 \end{table}
 
+The most essential elements used for descriptions in this thesis are models and the metamodels describing them.
+We have already introduced in \autoref{chap:foundations} what we consider a model and that we adhere to the modelling formalism defined by the \gls{MOF}.
+We use a sufficiently simplified notion of models, metamodels, and their elements, for which we give an overview in \autoref{tab:networks:elements}.
+In the following, we introduce the used notation and its conventions, as well as the elements used for modelling.
+Finally, we clarify assumptions that we make and discuss their impact.
+
 \todo{Introduce that/why we always use model tuples -  remove from modular consistency specifications in formalization}
 
-\todo{Like explained in foudnations, we use specific notations for sets, tuples and sequences}
+\subsection{Notation and Conventions}
 
-\subsection{Notation}
 
+\mnote{Modeling levels}
 In general, we use variables of uppercase letters for all elements at the metamodel level (M2), such as $\metamodel{M}{}$ for a metamodel or $\class{C}{}$ for a class, whereas we use lowercase letters for all elements at the model level (M1), such as $\model{m}{}$ for a model and $\object{o}{}$ for an object.
-If not further specified, we use the same indices on related elements on the metamodel and the model level, such as model $\model{m}{1}$ being an instance of metamodel $\metamodel{M}{1}$.
 
-\subsection{Elements}
+\mnote{Notation for model and metamodel level relations}
+We use the notations for sets and tuples introduced in \autoref{chap:foundations:notations} for denoting sets and tuples of the different elements, such as metamodels and models.
+When considering multiple metamodels or models, we are usually not interested in their order and usually the same model or metamodel cannot appear twice.
+Still, we always treat them as tuples rather than sets to be able to easily relate a model to its metamodel by its index within the tuple.
+Thus, if not further specified, we use the same indices to relate element at the metamodel and the model level, such as as $\model{m}{1}$ being an instance of $\metamodel{M}{1}$, i.e., $\model{m}{1} \in \metamodelinstanceset{M}{1}$.
+This could also be expressed by an explicit instantiation relation, but the used notation is more concise and thus proposes to easy readability.
 
-In general, we consider metamodels as a composition of meta-classes, which in turn are composed of properties representing attributes or references.
-Models instantiate metamodels and are composed of objects, which are instances of meta-classes and in turn consist of property values, which instantiate properties.
 
-We denote \emph{properties}, which are the information a meta-class consists of, such as attributes or references, as $P$ and the \emph{property values} as instances of a property as $\instances{P} = \setted{p_1, p_2, \dots}$ of property $P$. 
+\subsection{Modeling Elements}
+
+\mnote{Elements overview}
+In general, we consider metamodels as a composition of \metaclasses, which, in turn, are composed of properties representing attributes or references.
+Models instantiate metamodels and are composed of objects, which are instances of \metaclasses and, in turn, consist of property values, which instantiate properties.
+
+\mnote{Properties and property values}
+We denote \emph{properties}, which are the information a \metaclass consists of, such as attributes or references, as $P$ and the \emph{property values} as instances of a property as $\instances{P} = \setted{p_1, p_2, \dots}$ of property $P$. 
 We do not need to further differentiate different types of properties into attributes and references, like it is done in other formalizations, such as the OCL standard~\cite[A.1]{ocl} or the thesis of \citeauthor{kramer2017a}~\cite[2.3.2]{kramer2017a}.
 
+\mnote{Classes and objects}
 We denote \emph{meta-classes}, in the following shortly called \emph{classes}, as tuples of properties $\class{C}{} = \tupled{P_1, \dots, P_n}$. 
-Instances of a \emph{class} are \emph{objects}, each being a tuple of instances of the properties of the class and we denote all instances of a class $\class{C}{}$ as $\instances{\class{C}{}} = \setted{\object{o}{} = \tupled{p_1, \dots, p_n} \mid p_i \in \instances{P_i}}$.
+Instances of a class are \emph{objects}, each being a tuple of instances of the properties of the class.
+We denote all instances of a class $\class{C}{}$ as $\instances{\class{C}{}} = \setted{\object{o}{} = \tupled{p_1, \dots, p_n} \mid p_i \in \instances{P_i}}$.
 
+\mnote{Metamodels and models}
 We denote a metamodel $\metamodel{M}{} = \setted{\class{C}{1}, \dots, \class{C}{m}}$ as a finite set of classes.
 The instances of a metamodel are sets of objects $\metamodelinstanceset{M}{} = \setted{\model{m}{} \mid \model{m}{} \subseteq \bigcup_{\class{C}{} \in \metamodel{M}{}} \instances{\class{C}{}}}$.
-Those instance sets are, in other work like~\cite{stevens2020BidirectionalTransformationLarge-SoSym} with more lightweight definitions of metamodels, sometimes also simply called \emph{model sets}.
-Each instance, denoted as a \emph{model}, is a finite set of objects that instantiate the classes in the metamodel.
+In other work like~\cite{stevens2020BidirectionalTransformationLarge-SoSym}, such instance sets are also called \emph{model sets} and implicitly define a metamodel, thus representing a lightweight definition of metamodels by simply enumerating its instances.
+Each instance of a metamodel is called a \emph{model}, and represents a finite set of objects that instantiate the classes in the metamodel.
 For a tuple of metamodels $\metamodeltuple{M} = \tupled{\metamodel{M}{1}, \dots, \metamodel{M}{k}}$, we denote the set that contains all sets of instances of that metamodels as $\metamodeltupleinstanceset{M} = \setted{ \tupled{\model{m}{1}, \dots, \model{m}{k}} \mid \model{m}{i} \in \metamodelinstanceset{M}{i}}$.
+
+
+\todo{Discuss valid models, why we do not consider them and prove that invariants + consistency relations can express any consistency relation.
+A single relation can consider constraints on the single models, but combination (even within one transformation) can easily contradict constraints of a model.
+
+New:
+Discuss valid models here and why we do not further consider them. Discuss at end of (or somewhere in) compatibility how combination of valid model restriction and consistency relations can express any restriction to desired model sets.
+
+Idee für das Ausschluss-Problem (Für Student darf kein Employee existieren): Entweder darf nie ein entsprechender Employee existieren, dann müssen die Modelle allesamt ausgeschlossen werden (valid models). Wenn es in bestimmten Modellen auftreten darf, muss der Kontext einer Konsistenzrelation richtig festgelegt sein, damit sie abbildet unter welchen Bedingungen der Employee existieren darf. Geht aber nicht, weil Employee einfach in keiner Relation auftauchen könnte (man will nie, dass ein Employee für ein anderes Element vorhanden ist), aber man will, dass er in bestimmten Situationen nicht auftauchen darf.}
 
 
 
 \subsection{Assumptions}
-\label{chap:networks:assumption}
+\label{chap:networks:models:assumption}
 
+\mnote{Finite models}
 We assume models to be finite, so for each model $\model{m}{}$, we assume that $|\model{m}{}| < \infty$.
-Additionally, our formalism assumes objects to be unique within a model $\model{m}{}$. 
+Additionally, our proposed formalism assumes objects to be unique within a model $\model{m}{}$. 
 This is already implicitly covered by the definition of $\metamodelinstanceset{M}{}$ for the instances of a metamodel $\metamodel{M}{}$. 
+
+\mnote{Unique elements}
 In practice, it is usually allowed to have the same object, i.e., an element with the same type, attribute and reference values, multiple times within the same model. 
-This is, however, only a matter of identity, which we assume, without loss of generality, to be represented within the objects, whereas identity in practice is given by different objects being placed at specific places in memory.
+This is, however, only a matter of identity, which, in practice, is given at least by different objects being placed at specific places in memory.
+We assume, without loss of generality, the necessary information to distinguish two elements to be represented within properties of these elements.
 
 % Our definition of models does not restrict validity of models apart from being a collection of instances of the classes in the metamodel.
 % It is possible to define further constraints for metamodels that restrict their valid instances.
 % We intentionally do not consider such restrictions of valid models, because even a single transformation 
-
-\todo{Discuss valid models, why we do not consider them and prove that invariants + consistency relations can express any consistency relation.
-A single relation can consider constraints on the single models, but combination (even within one transformation) can easily contradict constraints of a model.}
 
 
 
