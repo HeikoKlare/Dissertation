@@ -133,16 +133,16 @@ We already informally discussed this as a notion of \emph{compatibility}, for wh
 \label{chap:correctness:formalization:incremental_inductive}
 \mnote{Preserving consistency}
 While the previous discussion only considered when models are considered consistent, it is of especial interest to ensure that consistency of models is preserved.
-We informally introduced such specifications as \glspl{consistency preservation rule}.
+We informally introduced such specifications as consistency preservation rules.
 In the following, we will restrict us to \emph{incremental} and \emph{inductive} consistency preservation and give a precise definition for that.
 This means that we make the following assumptions to the process:
 \begin{properdescription}
     \item[Information preservation (incrementality):] After a change to one model, the others are not generated from scratch but updated according to the performed changes. This ensures that information that cannot be generated but was added by users to the other models is preserved.
-    \item[Consistency assumption (induction):] We assume models to be consistent before a change is processed by \glspl{consistency preservation rule}. Otherwise the preservation rules would need to be able to handle arbitrary states of the models and it would be unclear consistency to which \glspl{consistency relation} has to be restored.
+    \item[Consistency assumption (induction):] We assume models to be consistent before a change is processed by consistency preservation rules. Otherwise the preservation rules would need to be able to handle arbitrary states of the models and it would be unclear consistency to which consistency relations has to be restored.
 \end{properdescription}
 While incrementality is an essential requirement whenever consistency shall be preserved to avoid information loss, inductivity may not be necessary.
-We, however, make this assumption to avoid requiring from the \glspl{consistency preservation rule} that they need to be able to process an inconsistent state without knowing which changes introduced it.
-From a theoretical point of view, we could omit that requirement, but this would make the specification of \glspl{consistency preservation rule} impractically complicated, such that omitting that requirement is not practically relevant anyway.
+We, however, make this assumption to avoid requiring from the consistency preservation rules that they need to be able to process an inconsistent state without knowing which changes introduced it.
+From a theoretical point of view, we could omit that requirement, but this would make the specification of consistency preservation rules impractically complicated, such that omitting that requirement is not practically relevant anyway.
 %In consequence, an incremental and inductive \gls{consistency preservation rule} takes a consistent tuple of models and changes to them and returns a tuple of models that is consistent again.
 
 \todoLater{Do we need inductivity for synchronization? Otherwise we may remove it here and from following definitions?}
@@ -150,14 +150,14 @@ From a theoretical point of view, we could omit that requirement, but this would
 %\todo{Make precise here that we have incremental consistency, thus last consistent state and delta to that is known. We did not assume that in the informal notion before.}
 
 \mnote{Monolithic and modular consistency preservation}
-Like we already discussed for \glspl{consistency preservation rule} in general, incremental preservation rules can be realized in an either monolithic or modular way.
+Like we already discussed for consistency preservation rules in general, incremental preservation rules can be realized in an either monolithic or modular way.
 A monolithic consistency preservation rules takes a tuple of models that is consistent to a consistency relation and a change to these models and returns another tuple of models that is consistent again.
-In a modular specification of \glspl{consistency preservation rule}, a set of such rules is given which are able to preserve consistency of a subset of the given models according to modular consistency relations.
+In a modular specification of consistency preservation rules, a set of such rules is given which are able to preserve consistency of a subset of the given models according to modular consistency relations.
 In our case, we consider such rules for two models, each of them restoring consistency according to a binary consistency relation.
 %We will later discuss if and how an execution order of such consistency preservation rules can be determined.
 
 \mnote{Drawbacks of existing unidirectional consistency restorers}
-In terminology for transformations, a \gls{consistency preservation rule} that restores consistency of models according to a \gls{consistency relation} in one direction is called \emph{directional transformation}~\cite{stevens2010sosym} or \emph{consistency restorer}~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
+In terminology for transformations, a consistency preservation rule that restores consistency of models according to a consistency relation in one direction is called \emph{directional transformation}~\cite{stevens2010sosym} or \emph{consistency restorer}~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
 Definitions of that terminology do usually not consider changes but only states of models and simply define a preservation rule for metamodel $\metamodel{M}{1}$ and $\metamodel{M}{2}$ that modifies the instance of $\metamodel{M}{2}$ to restore consistency as $\consistencypreservationrule{}: \metamodelinstanceset{M}{1} \times \metamodelinstanceset{M}{2} \rightarrow \metamodelinstanceset{M}{2}$.
 This notion, however, has two properties that imply essential drawbacks:
 \begin{properdescription}
@@ -167,15 +167,15 @@ This notion, however, has two properties that imply essential drawbacks:
 State-based transformations always suffer from the problem that it is unknown which changes were made that led to an inconsistent state and reconstructing them from the difference between two states is only a heuristic approximation~\cite{diskin2011StateToDeltaSymmetric-MODELS}.
 This, for example, includes that information about elements which were moved or renamed can potentially not be reconstructed, leading to elements that are deleted and created anew, losing all information that was potentially added to them.
 Unidirectionality may be reasonable when assuming that only one of the models was modified. In that case it is sufficient to update the other model to restore consistency.
-With a modular specification of consistency preservation, however, several \glspl{consistency preservation rule} modifying the same models may need to be executed.
+With a modular specification of consistency preservation, however, several consistency preservation rules modifying the same models may need to be executed.
 This can be seen in the example in \dots \todo{add graphics and explanation for that; a simple example for a concurrent modification scenario (although maybe not induced by a network but several users) are that different classes are added to the UML and the Java model. Now it is necessary to react to changes in both models and to update both to reflect the classes added to the other. A single unidirectional transformation would result in reverting some changes, i.e., removing some classes that were added by the users}.
 In consequence, the rules need to be able to deal with changes performed in both of the input models and, consequentially, need to update both models to reflect the changes in the other.
 
 \mnote{Synchronizing consistency preservation rules circumvent drawbacks}
-To be able to combine several \glspl{consistency preservation rule} without the discussed drawbacks, we define a \emph{synchronizing} rather than a unidirectional notion of them.
+To be able to combine several consistency preservation rules without the discussed drawbacks, we define a \emph{synchronizing} rather than a unidirectional notion of them.
 Those rules are able to react to changes in both models and produce changes in both models again.
 This is sometime also called the capability of handling \emph{concurrent} modifications (e.g. \cite{leblebici2014IncrementalTGGSurvey-GTVMT}).
-To precisely define this behavior, we first introduce a notion of \emph{changes} and afterwards of \emph{\glspl{consistency preservation rule}}, which we also refer to as \emph{synchronizing} consistency preservation rules.
+To precisely define this behavior, we first introduce a notion of \emph{changes} and afterwards of \emph{consistency preservation rules}, which we also refer to as \emph{synchronizing} consistency preservation rules.
 
 \todo{Refine change notion to be partial, because not every change is necessarily applicable. Even if it could be, maybe it should not be.}
 \todo{Discuss that change (esp. partial notion) is reasonable because of practical realization: Changes in EMF define changes to elements. If that element is found in the model, it can be applied, if not, its behavior is undefined. This induces a function like we propose here, because a change can be applied to any instance of a metamodel, not only to one model.}
@@ -273,7 +273,7 @@ Discuss that we do not define for which inputs the function may be undefined. It
 
 \mnote{No restriction to achieve \enquote{resonable} preservation rules}
 This definition does not make any restrictions on how the input and output changes are related.
-In fact, a valid (and especially correct) \gls{consistency preservation rule} could always return empty changes.
+In fact, a valid (and especially correct) consistency preservation rule could always return empty changes.
 In consequence, the rule would simply revert all input changes to achieve a consistent state again.
 Although this may not be the expected behavior, there is no reason to restrict this behavior in the definition.
 Actually, the developer of the preservation rule should specify in a \emph{reasonable} way, such that is provides any expected behavior.
@@ -281,7 +281,7 @@ Actually, the developer of the preservation rule should specify in a \emph{reaso
 %A \modellevelconsistencypreservationrule is defined to restore consistency after a modification in a left model of the underlying \modellevelconsistencyrelation by creating a change for the right model. To consider consistency preservation rules that preserve consistency in the other direction, we regard the inverse of the consistency relation as well, denoted as $\inverseconsistencyrelation{CR}{} = \setted{\tupled{\model{m}{1}, \model{m}{2}} \mid \tupled{\model{m}{2}, \model{m}{1}} \in \consistencyrelation{CR}{}}$.
 
 \mnote{Encapsulation of consistency relations and preservation rules in transformations.}
-We already discussed that it is possible to define \glspl{consistency relation} and derive \glspl{consistency preservation rule} from them or to only define the \glspl{consistency preservation rule}, which then imply the \glspl{consistency relation} by their image, i.e., the set of all models that can be derived from applying the consistency preservation rule to any models and changes for which it is defined.
+We already discussed that it is possible to define consistency relations and derive consistency preservation rules from them or to only define the consistency preservation rules, which then imply the consistency relations by their image, i.e., the set of all models that can be derived from applying the consistency preservation rule to any models and changes for which it is defined.
 Anyway, in practice there will only be one of these specifications and the other is implied or derived.
 We thus define a \emph{synchronizing transformation}, in extension to \emph{bidirectional transformations}~\cite{stevens2010sosym}, as an artifact that encapsulates a \modellevelconsistencyrelation together with a \modellevelconsistencypreservationrule, no matter which of them is defined and which is derived or implied.
 
@@ -297,7 +297,7 @@ We thus define a \emph{synchronizing transformation}, in extension to \emph{bidi
 \end{definition}
 
 \mnote{Generalize consistency and its preservation to encapsulating transformations}
-In the following, we will only refer to transformations rather than \glspl{consistency relation} and \glspl{consistency preservation rule} if the distinction is not necessary.
+In the following, we will only refer to transformations rather than consistency relations and consistency preservation rules if the distinction is not necessary.
 We will thus also say that models are consistent to a transformation, which is supposed to mean that they are consistent to the consistency relation encapsulated by that transformation.
 
 \begin{definition}[Consistency to Transformation]
@@ -322,7 +322,7 @@ This question was introduced as \autoref{rq:correctness:synchronization} and an 
 
 \mnote{Multiple transformations need orchestration}
 Having multiple transformations between several metamodels requires their orchestration, i.e., the decision which transformation have to be executed in which order, if consistency between instances of those metamodels shall be preserved after changes.
-We discussed that transformations, or more precisely their \glspl{consistency preservation rule}, may be executed independently and thus concurrently, which requires their results to be unified, or to execute them consecutively.
+We discussed that transformations, or more precisely their consistency preservation rules, may be executed independently and thus concurrently, which requires their results to be unified, or to execute them consecutively.
 We already identified the drawbacks of a concurrent execution approach, including the necessity to define unification operators and the missing guarantee to be consistent to any consistency relation after such a unification.
 This is why we follow the approach of consecutively executing transformations.
 
@@ -332,8 +332,8 @@ While in practice a dynamic algorithm will be used to determine that order, from
 We call this an \emph{orchestration function} as it is responsible for orchestrating the execution of transformations.
 
 \begin{definition}[Transformation Orchestration Function] \label{def:orchestrationfunction}
-    Let $\transformationset{}$ be a set of transformations with \glspl{consistency relation} and according \glspl{consistency preservation rule} for metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$.
-    A transformation \gls{orchestration function} $\orcfunction{\transformationset{T}}$ for these transformations is a function:
+    Let $\transformationset{}$ be a set of transformations with consistency relations and according consistency preservation rules for metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$.
+    A transformation orchestration function $\orcfunction{\transformationset{T}}$ for these transformations is a function:
     \begin{align*}
         &
         \orcfunction{\transformationset{T}} : (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}}) \rightarrow \transformationset{T}^{< \mathbb{N}}
@@ -372,13 +372,13 @@ We will also prove that without further restrictions the decision problem whethe
 Due to these degrees of freedom, the definition does not further restrict that an orchestration of transformations has to lead to a consistent result.
 
 \mnote{Application function to make process of applying transformations explicit}
-An \gls{orchestration function} does only determine an order of transformations.
+An orchestration function does only determine an order of transformations.
 Intuitively speaking, consistency for given models and changes to them can be preserved by requesting an orchestration from that function and executing the transformations in the given order.
-We make this process explicit by defining an \emph{\gls{application function}} that is able to perform consistency preservation based on given transformations, an orchestration function for them and the actual models and changes.
+We make this process explicit by defining an \emph{application function} that is able to perform consistency preservation based on given transformations, an orchestration function for them and the actual models and changes.
 
 \mnote{Simplify transformation concatenation by a generalization function}
-Before defining that \gls{application function}, we first need to define an auxiliary function to concatenate transformations, more precisely their contained \glspl{consistency preservation rule}.
-\Glspl{consistency preservation rule} according to \autoref{def:consistencypreservationrule} are restricted to the two metamodels they are defined for.
+Before defining that application function, we first need to define an auxiliary function to concatenate transformations, more precisely their contained consistency preservation rules.
+Consistency preservation rules according to \autoref{def:consistencypreservationrule} are restricted to the two metamodels they are defined for.
 Additionally, they require initial models and changes as input, but only return changes.
 For these two reasons, the functions describing the preservation rules cannot be easily concatenated.
 This, however, is necessary to formally describe their consecutive execution.
@@ -432,13 +432,13 @@ Finally, the orchestration function could also directly be encoded into the appl
 However, from a practical perspective we may want to be able to find an execution order although there is no order that results in a consistent state, to be able to find out why it is not possible to restore consistency, thus, e.g., which transformation induces that problem.
 
 \mnote{An application function is partial and applies transformations}
-We define a transformation \gls{application function} that applies transformations to a given tuple of models and changes according to an order delivered by an \gls{orchestration function}.
+We define a transformation application function that applies transformations to a given tuple of models and changes according to an order delivered by an orchestration function.
 This function is partial to allow it to indicate that no result with consistent models could be found.
 We indicate those cases with the result $\bot$.
 
 \begin{definition}[Transformation Application Function] \label{def:applicationfunction}
     Let $\transformationset{T}$ be a set of synchronizing transformation for consistency relation $\consistencyrelationset{CR}$ on metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$ and $\orcfunction{\transformationset{T}}$ an orchestration function for them.
-    A transformation \gls{application function} $\appfunction{\orcfunction{\transformationset{T}}}$ for these rules is a partial function:
+    A transformation application function $\appfunction{\orcfunction{\transformationset{T}}}$ for these rules is a partial function:
     \begin{align*}
         &
         \appfunction{\orcfunction{\transformationset{T}}} : (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}}) \rightarrow \metamodeltupleinstanceset{M} \cup \setted{\bot}
@@ -469,12 +469,12 @@ We indicate those cases with the result $\bot$.
 \end{definition}
 
 \mnote{A weak notion of correctness, because of orchestration undecidability}
-While the previous definition does not restrict in which cases $\bot$ and in which an actual tuple of models is returned, we define when we consider an \gls{application function} \emph{correct}.
+While the previous definition does not restrict in which cases $\bot$ and in which an actual tuple of models is returned, we define when we consider an application function \emph{correct}.
 Correctness can be defined in several ways.
 For example, we might say that the function is correct if it always returns a consistent tuple of models when there is an order of transformations that leads to those consistent models.
 As we will see later, this is, however, generally impossible, because that decision problem is undecidable.
-In consequence, the \gls{orchestration function} and \gls{application function} need to operate conservatively, i.e., return $\bot$ although there might be a sequence of transformations whose application leads to consistent models.
-As an alternative, we might require the function to always return consistent models when the \gls{orchestration function} delivers a sequence of transformations whose application leads to a consistent tuple of models.
+In consequence, the orchestration function and application function need to operate conservatively, i.e., return $\bot$ although there might be a sequence of transformations whose application leads to consistent models.
+As an alternative, we might require the function to always return consistent models when the orchestration function delivers a sequence of transformations whose application leads to a consistent tuple of models.
 Since we have to deal with conservativeness anyway, this, however, does not provide any benefits.
 In fact, the above discussed requirements encode a kind of \emph{optimality} for the functions, which we will specify more precisely in \autoref{chap:orchestration}.
 For now, we stick to the simple notion of correctness that the application function does never return inconsistent models, i.e., if a tuple of models is returned, it must be consistent.
@@ -482,7 +482,7 @@ For now, we stick to the simple notion of correctness that the application funct
 \begin{definition}[Transformation Application Function Correctness]
     \label{def:applicationfunctioncorrectness}
     Let $\appfunction{\orcfunction{\transformationset{T}}}$ be an application function for an orchestration function $\orcfunction{\transformationset{T}}$ for transformations $\transformationset{T}$.
-    Let $\consistencyrelationset{CR}$ be the set of \glspl{consistency relation} for which the transformations in $\transformationset{T}$ are defined.
+    Let $\consistencyrelationset{CR}$ be the set of consistency relations for which the transformations in $\transformationset{T}$ are defined.
     We say that $\appfunction{\orcfunction{\transformationset{T}}}$ is \emph{correct} if its result is either $\bot$ or consistent to $\consistencyrelationset{CR}{}$:
     \begin{align*}
         &
@@ -556,7 +556,7 @@ For now, we stick to the simple notion of correctness that the application funct
 
 \mnote{Conservativeness more relevant than correctness}
 This, in fact, is a rather weak notion of correctness. 
-Actually, an \gls{application function} that always return $\bot$ is correct according to that definition.
+Actually, an application function that always return $\bot$ is correct according to that definition.
 Due to the fact that the orchestration and application function have to operate conservatively, a binary correctness notion is not that relevant anyway.
 Rather the degree of conservativeness and how to improve it is of special interest.
 The question how such an orchestration can or should look like was introduced as \autoref{rq:correctness:orchestration} and the degrees of freedom as well as a concrete approach will be presented as contribution \autoref{contrib:correctness:orchestration} in \autoref{chap:orchestration}.
@@ -572,7 +572,7 @@ Although we define these artifacts specifically for one transformation network, 
 \todo{Maybe also metamodels in transformation and networks?}
 \begin{definition}[Transformation Network]
     \label{def:transformationnetwork}
-    Let $\transformationset{T}$ be a set of transformations, $\orcfunction{\transformationset{T}}$ an \gls{orchestration function} for these transformations and $\appfunction{\orcfunction{\transformationset{T}}}$ an \gls{application function}.
+    Let $\transformationset{T}$ be a set of transformations, $\orcfunction{\transformationset{T}}$ an orchestration function for these transformations and $\appfunction{\orcfunction{\transformationset{T}}}$ an application function.
     A transformation network $\transformationnetwork{N}$ is a triple:
     \begin{align*}
         \transformationnetwork{N} = \tupled{\transformationset{T}, \orcfunction{\transformationset{T}}, \appfunction{\orcfunction{\transformationset{T}}}}
