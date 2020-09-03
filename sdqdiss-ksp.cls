@@ -189,8 +189,10 @@
 
 %% Flattersatz in Aufzählungen
 \usepackage{enumitem}
-\setlist[itemize]{before=\csname par\endcsname\raggedright,partopsep=0pt}
-\setlist[enumerate]{before=\csname par\endcsname\raggedright,partopsep=0pt}
+\setlist[itemize]{%before=\csname par\endcsname\raggedright,
+partopsep=0pt}
+\setlist[enumerate]{%before=\csname par\endcsname\raggedright,
+partopsep=0pt}
 
 
 %%
@@ -215,8 +217,8 @@
 
 
 % Verzeichnisse Figure/Table/Listing ohne linken Rand
-\renewcommand\l@figure{\@dottedtocline{1}{0em}{1.5em}}
-\renewcommand\l@table{\@dottedtocline{1}{0em}{1.5em}}
+\renewcommand\l@figure{\@dottedtocline{1}{0em}{2.3em}}
+\renewcommand\l@table{\@dottedtocline{1}{0em}{2.3em}}
 
 % Gleiche Größe und Ausrichtung von Part und Chapter
 \setkomafont{partentry}{\usekomafont{chapterentry}}
