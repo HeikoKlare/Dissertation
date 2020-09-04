@@ -135,34 +135,38 @@ We already informally discussed this as a notion of \emph{compatibility}, for wh
 
 \subsection{Incremental and Inductive Consistency Preservation}
 \label{chap:correctness:formalization:incremental_inductive}
+
 \mnote{Preserving consistency}
 While the previous discussion only considered when models are considered consistent, it is of especial interest to ensure that consistency of models is preserved.
 We informally introduced such specifications as consistency preservation rules.
 In the following, we will restrict us to \emph{incremental} and \emph{inductive} consistency preservation and give a precise definition for that.
-This means that we make the following assumptions to the process:
+This means that we make the following assumptions to the process.
 \begin{properdescription}
     \item[Information Preservation (Incrementality):] After a change to one model, the others are not generated from scratch but updated according to the performed changes. This ensures that information that cannot be generated but was added by users to the other models is preserved.
-    \item[Consistency Assumption (Induction):] We assume models to be consistent before a change is processed by consistency preservation rules. Otherwise the preservation rules would need to be able to handle arbitrary states of the models and it would be unclear consistency to which consistency relations has to be restored.
+    \item[Consistency Assumption (Induction):] We assume models to be consistent before a change is processed by consistency preservation rules. Otherwise, the preservation rules would need to be able to handle arbitrary states of the models and intentions of performed changes could not be incorporated to restore consistency.
 \end{properdescription}
 While incrementality is an essential requirement whenever consistency shall be preserved to avoid information loss, inductivity may not be necessary.
 We, however, make this assumption to avoid requiring from the consistency preservation rules that they need to be able to process an inconsistent state without knowing which changes introduced it.
 From a theoretical point of view, we could omit that requirement, but this would make the specification of consistency preservation rules impractically complicated, such that omitting that requirement is not practically relevant anyway.
 %In consequence, an incremental and inductive \gls{consistency preservation rule} takes a consistent tuple of models and changes to them and returns a tuple of models that is consistent again.
 
-\todoLater{Do we need inductivity for synchronization? Otherwise we may remove it here and from following definitions?}
+%\todoLater{Do we need inductivity for synchronization? Otherwise we may remove it here and from following definitions?} % Yes, we do!
 %\todo{Explicitly discuss incrementality here, although we actually do not need it. So leave it out? No, needed for synchronization definition. But make clear that this is a specialization and discuss generalization.}
 %\todo{Make precise here that we have incremental consistency, thus last consistent state and delta to that is known. We did not assume that in the informal notion before.}
 
 \mnote{Monolithic and modular consistency preservation}
-Like we already discussed for consistency preservation rules in general, incremental preservation rules can be realized in an either monolithic or modular way.
+Like we already discussed for consistency preservation rule in general, incremental preservation rules can be realized in an either monolithic or modular way.
 A monolithic consistency preservation rules takes a tuple of models that is consistent to a consistency relation and a change to these models and returns another tuple of models that is consistent again.
 In a modular specification of consistency preservation rules, a set of such rules is given which are able to preserve consistency of a subset of the given models according to modular consistency relations.
 In our case, we consider such rules for two models, each of them restoring consistency according to a binary consistency relation.
 %We will later discuss if and how an execution order of such consistency preservation rules can be determined.
 
-\mnote{Drawbacks of existing unidirectional consistency restorers}
-In terminology for transformations, a consistency preservation rule that restores consistency of models according to a consistency relation in one direction is called \emph{directional transformation}~\cite{stevens2010sosym} or \emph{consistency restorer}~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
-Definitions of that terminology do usually not consider changes but only states of models and simply define a preservation rule for metamodel $\metamodel{M}{1}$ and $\metamodel{M}{2}$ that modifies the instance of $\metamodel{M}{2}$ to restore consistency as $\consistencypreservationrule{}: \metamodelinstanceset{M}{1} \times \metamodelinstanceset{M}{2} \rightarrow \metamodelinstanceset{M}{2}$.
+\mnote{Drawbacks of existing consistency preservation approaches}
+In the terminology for transformations, a consistency preservation rule that restores consistency of models according to a consistency relation in one direction is called \emph{directional transformation}~\cite{stevens2010sosym} or \emph{consistency restorer}~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
+Definitions of that terminology do usually not consider changes but only states of models and simply define a consistency preservation rule $\consistencypreservationrule{}$ for metamodels $\metamodel{M}{1}$ and $\metamodel{M}{2}$ that modifies the instance of $\metamodel{M}{2}$ to restore consistency as:
+\begin{align*}
+    \consistencypreservationrule{}: \metamodelinstanceset{M}{1} \times \metamodelinstanceset{M}{2} \rightarrow \metamodelinstanceset{M}{2}
+\end{align*}
 This notion, however, has two properties that imply essential drawbacks:
 \begin{properdescription}
     \item[State-based:] No information about the performed changes that led to the inconsistent state are given. This means that the specification is not aware of how the inconsistent state was reached.
@@ -172,44 +176,79 @@ State-based transformations always suffer from the problem that it is unknown wh
 This, for example, includes that information about elements which were moved or renamed can potentially not be reconstructed, leading to elements that are deleted and created anew, losing all information that was potentially added to them.
 Unidirectionality may be reasonable when assuming that only one of the models was modified. In that case it is sufficient to update the other model to restore consistency.
 With a modular specification of consistency preservation, however, several consistency preservation rules modifying the same models may need to be executed.
-This can be seen in the example in \dots \todo{add graphics and explanation for that; a simple example for a concurrent modification scenario (although maybe not induced by a network but several users) are that different classes are added to the UML and the Java model. Now it is necessary to react to changes in both models and to update both to reflect the classes added to the other. A single unidirectional transformation would result in reverting some changes, i.e., removing some classes that were added by the users}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/correctness/notion/not_unidirectional.png}
+    \caption[Counterexample unidirectional consistency preservation in networks]{Consistency preservation rules of which at least one cannot be unidirectional because both models are modified by user or other consistency preservation rules.}
+    \label{fig:correctness:unidirectionality_example}
+\end{figure}
+
+\mnote{Counterexample for unidirectionality}
+\autoref{fig:correctness:unidirectionality_example} depicts an example why unidirectional consistency preservation rules cannot be applied of used in combination with others.
+If the depicted consistency preservation rules $\consistencypreservationrule{1}$ and $\consistencypreservationrule{2}$ are executed first, $\consistencypreservationrule{3}$ cannot be unidirectional, as both involved models $\model{m}{1}$ and $\model{m}{3}$ have been modified either by the user or by another consistency preservation rule.
+Thus, in general, it is not possible to only consider changes in one model and unidirectionally propagate them to the other model.
+%\todo{add graphics and explanation for that; a simple example for a concurrent modification scenario (although maybe not induced by a network but several users) are that different classes are added to the UML and the Java model. Now it is necessary to react to changes in both models and to update both to reflect the classes added to the other. A single unidirectional transformation would result in reverting some changes, i.e., removing some classes that were added by the users}.
 In consequence, the rules need to be able to deal with changes performed in both of the input models and, consequentially, need to update both models to reflect the changes in the other.
 
-\mnote{Synchronizing consistency preservation rules circumvent drawbacks}
+\mnote{Synchronizing consistency preservation rules}
 To be able to combine several consistency preservation rules without the discussed drawbacks, we define a \emph{synchronizing} rather than a unidirectional notion of them.
 Those rules are able to react to changes in both models and produce changes in both models again.
 This is sometime also called the capability of handling \emph{concurrent} modifications (e.g. \cite{leblebici2014IncrementalTGGSurvey-GTVMT}).
 To precisely define this behavior, we first introduce a notion of \emph{changes} and afterwards of \emph{consistency preservation rules}, which we also refer to as \emph{synchronizing} consistency preservation rules.
 
-\todo{Refine change notion to be partial, because not every change is necessarily applicable. Even if it could be, maybe it should not be.}
-\todo{Discuss that change (esp. partial notion) is reasonable because of practical realization: Changes in EMF define changes to elements. If that element is found in the model, it can be applied, if not, its behavior is undefined. This induces a function like we propose here, because a change can be applied to any instance of a metamodel, not only to one model.}
-\todo{Define how a change tuple can be applied to a tuple. Then update every complicated statement about applying a tuple to a tuple by a tuple notation with the short notation.}
+\mnote{Changes as functions}
+As motivated before, we base our notion of consistency preservation on changes to explicitly express how a inconsistent state was derived from a previously consistent one.
+We consider those changes to be functions that take a model and return a new one.
+They are explicitly not defined for a specific model but for all instances of one metamodel.
+This is reasonable, because a change is supposed to represent how specific elements are modified, such as adding, removing or modifying them.
+Thus, they can be applied to any models containing these affected elements.
+This is also how actual implementations, such as the in \gls{EMF} behave.
+When the elements a change affects are missing a model, applying the change may fail.
+This is why we consider the function describing a change to be partial.
+%\todo{Refine change notion to be partial, because not every change is necessarily applicable. Even if it could be, maybe it should not be.}
+%\todo{Discuss that change (esp. partial notion) is reasonable because of practical realization: Changes in EMF define changes to elements. If that element is found in the model, it can be applied, if not, its behavior is undefined. This induces a function like we propose here, because a change can be applied to any instance of a metamodel, not only to one model.}
+%\todo{Define how a change tuple can be applied to a tuple. Then update every complicated statement about applying a tuple to a tuple by a tuple notation with the short notation.}
 \begin{definition}[Change]
     \label{def:change}
-    Given a metamodel $\metamodel{M}{}$, a change $\change{\metamodel{M}{}}$ is a function that takes an instance of that metamodel and returns another one:
+    Given a metamodel $\metamodel{M}{}$, a change $\change{\metamodel{M}{}}$ is a partial function that takes an instance of that metamodel and returns another one or $\bot$:
     \begin{align*}
-        \change{\metamodel{M}{}}: \metamodelinstanceset{M}{} \rightarrow \metamodelinstanceset{M}{}
+        \change{\metamodel{M}{}}: \metamodelinstanceset{M}{} \rightarrow \metamodelinstanceset{M}{} \cup \setted{\bot}
     \end{align*}
     It encodes any kind of modification, which may be just an element addition, or removal, an attribute change and so on, or any composition of changes.
     We denote the identity change, i.e., the change that always returns the input model, as $\identitychange$:
     \begin{align*}
         \identitychange(x) \equalsperdefinition x
     \end{align*}
-    We denote the universe of all changes in $\metamodel{M}{}$, i.e., all subsets of $\metamodelinstanceset{M}{} \times \metamodelinstanceset{M}{}$ that are functional, as 
+    We denote the universe of all changes in $\metamodel{M}{}$, i.e., all subsets of $\metamodelinstanceset{M}{} \times \metamodelinstanceset{M}{}$ that are functional, as:
     \begin{align*}
         \changeuniverse{\metamodel{M}{}} \equalsperdefinition \setted{\change{\metamodel{M}{}} \mid \change{\metamodel{M}{}} \subseteq \metamodelinstanceset{M}{} \times \metamodelinstanceset{M}{} \land
-        (\tupled{\model{m}{1}, \model{m}{2}}, \tupled{\model{m}{1}, \model{m}{3}} \in \change{\metamodel{M}{}} \Rightarrow \model{mc}{2} = \model{m}{3})}
+        (\tupled{\model{m}{1}, \model{m}{2}}, \tupled{\model{m}{1}, \model{m}{3}} \in \change{\metamodel{M}{}} \Rightarrow \model{m}{2} = \model{m}{3})}
     \end{align*}
-    For a given metamodel tuple $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$, we denote the set of all tuples of changes in the instances tuples of 
+    For a given metamodel tuple $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$, we denote a tuple of changes to an instance of each metamodel as:
+    \begin{align*}
+        \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}}, \change{\metamodel{M}{i}} \in \changeuniverse{\metamodel{M}{i}}
+    \end{align*}
+    Likewise, we define the set of all tuples of changes in the instance tuples of 
     $\metamodeltuple{M}$, i.e. in $\metamodeltupleinstanceset{M}$, as $\changeuniverse{\metamodeltuple{M}}$:
     \begin{align*}
-        \changeuniverse{\metamodeltuple{M}} \equalsperdefinition \setted{ \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \mid \forall i \in \setted{1,\dots,n} : \change{\metamodel{M}{i}} \in \changeuniverse{\metamodel{M}{i}} } 
+        \changeuniverse{\metamodeltuple{M}} \equalsperdefinition \changeuniverse{\metamodel{M}{1}} \times \dots \times \changeuniverse{\metamodel{M}{n}} %\setted{ \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \mid \forall i \in \setted{1,\dots,n} : \change{\metamodel{M}{i}} \in \changeuniverse{\metamodel{M}{i}} } 
+    \end{align*}
+    We define the application of a change tuple $\changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}}$ to a model tuple $\modeltuple{m} = \tupled{\modelsequence{m}{n}} \in \metamodeltupleinstanceset{M}$ as the element-wise application of the changes:
+    \begin{align*}
+        \changetuple{\metamodeltuple{M}}(\modeltuple{m}) = \tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \dots, \change{\metamodel{M}{n}}(\model{m}{n})}
     \end{align*}
 \end{definition}
 
-\mnote{Behavior of unapplicable change is undefined}
-For us, it does not matter how the function describing a change behaves in cases, in which the encoded change cannot be applied, e.g., because the changed or removed element does not exist. The function may do nothing for those models, i.e., return the identical model, or even be undefined for those model, i.e., be partial.
-\todoLater{Check whether this behavior is correct.}
+\mnote{Unapplicable changes}
+For us, it does not matter how the function describing a change behaves in cases, in which the encoded change cannot be applied, e.g., because the changed or removed element does not exist. The function may do nothing for those models, i.e., return the identical model, or even be undefined for those model, i.e., be partial and return $\bot$.
+
+\mnote{Reasonable change behavior}
+In fact, we do restrict the actual behavior of a change in any way.
+It may return an empty model, independent from the input, or may perform arbitrary changes to different models, instead of affects only specific elements.
+We omit such restrictions, because they are not necessary for us, although, in practice, they are usually given.
+Thus, further restricting the formalism would not provide any benefits.
+%\todoLater{Check whether this behavior is correct.}
 
 % \begin{definition}[\ModelLevelConsistencyPreservationRule]
 %     Let $\metamodel{M}{1}, \metamodel{M}{2}$ be two metamodels and $\consistencyrelation{CR}{} \subseteq \metamodelinstanceset{M}{1} \times \metamodelinstanceset{M}{2}$ a binary \modellevelconsistencyrelation between them.
@@ -232,50 +271,74 @@ For us, it does not matter how the function describing a change behaves in cases
 %     \end{align*}
 % \end{definition}
 
-\todo{Maybe remove \enquote{model-level} if we do not need a fine-grained notion of preservation rules. Maybe better call it \enquote{synchronizing} to be able to distinguish it from non-synchronizing ones later. -- No, not synchornizing, because other notion is only relevant in synchronization chapter, nowhere else.}
-\begin{definition}[\ModelLevelConsistencyPreservationRule]
+\mnote{Consistency preservation rules}
+With that notion of changes, we can define consistency preservation rules as functions receiving two models and changes to each own them and returning new changes to both models.
+
+%\todo{Maybe remove \enquote{model-level} if we do not need a fine-grained notion of preservation rules. Maybe better call it \enquote{synchronizing} to be able to distinguish it from non-synchronizing ones later. -- No, not synchornizing, because other notion is only relevant in synchronization chapter, nowhere else.}
+\begin{definition}[Consistency Preservation Rule]
     \label{def:consistencypreservationrule}
     Let $\metamodel{M}{1}, \metamodel{M}{2}$ be two metamodels and $\consistencyrelation{CR}{} \subseteq \metamodelinstanceset{M}{1} \times \metamodelinstanceset{M}{2}$ a binary \modellevelconsistencyrelation between them.
-    A \emph{\modellevelconsistencypreservationrule} $\consistencypreservationrule{\consistencyrelation{CR}{}}$ for the relation $\consistencyrelation{CR}{}$ is a function:
+    A \emph{consistency preservation rule} $\consistencypreservationrule{\consistencyrelation{CR}{}}$ for the relation $\consistencyrelation{CR}{}$ is a function:
     \begin{align*}
-        \consistencypreservationrule{\consistencyrelation{CR}{}} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}, \changeuniverse{\metamodel{M}{2}}) \rightarrow (\changeuniverse{\metamodel{M}{1}}, \changeuniverse{\metamodel{M}{2}})
+        \consistencypreservationrule{\consistencyrelation{CR}{}} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}, \changeuniverse{\metamodel{M}{2}}) \rightarrow (\changeuniverse{\metamodel{M}{1}}, \changeuniverse{\metamodel{M}{2}}) \cup \setted{\bot}
     \end{align*}
     %It takes two consistent models and a change in the first one and returns a change in the second one. 
 \end{definition}
 
-\mnote{Synchronization behavior conforms to existing definitions}
+\mnote{Partial consistency preservation rules}
+For reasons of practical applicability, the rules need to be partial as we may not want to require them to be able to process arbitrary models and changes.
+First, this is because we do not require it to produce any changes when the input models were not consistent.
+Second, even if the input models are consistent, it may not be possible to preserve consistency for the given changes.
+For example, if conflicting changes in both changes are made, i.e., changes that require one of them to be reverted, it may be desired that the consistency preservation rule does not return an unexpected result but to indicate a failure by returning $\bot$.
+Our formalism does not restrict such a behavior, in fact it does even allow to always return the same changes or to return changes that always deliver empty models.
+Finally, it is up to the developer to define reasonable consistency preservation rules and to define in which cases the function does not return a result.
+
+\mnote{Conformance to existing definitions}
 This notion of synchronizing consistency preservation conforms to the definition of \emph{synchronizers} given by \textcite{xiong2013SynchronizingConcurrentUpdates-SoSym}, which also reflect the case that both models have been modified and can be updated by the consistency preservation rule.
 They do, however, encode the changes in terms of new model states rather than explicit changes.
 
-\mnote{Correctness notion of consistency preservation rules}
-To consider a \modellevelconsistencypreservationrule \emph{correct}, it has to return changes that, when applied to the input models, result in models that are consistent according to the \modellevelconsistencyrelation for which the preservation rule is defined.
+\mnote{Correctness notion}
+To consider a consistency preservation rule \emph{correct}, it has to return changes that, when applied to the input models, result in models that are consistent according to the \modellevelconsistencyrelation for which the preservation rule is defined.
 This conforms to the notion of correctness defined for bidirectional transformations~\cite{stevens2010sosym} and the notion of consistency given for synchronizers by \textcite{xiong2013SynchronizingConcurrentUpdates-SoSym}.
 
-\todo{Revise such that the rule must not necessarily return a result (and also the definition of a rule itself), as it may be undefined for some inputs. Discuss that this is only a "can" requirement, so it is always possible to define a left-total CPR, because it can return any pair of consistent models (in the worst case always the same pair or the empty sets). We will later see that with other definitions this is a "must" requirement, but here we could, theoretically also require the CPR to always return a result. Nevertheless, practically we may want to support the case that the CPR cannot properly restore consistency for some inputs, e.g., because some of the input changes need to be reverted, which may not be wanted.
-Discuss that we do not define for which inputs the function may be undefined. It is up to the developer to reasonably use the ability to specify the function partially. In the extreme case, the function could be undefined for all inputs, which does not make sense, but thats up to the developer.}
-\begin{definition}[\ModelLevelConsistencyPreservationRule Correctness]
+%\todo{Revise such that the rule must not necessarily return a result (and also the definition of a rule itself), as it may be undefined for some inputs. Discuss that this is only a "can" requirement, so it is always possible to define a left-total CPR, because it can return any pair of consistent models (in the worst case always the same pair or the empty sets). We will later see that with other definitions this is a "must" requirement, but here we could, theoretically also require the CPR to always return a result. Nevertheless, practically we may want to support the case that the CPR cannot properly restore consistency for some inputs, e.g., because some of the input changes need to be reverted, which may not be wanted.
+%Discuss that we do not define for which inputs the function may be undefined. It is up to the developer to reasonably use the ability to specify the function partially. In the extreme case, the function could be undefined for all inputs, which does not make sense, but thats up to the developer.}
+\begin{definition}[Consistency Preservation Rule Correctness]
     \label{def:consistencypreservationrulecorrectness}
-    Let $\consistencypreservationrule{\consistencyrelation{CR}{}}$ be a \emph{\modellevelconsistencypreservationrule}.
-    We call $\consistencypreservationrule{\consistencyrelation{CR}{}}$ \emph{correct} if the resulting models when applying the generated changes are consistent to $\consistencyrelation{CR}{}$ again:
-    \begin{align*}
-        &
+    Let $\consistencypreservationrule{\consistencyrelation{CR}{}}$ be a consistency preservation rule.
+    We call $\consistencypreservationrule{\consistencyrelation{CR}{}}$ \emph{correct} if it either returns $\bot$ or changes that deliver models that are consistent to $\consistencyrelation{CR}{}$ if applied to the input models again, i.e.
+    \begin{align*} &
         \forall 
         \model{m}{1} \in \metamodelinstanceset{M}{1}, 
         \model{m}{2} \in \metamodelinstanceset{M}{2},
         \change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}},
-        \change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}} :
-        \tupled{\model{m}{1}, \model{m}{2}} \consistenttomath \consistencyrelation{CR}{} \Rightarrow\\
+        \change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}} : \\
         & \formulaskip
-        \exists 
+        \bigl( \exists 
         \change{\metamodel{M}{1}}' \in \changeuniverse{\metamodel{M}{1}},
         \change{\metamodel{M}{2}}' \in \changeuniverse{\metamodel{M}{2}} :
         \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}) = (\change{\metamodel{M}{1}}', \change{\metamodel{M}{2}}') \\
-        & \formulaskip
-        \land \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \change{\metamodel{M}{2}}'(\model{m}{2})} \consistenttomath \consistencyrelation{CR}{}
+        & \formulaskip\formulaskip
+        \Rightarrow
+        \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \change{\metamodel{M}{2}}'(\model{m}{2})} \consistenttomath \consistencyrelation{CR}{} \bigr)
+        % &
+        % \forall 
+        % \model{m}{1} \in \metamodelinstanceset{M}{1}, 
+        % \model{m}{2} \in \metamodelinstanceset{M}{2},
+        % \change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}},
+        % \change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}} :
+        % \tupled{\model{m}{1}, \model{m}{2}} \consistenttomath \consistencyrelation{CR}{} \Rightarrow\\
+        % & \formulaskip
+        % \exists 
+        % \change{\metamodel{M}{1}}' \in \changeuniverse{\metamodel{M}{1}},
+        % \change{\metamodel{M}{2}}' \in \changeuniverse{\metamodel{M}{2}} :
+        % \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}) = (\change{\metamodel{M}{1}}', \change{\metamodel{M}{2}}') \\
+        % & \formulaskip
+        % \land \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \change{\metamodel{M}{2}}'(\model{m}{2})} \consistenttomath \consistencyrelation{CR}{}
     \end{align*}
 \end{definition}
 
-\mnote{No restriction to achieve \enquote{resonable} preservation rules}
+\mnote{Reasonable consistency preservation rules}
 This definition does not make any restrictions on how the input and output changes are related.
 In fact, a valid (and especially correct) consistency preservation rule could always return empty changes.
 In consequence, the rule would simply revert all input changes to achieve a consistent state again.
@@ -284,41 +347,72 @@ Actually, the developer of the preservation rule should specify in a \emph{reaso
 
 %A \modellevelconsistencypreservationrule is defined to restore consistency after a modification in a left model of the underlying \modellevelconsistencyrelation by creating a change for the right model. To consider consistency preservation rules that preserve consistency in the other direction, we regard the inverse of the consistency relation as well, denoted as $\inverseconsistencyrelation{CR}{} = \setted{\tupled{\model{m}{1}, \model{m}{2}} \mid \tupled{\model{m}{2}, \model{m}{1}} \in \consistencyrelation{CR}{}}$.
 
-\mnote{Encapsulation of consistency relations and preservation rules in transformations.}
+\mnote{Transformations}
 We already discussed that it is possible to define consistency relations and derive consistency preservation rules from them or to only define the consistency preservation rules, which then imply the consistency relations by their image, i.e., the set of all models that can be derived from applying the consistency preservation rule to any models and changes for which it is defined.
 Anyway, in practice there will only be one of these specifications and the other is implied or derived.
-We thus define a \emph{synchronizing transformation}, in extension to \emph{bidirectional transformations}~\cite{stevens2010sosym}, as an artifact that encapsulates a \modellevelconsistencyrelation together with a \modellevelconsistencypreservationrule, no matter which of them is defined and which is derived or implied.
+We thus define a \emph{synchronizing transformation}, in extension to \emph{bidirectional transformations}~\cite{stevens2010sosym}, as an artifact that encapsulates a \modellevelconsistencyrelation together with a consistency preservation rule, no matter which of them is defined and which is derived or implied.
 
 \begin{definition}[Synchronizing Transformation]
     \label{def:synchronizingtransformation}
-    Let $\consistencyrelation{CR}{}$ be a \modellevelconsistencyrelation and $\consistencypreservationrule{\consistencyrelation{CR}{}}$ a \modellevelconsistencypreservationrule that restores consistency according to that relation.
+    Let $\consistencyrelation{CR}{}$ be a \modellevelconsistencyrelation and $\consistencypreservationrule{\consistencyrelation{CR}{}}$ a consistency preservation rule that restores consistency according to that relation.
     A \emph{synchronizing transformation} is a pair $\transformation{t} = \tupled{\consistencyrelation{CR}{}, \consistencypreservationrule{\consistencyrelation{CR}{}}}$.
 \end{definition}
 
+\mnote{Transformation correctness}
+Correctness of a transformation is then given by correctness of its consistency preservation rule.
+
 \begin{definition}[Synchronizing Transformation Correctness]
     \label{def:synchronizingtransformationcorrectness}
-    We call a synchronizing transformation $\transformation{t} = \tupled{\consistencyrelation{CR}{}, \consistencypreservationrule{\consistencyrelation{CR}{}}}$ correct if, and only if, $\consistencypreservationrule{\consistencyrelation{CR}{}}$ is correct according to \autoref{def:consistencypreservationrulecorrectness}.
+    Let $\transformation{t} = \tupled{\consistencyrelation{CR}{}, \consistencypreservationrule{\consistencyrelation{CR}{}}}$ be a synchronizing transformation.
+    We say that $\transformation{t}$ is correct if, and only if, $\consistencypreservationrule{\consistencyrelation{CR}{}}$ is correct according to \autoref{def:consistencypreservationrulecorrectness}.
 \end{definition}
 
-\mnote{Generalize consistency and its preservation to encapsulating transformations}
+\mnote{Hippocraticness}
+Transformations are usually expected to by \emph{hippocratic}~\cite{stevens2010sosym}.
+This means that a transformation, or more precisely its consistency preservation rule, does not perform any changes if the input changes applied to the input models already yield consistent models.
+The execution of hippocraticness to synchronizing transformations can be defined as follows.
+\begin{definition}[Hippocratic Synchronizing Transformation]
+    Let $\transformation{t} = tupled{\consistencyrelation{CR}{}, \consistencypreservationrule{\consistencyrelation{CR}{}}}$ be a transformation for metamodels $\metamodel{M}{1}$ and $\metamodel{M}{2}$.
+    We say that $\transformation{t}$ is \emph{hippocratic} if, and only if, it returns the input changes if their application to the input models yields consistent models, i.e.
+    \begin{align*}
+        &
+        \forall
+        \model{m}{1} \in \metamodelinstanceset{M}{1}, \model{m}{2} \in \metamodelinstanceset{M}{2}, 
+        \change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{2}}, \change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}} : \\
+        &
+        \tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}(\model{m}{2})} \in \consistencyrelation{CR}{} \Rightarrow \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}) = (\change{\metamodel{M}{1}}, \change{\metamodel{M}{2}})
+    \end{align*}
+\end{definition}
+
+\mnote{Benefits of hippocraticness}
+Although hippocraticness is not a necessary requirement for our considerations in most cases, it is usually a desired property in practice~\cite{stevens2010sosym}.
+One benefit of hippocraticness with regards to transformations is given if a transformation is only defined by its consistency preservation rule and thus implies the underlying consistency relation as its fixed points, as discussed in \autoref{chap:correcttnes:notions_consistency:declarative_imperative}.
+Actually, a consistency preservation rule according to our definition does not have fixed points, because the signatures of definition and value set of the function are different due to the models only occurring in the definition set.
+Transferred to our definition, the consistency relation is implied by iteratively applying the function to each pair of models and changes with the changes delivered by the function until they are not modified by the function anymore.
+In case that the transformation is correct and hippocratic, it does always deliver changes that yield consistent models already upon its first execution and does not modify them upon further applications, thus the consistency relation is implied by applying the function to each pair of models and changes only once.
+
+\mnote{Generalization to transformations}
 In the following, we will only refer to transformations rather than consistency relations and consistency preservation rules if the distinction is not necessary.
 We will thus also say that models are consistent to a transformation, which is supposed to mean that they are consistent to the consistency relation encapsulated by that transformation.
 
 \begin{definition}[Consistency to Transformation]
     \label{def:consistencytransformation}
     Let $\transformation{t} = \tupled{\consistencyrelation{CR}{}, \consistencypreservationrule{\consistencyrelation{CR}{}}}$ be a synchronizing transformation.
-    We say that any tuple of models $\modeltuple{m}$ is \emph{consistent to} $\transformation{t}$ if, any only if, it is consistent to its consistency relation, i.e.
+    We say that any tuple of models $\modeltuple{m}$ is \emph{consistent to} $\transformation{t}$ if, and only if, it is consistent to its consistency relation, i.e.
     \begin{align*}
         \modeltuple{m} \consistenttomath \transformation{t} \equivalentperdefinition \modeltuple{m} \consistenttomath \consistencyrelation{CR}{}.
     \end{align*}
     %
-    For a set of transformations $\transformationset{T}$, we say that a model tuple $\modeltuple{m}$ is \emph{consistent to} $\transformationset{T}$ if, any only if, it consistent to all transformations in it, i.e.
+    For a set of transformations $\transformationset{T}$, we say that a model tuple $\modeltuple{m}$ is \emph{consistent to} $\transformationset{T}$ if, and only if, it consistent to all transformations in it, i.e.
     \begin{align*}
         \modeltuple{m} \consistenttomath \transformationset{T} \equivalentperdefinition \forall \transformation{t} \in \transformationset{T} : \modeltuple{m} \consistenttomath \transformation{t}.
     \end{align*}
 \end{definition}
 
-Although \autoref{def:synchronizingtransformationcorrectness} precisely defines when we consider a transformation correct, it is unclear how to define a transformation that fulfills such a correctness property.
+\mnote{Synchronization problem}
+Although \autoref{def:synchronizingtransformationcorrectness} precisely defines when we consider a transformation to be correct, it is unclear how to define a transformation that fulfills such a correctness property.
+In particular, most existing languages for specifying transformation are restricted to input changes to one model or at least to delivering changes to one model.
+We will thus discuss how we can achieving a correct synchronizing transformation by means of such a restricted formalism.
 This question was introduced as \autoref{rq:correctness:synchronization} and an approach for that constitutes our contribution \autoref{contrib:correctness:synchronization}, which we discuss in \autoref{chap:synchronization}.
 
 
