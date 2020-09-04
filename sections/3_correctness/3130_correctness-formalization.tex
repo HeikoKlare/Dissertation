@@ -429,14 +429,15 @@ To consecutively execute transformations, an order of their execution has to be 
 While in practice a dynamic algorithm will be used to determine that order, from a theoretical perspective that algorithm realizes a function that returns the order to execute the transformations in.
 We call this an \emph{orchestration function} as it is responsible for orchestrating the execution of transformations.
 
+\todo{Prüfen, ob es valide ist, dass die Funktion ist partiell ist. Man könnte bspw. sagen, die gibt im Fehlerfall einfach die leere Sequenz zurück. Dann müsste halt App prüfen, ob die Modelle schon konistent waren oder nicht.}
 \begin{definition}[Transformation Orchestration Function] \label{def:orchestrationfunction}
-    Let $\transformationset{}$ be a set of transformations with consistency relations and according consistency preservation rules for metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$.
-    A transformation orchestration function $\orcfunction{\transformationset{T}}$ for these transformations is a function:
+    Let $\transformationset{T}$ be a set of transformations with consistency relations and according consistency preservation rules for metamodels $\metamodeltuple{M}$.
+    A transformation orchestration function $\orcfunction{\transformationset{T}}$ for these transformations is a function that delivers a sequence of transformations for given models and changes:
     \begin{align*}
         &
         \orcfunction{\transformationset{T}} : (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}}) \rightarrow \transformationset{T}^{< \mathbb{N}}
     \end{align*}
-    $\transformationset{T}^{< \mathbb{N}}$ denotes all finite sequences of transformations in $\transformationset{T}$, i.e., $\transformationset{T}^{< \mathbb{N}} \equalsperdefinition \emptyset \cup \transformationset{T}^1 \cup \transformationset{T}^2 \cup \dots$.
+    $\transformationset{T}^{< \mathbb{N}}$ denotes all finite sequences in $\transformationset{T}$, i.e., $\transformationset{T}^{< \mathbb{N}} \equalsperdefinition \emptyset \cup \transformationset{T}^1 \cup \transformationset{T}^2 \cup \dots$
 \end{definition}
 
 % \begin{definition}[Consistency Preservation Orchestration Function]
@@ -449,56 +450,71 @@ We call this an \emph{orchestration function} as it is responsible for orchestra
 %     $\consistencypreservationruleset{}^{< \mathbb{N}}$ denotes all finite sequences of consistency preservation rules in $\consistencypreservationruleset{}$, i.e., $\consistencypreservationruleset{}^{< \mathbb{N}} = \emptyset \cup \consistencypreservationruleset{}^1 \cup \consistencypreservationruleset{}^2 \cup \dots$.
 % \end{definition}
 
-\mnote{Orchestration function does not guarantee consistent result}
-According to this definition, the orchestration functions returns a sequence of transformations and determines that their \modellevelconsistencypreservationrules need to be executed in the given order. 
+\mnote{Repetitions in orchestration}
+According to this definition, the orchestration functions returns a sequence of transformations and determines that their consistency preservation rules need to be executed in the given order. 
 This especially includes that transformations may occur more than once in such a sequence.
 
-\mnote{There is not always an orchestration with a consistent result}
-It is obvious that without further restrictions to the transformations it is possible that for given transformations, models and changes to them an orchestration function cannot find an execution order that returns a consistent tuple of models after certain changes. 
-Consider the example in \autoref{fig:correctness:no_execution_order}. There exists no execution order for any input value that terminates. The transformations will always increase the value, although the defined relations could be fulfilled for the input value, but the transformations never find that solution.
+\mnote{Existence of reasonable orchestrations}
+It is obvious that without further restrictions to the transformations it is possible that, for given transformations, models and changes to them, an orchestration function cannot find an execution order that returns a consistent tuple of models after certain changes.
+This can be because there is no such order, because the transformations make local decisions to restore consistency for two models that are in no case consistent with the other transformations.
+Additionally, even if such an order exists, it may not be possible to find it.
 
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{figures/correctness/notion/divergence_example.png}
-    \caption[Example for divergence]{Example for divergence}
-    \todo{Change caption}
-    \label{fig:correctness:no_execution_order}
-\end{figure}
+% Consider the example in \autoref{fig:correctness:no_execution_order}. There exists no execution order for any input value that terminates. The transformations will always increase the value, although the defined relations could be fulfilled for the input value, but the transformations never find that solution.
 
-\mnote{Restriction to transformations are necessary to decide the orchestration problem}
-We will discuss in \autoref{chap:orchestration} in detail whether we can find restrictions for the transformations that ensure that an orchestration that delivers a consistent result always exists.
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=\textwidth]{figures/correctness/notion/divergence_example.png}
+%     \caption[Example for divergence]{Example for divergence}
+%     \todo{Change caption}
+%     \label{fig:correctness:no_execution_order}
+% \end{figure}
+
+\mnote{Decidability of existence of orchestration}
+We will discuss these problems in detail in \autoref{chap:orchestration} and investigate whether we can find restrictions for the transformations that ensure that an orchestration that delivers a consistent result always exists.
 We will also prove that without further restrictions the decision problem whether an orchestration exists that leads to a consistent result is undecidable.
 Due to these degrees of freedom, the definition does not further restrict that an orchestration of transformations has to lead to a consistent result.
 
-\mnote{Application function to make process of applying transformations explicit}
+\mnote{Explicit function for transformation application}
 An orchestration function does only determine an order of transformations.
 Intuitively speaking, consistency for given models and changes to them can be preserved by requesting an orchestration from that function and executing the transformations in the given order.
 We make this process explicit by defining an \emph{application function} that is able to perform consistency preservation based on given transformations, an orchestration function for them and the actual models and changes.
 
-\mnote{Simplify transformation concatenation by a generalization function}
+\mnote{Generalization function for transformation concatenation}
 Before defining that application function, we first need to define an auxiliary function to concatenate transformations, more precisely their contained consistency preservation rules.
 Consistency preservation rules according to \autoref{def:consistencypreservationrule} are restricted to the two metamodels they are defined for.
 Additionally, they require initial models and changes as input, but only return changes.
 For these two reasons, the functions describing the preservation rules cannot be easily concatenated.
-This, however, is necessary to formally describe their consecutive execution.
+This, however, is necessary to compose them to formally describe their consecutive execution.
 We define a \emph{generalization function} for transformations, which generalizes them to arbitrary tuples of metamodels and a conforming signature for their input and output, which eases the description of their concatenation.
 
-\todo{Fix that transformation is a parameter and not index, rename function? We later have a generalization of consistency check}
-\todo{Correct that generalization function may return bot when the consistency preservation rule does. Update all usages of it appropriately}
+%\todo{Fix that transformation is a parameter and not index, rename function? We later have a generalization of consistency check}
+%\todo{Correct that generalization function may return bot when the consistency preservation rule does. Update all usages of it appropriately}
+\todo{Update usages of generalization function to support the case when it return bot}
 \begin{definition}[Transformation Generalization Function]
-    Let $\transformation{t} = \tupled{\consistencyrelation{CR}, \consistencypreservationrule{\consistencyrelation{CR}{}}}$ be a transformation for metamodels $\metamodel{M}{i}, \metamodel{M}{k}$.
+    Let $\transformation{t} = \tupled{\consistencyrelation{CR}{}, \consistencypreservationrule{\consistencyrelation{CR}{}}}$ be a transformation for metamodels $\metamodel{M}{i}, \metamodel{M}{k}$.
     Let $\metamodeltuple{M} = \tupled{\metamodel{M}{1}, \dots, \metamodel{M}{i}, \dots, \metamodel{M}{k}, \dots, \metamodel{M}{n}}$ be a tuple of metamodels containing $\metamodel{M}{i}$ and $\metamodel{M}{k}$.
-    A transformation generalization function $\generalizationfunction{\metamodeltuple{M},\transformation{t}}$ for metamodels $\metamodeltuple{M}$ and transformation $\transformation{t}$ is a function:
+    A transformation generalization function $\generalizationfunction{\metamodeltuple{M},\transformation{t}}$ for metamodels $\metamodeltuple{M}$ and transformation $\transformation{t}$ is a partial function:
     \begin{align*}
-        \generalizationfunction{\metamodeltuple{M},\transformation{t}} : (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}}) \rightarrow (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}})
+        \generalizationfunction{\metamodeltuple{M},\transformation{t}} : (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}}) \rightarrow (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}}) \cup \setted{\bot}
     \end{align*}
-    It generalizes the \modellevelconsistencypreservationrule $\consistencypreservationrule{\consistencyrelation{CR}{}}$ of transformation $\transformation{t}$ such that it can be applied to changes in $\metamodeltuple{M}$ instead of $\metamodel{M}{i}$ and $\metamodel{M}{k}$, i.e. it applies the changes delivered by $\consistencypreservationrule{\consistencyrelation{CR}{}}$ for the relevant models to the given change tuple.
-    Let $\modeltuple{m} \in \metamodeltupleinstanceset{M}$ be a model tuple and $\changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{i}}, \dots, \change{\metamodel{M}{k}}, \dots, \change{\metamodel{M}{n}}}$ a change tuple.
+    It generalizes the consistency preservation rule $\consistencypreservationrule{\consistencyrelation{CR}{}}$ of $\transformation{t}$ such that it can be applied to changes in $\metamodeltuple{M}$ instead of $\metamodel{M}{i}$ and $\metamodel{M}{k}$, i.e., it applies the changes delivered by $\consistencypreservationrule{\consistencyrelation{CR}{}}$ for the corresponding models to the given change tuple.
+    Let $\modeltuple{m} \in \metamodeltupleinstanceset{M}$ be a model tuple and let $\changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{i}}, \dots, \change{\metamodel{M}{k}}, \dots, \change{\metamodel{M}{n}}}$ be a change tuple.
     We define $\tupled{\change{\metamodel{M}{i}}', \change{\metamodel{M}{k}}'} \equalsperdefinition \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{i}, \model{m}{k}, \change{\metamodel{M}{i}}, \change{\metamodel{M}{k}})$.
     Then the generalization function is defined as:
     \begin{align*}
-        \generalizationfunction{\metamodeltuple{M},\transformation{t}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) =
-        (\modeltuple{m}, \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{i}}' \concatfunction \change{\metamodel{M}{i}}, \dots, \change{\metamodel{M}{k}}' \concatfunction \change{\metamodel{M}{k}}, \dots, \change{\metamodel{M}{n}}})
+        &
+        \generalizationfunction{\metamodeltuple{M},\transformation{t}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \\
+        &
+        \formulaskip
+        = 
+        \begin{cases}
+            \bot, & 
+                \tupled{\change{\metamodel{M}{i}}', \change{\metamodel{M}{k}}'} = \bot \\
+            (\modeltuple{m}, \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{i}}' %\concatfunction \change{\metamodel{M}{i}}
+            , \dots, \change{\metamodel{M}{k}}'% \concatfunction \change{\metamodel{M}{k}}
+            , \dots, \change{\metamodel{M}{n}}}), & 
+                \otherwisemath
+        \end{cases}
     \end{align*}
 \end{definition}
 
@@ -519,34 +535,38 @@ We define a \emph{generalization function} for transformations, which generalize
 %     \end{align*}
 % \end{definition}
 
-\mnote{Generalization function is universally defined}
+\mnote{Partial generalization function}
+Like consistency preservation rules, a generalization function must also be partial to reflect cases in which it cannot return a result.
+This is a direct consequence of consistency preservation rules being partial, thus a generalization function is defined to return $\bot$ in exactly those cases in which the consistency preservation rule is generalizes does so.
+
+\mnote{Generalization function is universal}
 The generalization function is a universally-defined auxiliary function that is only necessary to formalize the concepts.
 It must neither be defined individually for a specific transformation, nor must it be explicitly specified by a developer of transformations at all.
 
-\mnote{Orchestration or application funciton must deal with unresolvable cases}
+\mnote{Dealing with unresolvable cases}
 Finally, either the orchestration function or an application function must also be able to reflect the cases in which no execution order of transformation can be found that restores consistency.
 In accordance to the terminology of \textcite{stevens2020BidirectionalTransformationLarge-SoSym}, we call those cases \emph{unresolvable}.
 From a theoretical perspective, it does not make a difference whether the orchestration or the application function makes that decision. 
 Finally, the orchestration function could also directly be encoded into the application function from a theoretical perspective.
 However, from a practical perspective we may want to be able to find an execution order although there is no order that results in a consistent state, to be able to find out why it is not possible to restore consistency, thus, e.g., which transformation induces that problem.
 
-\mnote{An application function is partial and applies transformations}
+\mnote{Application function}
 We define a transformation application function that applies transformations to a given tuple of models and changes according to an order delivered by an orchestration function.
-This function is partial to allow it to indicate that no result with consistent models could be found.
+This function is partial to allow it to indicate that no result with consistent models could be found, e.g., because the input models were inconsistent or because a transformation within the orchestration delivered $\bot$.
 We indicate those cases with the result $\bot$.
 
 \begin{definition}[Transformation Application Function] \label{def:applicationfunction}
-    Let $\transformationset{T}$ be a set of synchronizing transformation for consistency relation $\consistencyrelationset{CR}$ on metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$ and $\orcfunction{\transformationset{T}}$ an orchestration function for them.
+    Let $\transformationset{T}$ be a set of synchronizing transformations for consistency relations $\consistencyrelationset{CR}$ on metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$ and $\orcfunction{\transformationset{T}}$ an orchestration function for them.
     A transformation application function $\appfunction{\orcfunction{\transformationset{T}}}$ for these rules is a partial function:
     \begin{align*}
         &
         \appfunction{\orcfunction{\transformationset{T}}} : (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}}) \rightarrow \metamodeltupleinstanceset{M} \cup \setted{\bot}
     \end{align*}
-    The function takes a consistent tuple of models and a tuple of changes that was performed on them and returns a changed tuple of models by acquiring changes from the consistency preservation rules in $\consistencypreservationruleset{}$. It is partial, because it is allowed to return $\bot$ especially for inconsistent input models but potentially also in other cases. It has to fulfill the following conditions:
+    The function takes a consistent tuple of models and a tuple of changes that was performed on them and returns a changed tuple of models by acquiring changes from the consistency preservation rules in $\consistencypreservationruleset{}$. %It is partial, because it is allowed to return $\bot$ especially for inconsistent input models but potentially also in other cases. 
+    Thus, it has to fulfill the following condition:
     \begin{align*}
         &
-        \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \forall \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} :
-        \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \Rightarrow \\
+        \forall \modeltuple{m} \in \setted{\modeltuple{m} \in  \metamodeltupleinstanceset{M} \mid \modeltuple{m} \consistenttomath \consistencyrelationset{CR}} : \forall \changetuple{\metamodeltuple{M}} \in \changeuniverse{\metamodeltuple{M}} : \\
         & \formulaskip
         \big( 
         %\appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \bot \\
@@ -556,24 +576,24 @@ We indicate those cases with the result $\bot$.
             \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \modeltuple{m'} \Rightarrow\\
             & \formulaskip \formulaskip
             \exists \transformation{t}_{1}, \dots, \transformation{t}_{m} \in \transformationset{T} :
-            \exists \changetuple{\metamodeltuple{M}}' = \tupled{\change{\metamodel{M}{1}}', \dots, \change{\metamodel{M}{n}}'} \in \changeuniverse{\metamodeltuple{M}} :\\
-            & \formulaskip \formulaskip \formulaskip
-            \orcfunction{\transformationset{T}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \tupled{\transformation{t}_{1}, \dots, \transformation{t}_{m}} \\
-            & \formulaskip \formulaskip \formulaskip
-            \land \generalizationfunction{\metamodeltuple{M},\transformation{t}_{1}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M},\transformation{t}_{m}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}')\\
-            & \formulaskip \formulaskip \formulaskip
-            \land \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \dots, \change{\metamodel{M}{n}}'(\model{m}{n})} = \modeltuple{m'}
+            \exists \changetuple{\metamodeltuple{M}}' \in \changeuniverse{\metamodeltuple{M}} : %\\
+            %& \formulaskip \formulaskip \formulaskip
+            \orcfunction{\transformationset{T}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \sequenced{\transformation{t}_{1}, \dots, \transformation{t}_{m}} \\
+            & \formulaskip \formulaskip
+            \land \generalizationfunction{\metamodeltuple{M},\transformation{t}_{1}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M},\transformation{t}_{m}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}') %\\
+            %& \formulaskip \formulaskip \formulaskip
+            \land \changetuple{\metamodeltuple{M}}'(\modeltuple{m}) = \modeltuple{m'}
         \big)
     \end{align*}
 \end{definition}
 
-\mnote{A weak notion of correctness, because of orchestration undecidability}
+\mnote{Weak notion of correctness}
 While the previous definition does not restrict in which cases $\bot$ and in which an actual tuple of models is returned, we define when we consider an application function \emph{correct}.
 Correctness can be defined in several ways.
-For example, we might say that the function is correct if it always returns a consistent tuple of models when there is an order of transformations that leads to those consistent models.
+For example, we might say that the function is correct if it returns a consistent tuple of models whenever there is an order of transformations that leads to those consistent models.
 As we will see later, this is, however, generally impossible, because that decision problem is undecidable.
 In consequence, the orchestration function and application function need to operate conservatively, i.e., return $\bot$ although there might be a sequence of transformations whose application leads to consistent models.
-As an alternative, we might require the function to always return consistent models when the orchestration function delivers a sequence of transformations whose application leads to a consistent tuple of models.
+As an alternative, we might require the function to return consistent models whenever the orchestration function delivers a sequence of transformations whose application leads to a consistent tuple of models.
 Since we have to deal with conservativeness anyway, this, however, does not provide any benefits.
 In fact, the above discussed requirements encode a kind of \emph{optimality} for the functions, which we will specify more precisely in \autoref{chap:orchestration}.
 For now, we stick to the simple notion of correctness that the application function does never return inconsistent models, i.e., if a tuple of models is returned, it must be consistent.
@@ -582,12 +602,12 @@ For now, we stick to the simple notion of correctness that the application funct
     \label{def:applicationfunctioncorrectness}
     Let $\appfunction{\orcfunction{\transformationset{T}}}$ be an application function for an orchestration function $\orcfunction{\transformationset{T}}$ for transformations $\transformationset{T}$.
     Let $\consistencyrelationset{CR}$ be the set of consistency relations for which the transformations in $\transformationset{T}$ are defined.
-    We say that $\appfunction{\orcfunction{\transformationset{T}}}$ is \emph{correct} if its result is either $\bot$ or consistent to $\consistencyrelationset{CR}{}$:
+    We say that $\appfunction{\orcfunction{\transformationset{T}}}$ is \emph{correct} if, and only if, its result is either $\bot$ or consistent to $\consistencyrelationset{CR}{}$ for all inputs:
     \begin{align*}
         &
-        \appfunction{\orcfunction{\transformationset{T}}} \mathtextspacearound{is correct} \equivalentperdefinition \\
-        & \formulaskip
-        \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \forall \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} :
+        %\appfunction{\orcfunction{\transformationset{T}}} \mathtextspacearound{is correct} \equivalentperdefinition \\
+        %& \formulaskip
+        \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \forall \changetuple{\metamodeltuple{M}} \in \changeuniverse{\metamodeltuple{M}} :
         \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \Rightarrow \\
         & \formulaskip
         \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \bot \lor \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \consistenttomath \consistencyrelationset{CR}
@@ -653,22 +673,22 @@ For now, we stick to the simple notion of correctness that the application funct
 %     \end{align*}
 % \end{definition}
 
-\mnote{Conservativeness more relevant than correctness}
+\mnote{Conservativeness more relevant}
 This, in fact, is a rather weak notion of correctness. 
-Actually, an application function that always return $\bot$ is correct according to that definition.
+Actually, an application function that always returns $\bot$ is correct according to that definition.
 Due to the fact that the orchestration and application function have to operate conservatively, a binary correctness notion is not that relevant anyway.
-Rather the degree of conservativeness and how to improve it is of special interest.
+Rather the degree of conservativeness, i.e., how often it returns no result although one exists, and how to improve it is of special interest.
 The question how such an orchestration can or should look like was introduced as \autoref{rq:correctness:orchestration} and the degrees of freedom as well as a concrete approach will be presented as contribution \autoref{contrib:correctness:orchestration} in \autoref{chap:orchestration}.
 
 
 \subsection{Transformation Networks}
 
-\mnote{Definition of transformation networks}
+\mnote{Transformation networks}
 Based on the previous definitions of transformations, orchestration and application functions, we define what we consider a \emph{transformation network} and when we consider it \emph{correct}.
 A transformation network is composed of transformations, an orchestration and an application function.
-Although we define these artifacts specifically for one transformation network, i.e., an orchestration and application function according to their definitions is specific for one set of transformations, the goal will be to find an orchestration and application function that is independent from the actual transformations and the networks.
+Although we define these artifacts specifically for one transformation network, i.e., an orchestration and application function according to their definitions is specific for one set of transformations, the goal will be to find an orchestration and application function that is independent from the actual transformations.
 
-\todo{Maybe also metamodels in transformation and networks?}
+%\todo{Maybe also metamodels in transformation and networks?}
 \begin{definition}[Transformation Network]
     \label{def:transformationnetwork}
     Let $\transformationset{T}$ be a set of transformations, $\orcfunction{\transformationset{T}}$ an orchestration function for these transformations and $\appfunction{\orcfunction{\transformationset{T}}}$ an application function.
@@ -679,23 +699,23 @@ Although we define these artifacts specifically for one transformation network, 
 \end{definition}
 
 \mnote{Correctness of transformation networks}
-Correctness of a transformation network is given by correctness of both the individual transformation as well as the application function, according to \autoref{def:synchronizingtransformationcorrectness} and \autoref{def:applicationfunctioncorrectness}.
-We will say that the transformations ensure \emph{local consistency}, because they are able to achieve consistency locally for two models, whereas the application function achieves \emph{global consistency} by applying the individual transformations in a ways such that all models are consistent according to all transformation afterwards.
+Correctness of a transformation network is given by correctness of both the individual transformations as well as the application function, according to \autoref{def:synchronizingtransformationcorrectness} and \autoref{def:applicationfunctioncorrectness}.
+We say that the transformations ensure \emph{local consistency}, because they are able to achieve consistency locally for two models, whereas the application function achieves \emph{global consistency} by applying the individual transformations in a ways such that all models are consistent according to all transformations afterwards.
 
 \begin{definition}[Transformation Network Correctness]
     \label{def:transformationnetworkcorrectness}
     Let $\transformationnetwork{N} = \tupled{\transformationset{T}, \orcfunction{\transformationset{T}}, \appfunction{\orcfunction{\transformationset{T}}}}$ be a transformation network.
-    We say that:
+    We say that $\transformationnetwork{N}$ is \emph{correct} if, and only if, its transformations in $\transformationset{T}$ as well as the application function $\appfunction{\orcfunction{\transformationset{T}}}$ is correct, i.e.
     \begin{align*}
-        & 
-        \transformationnetwork{N} \mathtextspacearound{is correct} \equivalentperdefinition \\
-        & \formulaskip
+       % & 
+        %\transformationnetwork{N} \mathtextspacearound{is correct} \equivalentperdefinition \\
+        %& \formulaskip
         \forall \transformation{t} \in \transformationset{T} : \transformation{t} \mathtextspacearound{is correct} \land \appfunction{\orcfunction{\transformationset{T}}} \mathtextspacearound{is correct}
     \end{align*}
 \end{definition}
 
-\mnote{Conservativeness and compatibility in addition to correctness}
-We have already indicated that we will show that the application function has to be conservative, which is why correctness is an essential property, but not the most interesting one to achieve.
+\mnote{Conservativeness and compatibility}
+We have already indicated that we will show that the application function has to operate conservatively, which is why correctness is an essential property, but not the most interesting one to achieve.
 Additionally, we already suggested that the consistency relations of the transformations are considered correct by definition, as there is no other specification to which they have to be correct, but we will discuss a notion of \emph{compatibility} to reflect when those relations contain unintended contradictions.
 
 
