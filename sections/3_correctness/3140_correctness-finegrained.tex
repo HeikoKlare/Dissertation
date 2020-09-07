@@ -6,9 +6,9 @@
 % \todo{Check whether we discuss why we do not use explicit trace models, adapt prototypical implementation reference in evaluation
 % -> Will be added by fine-grained consistency relations}
 
-\todo{Fine-grained relations hierher verschieben. Diskutieren, dass model-level relations im Prinzip erstmal ausreichend für allgemeine Betrachtungen (z.B. und insbesondere für den Formalismus als Ganzes wie auch speziell die Orchestrierung). Daher zunächst der allgemeine Formalismus. Später der feingranulerer und praxisnähere Formalismus, der insb. für Kompatibilität eingeführt wird. Ist aber im Prinzip gleichbedeutend. Feingranularer Konsistenzbegriff: Wir sagen nicht wann zwei Modelle konsistent sind, sondern was wir im zweiten Modell erwarten, wenn in dem ersten etwas vorhanden ist. So drücken es auch Transformationssprachen aus.
-CPRs bleiben gleich auf feingranularen CRs. Transformation besteht dann aus mehreren CRs und einer CPR.
-Das definieren wir aber nicht neu, sondern sagen und zeigen in Prosa einfach nur, dass das so ist (ergibt sich daraus, dass jede Menge von feingranulare CRs eine model-level CR induziert). Damit ist das ohne weitere Definitionen abgefrühstückt.}
+% \todo{Fine-grained relations hierher verschieben. Diskutieren, dass model-level relations im Prinzip erstmal ausreichend für allgemeine Betrachtungen (z.B. und insbesondere für den Formalismus als Ganzes wie auch speziell die Orchestrierung). Daher zunächst der allgemeine Formalismus. Später der feingranulerer und praxisnähere Formalismus, der insb. für Kompatibilität eingeführt wird. Ist aber im Prinzip gleichbedeutend. Feingranularer Konsistenzbegriff: Wir sagen nicht wann zwei Modelle konsistent sind, sondern was wir im zweiten Modell erwarten, wenn in dem ersten etwas vorhanden ist. So drücken es auch Transformationssprachen aus.
+% CPRs bleiben gleich auf feingranularen CRs. Transformation besteht dann aus mehreren CRs und einer CPR.
+% Das definieren wir aber nicht neu, sondern sagen und zeigen in Prosa einfach nur, dass das so ist (ergibt sich daraus, dass jede Menge von feingranulare CRs eine model-level CR induziert). Damit ist das ohne weitere Definitionen abgefrühstückt.}
 
 \mnote{Fine-grained understanding of consistency}
 We have yet given a common definition of consistency~\cite{stevens2010sosym} by enumerating consistent pairs of models in a relation (see \autoref{chap:correctness:notions_consistency}).
@@ -296,21 +296,21 @@ We will later discuss practical benefits of having an explicit trace model for c
 But this does, as discussed, not restrict applicability of our formalism.
 
 
-\subsection{Equivalence to \ModelLevelConsistencyRelations}
+\subsection{Expressiveness of Fine-Grained Relations} % Equivalence to \modellevelconsistencyrelations
 
-\mnote{Necessity to validate expressiveness of fine-grained consistency notion}
-The model-level consistency notion introduced in \autoref{chap:correctness:notions_consistency} is established and based on notions used by several researchers.
-The given fine-grained definition of consistency is based on the insight that practical approaches to describe consistency and its preservation use fine-grained rules rather than enumerating consistent model pairs.
-We did, however, only provide examples that justify specific decisions in the definitions, such as the witness structure for correspondences, but we did not argue if and why this notion has equal expressiveness.
+\mnote{Expressiveness of fine-grained consistency}
+The model-level consistency notion of \autoref{def:modellevelconsistency} is established and based on notions used by several researchers.
+The given fine-grained notion of consistency according to \autoref{def:consistency} is based on the insight that practical approaches to describe consistency and its preservation use fine-grained rules rather than enumerating consistent model pairs.
+We did, however, only provide examples that justify specific decisions in the definitions, such as the witness structure for correspondences, but we did not argue if and why fine-grained relations are an actual refinement, such that statements about \modellevelconsistencyrelation used for our general formal framework also apply to fine-grained consistency relations.
 
-\mnote{Fine-grained relations can always be expressed by model-level one}
-To show that every set of fine-grained consistency relations can be expressed by a single \modellevelconsistencyrelation, we can use the same constructive approach that we use to define consistency according to multiple consistency relations, be they at model-level or fine-grained.
-Given fine-grained consistency relations $\setted{\consistencyrelation{CR}{1}, \dots, \consistencyrelation{CR}{k}}$, we can construct an equivalent \modellevelconsistencyrelation as follows:
+\mnote{Implication of model-level relation}
+To show that every set of fine-grained consistency relations can be expressed by a single \modellevelconsistencyrelation, we can use the same constructive approach that we have used to define consistency according to multiple consistency relations, be they at model level or fine-grained.
+Given fine-grained consistency relations $\consistencyrelationset{CR} = \setted{\consistencyrelation{CR}{1}, \dots, \consistencyrelation{CR}{k}}$, we can construct an equivalent \modellevelconsistencyrelation $\consistencyrelation{CR}{}$ as follows:
 \begin{align*}
-    \consistencyrelation{CR}{} = \setted{\modeltuple{m} \mid \modeltuple{m} \consistenttomath \setted{\consistencyrelation{CR}{1}, \dots, \consistencyrelation{CR}{k}}}
+    \consistencyrelation{CR}{} = \setted{\modeltuple{m} \mid \modeltuple{m} \consistenttomath \consistencyrelationset{CR}}
 \end{align*}
 
-\mnote{Model-level relation can, in general, not be expressed by fine-grained ones}
+\mnote{Model-level relations more expressive}
 A \modellevelconsistencyrelation can, however, not necessarily be expressed by fine-grained consistency relations.
 The most simple construction approach would define a single fine-grained consistency relation to express a \modellevelconsistencyrelation, which contains the complete models instead of extracts of them.
 The definition of consistency is, however, different for the two types of relations.
@@ -320,25 +320,36 @@ If there is, however, a model that is not considered consistent to any other mod
 According to the definition of consistency for fine-grained relations (see \autoref{def:consistency}), if there is no condition element in the relation, then consistency is not constrained for the contained model elements.
 In consequence, such a model would be considered consistent to every other model.
 
-\mnote{Consistency relations should not restrict valid models}
-While, at first, this seems inappropriate, it has a specific reason.
-The specification of consistency relations does usually only constraint what has to exist in one model if something exists in another.
-It does, however, not constraint which elements are allowed to occur at all.
+\mnote{Additional semantics in consistency relations}
+While, at first, this may seem inappropriate, it is actually appropriate for two reasons.
+First, the formalism can only express that for some elements other elements need to exist, but not that specific elements are not allowed to exist if other elements exist.
+This is reasonable, because consistency between models is supposed to ensure that the overlap of information is represented uniformly, thus to express that information in one model needs to be represented in another one as well.
+Expressing that some elements are not allowed to exist because of other, e.g., being an employee in one model, the same person cannot be a student in another model, is actually not a consistency constraint for information shared between models, but actually additional information that should be stored in a specific model representing these semantics.
+Thus, we do not consider this case at all.
+
+\mnote{Restriction of valid models}
+Second, the formalism for fine-grained can not prevent specific elements from existing at all.
 For example, a consistency relation may define that for a component in an architecture model there has to be a corresponding class in the object-oriented design model, but it may not restrict that only components of specific names are allowed.
 Such restrictions should and actually are separate specifications not related to consistency between models but restricting a model on its own.
-Thus, the metamodel or some additional specification for it should provide such additional restrictions of valid models.
-In our formalism, this would be a restriction of $\metamodelinstanceset{M}{}$ for a metamodel $\metamodel{M}{}$.
+Thus, the metamodel or some additional specification for it should provide such additional restrictions of valid models, which we have already discussed as a restriction of $\metamodelinstanceset{M}{}$ for a metamodel $\metamodel{M}{}$ in \autoref{chap:networks:models}.
 
-\mnote{Fine-grained and model-level relations are equivalent if valid models are restricted externally}
-If we assume such a restriction of $\metamodelinstanceset{M}{}$, it would be the union of all instances of that metamodel at one side of the \modellevelconsistencyrelation.
-Then, each \modellevelconsistencyrelation can also be defined by a fined-grained one.
-A model that does not occur in the \modellevelconsistencyrelation is also not contained in $\metamodelinstanceset{M}{}$, thus is is no valid model at all.
-If the model occurs in $\metamodelinstanceset{M}{}$, there is also a pair in the fine-grained consistency relation that defines that for this model an according other model has to occur.
-\todo{This is only valid if there are no two models with one being contained in the other and two corresponding models with one not being contained in the other. E.g. component is mapped to class, but if additionally component has an interface then the class it is mapepd to has a different name. Then both consistency relation pairs for the component models apply but only one of the corresponding element tuples is contained in the other model.}
+% \mnote{Fine-grained and model-level relations are equivalent if valid models are restricted externally}
+% If we assume such a restriction of $\metamodelinstanceset{M}{}$, it would be the union of all instances of that metamodel at one side of the \modellevelconsistencyrelation.
+% Then, each \modellevelconsistencyrelation can also be defined by a fined-grained one.
+% A model that does not occur in the \modellevelconsistencyrelation is also not contained in $\metamodelinstanceset{M}{}$, thus is is no valid model at all.
+% If the model occurs in $\metamodelinstanceset{M}{}$, there is also a pair in the fine-grained consistency relation that defines that for this model an according other model has to occur.
+% \todo{This is only valid if there are no two models with one being contained in the other and two corresponding models with one not being contained in the other. E.g. component is mapped to class, but if additionally component has an interface then the class it is mapepd to has a different name. Then both consistency relation pairs for the component models apply but only one of the corresponding element tuples is contained in the other model.}
 
-\mnote{Insights to any kind of relation are valid for the other as well}
-Summarizing, we know that \modellevelconsistencyrelations have equal expressiveness to fine-grained consistency relations, if the restriction that specific models are not allowed to occur at all are encoded in a separate specification, such as a restriction of $\metamodelinstanceset{M}{}$ for each metamodel $\metamodel{M}{}$.
-In consequence, insights based on any of the two kinds of consistency relations also apply to the other.
+% \mnote{Insights to any kind of relation are valid for the other as well}
+% Summarizing, we know that \modellevelconsistencyrelations have equal expressiveness to fine-grained consistency relations, if the restriction that specific models are not allowed to occur at all are encoded in a separate specification, such as a restriction of $\metamodelinstanceset{M}{}$ for each metamodel $\metamodel{M}{}$.
+% In consequence, insights based on any of the two kinds of consistency relations also apply to the other.
+
+\mnote{Insight transferability beteween notions}
+Summarizing, we know that we can express each set of fine-grained consistency relations by a \modellevelconsistencyrelation.
+Additionally, we know that there are specific kinds of restrictions that can be encoded in \modellevelconsistencyrelations, which cannot be expressed with fine-grained consistency relations.
+We have, however, discussed why they are not relevant for the designated application area of consistency preservation.
+In consequence, all insights made for \modellevelconsistencyrelations can also be applied to fine-grained consistency relations and, if specific restrictions are excluded, vice versa as well.
+
 
 %\todo{Derive that element-level consistency relations induce model-level consistency relations to be conforming with previous formalism}
 
