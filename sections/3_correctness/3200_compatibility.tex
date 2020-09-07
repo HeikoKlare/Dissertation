@@ -6,12 +6,12 @@
 %\todo{Check whether we can better derive necessity of compatibility in terms of transformations to being able to find consistent models at all. Does only ensure that transformations can at least, if properly defined, find consistent models.}
 \todo{Final müssen wir diskutieren, wie sich Inkompatibilitäten darauf auswirken, ob eine Ausführungsstrategie einen konsistenten Zustand findet. Im Optimalfall zeigen wir, dass Kompatibilität das Orchestrierungsproblem vereinfacht!}
 \todo{Prüfen, ob diskutiert ist, dass mit Kompatibilität sichergestellt wird, dass eine feingranulare Änderung immer zu einem konsistenten Modellset führen kann, was diese Änderung reflektiert.}
-\todo{Wir müssen noch unterstützen, dass Konsistenzrelationen die Existenz von Objekten ausschließen: Wenn ein Student vorhanden ist, darf kein Employee mit gleichem Namen vorhanden sein (da Studis nicht arbeit dürfen). Das geht nicht mit der naiven Verallgemeinerung, die sagt, dass dann die Modelle selbst eingeschränkt werden müssen, da das Modell mit dem Employee i.A. erlaubt ist, nur nicht, wenn ein Student mit dem Namen vorhanden ist.}
+%\todo{Wir müssen noch unterstützen, dass Konsistenzrelationen die Existenz von Objekten ausschließen: Wenn ein Student vorhanden ist, darf kein Employee mit gleichem Namen vorhanden sein (da Studis nicht arbeit dürfen). Das geht nicht mit der naiven Verallgemeinerung, die sagt, dass dann die Modelle selbst eingeschränkt werden müssen, da das Modell mit dem Employee i.A. erlaubt ist, nur nicht, wenn ein Student mit dem Namen vorhanden ist.}
 
 \mnote{Artifacts and correctness in modular consistency specification}
 We have defined in \autoref{chap:correctness} that transformations are composed of consistency relations and consistency preservation rules that preserve them.
 We especially focus on binary relations and according preservation rules, which concern two metamodels.
-Multiple transformations can be combined to a network with an orchestration and application function that executes the transformation in a determined order to restore consistency after changes to concrete models.
+Multiple transformations can be combined to a network with an orchestration and application function that executes the transformations in a determined order to restore consistency after changes to concrete models.
 We have also identified correctness notions and came to the conclusion that with modular, binary transformations combined to a network the individual consistency preservation rules must be correct with respect to the consistency relations they preserve and the orchestration and application functions must be correct with respect the combination of all consistency relations, such that all models are consistent to all consistency relations after executing the transformations.
 
 \mnote{Consistency relations are correct by construction}
@@ -25,16 +25,17 @@ We have discussed an abstract example for that case already in \autoref{chap:cor
 \begin{figure}
     \centering
     \input{figures/correctness/compatibility/three_persons_example_extended}
-    \caption[Three metamodels with (in)compatible consistency relations]{Derivation of \autoref{fig:networks:three_persons_example}: Three simple metamodels for persons, employees and residents, and three binary relations $R_{PE}, R_{PR}, R_{ER}$ between each pair of them, with $R'_{PR}$ as an alternative for $R_{PR}$ and $R'_{ER}$ as an alternative for $R_{ER}$.}
+    \caption[Three metamodels with (in)compatible consistency relations]{Derivation of \autoref{fig:networks:three_persons_example}: Three simple metamodels for persons, employees and residents, and three binary relations $\consistencyrelation{CR}{PE}, \consistencyrelation{CR}{PR}, \consistencyrelation{CR}{ER}$ between each pair of them, with $\consistencyrelation{CR}{PR}'$ as an alternative for $\consistencyrelation{CR}{PR}$ and $\consistencyrelation{CR}{ER}'$ as an alternative for $\consistencyrelation{CR}{ER}$. Adapted from \owncite[Fig. 1]{klare2020compatibility-report}.}
     \label{fig:compatibility:three_persons_example_extended}
 \end{figure}
 
 \mnote{Intuitive compatibility in the running example}
 We recapture the running example defined in \autoref{fig:networks:three_persons_example} and extend it with alternatives for two of the binary consistency relations in \autoref{fig:compatibility:three_persons_example_extended}.
-The example contains three pairwise consistency relations between persons, employees and residents and are defined in a way such that none of them can be omitted, because each pair shares a unique overlap in their attributes.
-In that example, the consistency relations $R_{PE}, R_{PR}$ and $R_{ER}$ are fulfilled if for any person (and analogously employee and resident) in the models there is exactly one employee and one resident, which fulfill the relations for names and further attributes defined by the consistency relations.
-As we will see later, it is of special importance that there is always only one such corresponding element, e.g., that there are not two employees fulfilling the relation to a single resident.
-Intuitively, these consistency relations are \emph{compatible}, as they lead to a reasonable tuple of models that are considered consistent to each other.
+The example contains three pairwise consistency relations between persons, employees and residents.
+They are defined in a way such that none of them can be omitted, because each pair shares a unique overlap in their attributes.
+In that example, the consistency relations $\consistencyrelation{CR}{PE}, \consistencyrelation{CR}{PR}$ and $\consistencyrelation{CR}{ER}$ are fulfilled if for each person (and each employee and resident analogously)in the models there is exactly one employee and one resident that fulfill the relations for names and further attributes defined by the consistency relations.
+According to our notion of consistency relations defined in \autoref{def:consistencyrelation}, it is of special importance that there is always only one such corresponding element, e.g., that there are not two employees with different name capitalizations fulfilling the relation to a single resident.
+Intuitively, these consistency relations are \emph{compatible}, as they lead to a reasonable set of model tuples that are considered consistent to each other.
 
 \begin{figure}
     \centering
@@ -44,27 +45,30 @@ Intuitively, these consistency relations are \emph{compatible}, as they lead to 
 \end{figure}
 
 \mnote{Intuitive incompatibility in the modified running example}
-In contrast, considering consistency relation $R'_{PR}$ instead of $R_{PR}$, the relations can never be fulfilled, because the concatenation of $firstname$ and $lastname$ from person to employee and from person to resident is conflicting.
-The relation between employees and residents assumes to be $firstname$ and $lastname$ to be concatenated in the same order, whereas the relations to person do not.
-Fulfilling these relations would require an infinitely large model, as each cycle through the relations swaps $firstname$ and $lastname$ and appends an additional comma due to the relation between person and resident.
-Thus, the set of consistent model tuples would be empty.
+In contrast, considering consistency relation $\consistencyrelation{CR}{PR}'$ instead of $\consistencyrelation{CR}{PR}$, the relations can never be fulfilled, because the concatenation of $\mathvariable{firstname}$ and $\mathvariable{lastname}$ from person to employee and from person to resident is conflicting.
+The relation between employees and persons assumes $\mathvariable{firstname}$ and $\mathvariable{lastname}$ to be concatenated in the same order, whereas the relation between residents and persons assumes them to be concatenated vice versa and separated by a comma.
+Fulfilling these relations would require an infinitely large model, as the cycle of the relations requires for each person, employee and resident others with $\mathvariable{firstname}$ and $\mathvariable{lastname}$ swapped and prolonged with a comma to exist.
+As this cannot be fulfilled with finite models, the set of consistent model tuples would be empty.
 
-\todo{Maybe leave the following out, or move it to the more fine-grained part}
+%\todo{Maybe leave the following out, or move it to the more fine-grained part} % We moved fine-grained relations to previous chapter, so it is fine.
 \mnote{More detailed incompatibility in the modified running example}
-In addition, considering consistency relation $R'_{ER}$ instead of $R_{ER}$, no models containing residents with a name not written in lower case can be consistent to all relations, as depicted in \autoref{fig:compatibility:intuitive_incompatibility}, which, for reasons of simplicity, omits all other attributes than the names.
-A resident with a non-lower-case name requires a person with equally written first and last name to exist.
-This, in consequence requires an employee with an equally written name to exist.
-The relation $R'_{ER}$ now requires a resident with the name written in lower case to exist, which again requires a person with the lower-case name and this, in turn, requires an employee with the lower-case name.
-In consequence, however, the resident with the lower-case name would correspond to both the employee with the original and the lower-case name, whereas the resident with the original name does not correspond to any employee.
-More intuitively speaking, it is impossible to find an employee that fulfills the consistency relation $R'_{ER}$ for a resident with a non-lower-case name.
+In addition, considering consistency relation $\consistencyrelation{CR}{ER}'$ instead of $\consistencyrelation{CR}{ER}$, no models containing residents with a name not written in lower case can be consistent to all relations, as depicted in the example in \autoref{fig:compatibility:intuitive_incompatibility}, which, for reasons of simplicity, omits all other attributes than the names.
+A resident with a non-lower case name requires a person with equally capitalized first and last name to exist.
+This, in consequence requires an employee with an equally capitalized name to exist.
+The relation $\consistencyrelation{CR}{ER}'$ now requires a resident with the name written in lower case to exist, which, again, requires a person with the lower case name to exist.
+This, in turn, requires an employee with the lower case name to exist as well.
+In consequence, the resident with the lower case name would correspond to both the employee with the original and the lower-case name, whereas the resident with the original name does not correspond to any employee.
+Since there is no witness structure with a unique mapping of corresponding elements, as also reflected in \autoref{fig:correctness:consistency_example}, such models cannot be consistent to the consistency relations.
+More intuitively speaking, it is impossible to find an employee that fulfills the consistency relation $\consistencyrelation{CR}{ER}'$ for a resident with a non-lower case name.
 This is what we will call and later precisely define as an \emph{incompatibility} of the consistency relations, as they define constraints that cannot be fulfilled at the same time.
 This can always occur if there is a cycle in the graph induced by the combined consistency relations.
 
 \mnote{Incompatibilities prevent transformations from finding consistent models}
-On the one hand, such incompatibilities are unwanted, as they indicate that developers have different, contradictory notions of consistency.
-On the other hand, the contradictions can easily lead to the situation that the transformations are not able to find consistent models or at least that their orchestration for finding consistency models becomes unnecessarily difficult.
+Such incompatibilities are unwanted, as they indicate that developers have different, contradictory notions of consistency.
+Additionally, the contradictions can easily lead to the situation that the transformations are not able to find consistent models or at least that their orchestration for finding consistency models becomes unnecessarily difficult.
 Therefore, in this chapter we first discuss some scenarios to identify an intuitive notion of compatibility, which we then use to define a precise notion of \emph{compatibility}.
-Afterwards, we develop a formal, inductive approach to prove compatibility of relations, which we base on a formal framework for which we prove correctness and then derive a practical approach for the transformation language \gls{QVTR} that uses that formal framework.
+Afterwards, we develop a formal, inductive approach to prove compatibility of relations, which we base on a formal framework for which we prove correctness.
+We then derive a practical approach for the transformation language \gls{QVTR} that uses that formal framework.
 The approach is based on the insight that consistency relations having a specific kind of tree structure are compatible and that removing a specific kind of redundant relations is compatibility-preserving.
 This chapter thus constitutes our contribution \autoref{contrib:correctness:compatibility}, which consists of four subordinate contributions: a discussion of compatibility notions, a formal definition of one such notions, a formal approach to prove compatibility, and finally a practical realization of that approach.
 It answers the following research question:
@@ -93,12 +97,15 @@ It answers the following research question:
 
 \mnote{Compatibility can be proven, incompatibility can not}
 We will see that it is in general not possible to prove that transformation are incompatible if the language, in which the relations are described, is undecidable, such as \gls{QVTR}.
-We can, however, at least conservatively prove that transformation are compatible.
-Thus, if our approach proves compatibility, the transformation are actually compatible, but not vice versa.
-This enables transformations developers to check their transformations for compatibility both on-the-fly during transformation development, if developed for a specific scenario, or a posteriori during their combination, according to the scenarios introduced in \autoref{chap:networks:specification_process}.
+We can, however, at least conservatively prove that transformations are compatible.
+Thus, if our approach proves compatibility, the transformations are actually compatible, but not vice versa.
+This enables transformation developers to validate compatibility of their transformations both on-the-fly during transformation development, if developed for a specific scenario, or a posteriori during their combination, according to the scenarios introduced in \autoref{chap:networks:specification_process}.
 Especially in the first scenario, developers can immediately react to the introduction of incompatibilities during transformation development.
 
-\todo{Paragraph über Publikation der Arbeit, so wie überall}
+\mnote{Publication of contributions}
+We have published the central contributions of this chapter, including the formal and practical approach for validating compatibility, in~\owncite{klare2020compatibility-report}.
+Parts of some sections of this chapter are also literally taken from that publication, which we will further indicate in the respective sections.
+The practical approach has been developed in the Master's thesis of \textcite{pepin2019ma}, which was supervised by the author of this thesis.
 
 \input{sections/3_correctness/3210_compatibility-informal_notion.tex}
 \input{sections/3_correctness/3220_compatibility-formal_notion.tex}
