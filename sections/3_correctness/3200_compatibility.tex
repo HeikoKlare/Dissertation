@@ -8,15 +8,19 @@
 \todo{Prüfen, ob diskutiert ist, dass mit Kompatibilität sichergestellt wird, dass eine feingranulare Änderung immer zu einem konsistenten Modellset führen kann, was diese Änderung reflektiert.}
 %\todo{Wir müssen noch unterstützen, dass Konsistenzrelationen die Existenz von Objekten ausschließen: Wenn ein Student vorhanden ist, darf kein Employee mit gleichem Namen vorhanden sein (da Studis nicht arbeit dürfen). Das geht nicht mit der naiven Verallgemeinerung, die sagt, dass dann die Modelle selbst eingeschränkt werden müssen, da das Modell mit dem Employee i.A. erlaubt ist, nur nicht, wenn ein Student mit dem Namen vorhanden ist.}
 
-\mnote{Artifacts and correctness in modular consistency specification}
-We have defined in \autoref{chap:correctness} that transformations are composed of consistency relations and consistency preservation rules that preserve them.
-We especially focus on binary relations and according preservation rules, which concern two metamodels.
-Multiple transformations can be combined to a network with an orchestration and application function that executes the transformations in a determined order to restore consistency after changes to concrete models.
-We have also identified correctness notions and came to the conclusion that with modular, binary transformations combined to a network the individual consistency preservation rules must be correct with respect to the consistency relations they preserve and the orchestration and application functions must be correct with respect the combination of all consistency relations, such that all models are consistent to all consistency relations after executing the transformations.
-
-\mnote{Consistency relations are correct by construction}
-As a consequence of the identified correctness notion, we also found that the underlying consistency relations themselves can, from a theoretical perspective, be considered correct by construction, as there is no other artifact (be it explicit or only implicitly given) with respect to which it has to be correct.
+% \mnote{Artifacts and correctness in modular consistency specification}
+\mnote{Consistency relations correct by construction}
+We have defined in \autoref{chap:correctness} that transformations, from which we construct transformation networks, are composed of consistency relations and consistency preservation rules that preserve them.
+We focus on binary relations and according preservation rules, which relate two metamodels.
+%Multiple transformations can be combined to a network with an orchestration and application function that executes the transformations in a determined order to restore consistency after changes to concrete models.
+%We have also identified correctness notions and came to the conclusion that with modular, binary transformations combined to a network the individual consistency preservation rules must be correct with respect to the consistency relations they preserve and the orchestration and application functions must be correct with respect the combination of all consistency relations, such that all models are consistent to all consistency relations after executing the transformations.
+While we precise defined correctness of transformations and their orchestration in a network, we
+% \mnote{Consistency relations are correct by construction}
+%As a consequence of the identified correctness notion, we also
+found that the underlying consistency relations themselves can, from a theoretical perspective, be considered correct by construction, as there is no other artifact (be it explicit or only implicitly given) with respect to which it has to be correct.
 Since we assume transformations to be developed independently and reused in a modular way, we can especially not assume a monolithic consistency relation to which the modular consistency relations must be correct (cf.\ \autoref{chap:correctness:notions_correctness:dimensions}).
+
+\mnote{Contradictions in relations}
 We have, however, already given examples for cases in which binary consistency relations are somehow contradictory.
 This is the case if the developers of the individual transformations have different, conflicting notions of consistency between the metamodels.
 In the worst case, this can lead to the situation that no single tuple of models would be considered consistent to a set of binary consistency relations, which is obviously unwanted behavior.
@@ -29,7 +33,7 @@ We have discussed an abstract example for that case already in \autoref{chap:cor
     \label{fig:compatibility:three_persons_example_extended}
 \end{figure}
 
-\mnote{Intuitive compatibility in the running example}
+\mnote{Intuitive compatibility in running example}
 We recapture the running example defined in \autoref{fig:networks:three_persons_example} and extend it with alternatives for two of the binary consistency relations in \autoref{fig:compatibility:three_persons_example_extended}.
 The example contains three pairwise consistency relations between persons, employees and residents.
 They are defined in a way such that none of them can be omitted, because each pair shares a unique overlap in their attributes.
@@ -44,14 +48,14 @@ Intuitively, these consistency relations are \emph{compatible}, as they lead to 
     \label{fig:compatibility:intuitive_incompatibility}
 \end{figure}
 
-\mnote{Intuitive incompatibility in the modified running example}
+\mnote{Intuitive incompatibility in modified running example}
 In contrast, considering consistency relation $\consistencyrelation{CR}{PR}'$ instead of $\consistencyrelation{CR}{PR}$, the relations can never be fulfilled, because the concatenation of $\mathvariable{firstname}$ and $\mathvariable{lastname}$ from person to employee and from person to resident is conflicting.
 The relation between employees and persons assumes $\mathvariable{firstname}$ and $\mathvariable{lastname}$ to be concatenated in the same order, whereas the relation between residents and persons assumes them to be concatenated vice versa and separated by a comma.
 Fulfilling these relations would require an infinitely large model, as the cycle of the relations requires for each person, employee and resident others with $\mathvariable{firstname}$ and $\mathvariable{lastname}$ swapped and prolonged with a comma to exist.
 As this cannot be fulfilled with finite models, the set of consistent model tuples would be empty.
 
 %\todo{Maybe leave the following out, or move it to the more fine-grained part} % We moved fine-grained relations to previous chapter, so it is fine.
-\mnote{More detailed incompatibility in the modified running example}
+\mnote{Further incompatibility in modified running example}
 In addition, considering consistency relation $\consistencyrelation{CR}{ER}'$ instead of $\consistencyrelation{CR}{ER}$, no models containing residents with a name not written in lower case can be consistent to all relations, as depicted in the example in \autoref{fig:compatibility:intuitive_incompatibility}, which, for reasons of simplicity, omits all other attributes than the names.
 A resident with a non-lower case name requires a person with equally capitalized first and last name to exist.
 This, in consequence requires an employee with an equally capitalized name to exist.
@@ -63,7 +67,7 @@ More intuitively speaking, it is impossible to find an employee that fulfills th
 This is what we will call and later precisely define as an \emph{incompatibility} of the consistency relations, as they define constraints that cannot be fulfilled at the same time.
 This can always occur if there is a cycle in the graph induced by the combined consistency relations.
 
-\mnote{Incompatibilities prevent transformations from finding consistent models}
+\mnote{Incompatibilities affect consistency preservation}
 Such incompatibilities are unwanted, as they indicate that developers have different, contradictory notions of consistency.
 Additionally, the contradictions can easily lead to the situation that the transformations are not able to find consistent models or at least that their orchestration for finding consistency models becomes unnecessarily difficult.
 Therefore, in this chapter we first discuss some scenarios to identify an intuitive notion of compatibility, which we then use to define a precise notion of \emph{compatibility}.
@@ -95,7 +99,7 @@ It answers the following research question:
 %     \item[\contributionlabel{contrib:evaluation}{Applicability Evaluation}{C4}:] While correctness of the approach is given by construction and proven on the formalism, we apply the approach to case studies to show applicability of the approach. 
 % \end{description}
 
-\mnote{Compatibility can be proven, incompatibility can not}
+\mnote{Provability of compatibility}
 We will see that it is in general not possible to prove that transformation are incompatible if the language, in which the relations are described, is undecidable, such as \gls{QVTR}.
 We can, however, at least conservatively prove that transformations are compatible.
 Thus, if our approach proves compatibility, the transformations are actually compatible, but not vice versa.
