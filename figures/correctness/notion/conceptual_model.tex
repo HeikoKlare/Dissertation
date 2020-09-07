@@ -1,0 +1,45 @@
+\newcommand{\hdistance}{12em}
+\newcommand{\vdistance}{8em}
+
+\begin{tikzpicture}[
+    model style/.style={color=darkgray},
+    concept/.style={draw, minimum width=7em, inner sep=0.5em},
+    model concept/.style={model style, concept},
+    metamodel concept/.style={concept},
+    model relation/.style={model style},
+    metamodel relation/.style={},
+]
+
+\node[model concept] (model) {Model};
+\node[model concept, right=\hdistance of model.north, anchor=north] (view) {View};
+\node[model concept, right=\hdistance of view.north, anchor=north] (vsum) {V-SUM};
+
+\node[metamodel concept, below=\vdistance of model.north, anchor=north] (metamodel) {Metamodel};
+\node[metamodel concept, right=\hdistance of metamodel.north, anchor=north] (viewtype) {View Type};
+\node[metamodel concept, right=\hdistance of viewtype.north, anchor=north] (vsumm) {V-SUM Metamodel};
+
+\node[metamodel concept, below=\vdistance of metamodel.north, anchor=north] (cr) {Consistency Rule};
+\node[metamodel concept, right=\hdistance of cr.north, anchor=north] (cpr) {Consistency Preservation Rule};
+\node[metamodel concept, right=\hdistance of cpr.north, anchor=north] (app) {Application Function};
+
+\draw[model relation, -latex] (view) -- node[uml cardinality start, very near start, above right] {*} node[uml association name, below] {is projection of} node[uml cardinality end, above left] {1..*} (model);
+\draw[model relation, -latex] (view) -- node[uml cardinality start, very near start, above left] {*} node[uml association name, below] {projected from} node[uml cardinality end, very near end, above right] {1} (vsum);
+\draw[model relation, open diamond-latex] (vsum) -- node[uml cardinality start, right] {1} ++(0,3em) -| node[uml association name, pos=0.25, below] {consists of} node[uml cardinality end, very near end, left] {*} (model);
+
+\draw[model relation, dashed, -latex] (model) -- node[uml cardinality start, above left] {*} node[uml association name, right] {\guillemotleft instance of\guillemotright} node[uml cardinality end, below left] {1} (metamodel);
+\draw[model relation, dashed, -latex] (view) -- node[uml cardinality start, above left] {*} node[uml association name, right] {\guillemotleft instance of\guillemotright} node[uml cardinality end, below left] {1} (viewtype);
+\draw[model relation, dashed, -latex] (vsum) -- node[uml cardinality start, above left] {*} node[uml association name, right] {\guillemotleft instance of\guillemotright} node[uml cardinality end, below left] {1} (vsumm);
+
+\draw[metamodel relation, open diamond-latex] ([xshift=1em]viewtype.north west) -- node[uml cardinality start, pos=0.25, right] {*} ++(0,2em) -| node[uml association name, pos=0.25, below] {has} node[uml cardinality end, pos=0.75, left] {1} ([xshift=-1em]metamodel.north east);
+\draw[metamodel relation, -latex] (viewtype) -- node[uml cardinality start, very near start, above right] {*} node[uml association name, below] {projects from} node[uml cardinality end, above left] {1..*} (metamodel);
+\draw[metamodel relation, -latex] (viewtype) -- node[uml cardinality start, very near start, above left] {*} node[uml association name, below] {used for} node[uml cardinality end, above right] {1..*} (vsumm);
+
+\draw[metamodel relation, open diamond-latex] (cr) -- node[uml cardinality start, below left] {*} node[uml association name, pos=0.4, right, align=left] {describes\\ consistency\\ between} node[uml cardinality end, above left] {2} (metamodel);
+\draw[metamodel relation, open diamond-latex] (cpr) -- node[uml cardinality start, above right] {*} node[uml association name, below] {preserves} node[uml cardinality end, very near end, above left] {1} (cr);
+\draw[metamodel relation, open diamond-latex] (app) -- node[uml association name, below] {orchestrates} node[uml cardinality end, very near end, above left] {*} (cpr);
+
+\draw[metamodel relation, open diamond-latex] ([xshift=-4em]vsumm.south) -- node[uml cardinality start, pos=0.5, left] {*} ++(0,-2em) -| node[uml association name, pos=0.25, below] {consists of} node[uml cardinality end, pos=0.75, left] {*} ([xshift=-1em]metamodel.south east);
+\draw[metamodel relation, open diamond-latex] ([xshift=-2em]vsumm.south) -- node[uml cardinality start, pos=0.25, left] {*} ++(0,-4em) -| node[uml association name, pos=0.25, below] {consists of} node[uml cardinality end, pos=0.75, below left] {*} (cpr.north);
+\draw[metamodel relation, open diamond-latex] (vsumm) -- node[uml cardinality start, above left] {*} node[uml association name, right] {consists of} node[uml cardinality end, below left] {1} (app);
+
+\end{tikzpicture}
