@@ -5,10 +5,11 @@
 \label{chap:compatibility:informal}
 
 \mnote{Modular relations induce monolithic ones}
-A set of binary consistency relations induces a monolithic, $n$-ary relation, also called \emph{global relation}, as discussed in \autoref{chap:correctness:notions_correctness:relations}.
-A monolithic relation $\consistencyrelation{R}{}$ for metamodels $\metamodelsequence{M}{n}$ and pairwise consistency relations $\consistencyrelation{R}{i,j}$ is defined by:
+We start with general considerations on \modellevelconsistencyrelations, be they specified explicitly or implied by sets of fine-grained consistency relations.
+A set of binary \modellevelconsistencyrelations induces a monolithic, multiary relation, also called \emph{global relation}, as discussed in \autoref{chap:correctness:notions_correctness:relations}.
+A monolithic relation $\consistencyrelation{CR}{}$ for metamodels $\metamodelsequence{M}{n}$ and pairwise consistency relations $\consistencyrelation{CR}{i,j}$ is defined by:
 \begin{align*}
-    \consistencyrelation{R}{} = \setted{\tupled{\model{m}{1}, \dots, \model{m}{n}} \mid \bigwedge\limits_{1 \le i < j \le n} \tupled{\model{m}{i}, \model{m}{j}} \in \consistencyrelation{R}{i,j}}
+    \consistencyrelation{CR}{} = \setted{\tupled{\model{m}{1}, \dots, \model{m}{n}} \mid \bigwedge\limits_{1 \le i < j \le n} \tupled{\model{m}{i}, \model{m}{j}} \in \consistencyrelation{CR}{i,j}}
 \end{align*}
 As discussed before, the consistency relations are correct by definition and so is the induced global relation, even if it is empty.
 It is, however, unclear whether the relations are \enquote{reasonable} in combination.
@@ -21,7 +22,7 @@ It is, however, unclear whether the relations are \enquote{reasonable} in combin
     \label{fig:compatibility:empty_global_relation}
 \end{figure}
 
-\mnote{Empty induced global relations indicate incompatibility}
+\mnote{Empty induced global relations}
 In fact, if the relations induce an empty global relation, these relations do actually not properly fit to each other, because no single tuple of models would be considered consistent, thus no system could be consistently described.
 We would thus consider such relations incompatible.
 \autoref{fig:compatibility:empty_global_relation} shows an extended version of the example already given in \autoref{chap:correctness:notions_correctness:relations}, inducing an empty global relation.
@@ -30,13 +31,13 @@ This is an abstraction of the concrete examples, which we have already discussed
 \mnote{Goal of identifying incompatible relations}
 There may, however, be more cases than empty induced global relations that we want to exclude by considering the relations incompatible.
 In general, the goal of finding incompatibilities and excluding them is twofold:
-First, we may want to identify that different developers of modular relations have an incompatible notion of consistent, such that the results would never be as expected.
+First, we may want to identify that different developers of modular relations have an incompatible notion of consistency, such that the results of preserving consistency would never be as expected.
 This is what we have seen in the examples with the name relations.
-We want to exclude these cases, because developers will not want to combine transformation based on relations that are contradicting.
+We want to exclude these cases, because developers will not want to combine transformations based on relations that are contradicting.
 Second, incompatibilities may lead to transformations not being able to find consistent models, so the orchestration would not be able to execute transformations in an order that achieves a consistent state.
-If we, for example, encoded the relations from the running with the inverse concatenation of $firstname$ and $lastname$ ($R'_{PR}$) into transformations, each cycle in which the transformation are executed would produce one new person, employee, and resident, with swapped $firstname$ and $lastname$ and a comma appended to $lastname$.
+If we, for example, encoded the relations from the running example with the inverse concatenation of $\mathvariable{firstname}$ and $\mathvariable{lastname}$ ($\consistencyrelation{CR}{PR}'$) into transformations, each cycle in which the transformation are executed would produce one new person, employee, and resident, or change each of the existing ones, such that $\mathvariable{firstname}$ and $\mathvariable{lastname}$ are swapped and a comma appended to $\mathvariable{lastname}$.
 In consequence, transformations would not be able to find a consistent state and, if not stopped preemptively, be executed endlessly.
-Thus we also want to exclude such cases, because it can prevent a transformation network from termination.
+Thus we also want to exclude such cases, because it can prevent the execution of transformations in a transformation network from termination.
 
 %\begin{itemize}
     %\item We discussed that we are not interested in correctness of modular relations w.r.t. one monolithic relations, as that relations is usually unknown and thus correctness cannot be checked (cf ~\autoref{chap:correctness:notions:dimensions})
@@ -57,32 +58,32 @@ Thus we also want to exclude such cases, because it can prevent a transformation
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{figures/correctness/compatibility/obsolete_relations.png}
-    \caption[Example for obsolete elements in consistency relations]{Example for \enquote{obsolete} models pairs in consistency relation $R_1$, which can never occur in a globally consistent tuple of models.}
+    \caption[Example for obsolete elements in consistency relations]{Example for obsolete model pairs in consistency relation $\consistencyrelation{CR}{1,2}$, which can never occur in a globally consistent tuple of models.}
     \label{fig:compatibility:obsolete_relations}
 \end{figure}
 
-\mnote{Locally consistent model pairs which are never globally consistent are \enquote{obsolete}}
+\mnote{Obsolete model pairs}
 A first intuitive option to define incompatibility is the presence of model pairs in the consistency relations, for which no globally consistent model tuple containing them can be found.
-This canonically covers the case, in which the modular relations induce an empty global relation, because for none of the models pairs in each relation a globally consistent model tuple containing them can be found.
-An example for that case is depicted in \autoref{fig:compatibility:obsolete_relations}, in which the relation $\consistencyrelation{R}{1}$ contains the pairs $\tupled{\model{m}{1}, \model{m}{2}'}$ and $\tupled{\model{m}{1}', \model{m}{2}}$, for which neither $\model{m}{3}$ nor $\model{m}{3}'$ is consistent to both other consistency relations, as the induced global relation is $\consistencyrelation{R}{} = \setted{\tupled{\model{m}{1},\model{m}{2},\model{m}{3}},\tupled{\model{m}{1}',\model{m}{2}',\model{m}{3}'}}$.
-Thus, these model pairs may be denoted \enquote{obsolete} as they cannot occur in any globally consistent model tuple.
+This canonically covers the case, in which the modular relations induce an empty global relation, because for none of the model pairs in each relation a globally consistent model tuple containing them can be found.
+An example for that case is depicted in \autoref{fig:compatibility:obsolete_relations}, in which the relation $\consistencyrelation{CR}{1,2}$ contains the pairs $\tupled{\model{m}{1}, \model{m}{2}'}$ and $\tupled{\model{m}{1}', \model{m}{2}}$, for which neither $\model{m}{3}$ nor $\model{m}{3}'$ is consistent to both other consistency relations, as the induced global relation is $\consistencyrelation{CR}{} = \setted{\tupled{\model{m}{1},\model{m}{2},\model{m}{3}},\tupled{\model{m}{1}',\model{m}{2}',\model{m}{3}'}}$.
+Thus, these model pairs may be denoted \emph{obsolete} as they cannot occur in any globally consistent model tuple.
 
-\mnote{Forbidding obsolete model pairs breaks assumptions}
-While this point of view may be reasonable for the consistency relations only, as we are finally only interested in results that are globally consistent, it induces problems to the process of achieving such a result by means of transformation networks.
+\mnote{Forbidding obsolete model pairs}
+While this point of view may be reasonable for the consistency relations only, as we are finally only interested in results that are globally consistent, it induces problems to the process of achieving such a result by means of the execution of transformations or, more precisely, their consistency preservation rules.
 In fact, transformation networks need to allow intermediate states of models, which are only locally consistent, although they can never occur in a globally consistent state.
 This is necessary, because otherwise each transformation would have to consider which model pairs are not only locally consistent but can be globally consistent as well.
-We, however, excluded that by assumption of independent development and modular reuse and let the orchestration of transformations kind of negotiate a consistent result.
+We, however, excluded such an alignment of the transformations by assumption of independent development and modular reuse and instead let the orchestration of transformations negotiate a consistent result.
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{figures/correctness/compatibility/obsolete_relations_scenario.jpg}
-    \caption[Concrete scenario with obsolete relation elements]{Example for an \enquote{obsolete} models pair in consistency relations between \gls{PCM}, UML and Java: The empty Java method realization cannot be globally consistent to the UML class model that defines the method in the class interface, because it realizes a \gls{PCM} component, for which the consistency relation requires at least a default implementation.}
+    \includegraphics[width=\textwidth]{figures/correctness/compatibility/obsolete_relations_scenario.png}
+    \caption[Concrete scenario with obsolete relation elements]{Example for an obsolete model pair in consistency relations between \gls{PCM}, UML and Java: The empty Java method realization is locally consistent to the UML class model that defines the method in the class interface, but cannot be globally consistent because it realizes a \gls{PCM} component, for which the consistency relation requires at least a default implementation.}
     \label{fig:compatibility:obsolete_relations_scenario}
 \end{figure}
 
 \mnote{Example for obsolete relation necessity}
-Consider the following example, which is also exemplarily depicted in \autoref{fig:compatibility:obsolete_relations_scenario}:
-A UML class model and Java code are considered consistent when the same classes and interfaces with the same (in Java potentially empty) methods are contained.
+Consider the following example, which is also exemplarily depicted in \autoref{fig:compatibility:obsolete_relations_scenario}.
+A UML class model and Java code are considered consistent when the same classes and interfaces with the same methods (in Java potentially with an empty body) are contained.
 In fact, for each UML model a usually infinite number of consistent Java models exists, containing arbitrary implementations of the methods.
 In addition, \gls{PCM} models and UML class models are consistent when components are realized as classes implementing the provided interfaces of the components and thus their methods.
 Analogously, each component is represented by a Java class implementing the provided interface.
@@ -91,9 +92,9 @@ The consistency relation between \gls{PCM} and Java may, however, require that a
 %The transformation between \gls{PCM} and Java may, however, initializes a method within a class that realizes a component with a default implementation, be it logging or something more component-specific.
 If we would now consider model pairs that can never occur in globally consistent model tuples as incompatible and thus forbid them, a UML model could not be considered consistent to a Java model if any method in a class that realizes a component and that is defined by one of its interfaces is realized by a Java method with an empty body.
 The transformation between UML and Java would thus not be allowed to create an empty Java method upon creation of a UML method.
-This would, however, enforce the relation between UML and Java to encode information about components, which both breaks our assumption of independent development, as the UML-Java transformation developer would need to know about that, and of modular reuse, because the transformation is then tied to the scenario in which \gls{PCM} is used as well.
+This would, however, enforce the relation between UML and Java to encode information about components, which both breaks our assumption of independent development, as the developer of the transformation between UML and Java would need to know about that, and of modular reuse, because the transformation is then tied to the scenario in which \gls{PCM} is used as well.
 
-\mnote{Obsolete relations do not induce a proper notion of incompatibility}
+\mnote{No proper notion of incompatibility}
 In consequence of the given scenario and the according insight that transformations may need to produce transient states that are only locally consistent to ensure independence of the transformations and their reusability in different contexts, such obsolete consistency relations do not induce a proper notion of incompatibility.
 
 %First option: Remove "obsolete" relation elements
@@ -120,30 +121,30 @@ In consequence of the given scenario and the according insight that transformati
     \label{fig:compatibility:unwanted_behavior}
 \end{figure}
 
-\mnote{Example for transformation execution that reverts a user change}
+\mnote{Reverting user changes}
 To identify a proper notion of incompatibility, we now consider an exemplary transformation scenario from which we can derive such a notion.
 In the example depicted in \autoref{fig:compatibility:unwanted_behavior}, we start with the models $\model{m}{1}$, $\model{m}{2}$ and $\model{m}{3}$, which are consistent to all three consistency relations.
 If a user performs a change of $\model{m}{2}$ to $\model{m}{2}'$, we may assume the following transformation executions:
-The transformation for $\consistencyrelation{R}{2}$ changes $\model{m}{3}$ to $\model{m}{3}'$, the one for $\consistencyrelation{R}{3}$ changes $\model{m}{1}$ to $\model{m}{1}'$ and then the one for $\consistencyrelation{R}{1}$ changes $\model{m}{2}'$ back to $\model{m}{2}$, as that is the only model consistent to $\model{m}{1}'$.
-Now the transformation for $\consistencyrelation{R}{2}$ changes $\model{m}{3}'$ back to $\model{m}{3}$ and finally the one or $\consistencyrelation{R}{1}$ restores $\model{m}{1}$.
+The transformation for $\consistencyrelation{CR}{2,3}$ changes $\model{m}{3}$ to $\model{m}{3}'$, the one for $\consistencyrelation{CR}{1,3}$ changes $\model{m}{1}$ to $\model{m}{1}'$ and then the one for $\consistencyrelation{CR}{1m2}$ changes $\model{m}{2}'$ back to $\model{m}{2}$, as that is the only model consistent to $\model{m}{1}'$.
+Now the transformation for $\consistencyrelation{CR}{2,3}$ changes $\model{m}{3}'$ back to $\model{m}{3}$ and finally the one or $\consistencyrelation{CR}{1,3}$ restores $\model{m}{1}$.
 As a result, the transformation network executed the transformations in a way such that the original models are returned, which are actually consistent but reject the user change.
 
-\mnote{Unnecessarily bad local selections can prevent network from finding proper solution}
+\mnote{Bad local selections} %Unnecessarily bad local selections can prevent network from finding proper solution
 Apart from the three given models, only $\model{m}{1}''$, $\model{m}{2}'$ and $\model{m}{3}'$ are consistent.
 Upon the user change of $\model{m}{2}$ to $\model{m}{2}'$, we would actually expect the transformations to find the latter triple of models as a consistent result, as otherwise, like in the above example, the original models are returned, which actually rejects the user change.
 The problem results from the model $\model{m}{1}'$ being present in the consistency relations, but not being consistent in any globally consistent model tuple.
 For each of the transformations the local selection of $\model{m}{1}'$ is fine, as there are models to which it is locally consistent according to each consistency relation on its own.
 
-\mnote{Scenario is different from obsolete relation elements}
+\mnote{Difference to obsolete elements} %Scenario is different from obsolete relation elements}
 Note that this scenario is different from the case discussed for obsolete relation elements.
 In the scenarios discussed for obsolete relation elements, each model in such an obsolete pair occurs in a globally consistent model tuple, but not both models in that pair together do.
 For example, the Java class with an empty method body actually occurs in a globally consistent model tuple, but not together with the UML class model in which the method is defined in the class interface, although they are locally consistent.
 
-\mnote{Models that do not occur in any globally consistent model tuple are problematic}
-We have seen that it is problematic, when consistency relations define consistency of models that do not occur in any globally consistent model tuple.
-This can easily lead to transformations that do find the expected solutions and unnecessarily reject user changes.
+\mnote{Relation to user changes} %Models that do not occur in any globally consistent model tuple are problematic
+We have seen that it is problematic when consistency relations define consistency of models that do not occur in any globally consistent model tuple.
+This can easily lead to transformations that do find expected solutions and unnecessarily reject user changes.
 We did not define a requirement that user changes may not be reverted on purpose, as that behavior may also be expected to express that certain changes are not allowed to be made.
-However, if there was a reasonable series of transformations that returns a consistent tuple of models with reflects the user changes, it should be preferred over one that reverts the user change.
+However, if there was a reasonable sequence of transformations that returns a consistent tuple of models which reflects the user changes, it should be preferred over one that reverts the user change.
 
 % \begin{itemize}
 %     \item Considering the example in \autoref{fig:compatibility:unwanted_behavior}, we start with $A_1, B_1, C_1$ and have a user change of $B_1$ to $B_2$. Apart from the input models, only $A_3, B_2, C_2$ are globally consistent. So we would expect the transformations to find the latter models. Because of also having consistency relations to $A_2$ and transformation that locally select $A_2$ (because they do not know that there is no globally consistent state with $A_2$), passing across that model can lead to resulting in $A_1, B_1, C_1$ again. We did not define that requirement yet because it is not essentially necessary, but usually user may not want their changes be undone by a transformation, at least if there was another set of consistent models reflecting their change.
@@ -158,32 +159,38 @@ However, if there was a reasonable series of transformations that returns a cons
 %%
 \subsection{An Informal Notion of Compatibility}
 
-\mnote{Models that are never globally consistent are problematic}
+\mnote{Property of problematic models} %Models that are never globally consistent are problematic
 The discussed case that models do not occur in any globally consistent model tuple can be seen as a special case of obsolete relation elements, because it actually means that for each pair in a consistency relation in which a model occurs, the model pair cannot occur in a globally consistent model.
 We found that in a combination of relations a model is problematic if
 \begin{shortenumerate}
-    \item it is locally consistent to another model, i.e., it occurs in a pair of a binary consistency relation and
+    \item it is locally consistent to another model, i.e., it occurs in a pair of a consistency relation and
     \item it can never be globally consistent, i.e., it is not contained in any model tuple that is consistent to all consistency relations.
 \end{shortenumerate}
 The model $\model{m}{1}'$ in \autoref{fig:compatibility:unwanted_behavior} was such a model, as it was locally consistent to $\model{m}{2}$ and $\model{m}{3}'$, but those two are inconsistent.
 
-\mnote{Problematic models can be introduced by users or transformations}
-We can distinguish two cases that lead to occurence of such a model like $\model{m}{1}'$:
+\mnote{Cases introducing problematic models} % Problematic models can be introduced by users or transformations
+We can distinguish two cases that lead to the occurence of such a model like $\model{m}{1}'$:
 \begin{properdescription}
     \item[User:] The model was created by the user, thus adapting the model is unwanted as the user introduced it. Such a change should be rejected as the model cannot be globally consistent.
-    \item[Transformation:] The model was created by a transformation. In our example, this can either be the case because $\model{m}{2}$ or $\model{m}{3}'$ was created. There is, however, at least $\model{m}{1}''$ to which $\model{m}{2}$ and $\model{m}{3}'$ are consistent, so the transformation should better select that one. If there was not such $\model{m}{1}''$, then $\model{m}{2}$ and $\model{m}{3}'$ would be in the same situation not occurring in any globally consistent model tuple, thus the argumentation could be applied inductively.
+    \item[Transformation:] The model was created by a transformation. In our example, this can either be the case because $\model{m}{2}$ or $\model{m}{3}'$ was created. There is, however, at least $\model{m}{1}''$ to which $\model{m}{2}$ and $\model{m}{3}'$ are consistent, so the transformation should better select that one. If there was no such $\model{m}{1}''$, then $\model{m}{2}$ and $\model{m}{3}'$ would be in the same situation not occurring in any globally consistent model tuple, thus the argumentation could be applied inductively.
 \end{properdescription}
-In consequence, allowing such models during the process of describing a system and preserving consistency between the system models does not provide any benefits and thus should in the best case not occur.
-There is no reason to create it, but it may prevent transformations from finding consistent states.
-In fact, disallowing the adaptation of the user change is even more reasonable when not concerning the complete model, like proposed with authoritative models by \textcite{stevens2020BidirectionalTransformationLarge-SoSym}, but only the part considered by a specific rule that describes consistency, such as a rule specifying the relation between classes and components, rather than between \gls{PCM} and UML.
-This does also fit the way in which transformation are usually defined, as they consist of rules that relate only limited sets of meta-classes and their properties.
-This is why our coming formalization of compatibility and its analysis will base on a more fine-grained notion of consistency, i.e., relations that relate extracts of models rather than the complete models.
+In consequence, allowing such models during the process of describing a system and preserving consistency between the system models does not provide any benefits and thus should, in the best case, not occur.
+There is no reason to create such models, but it may prevent transformations from finding consistent states.
+In fact, disallowing the adaptation of the user change is even more reasonable when not concerning the complete model, like proposed with authoritative models by \textcite{stevens2020BidirectionalTransformationLarge-SoSym}, but only the part considered by a specific rule that describes consistency, such as a rule specifying the relation between classes and components, rather than between the complete metamodels of \gls{PCM} and UML.
+%This does also fit the way in which transformation are usually defined, as they consist of rules that relate only limited sets of meta-classes and their properties.
+This is one of the reasons why we provided the formalization of fine-grained consistency relations in \autoref{def:consistencyrelation} that relate extracts of models rather than complete ones.
+We use this fine-grained notion for formalizing and analyzing compatibility.
 
-\mnote{A notion of compatibility}
-From these insights, we formulate the following, for now informal and still on the level of models, notion of compatibilility:
+\mnote{Notion of compatibility}
+Transferred to our fine-grained notion of consistency relations, we consider consistency relations incompatible if there is a condition element (rather than a model) which occurs in no tuple of models that is globally consistent to all consitency relations.
+We can thus formulate the following, for now informal notion of compatibility:
 \begin{quote}
-    For every model occurring in a pair of a consistency relation, a globally consistent model tuple containing it must exist.
+    For every condition element occurring in a pair of a consistency relation, a globally consistent model tuple containing it must exist.
 \end{quote}
+% From these insights, we formulate the following, for now informal and still on the level of models, notion of compatibilility:
+% \begin{quote}
+%     For every model occurring in a pair of a consistency relation, a globally consistent model tuple containing it must exist.
+% \end{quote}
 
 % 'This notion of compatibility reflects the intuitive requirements that we implicitly discussed.
 % 'First, if the relation imply an empty global consistency relation, they are not considered compatible.
@@ -195,20 +202,20 @@ From these insights, we formulate the following, for now informal and still on t
 %     As teasered before, we will precisely define the notion in a more fine-grained way at the level of elements rather than complete models. 
 % \end{itemize}
 
-\mnote{Compatibility notion is reasonable for preservation process}
+\mnote{Reasonability for preservation process}
 This notion is especially reasonable when we consider the process of preserving consistency after user changes.
-If a user performs a change, we want to ensure that if consistency of the modified elements is restricted by a consistency relation, there should be at least one consistent tuple of models that reflects the user change.
+If a user performs a change, we want to ensure that if consistency of the modified elements is restricted by a consistency relation, there should be at least one consistent tuple of models that reflects the user change, i.e., contains the condition element he or she introduced or modified.
 If this is not the case, the transformations will not be able to produce a reasonable result, apart from reverting or adapting the user change.
 
-\mnote{Compatibility notion does not reflect specific semantic contradictions}
+\mnote{Reflection of semantic contradictions}
 Note that this notion of compatibility does only exclude combinations of relations according to the above made argumentation of being generally useless and potentially preventing transformations from finding consistency result.
 This does, however, not exclude further useless or unintended combinations of relations, for which the semantics of the relations would have to be known and analyzed.
-The already discussed example of the necessity to infinitely swap $firstname$ and $lastname$ and append a comma induced by the alternative consistency relation $\consistencyrelation{R}{PR}'$ in \autoref{fig:compatibility:three_persons_example_extended} let to the situation that no tuple of models can fulfill those constraints, thus the global induced consistency relation is empty.
-If we, however, relax $\consistencyrelation{R}{PR}'$ such that only $firstname$ and $lastname$ are swapped, but no comma is appended, the relations can be fulfilled by models which contain each person twice, once with its proper name and once with swapped first and last name.
-Although we might say that the relations are not intended that way, it is impossible for a generic approach to validate that without knowing about the semantics of the attributes $firstname$, $lastname$ and their combination in $name$.
+The already discussed example of the necessity to infinitely swap $\mathvariable{firstname}$ and $\mathvariable{lastname}$ and append a comma induced by the alternative consistency relation $\consistencyrelation{CR}{PR}'$ in \autoref{fig:compatibility:three_persons_example_extended} led to the situation that no tuple of models can fulfill those constraints, thus the global induced consistency relation is empty.
+If we, however, relax $\consistencyrelation{CR}{PR}'$ such that only $\mathvariable{firstname}$ and $\mathvariable{lastname}$ are swapped, but no comma is appended, the relations can be fulfilled by models which contain each person twice, once with its proper name and once with swapped first and last name.
+Although we might say that the relations are not intended that way, it is impossible for a generic approach to validate that without knowing about the semantics of the attributes $\mathvariable{firstname}$, $\mathvariable{lastname}$ and their combination in $\mathvariable{name}$.
 In a different context, it may be desired that two attributes are concatenated in both orders, thus it is generally necessary to not disallow that case.
 
-\mnote{Compatibility is context-dependent and not achievable by construction}
+\mnote{Context dependency}
 Obviously, the given notion of compatibility is a property of a set of consistency relations and not of a single consistency relation on its own.
 We may also say that compatibility of a single relation is \emph{context-dependent}.
 In consequence, that property can neither be analyzed nor systematically achieved for a single consistency relation.
@@ -243,11 +250,11 @@ Compatibility can only be achieved by construction if all consistency relations 
 
 \subsection{An Analysis for Compatibility of Relations}
 
-\mnote{Overview of compatibility analysis approach}
-In the following sections, we define a formal notion of compatibility and derive a formal, as well as practical approach for analyzing, or more precisely, proving it.
+\mnote{Compatibility analysis overview}
+In the following sections, we define a formal notion of compatibility and derive a formal, as well as a practical approach for analyzing, or more precisely, proving it.
 To give an overview of that approach, we first briefly introduce the central idea based on the given informal notion of compatibility, which we first introduced in \owncite{klare2018docsym} and \owncite{klare2019icmt}.
 
-\mnote{Tree are compatible, but in general not achievable}
+\mnote{Compatibility of trees}
 We have seen that incompatibilities can arise whenever there are cycles in the graph induced by consistency relations.
 This means that the same models are related across two paths of relations, which may be contradictory.
 Thus, to avoid incompatibilities by construction, one could define a network of transformations and thus underlying consistency relations that does not contain any cycles.
@@ -256,33 +263,34 @@ As we have already discussed, it is, however, in general not possible to define 
 First, it contradicts our assumption of independent development, as transformations would need to be aligned such that the missing direct relations between metamodels are expressed across other paths.
 Second, like we have seen in the running example in \autoref{fig:compatibility:three_persons_example_extended}, if three metamodels all share specific information only pairwise, there needs to be a cycle of transformations to keep that information consistent.
 
-\mnote{Redundancy and independence are compatibility-preserving}
+\mnote{Compatibility-preserving properties}
 Even if we cannot always construct tree, we can use the insight that trees of transformations consist of inherently compatible consistency relations to analyze arbitrary topologies for compatibility.
 This is based on two techniques:
 \begin{properdescription}
-    \item[Redundancy:] If a consistency relation is redundant in a network, i.e., the same model tuples are considered consistent with or without that specific relation we can, virtually, remove it without affecting compatibility of the relations. More precisely, $\consistencyrelation{R}{1}$ is redundant in $\setted{\consistencyrelation{R}{1}, \consistencyrelation{R}{2}, \consistencyrelation{R}{3}}$ if and only if a model tuple $\tupled{\model{m}{1}, \model{m}{2}, \model{m}{3}}$ is consistent to $\setted{\consistencyrelation{R}{1}, \consistencyrelation{R}{2}, \consistencyrelation{R}{3}}$ exact when it is consistent to $\setted{\consistencyrelation{R}{2}, \consistencyrelation{R}{3}}$.
-    Inductively applying the virtual removal of redundant relations until the remaining network is a tree, which is inherently compatible, we inductively know that the network with the redundant relations is compatible as well.
-    \item[Independence:] When we consider consistency relations at the level of elements rather than models, the independence of relations is a second compatibility-preserving property.
+    \item[Redundancy:] If a consistency relation is redundant in a network, i.e., the same model tuples are considered consistent with or without that specific relation, we can, virtually, remove it without affecting compatibility of the relations. More precisely, $\consistencyrelation{CR}{1}$ is redundant in $\setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR}{2}, \consistencyrelation{CR}{3}}$ if, and only if, a model tuple $\tupled{\model{m}{1}, \model{m}{2}, \model{m}{3}}$ is consistent to $\setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR}{2}, \consistencyrelation{CR}{3}}$ exactly when it is consistent to $\setted{\consistencyrelation{CR}{2}, \consistencyrelation{CR}{3}}$.
+    Iteratively applying the virtual removal of redundant relations until the remaining network is a tree, which is inherently compatible, we inductively know that the network with the redundant relations is compatible as well.
+    \item[Independence:] Independence of fine-grained consistency relations is a second compatibility-preserving property.
     For example, if consistency between components and classes between \gls{PCM}, UML and Java is expressed in one set of relations and consistency between different interface representations in another, they can be considered independent, because modifications in components and classes do never affect interfaces and vice versa.
-    Proving compatibility for each independent set of consistency relations inductively proves compatibility of the union of all these sets.
+    Proving compatibility for each independent set of consistency relations inductively proves compatibility of the union of all sets.
 \end{properdescription}
 Finding independent subsets of relations and removing their redundancies until only trees remain proves compatibility.
 We call this approach \emph{decomposition}, as we decompose the original relations into independent, essential relations, and we say that the resulting trees \emph{witness} compatibility.
 
 \begin{figure}
     \centering
-    \input{figures/correctness/compatibility/independent_relations.tex}
+    \input{figures/correctness/compatibility/decomposition.tex}
     \caption[Exemplary overview of compatibility analysis idea]{Example for the decomposition of independent and removal of redundant consistency relations for analyzing compatibility. Adapted from \owncite{klare2018docsym}.}
     \label{fig:compatibility:decomposition}
 \end{figure}
 
 \mnote{Example for compatibility analysis}
-Although we did not yet define how relations at the level of elements can be formally expressed, \autoref{fig:compatibility:decomposition} sketches the ideas for proving compatibility based on the given informal notion.
-We have consistency relations $\consistencyrelation{R}{1}, \consistencyrelation{R}{2}, \consistencyrelation{R}{3}$ between three metamodels.
-We know that $\consistencyrelation{R}{3}$ can be separated into disjoint $\consistencyrelation{R}{4}$ and $\consistencyrelation{R}{5}$, i.e., the relations are independent, thus one relation may related components and classes and the other may relate different interface representations, as exemplarily explained before.
-Additionally, we know that the combination of $\consistencyrelation{R}{1}$ and $\consistencyrelation{R}{2}$ is a subset of $\consistencyrelation{R}{4}$, thus $\consistencyrelation{R}{4}$ is redundant as models are only considered consistent if they are consistent to $\consistencyrelation{R}{1}$ and $\consistencyrelation{R}{2}$ anyway.
-In other words, $\consistencyrelation{R}{1}$ and $\consistencyrelation{R}{2}$ is more restrictive regarding consistency than $\consistencyrelation{R}{4}$.
-In consequence, we can virtually remove $\consistencyrelation{R}{4}$ and consider $\consistencyrelation{R}{1}$ and $\consistencyrelation{R}{2}$ independently from $\consistencyrelation{R}{5}$, inductively due to its independence from $\consistencyrelation{R}{4}$.
+%Although we did not yet define how relations at the level of elements can be formally expressed, 
+\autoref{fig:compatibility:decomposition} sketches the ideas for proving compatibility based on the given informal notion.
+We have consistency relations $\consistencyrelation{CR}{1}, \consistencyrelation{CR}{2}, \consistencyrelation{CR}{3}$ between three metamodels.
+We know that $\consistencyrelation{CR}{3}$ can be separated into disjoint $\consistencyrelation{CR}{4}$ and $\consistencyrelation{CR}{5}$, i.e., the relations are independent, thus one relation may relate components and classes and the other may relate different interface representations, as exemplarily explained before.
+Additionally, we know that the combination of $\consistencyrelation{CR}{1}$ and $\consistencyrelation{CR}{2}$ is a subset of $\consistencyrelation{CR}{4}$, thus $\consistencyrelation{CR}{4}$ is redundant as models are only considered consistent if they are consistent to $\consistencyrelation{CR}{1}$ and $\consistencyrelation{CR}{2}$ anyway.
+In other words, $\consistencyrelation{CR}{1} \concat \consistencyrelation{CR}{2}$ is more restrictive regarding consistency than $\consistencyrelation{CR}{4}$.
+In consequence, we can virtually remove $\consistencyrelation{CR}{4}$ and consider $\consistencyrelation{CR}{1}$ and $\consistencyrelation{CR}{2}$ independently from $\consistencyrelation{CR}{5}$, inductively due to its independence from $\consistencyrelation{CR}{4}$.
 The result are two independent trees of relations, which are inherently compatible.
 Since redundancy and independence are compatibility-preserving, this proves that the original relations are compatible.
 
