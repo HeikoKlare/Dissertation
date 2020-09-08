@@ -1,8 +1,8 @@
 \section{Combining Unidirectional Consistency Preservation Rules}
 
-\mnote{Discuss options to combine unidirectional preservation rules to be synchronizing}
+\mnote{Make bidirectional transformation synchronizing}
 We have introduced that bidirectional transformations, as we assume to be the notion for practically usable transformation specifications, can only be applied after changes to one model and update the other to restore consistency.
-This induced a gap to synchronizing transformations, as required in transformation networks, which are able to accept changes made in both models and update both models to restore consistency.
+This induces a gap to synchronizing transformations, as required in transformation networks, which are able to accept changes made in both models and update both models to restore consistency.
 To close this gap, we discuss options to combine the unidirectional consistency preservation rules of a bidirectional transformation, such that it considers changes made to both models and thus acts like a synchronizing transformation.
 
 
@@ -11,21 +11,21 @@ To close this gap, we discuss options to combine the unidirectional consistency 
 %%
 \subsection{Options for Combination}
 
-\mnote{Existing synchronization supports arbitrary conflicting concurrent changes}
+\mnote{Conflicting concurrent changes}
 Some existing work already proposed strategies to synchronize concurrent changes between two models.
 For example, some work proposes techniques for processing concurrent changes with \glspl{TGG}~\cite{hermann2012concurrentSynchronization-FASE,orejas2020IncrementalConcurrentSynchronization-FASE}, whereas others define specific algorithms for a general notion of synchronizing transformations according to our given definition~\cite{xiong2013SynchronizingConcurrentUpdates-SoSym,xiong2009parallelUpdates-ICMT}.
 All these approaches, however, deal with the more general case that any changes may have been made to the models.
 That especially includes conflicting updates by one or more user, which need to be resolved.
 Such a resolution may lead to the necessity of reverting one of the changes.
 
-\mnote{Transformation networks only produce specific concurrency situations}
-We are, however, in the special situation that transformations do not perform arbitrary changes and that changes of other transformations may need to be revised, but not reverted.
+\mnote{Specific concurrent changes in transformation networks}
+We are, however, in the situation that transformations do not perform arbitrary changes and that changes of other transformations may need to be revised but not reverted.
 For example, it may be necessary to update an attribute value again, because the interval of consistent values of the currently executed transformation is smaller than the one of a transformation executed before.
-It will, however, not be necessary to completely revert the modification of the attribute value, because the modification was necessary for another transformation to restore consistency, thus the causal change for which consistency was restored, needs to be reverted as well.
+It will, however, not be necessary to completely revert the modification of the attribute value, because the modification was necessary for another transformation to restore consistency, thus the causal change for which consistency was restored would need to be reverted as well.
 Finally, this would result in reverting a user change, which should never happen.
 
-\mnote{We assume compatibility of transformations}
-In fact, we assume transformations to be compatible according to \autoref{def:compatibility}, which excludes contradictions in their consistency relations that may prevent transformations from being able to find a consistent result for specific changes.
+\mnote{Assumed compatibility of relations}
+We assume the consistency relations of transformations to be compatible according to \autoref{def:compatibility}, which excludes contradictions that may prevent transformations from being able to find a consistent result for specific changes.
 This assumptions reduces the potential conflicts that may occur when changes of different transformations need to be synchronized.
 
 %\mnote{Difference between synchronizing and unidirectional consistency preservation rules}
@@ -43,18 +43,19 @@ This assumptions reduces the potential conflicts that may occur when changes of 
 %     \consistencypreservationrule{\consistencyrelation{CR}{},\leftarrow} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{2}}) \rightarrow \changeuniverse{\metamodel{M}{1}}
 % \end{align*}
 
-\mnote{Both preservation rules of a bidirectional transformation must be executed at least once}
+\mnote{Execution of both preservation rules}
 A bidirectional transformation according to \autoref{def:bidirectionaltransformation} consists of two unidirectional consistency preservation rules.
 We have discussed in \autoref{chap:synchronization:gap:alignment} that it is not possible to extend those consistency preservation rules to be synchronizing such that the execution of a single unidirectional consistency preservation rule restores consistency to all consistency relations after changes to both models.
 In fact, it will be necessary to execute both preservation rules at least ones to restore consistency.
 There are, however, different options how to apply the rules, each having different benefits and drawbacks.
 
-\mnote{First option: Independent execution and merge}
+\mnote{Independent execution and merge}
 %In consequence, we usually have two unidirectional consistency preservation rules $\consistencypreservationrule{\consistencyrelation{CR}{},\rightarrow}$ and $\consistencypreservationrule{\consistencyrelation{CR}{},\leftarrow}$ that define how changes are propagated from one model to the other and vice versa, but this is not equivalent to a synchronizing transformation.
+We have already sketched two scenarios for executing multiple consistency preservation rules in \autoref{chap:correctness:notions_consistency:preservation}, which can be transferred to the case of executing the two consistency preservation rules of a bidirectional transformation.
 A first option is to independently apply the consistency preservation rules and then merge the results.
 Imagine models $\model{m}{1}$ and $\model{m}{2}$ and changes to them $\change{\metamodel{M}{1}}$ and $\change{\metamodel{M}{2}}$.
-If we now applied the two unidirectional consistency preservation rules independently, we would have $\change{\metamodel{M}{2}}' = \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}(\model{m}{1},\model{m}{2}, \change{\metamodel{M}{1}})$ and $\change{\metamodel{M}{1}}' = \consistencypreservationrule{\consistencyrelationset{CR}{}}^{\leftarrow}(\model{m}{2}, \model{m}{1}, \change{\metamodel{M}{2}})$.
-It is, however, not guaranteed that $\tupled{\change{\metamodel{M}{1}}' \concatfunction \change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}' \concatfunction \change{\metamodel{M}{2}}(\model{m}{2})}$ is consistent.
+If we apply the two unidirectional consistency preservation rules independently, we get $\change{\metamodel{M}{2}}' = \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}(\model{m}{1},\model{m}{2}, \change{\metamodel{M}{1}})$ and $\change{\metamodel{M}{1}}' = \consistencypreservationrule{\consistencyrelationset{CR}{}}^{\leftarrow}(\model{m}{2}, \model{m}{1}, \change{\metamodel{M}{2}})$.
+It is, however, not guaranteed that $\tupled{\change{\metamodel{M}{1}}'(\change{\metamodel{M}{1}}(\model{m}{1})), \change{\metamodel{M}{2}}'(\change{\metamodel{M}{2}}(\model{m}{2}))}$ is consistent to $\consistencyrelationset{CR}$.
 It is even not guaranteed that the changes, such as $\change{\metamodel{M}{1}}$ and $\change{\metamodel{M}{1}}'$ can be concatenated at all, since $\change{\metamodel{M}{1}}'$ was generated for $\model{m}{1}$ rather than $\change{\metamodel{M}{1}}(\model{m}{1})$.
 An example may be that $\change{\metamodel{M}{1}}$ removes an element from $\model{m}{1}$, which $\change{\metamodel{M}{1}}'$ changes.
 Even if the change is still defined for that changed model, the result may not be consistent because the necessary change produced by $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ cannot be applied anymore.
@@ -62,18 +63,18 @@ Even if the change is still defined for that changed model, the result may not b
 %Then the resulting model may be invalid or, if the element is only added once, this may result in the missing existence of unique corresponding elements to build a witness structure for consistency.
 Thus simply merging the individually produced changes does not necessarily lead to a consistent result.
 
-\mnote{Second option: Sequential execution}
-Another option would be to sequence the execution, thus first generating $\change{\metamodel{M}{2}}' = \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}(\model{m}{1},\model{m}{2}, \change{\metamodel{M}{1}}$ as before.
+\mnote{Sequential execution}
+Another option is to sequence the execution, thus first generating $\change{\metamodel{M}{2}}' = \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}(\model{m}{1},\model{m}{2}, \change{\metamodel{M}{1}})$ as before.
 $\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}'(\model{m}{2})}$ is consistent due to correctness of $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$.
 Afterwards, we apply the second consistency preservation rule to the the new consistent models and the original change to $\model{m}{2}$, thus $\change{\metamodel{M}{1}}' = \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}(\change{\metamodel{M}{2}}'(\model{m}{2}), \change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}})$.
-As a result, we receive $\tupled{\change{\metamodel{M}{1}'} \concatfunction \change{\metamodel{M}{1}}(\model{m}{1}, \change{\metamodel{M}{2}} \concatfunction \change{\metamodel{M}{2}}'(\model{m}{2})}$, which is consistent to $\consistencyrelationset{CR}$.
+As a result, we receive $\tupled{\change{\metamodel{M}{1}}'(\change{\metamodel{M}{1}}(\model{m}{1})), \change{\metamodel{M}{2}}(\change{\metamodel{M}{2}}'(\model{m}{2}))}$, which is consistent to $\consistencyrelationset{CR}$.
 This means that $\change{\metamodel{M}{2}}$ is not applied to $\model{m}{2}$ anymore, to which the changes were made originally, but needs to be applied to $\change{\metamodel{M}{2}}'(\model{m}{2})$.
 It is again unclear whether the change can still be applied to that state, i.e., whether $\change{\metamodel{M}{2}}$ is defined for $\change{\metamodel{M}{2}}'(\model{m}{2})$, like in the merge example above.
 If, however, the changes are applicable, then we have the guarantee that all original changes are reflected, as they were applied to the models, and that the resulting models are consistent, because of the correctness of the consistency preservation rules.
 %An example may be that $\change{\metamodel{M}{2}}'$ removes an element from $\model{m}{2}$, which $\change{\metamodel{M}{2}}$ changes.
 %\todo{Revise change definition to be partial}
 
-\mnote{Further investigate sequential execution because of less drawbacks}
+\mnote{Sequential execution with less drawbacks}
 Both discussed options have the drawback that they cannot guarantee to produce a result, as it is possible that the involved changes cannot be concatenated.
 In addition, the first option of independently applying the consistency preservation rules and then merging the results cannot even give a guarantee that if changes can be concatenated the resulting models are consistent.
 Thus, we do not pursue that approach anymore.
@@ -97,12 +98,12 @@ In the following, we further discuss the second option of sequencing the executi
     \label{fig:synchronization:sequencing_schema}
 \end{figure}
 
-\mnote{Changes that affect disjoint sets of elements can be concatenated}
+\mnote{Changes affecting disjoint element sets}
 The sequential application of original changes and execution of consistency preservation rules as explained in the previous section is depicted schematically in \autoref{fig:synchronization:sequencing_schema}.
 It has two important properties. 
 First, it ensures that all original changes are applied to the models and, second, it guarantees that the resulting models are consistent.
 It is, however, only applicable in specific situations.
-The optimal case, in which the approach is always applicable, is if $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ produces changes for the second model, which affects a disjoint set of elements in $\consistencyrelationset{CR}$ compared to the original changes to the second model $\change{\metamodel{M}{2}}$.
+The optimal case, in which the approach is always applicable, is if $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ produces changes for the second model that affect a disjoint set of elements in $\consistencyrelationset{CR}$ compared to the original changes to the second model $\change{\metamodel{M}{2}}$.
 If two changes affect completely disjoint sets of elements, they can obviously be consecutively applied.
 It would even not make a difference in which order they are applied then.
 
@@ -113,7 +114,7 @@ It would even not make a difference in which order they are applied then.
     \label{fig:synchronization:non_transformability}
 \end{figure}
 
-\mnote{Non-applicability and non-transformability can occur when change and consistency preservation rule application are sequenced}
+\mnote{Issues when sequencing preservation rule application}
 Unfortunately, the changes $\change{\metamodel{M}{2}}'$ produced by $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ and the original ones produced by other transformations $\change{\metamodel{M}{2}}$ do not necessarily affect disjoint sets of elements.
 In that case, two problems can occur:
 \begin{properdescription}
@@ -129,27 +130,28 @@ In that case, two problems can occur:
     In fact, this requirement applies to all changes, thus even original user changes, but there are special circumstances in this situation that make it prone to not being able to transform the changes.
     Whenever $\change{\metamodel{M}{2}}'$ adds condition elements that were already added by $\change{\metamodel{M}{2}}$, their concatenation can lead to a duplication of those elements.
     Consider the scenario depicted in \autoref{fig:synchronization:non_transformability} with consistency relation $\consistencyrelation{CR}{ER}$. 
-    An employee \enquote{alive avid} is added by the original change to $\model{m}{1}$.
+    An employee \enquote{alice avid} is added by the original change to $\model{m}{1}$.
     The consistency preservation rule then generates an appropriate resident with the same name to fulfill the consistency relation.
-    Applying the original change to $\model{m}{2}$ then leads to the addition of resident \enquote{Alice Avid}.
+    Applying the original change to $\model{m}{2}$ then leads to the addition of resident \enquote{Alice Avid}, which was generated by another transformation, e.g., the one that created an appropriate person and changed the capitalization of the name.
     Now it is impossible for $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}$ to generate a change $\change{\metamodel{M}{1}}'$ for the first model to restore consistency. The employee corresponds to both residents, as both fulfill the constraint of the consistency relation. 
     But there is no additional employee that could be added to achieve a unique mapping between corresponding elements.
     A synchronizing transformation would have been able to produce a consistent result by simply performing no additional changes, as the originally added resident is already consistent to the originally added employee.
-    In consequence, if the unidirectional consistency preservation would have known that the resident was already added, it would not have performed any changes.
+    In consequence, if the unidirectional consistency preservation rule would have known that the resident was already added, it would not have performed any changes.
 \end{properdescription}
 
-\mnote{Non-transformable changes of users cannot be avoided, but those of transformations can}
+\mnote{Non-transformable changes of users unavoidable}
 As remarked before, the situation that certain changes cannot be processed by the consistency preservation rules cannot be avoided. 
 If the user had added the second resident in the previous scenario, there would have also been no possibility for the consistency preservation rule to generate changes that restore consistency.
-The difference is, however, that in this case it is fine that consistency preservation cannot find a result, whereas in case of the scenario discussed above, the original changes could have been reasonably processed to a consistent result, if the unidirectional consistency preservation would have considered that there already was a change that restored consistency.
+The difference is, however, that in this case it is fine that consistency preservation cannot find a result, whereas in case of the scenario discussed above, the original changes could have been reasonably processed to a consistent result, if the unidirectional consistency preservation rule would have considered that there already was a change that restored consistency.
 
-\mnote{Consistency preservation rules need to be able to process inconsistent inputs}
+\mnote{Necessity to process inconsistent inputs}
 In consequence, it is inevitable that consistency preservation rules need to be able to deal with the situation that the second model was already modified, such that the given models are not initially consistent, to reflect the changes that already have been made and integrate them into consistency preservation.
-This means that we finally have to relax our requirements for the input of consistency preservation rules, which also means that we need to make further requirements, because the consistency preservation rules cannot guarantee correctness for inputs that are not consistent.
+This means that we finally have to relax our requirements for the input of consistency preservation rules to be able to consider the changes to both models.
+This means that we need to make further requirements to the preservation rules, because we do not assume the consistency preservation rules to produce results for inputs that are not consistent.
 We have already given examples where it is not possible to restore consistency by one unidirectional consistency preservation rule after changes in both models.
 
-\mnote{Relaxed notion can affect number of times consistency preservation rules are executed}
-Before we define a precise notion of further requirements to consistency preservation rules that accept inconsistent inputs, we first discuss how often it may be necessary to execute both consistency preservation rules to restore consistency, as that directly affects the requirements we have to make.
+\mnote{Relaxed notion affecting number of executions}
+Before we define a precise notion of further requirements to consistency preservation rules that accept inconsistent inputs, we first discuss how often it may be necessary to execute both consistency preservation rules to restore consistency, as that directly affects the requirements we have to define.
 
 %Optimalfall: d2' und d2 erzeugen Änderungen für Elemente, die disjunkte Mengen von Condition Elements betreffen. Dann können sie beliebig sequentialisiert werden und erzeugen konsistente Ergebnisse.
 
@@ -207,42 +209,42 @@ Before we define a precise notion of further requirements to consistency preserv
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{figures/correctness/synchronization/multiple_unidirectional_execution.png}
+    \includegraphics[width=0.7\textwidth]{figures/correctness/synchronization/multiple_unidirectional_execution.png}
     \caption[Multiple execution of consistency preservation rules]{A consistency relation requiring multiple executions of unidirectional consistency preservation rules to find a consistent result.}
     \label{fig:synchronization:multiple_unidirectional_execution}
 \end{figure}
 
-\mnote{Unidirectional consistency preservation rules cannot be correct for every consistency relation set}
+\mnote{Unidirectional preservation rules cannot always be correct}
 Correctness of unidirectional consistency preservation rules ensures that after executing such a rule the resulting models are consistent.
 It is easy to see that this correctness notion cannot be fulfilled for certain sets of consistency relation sets.
 This is exemplified at the artificial scenario depicted in \autoref{fig:synchronization:multiple_unidirectional_execution}.
-We assume two consistency relations $\consistencyrelation{CR}{1}$ and $\consistencyrelation{CR}{2}$ and their transposed relations, i.e., $\consistencyrelationset{CR} = \setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR}{1}^T, \consistencyrelation{CR}{2}, \consistencyrelation{CR}{2}^T}$.
+We consider two consistency relations $\consistencyrelation{CR}{1}$ and $\consistencyrelation{CR}{2}$ and their transposed relations, i.e., $\consistencyrelationset{CR} = \setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR}{1}^T, \consistencyrelation{CR}{2}, \consistencyrelation{CR}{2}^T}$.
 $\consistencyrelation{CR}{1}$ requires that for each \modelelement{A} an instance of \modelelement{B} exists, which has the same value of $i$ incremented by $1$.
 The only exception is that if $i$ in \modelelement{A} is $4$ (or any other arbitrary value), then no corresponding element \modelelement{B} is required.
 $\consistencyrelation{CR}{2}$ requires that for each \modelelement{A} an instance of \modelelement{B} exists, which has the same value of $i$.
 We want to define a bidirectional transformation of two unidirectional consistency preservation rules $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ for propagating changes in models with instances of \modelelement{A} to one with instances of \modelelement{B} and $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}$ to propagate changes in the opposite direction. 
 
-\mnote{Example scenario not allowing a single consistency preservation rule to restore consistency}
+\mnote{Example scenario}
 Consider the following scenario: If an \modelelement{A} with $i = 0$ is added to an empty model, $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ cannot perform any changes in an (also empty) model with instances of \modelelement{B} that restore consistency.
-Because of $\consistencyrelation{CR}{1}$ a \modelelement{B} with $i = 1$ has to be created, and because of $\consistencyrelation{CR}{2}$ a \modelelement{B} with $i = 0$ has to be created.
+Because of $\consistencyrelation{CR}{1}$, a \modelelement{B} with $i = 1$ has to be created, and because of $\consistencyrelation{CR}{2}$, a \modelelement{B} with $i = 0$ has to be created.
 While this also fulfills $\consistencyrelation{CR}{1}^T$, the existence of \modelelement{B} with $i = 1$ requires the existence of an \modelelement{A} with $i = 1$ due to $\consistencyrelation{CR}{2}^T$.
 Since $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ cannot modify the model with instances of \modelelement{A}, it is impossible for $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ to restore consistency in that case.
 
-\mnote{Multiple executions of consistency preservation rules can lead to a consistent result}
-Allowing the consistency preservation rules to react to each other multiple times does, however, can lead to a consistent result.
+\mnote{Multiple executions leading to consistent result}
+Allowing the consistency preservation rules to react to each other multiple times can, however, lead to a consistent result.
 If $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}$ adds an \modelelement{A} with $i = 1$ in response to the previous execution of $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$, all consistency relations except $\consistencyrelation{CR}{1}$ are fulfilled.
 $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ can then create a \modelelement{B} with $i = 2$, which is iteratively processed by $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}$.
 This process terminates as soon as $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ adds a \modelelement{B} with $i = 5$, as then $\consistencyrelation{CR}{1}^T$ is also fulfilled, because it does not require a corresponding \modelelement{A} for a \modelelement{B} with $i = 5$.
 
-\mnote{Number of necessary consistency preservation rule execution can be arbitrarily high}
-We have seen that is possible to execute unidirectional consistency preservation rules multiple times to achieve a consistent state and that is cannot always be possible to ensure consistency with only one execution of such a rule.
+\mnote{Arbitrary high number of necessary executions}
+We have seen that it is possible to execute unidirectional consistency preservation rules multiple times to achieve a consistent state and that it is not always possible to ensure consistency with only one execution of such a rule.
 In fact, the number of necessary execution of consistency preservation rules can be arbitrarily high.
 The value of $5$ in $\consistencyrelation{CR}{1}$ of the example can be exchanged by an arbitrary high value requiring an arbitrary high number of executions.
 This may only be circumvented if we required that $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ must perform changes such that $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}$ can then restore consistency with a single execution.
 In our scenario this would mean that $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ adds all \modelelement{B} with $i \leq 5$.
 Anyway, such a behavior requires a relaxation of the correctness requirement for consistency preservation rules, because $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ can never result in a consistent state.
 
-\mnote{Consistency preservation rules may be desired to complete partial condition elements}
+\mnote{Preservation rules complete partial condition elements}
 Additionally, it may be desired that elements of a consistency relation are created by a consistency preservation rule, although a condition element was only created partially yet.
 In that case, both the partial condition element has to be completed in one model and the corresponding condition element in the other model have to be created.
 Thus changes in both models are required, which can only be achieved by executing both consistency preservation rules and accepting that the first executed one does not return consistent models.
@@ -251,8 +253,8 @@ It may be desired that as soon as a package at a specific place, e.g., a \enquot
 In that case, there is no complete condition element created in Java, because this would also require the existence of an appropriate class.
 If the elements shall still be created, both models have to be changed, thus the first consistency preservation rule introduces the \gls{PCM} component which introduces an inconsistency between the models, as the corresponding Java class is missing, which is then corrected by the second consistency preservation rule.
 
-\mnote{Synchronization scenarios require multiple executions but need termination guarantees}
-Finally, it is questionable whether such scenarios should be considered in the formal framework or if it should be up to a developer to implement such a scenarios without having specific guarantees regarding termination of the consistency preservation rules or regarding consistency of the models after executing the rules a specific number of times.
+\mnote{Necessity of termination guarantee}
+Finally, it is questionable whether such scenarios should be considered in the formal framework or if it should be up to a developer to implement such a scenario without having specific guarantees regarding termination of the consistency preservation rules or regarding consistency of the models after executing the rules a specific number of times.
 Since we need to relax the requirement of consistency preservation rules to always produce consistent results after one execution in the synchronization scenario where both models have been modified, we will allow the consistency preservation rules to be executed more than once anyway.
 Regarding the example in \autoref{fig:synchronization:multiple_unidirectional_execution}, if we started with an \modelelement{A} with $i = 6$ and let the consistency preservation rules operate as discussed above, always adding the elements with $i$ incremented by one, this process would never terminate.
 We thus need to ensure that such an execution terminates.
@@ -292,14 +294,14 @@ Since the consistency preservation rules depend on each other, this will, howeve
 
 \subsection{Necessity for Synchronization Extension}
 
-\mnote{We need to able consistency preservation rules to handle inconsistent input models}
+\mnote{Processing inconsistent input models}
 In the previous sections, we have discussed that after changes to two models, these changes and the ones produced by consistency preservation rules that restore consistency between these models cannot be sequenced in a way such that we receive consistent models in all cases the consistency preservation rules are able to handle.
 We especially found that it is necessary for a unidirectional consistency preservation rule to consider the changes made to the model it is supposed to modify.
 Thus, we need to enable consistency preservation rules to deal with the situation that the input models are inconsistent.
 In our current definition, no behavior of a consistency preservation rule and the encapsulating bidirectional transformation for such a situation is defined.
 Thus, we discuss an appropriate extension of bidirectional transformations that support this scenario of synchronization in the following section.
 
-\mnote{We need to guarantee termination if consistency preservation rules are executed multiple times}
+\mnote{Guaranteeing termination}
 Additionally, we found that it can be required that consistency preservation rules need to be executed multiple times.
 This is obviously necessary to make bidirectional transformation synchronizing, thus we will especially consider how to achieve execution bounds, such that termination of multiple executions of the consistency preservation rules of a bidirectional transformation is guaranteed.
 
