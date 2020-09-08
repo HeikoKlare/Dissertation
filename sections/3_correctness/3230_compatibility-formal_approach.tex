@@ -17,7 +17,7 @@ In the following, we formalize and prove this inductive approach to check compat
 The sketched approach for witnessing compatibility is based on a definition of equivalence for sets of consistency relations.
 We consider two sets of consistency relations equivalent if they consider the same sets of models as consistent:
 
-\begin{definition}[Equivalence of Consistency Relations]
+\begin{definition}[Consistency Relations Equivalence]
 \label{def:equivalence}
     Let $\consistencyrelationset{CR}_{1}, \consistencyrelationset{CR}_{2}$ be two sets of consistency relations defined for a tuple of metamodels $\metamodeltuple{M}$. % = \setted{\metamodel{M}{1}, \ldots, \metamodel{M}{k}}$.
     We say that:
@@ -53,7 +53,7 @@ Afterwards, we discuss how to find redundant consistency relations to be able to
 
 We consider consistency relation sets as independent if there are no transitive consistency relations induced by relations from both sets, i.e., for each object in a model consistency is only restricted by one of those sets.
 
-\begin{definition}[Independence of Consistency Relation Sets]
+\begin{definition}[Consistency Relation Sets Independence]
     \label{def:independence}
     Let $\consistencyrelationset{CR}_{1}$ and $\consistencyrelationset{CR}_{2}$ be two sets of consistency relations. We say that:
     \begin{align*}
@@ -95,7 +95,7 @@ Since there is no overlap in the objects that are related by the consistency rel
 
 An important property of independent sets of consistency relations is that computing their union is compatibility-preserving, i.e., the union of compatible, independent consistency relation sets is compatible as well:
 
-\begin{theorem} \label{theorem:independencecompatibility}
+\begin{theorem}[Independent Relation Sets Compatibility] \label{theorem:independencecompatibility}
     Let $\consistencyrelationset{CR}_{1}$ and $\consistencyrelationset{CR}_{2}$ be two compatible sets of consistency relations. Then $\consistencyrelationset{CR}_{1} \cup \consistencyrelationset{CR}_{2}$ is compatible.
 \end{theorem}
 
@@ -219,18 +219,21 @@ The definition also covers the more complicated case in which multiple classes m
 We can now prove that a set of consistency relations that is a consistency relation tree is always compatible.
 We first present a lemma that shows that in a consistency relation tree you can always find an order of the relations such that the classes at the right side of a relation do not overlap with the classes at the left side of a relation that preceded in the order, i.e. there is no cycle in the relations between classes.
 
-\begin{lemma} \label{lemma:treehassequence}
+\todo{Move this lemma and proof for tree being compatible to appendix? Is quite complicated and disturbed reading flow}
+\begin{lemma}[Consistency Relation Tree Unique Paths] \label{lemma:treehassequence}
     Let $\consistencyrelationset{CR} = \setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR^T}{1}, \dots, \consistencyrelation{CR}{k}, \consistencyrelation{CR^T}{k}}$ be a symmetric, connected set of consistency relations.
-    $\consistencyrelationset{CR}$ is a consistency relation tree if and only if for each $\consistencyrelation{CR}{}$ there exists a sequence of consistency relations $\tupled{\consistencyrelation{CR'}{1}, \dots, \consistencyrelation{CR'}{k}}$ with $\consistencyrelation{CR'}{1} = \consistencyrelation{CR}{}$, containing for each $i$ either $\consistencyrelation{CR}{i}$ or $\consistencyrelation{CR^T}{i}$, i.e.,
+    $\consistencyrelationset{CR}$ is a consistency relation tree if, and only if, for each $\consistencyrelation{CR}{} \in \consistencyrelationset{CR}$ there exists a sequence of consistency relations $\sequence{\consistencyrelationset{CR}'} = \sequenced{\consistencyrelation{CR'}{1}, \dots, \consistencyrelation{CR'}{k}}$ with $\consistencyrelation{CR'}{1} = \consistencyrelation{CR}{}$, containing for each $i$ either $\consistencyrelation{CR}{i}$ or $\consistencyrelation{CR^T}{i}$, i.e.,
     \begin{align*}
         &
         \forall i \in \setted{1, \dots, k} :%\\
         %& \formulaskip 
-        \bigl( \consistencyrelation{CR}{i} \in \tupled{\consistencyrelation{CR'}{1}, \dots, \consistencyrelation{CR'}{k}}
-        \land \consistencyrelation{CR^T}{i} \not\in \tupled{\consistencyrelation{CR'}{1}, \dots, \consistencyrelation{CR'}{k}} \bigl)\\
+        \bigl( \consistencyrelation{CR}{i} \in \sequence{\consistencyrelationset{CR}'} %sequenced{\consistencyrelation{CR'}{1}, \dots, \consistencyrelation{CR'}{k}}
+        \land \consistencyrelation{CR^T}{i} \not\in \sequence{\consistencyrelationset{CR}'} %\sequenced{\consistencyrelation{CR'}{1}, \dots, \consistencyrelation{CR'}{k}} 
+        \bigl)\\
         & \formulaskip 
-        \lor \bigl(\consistencyrelation{CR^T}{i} \in \tupled{\consistencyrelation{CR'}{1}, \dots, \consistencyrelation{CR'}{k}}
-        \land \consistencyrelation{CR}{i} \not\in \tupled{\consistencyrelation{CR'}{1}, \dots, \consistencyrelation{CR'}{k}} \bigl)
+        \lor \bigl(\consistencyrelation{CR^T}{i} \in \sequence{\consistencyrelationset{CR}'} %\sequenced{\consistencyrelation{CR'}{1}, \dots, \consistencyrelation{CR'}{k}}
+        \land \consistencyrelation{CR}{i} \not\in \sequence{\consistencyrelationset{CR}'} %\sequenced{\consistencyrelation{CR'}{1}, \dots, \consistencyrelation{CR'}{k}} 
+        \bigl)
     \end{align*}
     such that:
     \begin{align*}
@@ -254,40 +257,40 @@ We first present a lemma that shows that in a consistency relation tree you can 
 \end{lemma}
 
 \begin{proof}
-    We start with the forward direction, i.e., given a consistency relation tree $\consistencyrelationset{CR}$ we show that there exists a sequence according to the requirements in \autoref{lemma:treehassequence} by constructing such a sequence $\tupled{\consistencyrelation{CR'}{1}, \dots, \consistencyrelation{CR'}{k}}$ for any $\consistencyrelation{CR}{} \in \consistencyrelationset{CR}$.
+    We start with the forward direction, i.e., given a consistency relation tree $\consistencyrelationset{CR}$ we show that there exists a sequence according to the requirements in \autoref{lemma:treehassequence} by constructing such a sequence $\sequence{\consistencyrelationset{CR}'} = \sequenced{\consistencyrelation{CR'}{1}, \dots, \consistencyrelation{CR'}{k}}$ for any $\consistencyrelation{CR}{} \in \consistencyrelationset{CR}$.
     Start with $\consistencyrelation{CR'}{1} = \consistencyrelation{CR}{}$ for any $\consistencyrelation{CR}{} \in \consistencyrelationset{CR}$.
     We now inductively add further relations to that sequence.
-    Take any consistency relation $\consistencyrelation{CR}{s} = \consistencyrelation{CR}{s,1} \concat \dots \concat \consistencyrelation{CR}{s,m} \in \transitiveclosure{\consistencyrelationset{CR}}$ with $\classtuple{C}{l,\consistencyrelation{CR}{s,1}} \subseteq \classtuple{C}{r,\consistencyrelation{CR}{}}$. Such a sequence must exist because of $\consistencyrelation{CR}{}$ being connected.
-    Now add all $\consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}$ to the sequence, which fulfills both requirements to that sequence in \autoref{lemma:treehassequence} by definition.
+    Take any consistency relation $\consistencyrelation{CR}{s} = \consistencyrelation{CR}{s,1} \concat \dots \concat \consistencyrelation{CR}{s,m} \in \transitiveclosure{\consistencyrelationset{CR}}$ with $\classtuple{C}{l,\consistencyrelation{CR}{s,1}} \subseteq \classtuple{C}{r,\consistencyrelation{CR}{}}$. Such a sequence must exist because of $\consistencyrelationset{CR}$ being connected.
+    Now add all $\consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}$ to the sequence, such that we have $\sequenced{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}}$, which fulfills both requirements to that sequence in \autoref{lemma:treehassequence} by definition.
     The following addition of further consistency relations can be inductively applied.
     Take any other consistency relation $\consistencyrelation{CR}{t} = \consistencyrelation{CR}{t,1} \concat \dots \concat \consistencyrelation{CR}{t,n} \in \transitiveclosure{\consistencyrelationset{CR}}$ such that:
     \begin{align*}
         &
-        \exists \consistencyrelation{CR'}{} \in \setted{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,2}, \dots, \consistencyrelation{CR}{s,m}} :
+        \exists \consistencyrelation{CR'}{} \in \setted{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}} :
         \classtuple{C}{l,\consistencyrelation{CR}{t,1}} \subseteq \classtuple{C}{r,\consistencyrelation{CR'}{}}\\
         & \formulaskip
         \land
-        \consistencyrelation{CR}{t,1}, \consistencyrelation{CR^T}{t,1} \not\in \setted{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,2}, \dots, \consistencyrelation{CR}{s,m}}
+        \consistencyrelation{CR}{t,1}, \consistencyrelation{CR^T}{t,1} \not\in \setted{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}}
     \end{align*}
     In other words, take any concatenation in the transitive closure of $\consistencyrelationset{CR}$ that starts with a relation with a left class tuple that is contained in a right class tuple of a relation already added to the sequence.
     Again, such a sequence must exist because of $\consistencyrelationset{CR}$ being connected and, again, add all $\consistencyrelation{CR}{t,1}, \dots, \consistencyrelation{CR}{t,n}$ to the sequence.
     Per construction, for each $\consistencyrelation{CR'}{}$ in the sequence, there is a non-empty concatenation of relations within the sequence $\consistencyrelation{CR}{} \concat \dots \concat \consistencyrelation{CR'}{}$, because relations were added in a way that such a concatenation always exists. Since all relations in the sequence are contained in $\consistencyrelationset{CR}$, such a concatenation was also contained in $\transitiveclosure{\consistencyrelationset{CR}}$.
-    First, we show that the sequence still contains no duplicate elements (1.), i.e., that none of the $\consistencyrelation{CR}{t,i}$ or $\consistencyrelation{CR^T}{t,i}$ is already contained in the sequence $\tupled{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}}$. 
-    Second, we show that both further conditions for the sequence defined in \autoref{lemma:treehassequence} are still fulfilled for the sequence $\tupled{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}, \consistencyrelation{CR}{t,1}, \dots, \consistencyrelation{CR}{t,n}}$ (2. ,3.).
+    First (1.), we show that the sequence still contains no duplicate elements, i.e., that none of the $\consistencyrelation{CR}{t,i}$ or $\consistencyrelation{CR^T}{t,i}$ is already contained in the sequence $\sequenced{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}}$. 
+    Second (2. ,3.), we show that both further conditions for the sequence defined in \autoref{lemma:treehassequence} are still fulfilled for the sequence $\sequenced{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}, \consistencyrelation{CR}{t,1}, \dots, \consistencyrelation{CR}{t,n}}$.
     % We show that both conditions for the sequence in \autoref{lemma:treehassequence} are still fulfilled for our sequence $\tupled{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,2}, \dots, \consistencyrelation{CR}{s,m}, \consistencyrelation{CR}{t,2}, \dots, \consistencyrelation{CR}{t,n}}$ by assuming the contradictory:
     \begin{longenumerate}
         \item
-    Let us assume that the sequence $\tupled{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}}$ already contained one of the $\consistencyrelation{CR}{t,i}$ or $\consistencyrelation{CR^T}{t,i}$. If $\consistencyrelation{CR}{t,i}$ is contained in the sequence, there is a concatenation $\consistencyrelation{CR}{} \concat \dots \concat \consistencyrelation{CR}{t,i}$ with relations in $\tupled{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}}$, as well as a concatenation $\consistencyrelation{CR}{} \concat \dots \concat \consistencyrelation{CR}{t,1} \concat \dots \concat \consistencyrelation{CR}{t,i}$.
-    Since $\consistencyrelation{CR}{t,1} \not\in \setted{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,2}, \dots, \consistencyrelation{CR}{s,m}}$ by construction, these two concatenations relate the same class tuples, i.e., they contradict the definition of a consistency relation tree.
-    If $\consistencyrelation{CR^T}{t,i}$ was contained in the sequence $\tupled{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,2} \concat \dots \concat \consistencyrelation{CR}{s,m}}$, there is a concatenation $\consistencyrelation{CR}{} \concat \dots \concat \consistencyrelation{CR}{w} \concat \consistencyrelation{CR^T}{t,i}$ with relations in $\tupled{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}}$ and, like before, the concatenation $\consistencyrelation{CR}{} \concat \dots \concat \consistencyrelation{CR}{t,1}, \dots, \consistencyrelation{CR}{t,i}$.
-    Due to $\classtuple{C}{r,\consistencyrelation{CR}{w}} \cap \classtuple{C}{l,\consistencyrelation{CR}{t,i}} \neq \emptyset$ and  $\consistencyrelation{CR^T}{t,1} \not\in \setted{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,2}, \dots, \consistencyrelation{CR}{s,m}}$ by construction, the two concatenations $\consistencyrelation{CR}{} \concat \dots \concat \consistencyrelation{CR}{w}$ and $\consistencyrelation{CR}{} \concat \dots \concat \consistencyrelation{CR}{t,1} \concat \dots \concat \consistencyrelation{CR}{t,i}$ have an overlap in both their left and right class tuples, i.e., they contradict the definition of a consistency relation tree.
-    In consequence, the sequence $\tupled{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}}$ cannot have contained any $\consistencyrelation{CR}{t,i}$ or $\consistencyrelation{CR^T}{t,i}$ before.
+    Let us assume that the sequence $\sequenced{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}}$ already contained one of the $\consistencyrelation{CR}{t,i}$ or $\consistencyrelation{CR^T}{t,i}$. If $\consistencyrelation{CR}{t,i}$ is contained in the sequence, there is a concatenation $\consistencyrelation{CR}{} \concat \dots \concat \consistencyrelation{CR}{t,i}$ with relations in $\sequenced{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}}$, as well as a concatenation $\consistencyrelation{CR}{} \concat \dots \concat \consistencyrelation{CR}{t,1} \concat \dots \concat \consistencyrelation{CR}{t,i}$.
+    Since $\consistencyrelation{CR}{t,1} \not\in \setted{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}}$ by construction, these two concatenations relate the same class tuples, i.e., they contradict the definition of a consistency relation tree.
+    If $\consistencyrelation{CR^T}{t,i}$ was contained in the sequence $\sequenced{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1} \concat \dots \concat \consistencyrelation{CR}{s,m}}$, there is a concatenation $\consistencyrelation{CR}{} \concat \dots \concat \consistencyrelation{CR}{w} \concat \consistencyrelation{CR^T}{t,i}$ with relations in $\sequenced{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}}$ and, like before, the concatenation $\consistencyrelation{CR}{} \concat \dots \concat \consistencyrelation{CR}{t,1}, \dots, \consistencyrelation{CR}{t,i}$.
+    Due to $\classtuple{C}{r,\consistencyrelation{CR}{w}} \cap \classtuple{C}{l,\consistencyrelation{CR}{t,i}} \neq \emptyset$ and  $\consistencyrelation{CR^T}{t,1} \not\in \setted{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}}$ by construction, the two concatenations $\consistencyrelation{CR}{} \concat \dots \concat \consistencyrelation{CR}{w}$ and $\consistencyrelation{CR}{} \concat \dots \concat \consistencyrelation{CR}{t,1} \concat \dots \concat \consistencyrelation{CR}{t,i}$ have an overlap in both their left and right class tuples, i.e., they contradict the definition of a consistency relation tree.
+    In consequence, the sequence $\sequenced{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}}$ cannot have contained any $\consistencyrelation{CR}{t,i}$ or $\consistencyrelation{CR^T}{t,i}$ before.
         \item 
-    Let us assume there were any $\consistencyrelation{CR'}{u}$ and $\consistencyrelation{CR'}{v}$ in the sequence $\tupled{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}, \consistencyrelation{CR}{t,1}, \dots, \consistencyrelation{CR}{t,n}}$ such that $\classtuple{C}{r,\consistencyrelation{CR'}{u}} \cap \classtuple{C}{r,\consistencyrelation{CR'}{v}} \neq \emptyset$.
+    Let us assume there were any $\consistencyrelation{CR'}{u}$ and $\consistencyrelation{CR'}{v}$ in the sequence $\sequenced{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}, \consistencyrelation{CR}{t,1}, \dots, \consistencyrelation{CR}{t,n}}$ such that $\classtuple{C}{r,\consistencyrelation{CR'}{u}} \cap \classtuple{C}{r,\consistencyrelation{CR'}{v}} \neq \emptyset$.
     As discussed before, for each of these relations exists a concatenation of relations in the sequence $\consistencyrelation{CR}{} \concat \dots \concat \consistencyrelation{CR'}{u}$ and $\consistencyrelation{CR}{} \concat \dots \concat \consistencyrelation{CR'}{v}$, which is contained in $\transitiveclosure{\consistencyrelationset{CR}}$.
     This contradicts the definition of a consistency relation tree, so there cannot be two such relations with overlapping classes in the right class tuple.
         \item
-    Let us assume there were any $\consistencyrelation{CR'}{u}$ and $\consistencyrelation{CR'}{v}\; (u < v)$ in the sequence $\tupled{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}, \consistencyrelation{CR}{t,1}, \dots, \consistencyrelation{CR}{t,n}}$ such that $\classtuple{C}{l,\consistencyrelation{CR'}{u}} \cap \classtuple{C}{r,\consistencyrelation{CR'}{v}} \neq \emptyset$.
+    Let us assume there were any $\consistencyrelation{CR'}{u}$ and $\consistencyrelation{CR'}{v}\; (u < v)$ in the sequence $\sequenced{\consistencyrelation{CR}{}, \consistencyrelation{CR}{s,1}, \dots, \consistencyrelation{CR}{s,m}, \consistencyrelation{CR}{t,1}, \dots, \consistencyrelation{CR}{t,n}}$ such that $\classtuple{C}{l,\consistencyrelation{CR'}{u}} \cap \classtuple{C}{r,\consistencyrelation{CR'}{v}} \neq \emptyset$.
     Again per construction, there must be a non-empty concatenation $\consistencyrelation{CR}{} \concat \dots \concat \consistencyrelation{CR'}{w} \concat \consistencyrelation{CR'}{u}$ with $w < u$. Since $\classtuple{C}{l,\consistencyrelation{CR'}{u}} \subseteq \classtuple{C}{r,\consistencyrelation{CR'}{w}}$ per definition, it holds that
     $\classtuple{C}{r,\consistencyrelation{CR'}{w}} \cap \classtuple{C}{r,\consistencyrelation{CR'}{v}} \neq \emptyset$.
     In other words, the relation $\consistencyrelation{CR'}{v}$ introduces a cycle in the relations.
@@ -425,7 +428,7 @@ However, we can now show that a consistency relation tree is always compatible w
 
 %With the previous lemma, we can now show that a consistency relation tree is always compatible.
 
-\begin{theorem} \label{theorem:treecompatibility}
+\begin{theorem}[Consistency Relation Tree Compatibility] \label{theorem:treecompatibility}
     Let $\consistencyrelationset{CR}$ be a consistency relation tree, then $\consistencyrelationset{CR}$ is compatible.
 \end{theorem}
 
@@ -457,7 +460,7 @@ However, we can now show that a consistency relation tree is always compatible w
     Considering the example in $\autoref{fig:compatibility:tree_construction_example}$, for the selection of any person as a condition element in $\condition{c}{l,\consistencyrelation{CR}{1}}$ (1), we select a resident in $\condition{c}{r,\consistencyrelation{CR}{1}}$ with the same name (2), such that the elements are consistent to $\consistencyrelation{CR}{1}$.
     
     \paragraph{Induction assumption:} 
-    According to \autoref{lemma:treehassequence}, there is a sequence $\tupled{\consistencyrelation{CR}{1}, \dots, \consistencyrelation{CR}{k}}$ of the relations in $\consistencyrelationset{CR}$ with $\consistencyrelation{CR}{1} = \consistencyrelation{CR}{}$, such that:
+    According to \autoref{lemma:treehassequence}, there is a sequence $\sequenced{\consistencyrelation{CR}{1}, \dots, \consistencyrelation{CR}{k}}$ of the relations in $\consistencyrelationset{CR}$ with $\consistencyrelation{CR}{1} = \consistencyrelation{CR}{}$, such that:
     \begin{align*}
         &
         \forall s \in \setted{1, \dots, k-1} : \forall t \in \setted{i+1, \dots, k} : \\
@@ -467,7 +470,7 @@ However, we can now show that a consistency relation tree is always compatible w
         \classtuple{C}{l,\consistencyrelation{CR'}{s}} \cap 
         \classtuple{C}{r,\consistencyrelation{CR'}{t}} = \emptyset
     \end{align*}
-    Considering the example in \autoref{fig:compatibility:tree_construction_example}, such a sequence would be $\tupled{\consistencyrelation{CR}{1}, \consistencyrelation{CR}{2}}$, because the elements in the right condition of $\consistencyrelation{CR}{2}$ are not represented in the left condition of $\consistencyrelation{CR}{1}$.
+    Considering the example in \autoref{fig:compatibility:tree_construction_example}, such a sequence would be $\sequenced{\consistencyrelation{CR}{1}, \consistencyrelation{CR}{2}}$, because the elements in the right condition of $\consistencyrelation{CR}{2}$ are not represented in the left condition of $\consistencyrelation{CR}{1}$.
     If, in general, we know that $\setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR^T}{1} \dots, \consistencyrelation{CR}{i}, \consistencyrelation{CR^T}{i}}\; (i < k)$ is compatible, for every $\conditionelement{c}{l} \in \condition{C}{l,\consistencyrelation{CR}{}}$, we can find a model tuple $\modeltuple{m}$ that contains $\conditionelement{c}{l}$ and is consistent to $\setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR^T}{1}, \dots, \consistencyrelation{CR}{i}, \consistencyrelation{CR^T}{i}}$ by definition.
     We can especially create a minimal model according to our construction for the base case and the following inductive completion.
     
@@ -564,7 +567,7 @@ The essential idea is to find relations within the set, which do not change comp
 An approach that finds such relations and---virtually---removes them from the set until the remaining relations form a set of independent consistency relation trees, proves compatibility of the given set of relations.
 We first define the term of a \emph{compatibility-preserving} relation.
 
-\begin{definition}
+\begin{definition}[Compatibility-Preserving Consistency Relation]
     \label{def:compatibilitypreserving}
     Let $\consistencyrelationset{CR}$ be a compatible set of consistency relations and let $\consistencyrelation{CR}{}$ be a consistency relation. We say that:
     \begin{align*}
@@ -637,7 +640,7 @@ Actually, the definition of redundancy implies that the set of consistency relat
 % Actually, the definition of redundancy always implies equivalence.
 \todoLater{Explain that we do not require equality of elements in CR and CR' because, e.g., CR might only related names, whereas CR' related names and addresses, thus we only require that there are elements that are co-indicating consistency.}
 
-\begin{lemma} \label{lemma:redundancyimpliesequivalence}
+\begin{lemma}[Redundant Relations Equivalence] \label{lemma:redundancyimpliesequivalence}
     Let $\consistencyrelation{CR}{} \in \consistencyrelationset{CR}$ be a redundant consistency relation in a relation set $\consistencyrelationset{CR}$. %, according to \autoref{def:redundancy}.
     Then $\consistencyrelationset{CR}$ is equivalent to $\consistencyrelationset{CR} \setminus \setted{\consistencyrelation{CR}{}}$. %, according to \autoref{def:equivalence}.
 \end{lemma}
@@ -741,7 +744,7 @@ In case of $\consistencyrelation{CR}{1}$, it only requires an employee to exist 
 Our goal is to have a compatibility-preserving notion of redundancy, i.e., adding a redundant relation to a compatible relation set should preserve compatibility.
 Unfortunately, our intuitive redundancy definition is not compatibility-preserving. % with our intuitive notion of redundancy, a consistency relation $\consistencyrelation{CR}{}$ that is redundant to a compatible set of consistency relations $\consistencyrelationset{CR}$ does not imply that $\consistencyrelationset{CR} \cup \setted{\consistencyrelation{CR}{}}$ is compatible.
 
-\begin{proposition} \label{prop:redundantnotimpliescompatible}
+\begin{proposition}[Redundant Relations Non-Compatibility] \label{prop:redundantnotimpliescompatible}
     Let $\consistencyrelationset{CR}$ be a compatible set of consistency relations and let $\consistencyrelation{CR}{}$ be a consistency relation that is redundant in $\consistencyrelationset{CR} \cup \setted{\consistencyrelation{CR}{}}$.
     Then $\consistencyrelation{CR}{}$ is not necessarily compatibility-preserving, i.e., $\consistencyrelationset{CR} \cup \setted{\consistencyrelation{CR}{}}$ is not necessarily compatible.
     % it holds that:
@@ -776,7 +779,7 @@ In consequence of \autoref{prop:redundantnotimpliescompatible}, we need a strong
 In the example in \autoref{fig:compatibility:redundancy_compatibility_counterexample} showing \autoref{prop:redundantnotimpliescompatible}, we have seen that it is problematic if a redundant consistency relation considers more classes in its left condition than the relation it is redundant to.
 Therefore, we restrict the left class tuple.
 
-\begin{definition}[Left-equal Redundant Consistency Relation] \label{def:leftequalredundancy}
+\begin{definition}[Left-Equal Redundant Consistency Relation] \label{def:leftequalredundancy}
     Let $\consistencyrelationset{CR}$ be a set of consistency relations for a metamodel tuple $\metamodeltuple{M}$.
     For a consistency relation $\consistencyrelation{CR}{} \in \consistencyrelationset{CR}$, we say:
     \begin{align*}
@@ -805,7 +808,7 @@ Therefore, we restrict the left class tuple.
 The definition of left-equal redundancy is similar to the redundancy definition but restricts the notion of redundancy to cases in which the left condition of the redundant consistency relation $\consistencyrelation{CR}{}$ considers the same classes than the other relation in the set of consistency relations that induces consistency of a model tuple to $\consistencyrelation{CR}{}$.
 As discussed before, redundancy in general allows that the left condition of a redundant consistency relation can consider a superset of those classes. %than another relation in the set of consistency relations that induces consistency of a model set to $\consistencyrelation{CR}{}$, according to the definition of redundancy.
 
-\begin{lemma} \label{lemma:leftequalredundancyimpliesredundancy}
+\begin{lemma}[Left-Equal Redundancy to Redundancy] \label{lemma:leftequalredundancyimpliesredundancy}
     Let $\consistencyrelation{CR}{}$ be a consistency relation that is left-equal redundant in a set of consistency relations $\consistencyrelationset{CR}$. Then $\consistencyrelation{CR}{}$ is redundant in $\consistencyrelationset{CR}$.
 \end{lemma}
 
@@ -818,7 +821,7 @@ Before showing that left-equal redundancy is compatibility-preserving, we introd
 
 %In the following, we will show that the notion of left-equal redundancy, in comparison to the weaker general redundancy property, can be used to inductively prove compatibility of a set of consistency relations.
 
-\begin{lemma} \label{lemma:leftequalredundancysubset}
+\begin{lemma}[Left-Equal Redundancy Containment] \label{lemma:leftequalredundancysubset}
     Let $\consistencyrelation{CR}{}$ be a consistency relation that is left-equal redundant in a set of consistency relations $\consistencyrelationset{CR}$ for a tuple of metamodels $\metamodeltuple{M}$. Then it holds that: 
     \begin{align*}
         &
@@ -831,7 +834,7 @@ Before showing that left-equal redundancy is compatibility-preserving, we introd
         \modeltuple{m} \containsmath \conditionelement{c}{l}
     \end{align*}
 \end{lemma}
-
+%
 \begin{proof}
     Due to left-equal redundancy of $\consistencyrelation{CR}{}$ in $\consistencyrelationset{CR}$, we know per definition that:
     \begin{align*}
@@ -907,11 +910,11 @@ Before showing that left-equal redundancy is compatibility-preserving, we introd
 %     \todoHeiko{Correct and finish proof}
 % \end{proof}
 
-\begin{theorem} \label{theorem:redundancycompatibility}
+\begin{theorem}[Left-Equal Redundancy Compatibility] \label{theorem:redundancycompatibility}
     Let $\consistencyrelationset{CR}$ be a compatible set of consistency relations for a tuple of metamodels $\metamodeltuple{M}$ and let $\consistencyrelation{CR}{}$ be a consistency relation that is left-equal redundant in $\consistencyrelationset{CR} \cup \setted{\consistencyrelation{CR}{}}$. Then $\consistencyrelationset{CR} \cup \setted{\consistencyrelation{CR}{}}$ is compatible. 
     % If two sets of consistency relations $\set{\consistencyrelation[1]{CR}}$ and $\set{\consistencyrelation[2]{CR}}$ are equivalent and $\set{\consistencyrelation[1]{CR}}$ is compatible, then $\set{\consistencyrelation[2]{CR}}$ is compatible as well.
 \end{theorem}
-
+%
 \begin{proof}
     Due to left-equal redundancy of $\consistencyrelation{CR}{}$ in $\consistencyrelationset{CR} \cup \setted{\consistencyrelation{CR}{}}$, which also implies general redundancy according to \autoref{def:redundancy}, $\consistencyrelationset{CR}$ and $\consistencyrelationset{CR} \cup \setted{\consistencyrelation{CR}{}}$ are equivalent, according to \autoref{lemma:redundancyimpliesequivalence}.
     Due to that equivalence, we know that for any model tuple $\modeltuple{m} \in \metamodeltupleinstanceset{M}$:
@@ -1053,12 +1056,12 @@ Before showing that left-equal redundancy is compatibility-preserving, we introd
 % \end{proof}
 % \todoHeiko{the proof does not require the second part of the redundancy definition, so can we omit it? Or is there a mistake in the proof?}
 
-\begin{corollary} \label{corollary:transitiveredundancycompatibility}
+\begin{corollary}[Transitive Redundancy Compatibility] \label{corollary:transitiveredundancycompatibility}
     Let $\consistencyrelationset{CR}$ be a compatible set of consistency relations and let $\consistencyrelation{CR}{1}, \dots, \consistencyrelation{CR}{k}$ be consistency relations with:
     \begin{align*}
         &
-        \forall i \in \setted{1, \dots, k} : \\
-        & \formulaskip 
+        \forall i \in \setted{1, \dots, k} : %\\
+        %& \formulaskip 
         \consistencyrelation{CR}{i} \leftequalredundantinmath \consistencyrelationset{CR} \cup \setted{\consistencyrelation{CR}{1}, \dots, \consistencyrelation{CR}{i}}
     \end{align*}
     Then $\consistencyrelationset{CR} \cup \setted{\consistencyrelation{CR}{1}, \dots, \consistencyrelation{CR}{k}}$ is compatible.
