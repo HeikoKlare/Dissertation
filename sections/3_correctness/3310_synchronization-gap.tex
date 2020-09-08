@@ -4,7 +4,8 @@
 \section{Deriving the Gap to Ordinary Transformation}
 
 %\todo{Exchange "ordinary" with "unidirectional"}
-We have already introduced that there is both a formal and practical gap between synchronizing transformations, as we have defined as a component of transformation networks, and ordinary transformations, which are unidirectional and non-synchronizing, as used by most transformation languages.
+\mnote{Gap between synchronizing and ordinary transformations}
+We have already introduced that there is both a formal and practical gap between synchronizing transformations, which we have defined as a component of transformation networks, and ordinary transformations, which are unidirectional and non-synchronizing, as used by most transformation languages.
 In the following, we first give an example for faulty behavior if we simply used ordinary transformations in a transformation network.
 Afterwards, we give a formal definition of unidirectional preservation rules and ordinary transformations, then defined as \emph{bidirectional transformations}.
 Finally, we discuss the relation between unidirectional consistency preservation rules and unidirectional consistency relations as introduced in \autoref{chap:compatibility:formal_notion}.
@@ -15,11 +16,13 @@ Finally, we discuss the relation between unidirectional consistency preservation
 %% MOTIVATING FAULT EXAMPLE WITH ORDINARY TRANSFORMATIONS
 %%
 \subsection{Behavior of Ordinary Transformations in Networks}
+
+\mnote{Failure in motivational example}
 We have already sketched the example of creating a class in UML and Java after adding a component to a \gls{PCM} model in \autoref{chap:introduction:challenges:correctness:synchronization}.
 In that scenario, it was possible that for a created \gls{PCM} component first a UML class is generated, which is then transformed into a Java class.
 Additionally, the transformation between \gls{PCM} and Java creates another Java class, as it does not consider that there may be another transformation that already created that class.
 Such scenarios can lead to the duplication of elements as an already existing element is inserted again, or to an overwrite of an already existing element.
-Overwriting a previously created element may also overwrite and thus remove information that was already added to that it, like the transformation across UML may have added information to the Java class which is overwritten by new class creation of the transformation from PCM to Java.
+Overwriting a previously created element may also remove information that was already added to it, like the transformation across UML may have added information to the Java class which is overwritten by the new class creation of the transformation from \gls{PCM} to Java.
 
 \begin{figure}
     \centering
@@ -28,8 +31,9 @@ Overwriting a previously created element may also overwrite and thus remove info
     \label{fig:synchronization:duplicate_creation_example}
 \end{figure}
 
+\mnote{Failure in running example}
 An analogous example can be given for the running example of persons, employees and residents depicted in \autoref{fig:networks:three_persons_example}.
-We consider the consistency relations $\consistencyrelation{R}{PE}, \consistencyrelation{R}{ER}$ and $\consistencyrelation{R}{PR}$.
+We consider the consistency relations $\consistencyrelation{CR}{PE}, \consistencyrelation{CR}{ER}$ and $\consistencyrelation{CR}{PR}$.
 As discussed in \autoref{chap:compatibility}, these relations are compatible, thus for any given person, employee or resident, there is a consistent tuple of models containing it.
 Thus, the relations do not prevent transformations from finding consistent models whenever a person, employee or resident is added.
 If we now consider ordinary transformations with unidirectional consistency preservation rules, they react to the changes in one model and update another accordingly.
@@ -40,6 +44,7 @@ Since the transformations assume the models to be consistent before applying the
 This leads to the situation that both $\consistencypreservationrule{\consistencyrelation{CR}{ER}}$ as well as $\consistencypreservationrule{\consistencyrelation{CR}{PR}}$ create a resident upon creation of a person.
 In consequence, there exist two residents with the same name, which does not fulfill the consistency relations.
 
+\mnote{Avoidance of failures}
 It is our goal to find out how such a situation can be avoided by proper definition of consistency preservation rules in existing transformation languages.
 A simple solution in this example would have been to look for the existence of elements to create first.
 This can either be done by using a trace model, which most existing transformation language use to store corresponding elements, or by searching for an appropriate element in the other model.
@@ -139,26 +144,26 @@ Using a trace model, however, has some drawbacks and pitfalls, which we will inv
 %%
 \subsection{Unidirectional Consistency Preservation Rules}
 
-\mnote{Formal definition of unidirectional consistency preservation rules}
+\mnote{Unidirectional preservation rules}
 Before we can discuss options how unidirectional consistency preservation rules can be used to emulate the behavior of synchronizing consistency preservation rules, we first need to define them to be able to formally compare the two of them.
-In contrast to a synchronizing consistency preservation rule as defined in \autoref{def:consistencypreservationrule}, a unidirectional consistency preservation rule does only receive changes made to one of the two models and returns changes to the other models instead of receiving and returning changes to both.
+In contrast to a synchronizing consistency preservation rule as defined in \autoref{def:consistencypreservationrule}, a unidirectional consistency preservation rule does only receive changes made to one of the two models and returns changes to the other model instead of receiving and returning changes to both.
 
 \begin{definition}[Unidirectional Consistency Preservation Rule]
     \label{def:unidirectionalconsistencypreservationrule}
-    Let $\metamodel{M}{1}, \metamodel{M}{2}$ be two metamodels and $\consistencyrelationset{CR}$ a set of consistency relations between elements of those metamodels.
+    Let $\metamodel{M}{1}, \metamodel{M}{2}$ be two metamodels and let $\consistencyrelationset{CR}$ be a set of consistency relations between elements of those metamodels.
     A \emph{unidirectional consistency preservation rule} $\consistencypreservationrule{\consistencyrelationset{CR}}$ for the relation set $\consistencyrelationset{CR}$ is a (usually partial) function:
     \begin{align*}
         \consistencypreservationrule{\consistencyrelationset{CR}} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}) \rightarrow \changeuniverse{\metamodel{M}{2}} \cup \setted{\bot}
     \end{align*}
 \end{definition}
 
-\mnote{Preservation rules as defined in or derived from transformation languages}
+\mnote{Preservation rules in transformation languages}
 This is how the consistency preservation rules defined in or derived from existing transformation languages operate.
 They take two models and changes to one of them and generate changes for the other.
 Most of them even directly apply the changes instead of returning a dedicated change artifact.
 If the rule is not able to handle the given changes, it may return $\bot$.
 
-\mnote{Correctness of unidirectional rules analogous to common notions}
+\mnote{Correctness of unidirectional preservation rules}
 In addition, they usually assume the input models to be consistent and then ensure that applying the input and the output changes to the models, the resulting models are consistent again.
 This conforms to the common notion of \emph{correctness} for consistency preservation rules, like for the state-based (rather than our delta-based) notion of consistency preservation rules defined in \cite{stevens2010sosym}.
 This is even compliant to the correctness notion that we defined for synchronizing consistency preservation rules in \autoref{def:consistencypreservationrulecorrectness}.
@@ -167,17 +172,19 @@ Thus, we define correctness of such a unidirectional consistency preservation ru
 \begin{definition}[Unidirectional Consistency Preservation Rule Correctness]
     \label{def:unidirectionalconsistencypreservationrulecorrectness}
     Let $\consistencypreservationrule{\consistencyrelationset{CR}}$ be a unidirectional consistency preservation rule.
-    We call $\consistencypreservationrule{\consistencyrelationset{CR}}$ \emph{correct} if the resulting models when applying the generated changes are consistent to $\consistencyrelationset{CR}$ again:
+    We call $\consistencypreservationrule{\consistencyrelationset{CR}}$ \emph{correct} if the resulting models when applying the input and output changes are consistent to $\consistencyrelationset{CR}$ again:
     \begin{align*}
         &
+        \consistencypreservationrule{\consistencyrelationset{CR}} \correctmath \equivalentperdefinition 
         \forall 
         \model{m}{1} \in \metamodelinstanceset{M}{1}, 
         \model{m}{2} \in \metamodelinstanceset{M}{2},
         \change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}} : \\
         & \formulaskip
-        \bigl( \tupled{\model{m}{1}, \model{m}{2}} \consistenttomath \consistencyrelationset{CR} \\
-        & \formulaskip
-        \land \exists 
+        \bigl( %\tupled{\model{m}{1}, \model{m}{2}} \consistenttomath \consistencyrelationset{CR} \\
+        %& \formulaskip
+        %\land 
+        \exists 
         \change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}} :
         \change{\metamodel{M}{2}} = \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) \bigr) \\
         & \formulaskip\formulaskip
@@ -186,24 +193,26 @@ Thus, we define correctness of such a unidirectional consistency preservation ru
     \end{align*}
 \end{definition}
 
-\mnote{Synchronizing consistency preservation rules can be partial}
+\mnote{Optional partiality of synchronizing preservation rules}
 In \autoref{def:unidirectionalconsistencypreservationrule}, we explicitly allow consistency preservation rules to be partial.
 This was only an optional requirement for synchronizing consistency preservation rules defined in \autoref{def:consistencypreservationrule}, because there may be changes to both models which cannot be processed reasonably as one the changes may need to reverted to achieve consistency.
 Ignoring that practical requirement, it is theoretically possible to always return changes that, if applied to the input models, produce consistent models.
-Those returned changed may perform arbitrarily unreasonable modifications, but still restore consistency.
+Those returned changes may perform arbitrarily unreasonable modifications, but still restore consistency.
 
-\mnote{Unidirectinoal consistency preservation rule must be partial}
+\mnote{Mandatory partiality of unidirectinoal preservation rules}
 In general, unidirectional consistency preservation rules need to be partial.
 This is due to the reason that there can be models for which no other models can be generated such that they are consistent with respect to a set of consistency relations.
 Consider the consistency relations $\consistencyrelation{CR}{} = \setted{\tupled{a, z}, \tupled{b, z}}$ and its transposed $\consistencyrelation{CR}{}^T = \setted{\tupled{z, a}, \tupled{z, b}}$.
-If a change generated the model $\model{m}{} = \setted{a, b}$, then no consistent model can be generated.
+If a change led to the model $\model{m}{} = \setted{a, b}$, then no second model to which it is consistent can be generated.
 A consistent model would have to contain $z$, because the consistency relation $\consistencyrelation{CR}{}$ requires for $a$ and $b$ an element $z$ to exist in the other model.
-The consistency relation $\consistencyrelation{CR}{}^T$, however, requires that for a $z$ only either $a$ or $b$ exists in the other model, as otherwise no witness structure with unique corresponding elements can be found (see \autoref{def:consistency} for consistency).
-In consequence, a unidirectional consistency preservation rule may not produce a result for such an input and thus be partial, as the result would never fulfill the correctness definition.
+The consistency relation $\consistencyrelation{CR}{}^T$, however, requires that for a $z$ only either $a$ or $b$ exists in the other model, as otherwise no witness structure with unique corresponding elements can be found (see \autoref{def:consistency}).
+In consequence, a unidirectional consistency preservation rule cannot produce a result for such an input without violating the correctness definition and thus be partial.
+For that reason, unidirectional consistency preservation rules necessarily need to be partial, whereas this requirement was optional for synchronizing consistency preservation rules.
 
+\mnote{Undefined behavior}
 In fact, the definition does not specify for which inputs a unidirectional consistency preservation rule is allowed to be undefined.
-One could restrict this behavior to cases in which there is no $\change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}}$ for given models $\model{m}{1}$ and $\model{m}{2}$ as well as change $\change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}}$, such that $\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}(\model{m}{2})} \consistenttomath \consistencyrelationset{CR}$ for a set of consistency relation $\consistencyrelationset{CR}$.
-We, however, leave it up to the developer to decide for which inputs a consistency preservation rule is undefined, as there might be cases in which a change that restores consistency can be restored, but does semantically not make this.
+One could restrict this behavior to cases in which there is no $\change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}}$ for given models $\model{m}{1},\model{m}{2}$ and given change $\change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}}$ such that $\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}(\model{m}{2})} \consistenttomath \consistencyrelationset{CR}$ for a set of consistency relations $\consistencyrelationset{CR}$.
+We, however, leave it up to the developer to decide for which inputs a consistency preservation rule is undefined, as there might be cases in which a change that restores consistency can be theoretically generated, but does semantically not make sense.
 This was also the reason for allowing a synchronizing consistency preservation rule to be partial, which is why we have already discussed the scenario in \autoref{chap:correctness:formalization:incremental_inductive}.
 % \subsection{Partial Definition of Consistency Preservation Rules}
 % \todo{Move this to definition of unidirectional preservation rules?}
@@ -216,7 +225,7 @@ This was also the reason for allowing a synchronizing consistency preservation r
 \subsection{Unidirectional Relations and Preservation} % Alignment}
 \label{chap:synchronization:gap:alignment}
 
-\mnote{Unidirectional consistency preservation rules for each unidirectional consistency relation}
+\mnote{Unidirectional preservation rules for unidirectional relations}
 Defining unidirectional consistency preservation rules based on a unidirectional notion of consistency relations imposes the idea of having one unidirectional consistency preservation rule associated with one unidirectional consistency relation, or at least a set of unidirectional relations between the same two metamodels.
 In consequence, we would have two sets of unidirectional consistency relations between two metamodels and a consistency preservation rule for each of them.
 
@@ -229,7 +238,7 @@ In consequence, we would have two sets of unidirectional consistency relations b
     \label{fig:synchronization:unidirectional_nonalignment}
 \end{figure}
 
-\mnote{Unidirectional consistency preservation rules cannot only consider one direction of consistency relations}
+\mnote{Both relation directions for unidirectional preservation rule}
 It is, however, easy to see that a unidirectional consistency preservation rule cannot only consider one direction of consistency relations, but needs to consider both.
 Consider the example in \autoref{fig:synchronization:unidirectional_nonalignment}, which contains an extract of the consistency relations of the running example.
 We assume the consistency relations $\consistencyrelation{CR}{ER}$ and $\consistencyrelation{CR}{ER}^T$ describing that for each employee a single corresponding resident must exist and vice versa.
@@ -238,47 +247,47 @@ If we define a unidirectional consistency preservation rule $\consistencypreserv
 While for the scenario of adding an employee the rule properly propagates the change by adding a resident and thus restores consistency, removing an employee leads to a violation of consistency.
 Removing an employee does not require the consistency preservation rule to perform any changes in the resident model, because $\consistencyrelation{CR}{ER}$ only requires a unique resident to exist for every employee, but does not forbid that there is a resident for which no employee exists.
 This is defined by the inverse relation $\consistencyrelation{CR}{ER}^T$.
-In consequence, after removing tan employee the consistency preservation rule does not perform any changes, as consistency to $\consistencyrelation{CR}{ER}$ is given, but the model are then inconsistent to $\consistencyrelation{CR}{ER}^T$.
+In consequence, after removing an employee the consistency preservation rule does not perform any changes, as consistency to $\consistencyrelation{CR}{ER}$ is given, but the models are then inconsistent to $\consistencyrelation{CR}{ER}^T$.
 
-\mnote{Changes to one model may affect consistency relations in both directions}
+\mnote{Both relation directions affected by one change}
 The given scenario exemplifies the general case that a consistency according to a consistency relation cannot only be violated by performing changes to the model containing the left condition elements of the relations, but also by changes to the model containing the right condition elements of the relation.
 In general, consistency of models according to a consistency relation is affected by the presence of condition elements in the models.
-Consistency is defined as the ability to find a witness structure, i.e., a unique mapping between condition elements of the consistency relation that occur in the models.
-Thus, adding, changing or removing elements in model that constitute a condition element of the consistency relations can lead to inconsistencies.
+Consistency is defined as the ability to define a witness structure, i.e., a unique mapping between condition elements of the consistency relation that occur in the models.
+Thus, adding, changing or removing elements in a model that constitute a condition element of the consistency relations can lead to inconsistencies.
 
-\mnote{Distinction of addition, removal or change of condition elements for consistency relation affection}
+\mnote{Change type relevance for relation direction}
 We can see that any type of change can lead to the violation of a consistency relation in either direction:
 \begin{properdescription}
-    \item[Addition:] Whenever a condition element of the left side of a consistency relation is added to a model, a corresponding condition element need to exist in the other model. If it does not exist yet, the models are not consistent to that relation.
+    \item[Addition:] Whenever a condition element of the left side of a consistency relation is added to a model, a corresponding condition element needs to exist in the other model. If it does not exist yet, the models are not consistent to that relation.
     When a condition element of the right side of a consistency relation is added to a model, this does, according to the definition of consistency, not require another condition element to exist in the other model. It can, however, lead to the situation that no witness structure with a unique mapping between the elements exists anymore.
     Consider the exemplary relation $\consistencyrelation{CR}{ER}'$ in \autoref{fig:synchronization:unidirectional_nonalignment} and the example scenario 2.
     Having an employee with name \enquote{alice avid} and a corresponding resident with the same name, the models are consistent to that relation.
     Adding a resident with name \enquote{Alice Avid} violates $\consistencyrelation{CR}{ER}'$, because the employee \enquote{alice avid} corresponds to both residents, so there is no mapping inducing a witness structure for consistency.
-    In consequence, adding a right side condition element of the consistency relation to the models can also violate consistency to a consistency relation.
+    In consequence, adding a condition element of the right side of the consistency relation to the models can also violate consistency to a consistency relation.
     \item[Removal:] Whenever a condition element of the right side of a consistency relation is removed from a model, the corresponding condition element in the other model still exists. Because this element does not necessarily have a corresponding one anymore, there may not be a valid witness structure and thus the models may not be consistent anymore.
-    When a condition element of the left side of a consistency relation is removed from a model, the originally corresponding element is not connected to the removed element in the witness structure anymore. If another element is considered to this corresponding element, there is no unique mapping of elements anymore.
+    When a condition element of the left side of a consistency relation is removed from a model, the originally corresponding element is not connected to the removed element in the witness structure anymore. If there is another element that occurs in a consistency relation pairs with that corresponding element, there is no unique mapping of elements anymore.
     Consider again the relation $\consistencyrelation{CR}{ER}'$ in \autoref{fig:synchronization:unidirectional_nonalignment} and the example scenario 3.
     Having two employees and residents with the names \enquote{alice avid} and \enquote{Alice Avid}, the models are consistent because each employee has a corresponding resident and vice versa.
-    If we remove the employee \enquote{Alice Avid}, the models are consistent to $\consistencyrelation{CR}{ER}'$ anymore, because the remaining employee corresponds to both residents, so there is no unique mapping of condition elements.
-    \item[Change:] We do not have a precise notion of when a condition element can be considered changed, as elements do not have identity. 
-    Additionally, consistency in terms of being able to find a witness structure is only based on the existence or non-existence of condition elements, thus whether an element was changed or removed and created makes no different.
+    If we remove the employee \enquote{Alice Avid}, the models are not consistent to $\consistencyrelation{CR}{ER}'$ anymore, because the remaining employee corresponds to both residents, so there is no unique mapping between condition elements representing a witness structure.
+    \item[Change:] We do not have a precise notion of when a condition element can be considered changed, as elements do not have an identity. 
+    Additionally, consistency in terms of being able to find a witness structure is only based on the existence or non-existence of condition elements, thus whether an element was changed or whether it was removed and created makes no difference.
     We might say that a condition element can be considered changed when the change describes modifications of the model elements in the condition element that lead to a new condition element within the same condition.
-    This does, conceptually, not different from the removal of one and the addition of another condition element.
+    This does, conceptually, not differ from the removal of one and the addition of another condition element.
     Thus, the same situations as discussed for addition and removal above can occur.
 \end{properdescription}
 
-\mnote{Unidirectional consistency preservation rules cannot be synchronizing}
+\mnote{Synchronization of unidirectional preservation rules}
 %In addition to the insight that unidirectional consistency preservation rule must base on all consistency relations between two metamodels rather than only the ones in a specific direction, 
-It is also easy to see that there is no trivial way of specifying a unidirectional synchronizing consistency preservation rule.
+It is also easy to see that there is no trivial way of specifying a unidirectional consistency preservation rule that is synchronizing.
 It may seem natural to define a consistency preservation rule that is able to process changes in both models and then return only changes in one of them to restore consistency to close the gap between synchronizing and ordinary transformations.
-Consider the situation that we have two residents and employees named \enquote{Alice Avid} and \enquote{Bob Do}.
+Consider the situation that we have two residents and employees named \enquote{Alice Avid} and \enquote{Bob Bright}.
 If one of them is removed in the residents model and the other in the employees model, then a proper synchronizing transformation should remove both corresponding elements such that the models are empty.
 This requires changes to both models.
 With a synchronizing unidirectional consistency preservation rule for each direction, neither of them can produce changes in one of the models that reasonably restore consistency.
 Such a rule would necessarily revert one removal to restore consistency, which is not the intended behavior and would probably not be specified by a developer that way, such that the consistency preservation rule would be undefined for that input, although a synchronization transformation would be able to resolve those changes.
 In fact, we would expect to have two unidirectional consistency preservation rules of which each removes one of the elements.
 This does, however, violate our existing notion of correctness for a single consistency preservation rule.
-In the subsequent sections, we will therefore discuss relaxed requirements to unidirectional consistency preservation rules to be able to act like a synchronizing transformations.
+In the subsequent sections, we will therefore discuss relaxed requirements to unidirectional consistency preservation rules to be able to act like a synchronizing transformation.
 
 % A unidirectional consistency relations require preservation rules in both directions (add/delete)
 % \begin{itemize}
@@ -305,20 +314,20 @@ In the subsequent sections, we will therefore discuss relaxed requirements to un
 %%
 \subsection{Bidirectional Transformations}
 
-\mnote{Unidirectional consistency preservation rules usually appear as pairs}
+\mnote{Unidirectional preservation rules for both directions}
 A unidirectional consistency preservation rule does usually not appear on its own but in combination with another rule for the opposite direction.
-We have already seen that even a single unidirectional consistency relation between two metamodels requires unidirectional consistency preservation rules for both directions to preserve consistency according to that relation after changes either instances of either of the metamodels.
+We have already seen that even a single unidirectional consistency relation between two metamodels requires unidirectional consistency preservation rules for both directions to preserve consistency according to that relation after changes to instances of either of the metamodels.
 In practice, many transformation languages, especially relational ones such as \gls{QVTR} or \gls{TGG} tools, allow the specification of \emph{bidirectional transformations}, which means that they define or derive unidirectional consistency preservation rules for both directions.
 
-\mnote{Combine two unidirectional consistency preservation rules to a bidirectional transformation}
+\mnote{Bidirectional transformations}
 In general, it is reasonable to consider two unidirectional consistency preservation rules between two metamodels together, such that after changes in instances of any of the two metamodels, the other model can be updated to restore consistency.
 A synchronizing transformation according to \autoref{def:synchronizingtransformation} is also able to process changes in any of the two models, thus such a notion fits to our goal of emulating synchronizing transformations.
 According to common terminology, we define this as a bidirectional transformation.
 
 \begin{definition}[Bidirectional Transformation]
     \label{def:bidirectionaltransformation}
-    Let $\metamodel{M}{1}$ and $\metamodel{M}{2}$ be two metamodels and $\consistencyrelationset{CR}$ a set of consistency relations between them.
-    Additionally, let $\consistencypreservationrule{\consistencyrelationset{CR},{\rightarrow}}$ and $\consistencypreservationrule{\consistencyrelationset{CR},{\leftarrow}}$ be unidirectional consistency preservation rules with:
+    Let $\metamodel{M}{1}$ and $\metamodel{M}{2}$ be two metamodels and let $\consistencyrelationset{CR}$ be a set of consistency relations between them.
+    Additionally, let $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ and $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}$ be unidirectional consistency preservation rules with:
     \begin{align*}
         &
         \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}) \rightarrow \changeuniverse{\metamodel{M}{2}} \cup \setted{\bot} \\
@@ -337,7 +346,7 @@ We call such a bidirectional transformation correct if both consistency preserva
     We call $\transformation{t}$ correct if, and only if, $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ and $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}$ are both correct according to \autoref{def:unidirectionalconsistencypreservationrulecorrectness}.
 \end{definition}
 
-\mnote{Bidirectional transformations do not support changes of both models}
+\mnote{Changes of both models}
 Such bidirectional transformations ensure that if any of two models is changed, a change for the other is generated such that both changed models are consistent again, if possible.
 This does, however, not reflect the case that both models have been modified concurrently, as it is the case in transformation networks and thus supported by our initial definition of synchronizing transformations.
 We therefore discuss in the following sections how we can combine the unidirectional consistency preservation rules of a bidirectional transformation and which requirements we have to make to them such that the bidirectional transformation behaves like a synchronizing one.
