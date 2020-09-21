@@ -1,0 +1,35 @@
+\begin{algorithmic}[1]
+    \Procedure{$\function{Apply}$}{$\transformationset{T}, 
+    \modeltuple{m} %= \tupled{\model{m}{1}, \dots, \model{m}{n}}
+    , \changetuple{\metamodeltuple{M}} %= \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}}
+    $}
+        \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\transformationset{T}, \modeltuple{m})$
+        \If{$\neg \mathvariable{isConsistent}$}
+            \State \Return{$\bot$}
+        \EndIf
+        \State $\applyalgexecuted \leftarrow \sequenced{}$
+        \State $\applyalggenerated \leftarrow \sequenced{}$
+        \State $\transformation{t}_\mathvariable{next}$ $\leftarrow$ $\function{Orchestrate}_{\transformationset{T}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}, \applyalgexecuted, \applyalggenerated)$ \label{algo:orchestration:application:line:startorchestrate}
+        \While{$\transformation{t}_\mathvariable{next} \neq \bot$}
+            \State $(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ $\leftarrow$ $\generalizationfunction{\metamodeltuple{M}, \transformation{t}_\mathvariable{next}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ \label{algo:orchestration:application:line:stepcalculation}
+            \State $\applyalgexecuted \gets \applyalgexecuted + \transformation{t}_\mathvariable{next}$
+            \State $\applyalggenerated \gets \applyalggenerated + \changetuple{\metamodeltuple{M}}$
+            \State $\transformation{t}_\mathvariable{next}$ $\leftarrow$ $\function{Orchestrate}_{\transformationset{T}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}, \applyalgexecuted, \applyalggenerated)$
+        \EndWhile \label{algo:orchestration:application:line:endorchestrate}
+        %\State $\tupled{\model{m}{1}, \dots, \model{m}{n}} \leftarrow \modeltuple{m}$
+        %\State $\tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \leftarrow \changetuple{\metamodeltuple{M}}$
+        \State $\modeltuple{m}_\mathvariable{res} \leftarrow \changetuple{\metamodeltuple{M}}(\metamodeltuple{m})$ %\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \dots, \change{\metamodel{M}{n}}(\model{m}{n})}$
+        \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\transformationset{T}, \modeltuple{m}_\mathvariable{res})$ \label{algo:orchestration:application:line:startconsistencycheck}
+        \If{$\neg \mathvariable{isConsistent}$}
+            \State \Return{$\bot$}
+        \EndIf \label{algo:orchestration:application:line:endconsistencycheck}
+        % \For{$\transformation{t} \in \transformationset{T}$} \label{algo:orchestration:application:line:startcheckconsistency}
+        %     %\State $(\consistencyrelation{CR}{}, \consistencypreservationrule{\consistencyrelation{CR}{}}) \leftarrow \transformation{t}$
+        %     \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}_{\metamodeltuple{M}}(\modeltuple{m}_{res}, \transformation{t}$) %\consistencyrelation{CR}{})$
+        %     \If{$\neq \mathvariable{isConsistent}$}
+        %         \State \Return{$\bot$}
+        %     \EndIf
+        % \EndFor \label{algo:orchestration:application:line:endcheckconsistency}
+        \State \Return{$\modeltuple{m}_\mathvariable{res}$} \label{algo:orchestration:application:line:returnresult}
+    \EndProcedure
+\end{algorithmic}
