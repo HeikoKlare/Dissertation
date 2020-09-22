@@ -1,18 +1,18 @@
 \section{Conservative Approximation of the Orchestration Problem}
 
-\mnote{Optimal orchestration cannot be achieved}
+\mnote{Optimal orchestration unachievable}
 In the preceding section, we have proven that the orchestration problem is undecidable and we have discussed that it is unlikely to restrict the problem in a way such that it becomes decidable.
 In consequence, we cannot achieve optimality of an orchestration and application function, which results in an 
 algorithm that does not return optimal results and, depending on its implementation, does not terminate.
-Since the algorithm cannot return optimal results anyway, termination can at least be achieved by introducing an artificial upper bound for the number of transformation applications.
+Since the algorithm cannot return optimal results anyway, termination can at least be achieved by introducing an artificial upper bound for the number of executed transformation.
 This potentially prevents the algorithm even further from finding consistent orchestrations.
 
-\mnote{Gradual optimality notion and approaches to improve it}
+\mnote{Gradual optimality notion}
 Based on those previous insights, we assume in this section that the orchestration problem cannot be restricted such that it becomes decidable.
 We accept that any application function and any algorithm that realizes it will only realize a conservative approximation of the orchestration problem.
 This means that it may only return consistent models delivered by a consistent orchestration, but it may not find a consistent orchestration although it exists.
-In this case, we say that the function or algorithm, respectively, delivers \emph{false negatives} but no \emph{false positives} and call it \emph{conservative}.
-We investigate how we can define optimality of the application function in gradual rather than a binary way, which is supposed to indicate how likely it is that it finds a consistent orchestration.
+Considering found consistent orchestrations as \emph{positives}, we say that the function or algorithm, respectively, may deliver \emph{false negatives} but no \emph{false positives} and call it \emph{conservative}.
+We investigate how we can define optimality of the application function in a gradual rather than a binary way, which is supposed to indicate how likely it is that it finds a consistent orchestration.
 We then follow the goal of finding means to systematically improve optimality.
 Since there are always cases in which the algorithm does not find a consistent orchestration, we propose an algorithm that is supposed to help identifying the reasons for failing in such cases in the subsequent section.
 
@@ -53,32 +53,33 @@ Since there are always cases in which the algorithm does not find a consistent o
 %Due to Turing-completeness of the network this would mean that the orchestration function can decide whether a Turing machine halts, which is proven impossible.
 %Thus, our only goal can be to achieve optimality as far as possible in terms of reducing the degree of conservativeness, i.e., reduce the cases in which no sequence is found although it exists.
 
-\mnote{Gradual notion of optimality}
+\mnote{Gradual optimality notion}
 Since no optimal application function can be achieved, we can at least define a gradual notion of optimality.
 It indicates for how many inputs of models and changes the application function is able to return consistent models in comparison to the number of cases in which a consistent orchestration exists at all.
 This can be seen as a fitness function for the optimality $\function{Opt}$ of an application function:
 \begin{align*}
     &
     \function{Opt}(\appfunction{\orcfunction{\transformationset{T}}}) \\
-    &\formulaskip
-    = \frac{
+    & \formulaskip
+    \equalsperdefinition 
+    \frac{
         \abs{\setted{%\modeltuple{m} \in \metamodeltupleinstanceset{M},\changetuple{\metamodeltuple{M}} \in \changeuniverse{\metamodeltuple{M}}} 
         \tupled{\modeltuple{m},\changetuple{\metamodeltuple{M}}} \mid \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \mathtextspacearound{is consistent to} \transformationset{T}}}
     }{
-        \abs{\setted{\tupled{\modeltuple{m},\changetuple{\metamodeltuple{M}}} \mid \mathtextspacearound{consistent orchestration of} \transformationset{T} \mathtextspacearound{exists for} \tupled{\modeltuple{m}, \changetuple{\metamodeltuple{M}}}}}
+        \abs{\setted{\tupled{\modeltuple{m},\changetuple{\metamodeltuple{M}}} \mid \mathtextspaceafter{consistent orchestration of} \transformationset{T} \mathtextspacearound{exists for} \tupled{\modeltuple{m}, \changetuple{\metamodeltuple{M}}}}}
     }
 \end{align*}
 
-\mnote{Concrete optimality values are not relevant}
+\mnote{Concrete optimality values irrelevant}
 In fact, both the numerator as well as the denominator will usually have infinite values, as there is an infinite number of possible models and changes to them.
 It does, however, not matter for us what the actual optimality value of an application function is.
 The purpose of the formula is only to explicitly state the influencing factors of optimality to be able to discuss its systematic improvement.
 
-\mnote{Probability for finding correct orchestration by general random application function}
+\mnote{Average probability for finding consistent orchestration}
 Obviously, we may only improve the numerator to improve optimality, because the denominator, i.e., the number of cases in which consistent orchestrations exist, depends only on the transformations and not the application function.
 %is, first, not easy to achieve, and, second, may also reduce the number of cases in which a consistent orchestration is found.
-How to improve the numerator highly depends on the concrete implemented application and orchestration functions.
-For the most general case, let us assume that we have an application function $\appfunction{\orcfunction{\transformationset{T}}}$ whose orchestration function randomly tries any orchestration, i.e., it selects one of all possible orchestrations according to an equal distribution.
+How to improve the numerator highly depends on the actually implemented application and orchestration functions.
+For the most general case, let us assume that we have an application function $\appfunction{\orcfunction{\transformationset{T}}}$ whose orchestration function randomly determines any orchestration, i.e., it selects one of all possible orchestrations according to an equal distribution.
 So we consider the following event $E_{\modeltuple{m},\changetuple{\metamodeltuple{M}}}$:
 \begin{align*}
     &
@@ -93,22 +94,23 @@ The probability that this event occurs is given by the ratio between the number 
         \abs{\transformationset{T}^{< \mathbb{N}}}
     }
 \end{align*}
-Here, the denominator is the size of what we previously introduced as the problem space $P = \abs{\transformationset{T}^{< \mathbb{N}}}$ containing all possible orchestrations, and the numerator is the size of what we previously introduced as the solution space $S_{i} = \abs{\setted{\sequence{\transformation{t}} \in \transformationset{T}^{< \mathbb{N}} \mid \sequence{\transformation{t}} \mathtextspacearound{is consistent orchestration for} \tupled{\modeltuple{m}, \changetuple{\metamodeltuple{M}}}}}$, which contains all consistent orchestrations for for an input of models and changes.
+Here, the denominator is the size of what we previously introduced as the problem space $P = \abs{\transformationset{T}^{< \mathbb{N}}}$ containing all possible orchestrations, and the numerator is the size of what we previously introduced as the solution space $S_{i} = \abs{\setted{\sequence{\transformation{t}} \in \transformationset{T}^{< \mathbb{N}} \mid \sequence{\transformation{t}} \mathtextspacearound{is consistent orchestration for} \tupled{\modeltuple{m}, \changetuple{\metamodeltuple{M}}}}}$, which contains all consistent orchestrations for an input of models and changes.
 
-\mnote{Expected value for finding a consistent orchestration}
-So we can introduce a stochastic variable $AppCons_{\modeltuple{m},\changetuple{\metamodeltuple{M}}}$, which assigns the values $0$ and $1$ to the events $E_{\modeltuple{m},\changetuple{\metamodeltuple{M}}}$ and its complementary:
+\mnote{Expected value for finding consistent orchestration}
+We can introduce a stochastic variable $AppCons_{\modeltuple{m},\changetuple{\metamodeltuple{M}}}$, which assigns the values $0$ and $1$ to the events $E_{\modeltuple{m},\changetuple{\metamodeltuple{M}}}$ and its complementary:
 \begin{align*}
-    AppCons_{\modeltuple{m},\changetuple{\metamodeltuple{M}}}(\omega) = \begin{cases}
+    AppCons_{\modeltuple{m},\changetuple{\metamodeltuple{M}}}(\omega) \equalsperdefinition 
+    \begin{cases}
         0, & \omega = \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \mathtextspacearound{is not consistent to} \transformationset{T} \\
         1, & \omega = \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \mathtextspacearound{is consistent to} \transformationset{T}
     \end{cases}
 \end{align*}
-The expected value of this variable is then equal to the event $E_{\modeltuple{m},\changetuple{\metamodeltuple{M}}}$ to occur:
+The expected value of this variable is then equal to the probability of the event $E_{\modeltuple{m},\changetuple{\metamodeltuple{M}}}$ to occur:
 \begin{align*}
     \mu(AppCons_{\modeltuple{m},\changetuple{\metamodeltuple{M}}}) = P(AppCons_{\modeltuple{m},\changetuple{\metamodeltuple{M}}} = 1) = P(E_{\modeltuple{m},\changetuple{\metamodeltuple{M}}})
 \end{align*}
 
-\mnote{Number of found consistent orchestration is sum of expected values}
+\mnote{Number of found consistent orchestration}
 For an application function that chooses a random orchestration, we can thus express the numerator of $\function{Opt}(\appfunction{\orcfunction{\transformationset{T}}})$ as the sum of expected values of the stochastic variables for all possible inputs.
 \begin{align*}
     &
@@ -121,7 +123,7 @@ For an application function that chooses a random orchestration, we can thus exp
     }
 \end{align*}
 
-\mnote{Probability to find consistent orchestration improvable by reducing number of possibily considered orchestrations}
+\mnote{Improvement by reducing considered orchestrations}
 Thus, if we can improve $P(E_{\modeltuple{m},\changetuple{\metamodeltuple{M}}})$, we also improve optimality, even if orchestrations are chosen randomly.
 We can improve that probability by either improving the number of consistent orchestrations or by reducing the number of possibly considered orchestrations.
 The number of consistent orchestrations can only be influenced by requirements to the transformations.
@@ -135,18 +137,18 @@ In the following we discuss how we can reduce the number of possibly considered 
     \label{fig:orchestration:simulator}
 \end{figure}
 
-\mnote{No strategy that improves ability to find consistent orchestration}
-The application function can, for sure, contain more intelligent logic for determining an orchestration beyond the random selection of an orchestration to improve the number of cases in which it finds a consistent orchestration.
+\mnote{No systematic improvement}
+The application function can, of course, contain more intelligent logic for determining an orchestration beyond the random selection of transformations to improve the number of cases in which it finds a consistent orchestration.
 By implementing further mechanisms to make a reasonable selection, the possibility to find a consistent orchestration may be further improved.
-We investigated different orchestration strategies, such as the depth-first or breadth-first propagation of changes, and analyzed them with a simulator developed specifically for that purpose, which is available at GitHub~\cite{orchestrationSimulator}.
+We investigated different orchestration strategies, such as the depth-first or breadth-first selection of transformations in the induced graph, and analyzed them with a simulator developed specifically for that purpose, which is available at GitHub~\cite{orchestrationSimulator}.
 An example of a scenario showing the necessity to execute transformation more than once that we implemented in the simulator is depicted in \autoref{fig:orchestration:simulator}
-For each strategy, however, we found categories of transformation networks in which they performed worse than another strategy.
+For each strategy, however, we found categories of transformation networks for which it performed worse than another strategy.
 
-\mnote{Backtracking can be used to explore the problem space}
+\mnote{Backtracking to explore problem space}
 Another strategy could be to try different orchestrations as soon as it turns out that one orchestration cannot yield consistent models.
 This can, for example, be achieved by performing backtracking.
 \autoref{algo:orchestration:application} dynamically selects transformations to execute. 
-Thus as soon as the algorithm detects that no further transformations can lead to a consistent orchestration, it can revert the last transformation execution and proceed with another transformation.
+Thus, as soon as the algorithm detects that no further transformation executions can lead to a consistent orchestration, it can revert the last transformation execution and proceed with another transformation.
 This means that it resets the state of generated changes and executed transformations to the one before the current execution of the orchestration loop and proceeds again with another transformation.
 If all transformations as continuations of one sequence of executed transformation are tried out, the algorithm recursively steps back the iterations of the loop.
 While this approach, in theory, allows to explore the complete problem space $P = \abs{\transformationset{T}^{< \mathbb{N}}}$, it is impractical because the problem space is infinitely large.
@@ -156,8 +158,8 @@ It may, however, be used to try different options in a subset of the problem spa
 % This forbids approaches such as backtracking to find an appropriate solution.
 % \todo{Discuss Backtracking}
 
-\mnote{Avoiding alternation to improve ability to find consistent orchestration}
-Since it was impossible to find a strategy that is, in general, superior to other investigates strategies, we gave up that direction and focused on finding orchestrations that should be generally avoided.
+\mnote{Avoiding alternation}
+Since it was impossible to find a strategy that is, in general, superior to other investigated strategies, we gave up that direction and focused on finding orchestrations that should be generally avoided.
 To this end, we consider alternation as a possibility to reduce the number of cases in which non-termination can occur, thus improving optimality, by both its dynamic detection as well as its avoidance.
 Additionally, we focused on finding a strategy that improves the ability to deal with the fact that an optimality of $1$ can never be achieved by orchestrating the transformations such that the process of finding the reason for not finding a consistent orchestration is supported.
 
@@ -218,12 +220,12 @@ Additionally, we focused on finding a strategy that improves the ability to deal
 
 \mnote{Orchestration requires abortion criterion}
 The proposed algorithm, like any algorithm, is supposed to \emph{terminate} in a specific \emph{state} to be considered correct.
-In our case, a correct state, as required by an application function it implements, is the return of consistent models or $\bot$, which the algorithm fulfills by construction.
-In particular, the algorithm will never return models that are inconsistent, neither because it does not detect that they are inconsistent nor that it detects that they are inconsistent but still returns them.
+In our case, such a correct state, as required by an application function it implements, is the return of consistent models or $\bot$, which the algorithm fulfills by construction.
+In particular, the algorithm does never return models that are inconsistent, neither because it does not detect that they are inconsistent nor because it detects that they are inconsistent but still returns them.
 From our previous findings regarding decidability, we know that we cannot expect the algorithm to realize an optimal application function.
-Thus, we either need to implement \function{Orchestrate} such that it always returns $\bot$ after a finite number of executions to ensure termination, which results in returning $\bot$ although consistent models are expected, or we allow an arbitrary number of executions to improve the ability to find consistent results but accept that the algorithm may not terminate.
+Thus, we either need to implement \function{Orchestrate} such that it always returns $\bot$ after a finite number of executions to ensure termination, which results in returning $\bot$ although an order of transformations could yield consistent models, or we allow an arbitrary number of executions to improve the ability to find consistent results but accept that the algorithm may not terminate.
 
-\mnote{Alternation is inifinte repeated passing of same state}
+\mnote{Definition of alternation}
 We have discussed that non-termination of the algorithm can occur because no consistent orchestration exists at all or because the algorithm is not able to find it.
 A special case of non-termination is \emph{alternation}, which means that the same states are passed repeatedly. 
 In case of transformation networks, alternation means that from some point in time the subsequent executions of the transformations in Line~\ref{algo:orchestration:application:line:stepcalculation} of \autoref{algo:orchestration:application} repeatedly produce the same sequence of results, i.e., of changes.
@@ -236,17 +238,17 @@ In contrast to non-termination in general, the scenario of alternation can at le
 
 \begin{definition}[Alternation of Apply Algorithmus]
     \label{def:applyalternation}
-    Let there be a number $n$ of execution of the transformation execution loop in Lines~\autoref{algo:orchestration:application:line:startorchestrate}--\autoref{algo:orchestration:application:line:endorchestrate} of \autoref{algo:orchestration:application}, such that for all numbers of execution $> n$ there is a sequence of executed transformations and generated changes that occur at least two times subsequently at the end of the current states of $\applyalgexecuted$ and $\applyalggenerated$.
-    Then we call the algorithm \emph{alternating}.
-    If the algorithm does not terminate and is not alternating, we call it \emph{diverging}.
+    During an execution of \autoref{algo:orchestration:application}, let there be a number $n$ of executions of the transformation execution loop in Lines~\ref{algo:orchestration:application:line:startorchestrate}--\ref{algo:orchestration:application:line:endorchestrate} of \autoref{algo:orchestration:application}, such that for all numbers of loop executions $> n$ there is a sequence of executed transformations and generated changes that occur at least two times subsequently at the end of the current states of $\applyalgexecuted$ and $\applyalggenerated$.
+    Then we call the execution of the algorithm \emph{alternating}.
+    If the execution of the algorithm does not terminate and is not alternating, we call it \emph{diverging}.
 \end{definition}
 
-\mnote{Orchestrate function can detect alternation}
-The \function{Orchestrate} function receives the history of transformations and changes and is thus able to identify the situation that the same sequence of transformations was already executed and produced equal changes in each application.
-This allows it to implement the function in a way that it does not return the same sequence of transformations when it was already passed and produced the same changes.
-If a concrete realization of the \function{Orchestrate} function is not implemented in a way that it can react to the detection of alternation and produce a different sequence of transformations, it can at least return $\bot$ to ensure termination of \function{Apply}, because repeated execution of the same transformations will still returns the same changes. 
+\mnote{Orchestrate function detecting alternation}
+The \function{Orchestrate} function receives the history of transformations and yet generated changes and is thus able to identify the situation that the same sequence of transformations was already executed and produced equal changes in each application.
+This enables the implementation of the function in a way that it does not return the same sequence of transformations when it was already passed and produced the same changes, e.g., by performing backtracking if such a situation is detected.
+If a concrete realization of the \function{Orchestrate} function is not implemented in a way that it can react to the detection of alternation and produce a different sequence of transformations, it can at least return $\bot$ to ensure termination of \function{Apply}, because repeated execution of the same transformations will still return the same changes. 
 
-\mnote{Avoiding alternation improved possibility to find consistent orchestration}
+\mnote{Avoiding alternation improveds orchestration}
 Alternation produces orchestrations that can never yield consistent models, thus they are part of the problem space $P = {\transformationset{T}^{< \mathbb{N}}}$ of finding an orchestration for a given input $i$ of models and changes but can never be part of the solution space $S_{i} = \abs{\setted{\sequence{\transformation{t}} \in \transformationset{T}^{< \mathbb{N}} \mid \sequence{\transformation{t}} \mathtextspacearound{is consistent orchestration for} \tupled{\modeltuple{m}, \changetuple{\metamodeltuple{M}}}}}$ containing the consistent orchestrations.
 Avoiding such alternations thus reduces the problem space without affecting the solution space and thus improves the possibility to find a consistent orchestration, as shown in the previous subsection.
 
@@ -300,14 +302,14 @@ Avoiding such alternations thus reduces the problem space without affecting the 
 
 \subsection{Monotony for Avoiding Alternation}
 
-\mnote{Non-alternation by construction instead of dynamic detection}
+\mnote{Non-alternation by construction}
 We have discussed %in \autoref{chap:orchestration:conservative:alternation}
-that alternation, as a specific kind of non-termination scenario, can be avoided by construction of the orchestration function or at least can be detected by the \function{Apply} algorithm.
+that alternation of \autoref{algo:orchestration:application}, as a specific kind of non-termination scenario, can be avoided by construction of the orchestration function or at least can be detected by the \function{Apply} algorithm.
 Instead of detecting alternation during orchestration, we may also restrict the transformation network such that no alternation can occur by construction.
 We can achieve this by defining a notion of monotony for the transformations.
 
-\mnote{Monotony notion from synchronizing transformations is not applicable}
-For the construction of synchronizing bidirectional transformations by unidirectional consistency preservation rules in \autoref{chap:synchronization:bidirectional:transformations}, we have have defined the property of \emph{partial consistency improvement}, which is a monotony notion for the two unidirectional consistency preservation rules of a synchronizing bidirectional transformation, as each execution of them improved that property.
+\mnote{Monotony notion from synchronizing transformations}
+For the construction of synchronizing bidirectional transformations by unidirectional consistency preservation rules in \autoref{chap:synchronization:bidirectional:transformations}, we have have defined the property of \emph{partial consistency improvement}, which is a monotony notion for the two unidirectional consistency preservation rules of a synchronizing bidirectional transformation, as each execution of them improves that property.
 We can, however, not define monotony in a similar way for the whole transformation network because of two reasons.
 First, the notion of partial consistency is not applicable for transformation networks, because each transformation needs to restore consistency between two models completely.
 Second, since each transformation is developed independently from all others, we cannot apply the notion of partial consistent improvement to the other models by restricting how far a transformation may violate consistency to the other transformations.
@@ -315,12 +317,13 @@ Second, since each transformation is developed independently from all others, we
 We thus define a different notion of monotony for transformations as follows.
 \begin{definition}[Monotone Synchronizing Transformation]
     \label{def:monotonetransformation}
-    Let $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$ be metamodels and let $\transformation{t}$ be a synchronizing transformation. We call $\transformation{t}$ monotone if it does not change elements that were already changed, i.e.
+    Let $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$ be metamodels and let $\transformation{t}$ be a synchronizing transformation. We call $\transformation{t}$ monotone if, and only if, it does not change elements that were already changed, i.e.,
     \begin{align*}
         &
         \forall \modeltuple{m} = \tupled{\model{m}{1}, \dots, \model{m}{n}} \in \metamodeltuple{M}, \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} : \\
-        &
-        \bigl(\exists \changetuple{\metamodeltuple{M}}' = \tupled{\change{\metamodel{M}{1}}', \dots, \change{\metamodel{M}{n}}'} \in \changeuniverse{\metamodeltuple{M}} : \generalizationfunction{\metamodeltuple{M},\transformation{t}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \changetuple{\metamodeltuple{M}}' \\
+        & \formulaskip
+        \bigl(
+        \exists \changetuple{\metamodeltuple{M}}' = \tupled{\change{\metamodel{M}{1}}', \dots, \change{\metamodel{M}{n}}'} \in \changeuniverse{\metamodeltuple{M}} : \generalizationfunction{\metamodeltuple{M},\transformation{t}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m},\changetuple{\metamodeltuple{M}}') \\
         & \formulaskip
         \Rightarrow
         % WE CANNOT ASSUME TRANSFORAMTION TO BE STRONG MONTONE, BECAUSE IF TRANSFORMATION IS EXECTED FOR ALREADY CONSISTENT MODELS, IT CANNOT CHANGE ANYTHING
@@ -328,10 +331,14 @@ We thus define a different notion of monotony for transformations as follows.
         % & \formulaskip
         % \land 
         \forall i \in \setted{1, \dots, n} : 
-        (\change{\metamodel{M}{i}}(\model{m}{i}) \setminus \model{m}{i} \subseteq \change{\metamodel{M}{i}}'(\change{\metamodel{M}{i}}(\model{m}{i})) \\
+        (\change{\metamodel{M}{i}}(\model{m}{i}) \setminus \model{m}{i}) \subseteq \change{\metamodel{M}{i}}'%(\change{\metamodel{M}{i}}
+        (\model{m}{i})%) 
+        \\
         & \formulaskip\formulaskip
         \land
-        (\model{m}{i} \setminus \change{\metamodel{M}{i}}(\model{m}{i})) \cap \change{\metamodel{M}{i}}'(\change{\metamodel{M}{i}}(\model{m}{i})) = \emptyset)
+        (\model{m}{i} \setminus \change{\metamodel{M}{i}}(\model{m}{i})) \cap \change{\metamodel{M}{i}}'%(\change{\metamodel{M}{i}}
+        (\model{m}{i})%)
+         = \emptyset)
         \bigr)
         %\change{\metamodeltuple{M}}(\modeltuple{m}) \subseteq \modeltuple{m} \cup \changetuple{\metamodeltuple{M}}'(\changetuple{\metamodeltuple{M}}(\model{m}{}))
         %\land
@@ -339,42 +346,45 @@ We thus define a different notion of monotony for transformations as follows.
     \end{align*}
 \end{definition}
 
-\mnote{Montone transformations do not repeatedly change the same elements}
+\mnote{No repeated change of same elements}
 The definition is based on the idea that transformations are only supposed to append changes but not to revert previous changes.
 This means that elements that were introduced by previous changes still need to be present after applying the transformation.
 Additionally, elements that were removed are not allowed to be added by the transformation again.
-Thus all elements of the originally changed models were either contained in the original models or are contained in the models yielded by the transformation application, which leads to the model relations in the definition.
-Additionally, 
+Thus all elements of the originally changed models were either contained in the original models or are contained in the models yielded by the transformation execution, which leads to the model relations in the definition.
 
 % \begin{definition}[Strongly Montone Synchronizing Transformation]
 %     Let $\metamodeltuple{M}$ be metamodels and let $\transformation{t}$ be a monotone synchronizing transformation. We call $\transformation{t}$ strongly monotone if it does not perform any changes only when all models are already consistent does not change elements that were already changed, i.e.
 % \end{definition}
 
-\mnote{Orchestrations of monotone transforamtion yield squences of pairwise different model states}
+\mnote{Property of monotone transformation orchestrations}
 Having only monotone transformations ensures that each orchestration, which does not apply a transformation to already consistent models, yields a sequence of pairwise different model states, if the transformations are sequentially applied.
 \begin{lemma}[Montone Transformation Orchestration Prefixes]
     \label{lemma:monotonetransformationsnosamestates}
     Let $\transformationset{T}$ be a set of correct monotone synchronizing transformations for a tuple of metamodels $\metamodeltuple{M}$.
-    Then for all models and changes, as well as any orchestration $\sequenced{\transformation{t}_{1}, \dots, \transformation{t}_{m}}  \; (\transformation{i} \in \transformationset{T})$ that does not contain a transformation when its models are already consistent, the prefixes of that orchestration only yield the same models if those prefixes are consistent orchestrations, i.e.
+    Then for all models and changes, as well as any orchestration $\sequenced{\transformation{t}_{1}, \dots, \transformation{t}_{m}} \in \transformationset{T}^{< \mathbb{N}}$ that does not contain a transformation to be executed when its models are already consistent, the prefixes of that orchestration only yield the same models if those prefixes are consistent orchestrations, i.e.,
     \begin{align*}
         &
-        \forall \modeltuple{m} \in \metamodeltupleinstanceset{M}, \changetuple{\metamodeltuple{M}} \in \changetuple{\metamodeltuple{M}} : \forall i, k \in \setted{1, \dots, m} : \\
+        \forall \modeltuple{m} \in \metamodeltupleinstanceset{M}, \changetuple{\metamodeltuple{M}} \in \changeuniverse{\metamodeltuple{M}} : \forall i, k \in \setted{1, \dots, m} : \\
         &
         \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{i}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \\
         & \formulaskip 
         \Rightarrow
-        \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \consistenttomath \transformationset{T}
+        \exists \changetuple{\metamodeltuple{M}}' \in \changeuniverse{\metamodeltuple{M}} :
+        \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = ()\modeltuple{m}, \changetuple{\metamodeltuple{M}}') \\
+        & \formulaskip\formulaskip
+        \land 
+        \changetuple{\metamodeltuple{M}}'(\modeltuple{m}) \consistenttomath \transformationset{T}
         \end{align*}
 \end{lemma}
 \begin{proof}
     Assume that there are two prefixes $\sequenced{\transformation{t}_{1}, \dots, \transformation{t}_{i}}$ and $\sequenced{\transformation{t}_{1}, \dots, \transformation{t}_{k}}$ of an orchestration, $i < k$ without loss of generality, such that they yield the same inconsistent models, i.e., $\generalizationfunction{\metamodeltuple{M}, \transformation{t}_{i}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ although $\generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ is not consistent to $\transformationset{T}$.
     We denote the change tuple delivered by any prefixes of length $l$ as $\changetuple{\metamodeltuple{M},l} = \tupled{\change{\metamodel{M}{1},l}, \dots, \change{\metamodel{M}{n}, l}}$ with $\tupled{\modeltuple{m}, \changetuple{\metamodeltuple{M},l}} = \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{l}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$.
-    We know that the sequence of changes between the two prefixes does not perform any changes and thus acts like the identity function, i.e., $\generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{i+1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M},i}) = \identitychange(\modeltuple{m}, \changetuple{\metamodeltuple{M},i})$
+    We know that the sequence of changes between the two prefixes does not perform any changes and thus acts like the identity function, i.e., $\generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{i+1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M},i}) = \tupled{\modeltuple{m},\identitychange(\modeltuple{m}, \changetuple{\metamodeltuple{M},i})}$
     and thus $\changetuple{\metamodeltuple{M},i}(\modeltuple{m}) = \changetuple{\metamodeltuple{M},k}(\modeltuple{m})$.
-    We also know that all the transformations between the prefixes, i.e., all transformations $\transformation{t}_{l}$ for each $l$ with $i < l \leq k$, do not act like the identity function for their inputs, i.e., $\generalizationfunction{\metamodeltuple{M}, \transformation{t}_{l}}(\modeltuple{m}, \changetuple{\metamodeltuple{M},l-1}) \neq \identitychange(\modeltuple{m}, \changetuple{\metamodeltuple{M},l-1})$.
+    We also know that all the transformations between the prefixes, i.e., all transformations $\transformation{t}_{l}$ for each $l$ with $i < l \leq k$, do not act like the identity function for their inputs, i.e., $\generalizationfunction{\metamodeltuple{M}, \transformation{t}_{l}}(\modeltuple{m}, \changetuple{\metamodeltuple{M},l-1}) \neq \tupled{\modeltuple{m}, \identitychange(\modeltuple{m}, \changetuple{\metamodeltuple{M},l-1})}$.
     Otherwise, the models affected by the transformation would either have been consistent before, which conflicts with the assumption that the orchestration does not contain a transformation when its models are already consistent, or they would not be consistent afterwards, which conflicts with the assumed correctness of the transformations.
 
-    Thus, each transformation $\transformation{t}_{l} \; (i < l \leq k)$ performs modifications to the change tuple, i.e., adds or removed further elements.
+    Thus, each transformation $\transformation{t}_{l} \; (i < l \leq k)$ performs modifications to the change tuple, i.e., adds or removes further elements.
     This especially applies to $\transformation{t}_{i+1}$.
     Let us assume that $\transformation{t}_{i+1}$ adds an element (analogous argumentation for the removal).
     %modifies the change tuple such that it adds or removes further elements.
@@ -389,38 +399,38 @@ Having only monotone transformations ensures that each orchestration, which does
 \end{proof}
 
 \mnote{Monotone transformation prevent alternation}
-With that insight, it is easy to see that given only monotone transformation, no alternation can occur in our algorithm \autoref{algo:orchestration:application}.
+With that insight, it is easy to see that given only monotone transformations, no alternation can occur in our algorithm \autoref{algo:orchestration:application}.
 \begin{theorem}[Monotone Transformations Prevent Alternation]
-    Given a set of correct, monotone synchronizing transformations $\transformationset{T}$.
-    Then \autoref{algo:orchestration:application} cannot contain an alternation according to \autoref{def:applyalternation}, as long as $\function{Orchestrate}$ does not return a transformation whose models are already consistent.
+    Let $\transformationset{T}$ be a set of correct, monotone synchronizing transformations.
+    Then the execution of \autoref{algo:orchestration:application} cannot be alternating according to \autoref{def:applyalternation}, as long as $\function{Orchestrate}$ does not return a transformation whose models are already consistent.
 \end{theorem}
 \begin{proof}
-    According to \autoref{lemma:monotonetransformationsnosamestates}, monotone transformations ensure that in an orchestration that does not contains transformations that need to be applied to already consistent models the application of two prefixes never yields the same changes.
-    In consequence, the sequence of $\applyalggenerated$ in the transformation application in 
-    Lines~\autoref{algo:orchestration:application:line:startorchestrate}--\autoref{algo:orchestration:application:line:endorchestrate} of \autoref{algo:orchestration:application} can never contain the same two changes.
+    According to \autoref{lemma:monotonetransformationsnosamestates}, monotone transformations ensure that in an orchestration that does not contain transformations that need to be applied to already consistent models the application of two prefixes never yields the same changes.
+    In consequence, the sequence of $\applyalggenerated$ in the transformation execution loop in 
+    Lines~\ref{algo:orchestration:application:line:startorchestrate}--\ref{algo:orchestration:application:line:endorchestrate} of \autoref{algo:orchestration:application} can never contain the same two changes.
     This would, however, be necessary to fulfill \autoref{def:applyalternation} for alternation.
 \end{proof}
 
-\mnote{Guarantee by monotone transformations is stronger than non-alternation}
+\mnote{Stronger guarantee than non-alternation}
 In fact, the guarantee of not producing the same state twice is even stronger than non-alternation, because alternation allows to pass the same state multiple times, as long as the same sequence of states is not passed repeatedly and infinitely.
-It does, however, only make sense to pass the same state twice if the orchestration algorithm that selects the next transformation to execute is able to process that situation by trying different execution orders if an alternation occurs.
+It does, however, only make sense to pass the same state twice if the orchestration algorithm, which selects the next transformation to execute, is able to process that situation by trying different execution orders if an alternation occurs.
 Thus, the less strict requirement for alternation is suited to make statements about the orchestration strategy but not about the individual transformations, as it is unlikely to find a property for a single transformation that gives a guarantee that depends on the execution order of transformations, like alternation does.
 
-\mnote{Monotony cannot be generally assumed}
-While monotone transformation give the guarantee of non-alternation, monotony according to \autoref{def:monotonetransformation} is not a property that we cannot assume to be fulfilled by all transformations.
+\mnote{Monotony not generally assumable}
+Monotone transformations give the guarantee of non-alternation, but monotony according to \autoref{def:monotonetransformation} is not a property that we cannot assume to be fulfilled by all transformations.
 Although is seems intuitive that a transformation should not remove elements that were added before and vice versa, this does also mean that, for example, an attribute value may only be changed once by the transformations.
 This would, however, require the transformations to always make a choice for attributes that fits for all other transformations as well.
 We have seen in different examples, such as the one depicted in \autoref{fig:orchestration:no_upper_bound} and \autoref{fig:orchestration:no_orchestration}, that it may be necessary to change elements multiple times, because the transformations select values with which the models only fulfill their own consistency relation but not those of the other transformations.
 It may take several executions to find a value selection with which the models are consistent to all transformations.
 We might say that the transformations need to \emph{negotiate} a consistent solution.
 
-\mnote{Ensuring monotony as often as possible improves possibility of finding consistent orchestration}
+\mnote{Ensuring monotony as often as possible}
 Still, the given examples were rather artificial, so they cannot be seen as an indicator for monotony to be not practically achievable.
 It may, at least in some cases, be possible to specify transformations that are monotone.
 Even if only some of the transformations are monotone, or if only specific rules of them are monotone, it improves the chance that an orchestration strategy finds a consistent orchestration.
 Having the knowledge about the benefits of monotony gives a transformation developer the ability to implement it as often as possible.
 
-\mnote{Combining alternation avoidance and dynamic detection}
+\mnote{Combining alternation avoidance and detection}
 Finally, the possibility to avoid alternation by construction can be combined with the ability of an orchestration strategy to react to alternation.
 We have discussed in \autoref{chap:orchestration:conservative:alternation} that an orchestration strategy can detect alternation and adapt its strategy of selecting the next transformation in that case.
 In addition, if monotony is given at least for some transformations, the orchestration strategy needs to try less execution orders and thus improves the chance of finding a consistent orchestration.
