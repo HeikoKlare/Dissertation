@@ -2,11 +2,11 @@
 
 \todo{Discuss problem of default values, or more general \enquote{special cases}?}
 
-\mnote{Categorization of mistakes, faults and failures}
-In this section, we identify and categorize potential \emph{failures} that can occur when executing transformation networks, which are derived from the failure cases of the application algorithms already discussed in \autoref{chap:orchestration}.
+\mnote{Categorization of errors}
+In this section, we identify and categorize potential \emph{failures} that can occur when executing transformation networks, which are derived from the failure cases of the application algorithm already discussed in \autoref{chap:orchestration}.
 We then consider the \emph{mistakes} and the resulting \emph{faults} in the transformation specifications, which a transformation developer can make.
 The mistakes are specific for the yet introduced conceptual specification levels, thus we derive them from those levels.
-We finally relate the mistakes to the failures that can occur when transformation networks containing faults that are caused by those mistakes are executed nevertheless.
+We finally relate the mistakes to the failures that can occur when transformation networks containing faults that are caused by those mistakes are still executed.
 
 % In this section, we %first identify and 
 % categorize potential \emph{failures} that can occur when executing \acp{BX} in a network to preserve consistency.
@@ -34,19 +34,19 @@ We finally relate the mistakes to the failures that can occur when transformatio
 Errors in transformation networks can occur in different contexts, for example in terms of the transformation networks, more precisely the application algorithm, producing an incorrect result, or in terms of a transformation developer defining an erroneous transformation.
 To be able to distinguish these contexts, we have already used the terms \emph{mistakes}, \emph{fault} and \emph{failure} with a short introduction of their distinction, as specializations of the general term \emph{error}.
 They are supposed to describe erroneous or inappropriate knowledge of a developer (mistakes), erroneous implementations (faults) and erroneous execution results (failures).
-These different types of errors depend on each other, as a mistake can lead to a fault, which can finally lead to a failure.
+These different types of errors depend on each other, as a mistake can lead to a fault, which can then lead to a failure.
 
 \begin{properdescription}
-    \item[Mistake:] \mnote{Mistake results from erroneous knowledge of transformation developer}
+    \item[Mistake:] \mnote{Erroneous knowledge}
     A mistake is made by a transformation developer. It is based on missing or erroneous knowledge about either the concrete transformation or the necessity to ensure certain properties. For example, the missing knowledge that transformations need to be synchronizing leads to a mistake in the conceptualization of transformations as they do not ensure this required property. The missing knowledge that compatibility is required as well as the missing knowledge about the other transformations of the transformation network can lead to the mistake that incompatible transformations are realized.
-    If a transformation language abstracts from a specific conceptual level and thus relieves the developer from ensuring that no mistakes at that level are made, a faulty implementation of the language can, for sure, also have faulty behavior because of those mistakes, if they were made by the transformation language developer. We do, however, not consider that case explicitly. 
-    \item[Fault:] \mnote{Fault is manifestation of mistake in transformation implementation}
-    A fault is the manifestation of a mistake in the implementation of transformations. For example, the missing knowledge about the necessity to have synchronizing transformations can lead to the fault that the implementation does not properly match existing elements instead of creating new ones. A fault is, thus, always the consequence of a mistake. It is also made by a transformation developer, but can be seen explicitly in the implementation, whereas a mistake can only be detected by the fault in the implementation to which it led.
-    \item[Failure:] \mnote{Failure is manifestation of fault when executing transformations}
+    If a transformation language abstracts from a specific conceptual level and thus relieves the developer from ensuring that no mistakes at that level are made, a faulty implementation of the language can, of course, also have faulty behavior because of those mistakes, if they were made by the transformation language developer. We do, however, not consider that case explicitly. 
+    \item[Fault:] \mnote{Erroneous implementation}
+    A fault is the manifestation of a mistake in the implementation of transformations. For example, the missing knowledge about the necessity to have synchronizing transformations can lead to the fault that the implementation does not properly match existing elements instead of creating new ones. A fault is, thus, always the consequence of a mistake. It is also made by a transformation developer, but can be seen within the implementation explicitly, whereas a mistake can only be detected by the fault in the implementation to which it led.
+    \item[Failure:] \mnote{Manifestation of fault during execution}
     A failure occurs at execution time of the transformation and is the manifestation of a fault when executing a faulty transformation network. A failure is the incorrect result of the execution of transformations. Whenever the transformations in a network have a faulty implementation, failures such as the termination in inconsistent states or non-termination of the application algorithm can occur. Since the occurrence of a failure depends on the scenario in which the transformations are executed, not every fault must lead to a failure. On the other hand, a fault can also lead to several failures, for example, because a transformation is executed multiple times.
 \end{properdescription}
 
-\mnote{Relation to other notions of error terms}
+\mnote{Relation to other error notions}
 Several similar terms like errors, mistakes, faults, bugs, defects and so on are used in software engineering and especially in software testing.
 They are sometimes used interchangeably and sometimes with specific meanings.
 One common notion is the distinction of faults, errors and failures in software testing, however also with different meanings, of which at least one is comparable to ours using the term \emph{error} for what we call \emph{mistake}.
@@ -56,36 +56,35 @@ We decided to avoid the overloaded term \emph{error} and make the human \emph{mi
 \subsection{Possible Failure Types}
 \label{chap:errors:categorization:failures}
 
-\mnote{Essential failures are non-termination, inconsistent models and returning $\bot$}
+\mnote{Essential failure types}
 Failures are the manifestation of faults during transformation execution and thus the final result of mistakes made by a transformation developer.
 A failure means that the transformation network or more precisely the execution of the application algorithm reached an unwanted state.
-We have already discussed in \autoref{chap:orchestration:decidability:correctness_termination} that the application algorithm can fail by not implementing a correct application function, thus either returning models that are inconsistent or by not terminating at all.
+We have already discussed in \autoref{chap:orchestration:decidability:correctness_termination} that the application algorithm can fail by not implementing a correct application function, thus either returning models that are inconsistent or not terminating at all.
 Additionally, the algorithm may fail to deliver consistent models by returning $\bot$.
 Returning $\bot$ is actually desired behavior to deal with the undecidability of the orchestration problem.
-It can, however, mask that the transformation network actually contains mistakes that lead to the algorithm not being able to find consistent models.
+It can, however, mask that the transformations in the network actually contain faults that lead to the algorithm not being able to find consistent models.
 
-\mnote{Specialization options for general failure types}
+\mnote{Specialization options for failure types}
 Termination in an inconsistent state, non-termination and returning $\bot$ already form the three general failure types that can occur when executing faulty transformations.
-They can be further specialized in different dimensions, e.g., regarding determinism of inconsistent termination or regarding whether too many or too few elements (or combination of them) consist for being consistent, i.e., whether corresponding condition elements are missing or whether there are too many condition elements for which no consistent models can be found by adding further ones.
-We did, however, find in \cite[Table~5.7]{saglam2020ma} that the distinction regarding elements does not bring any benefits when tracing the failures back to the causal mistakes.
+They can be further specialized in different dimensions, e.g., regarding determinism of inconsistent termination or regarding whether too many or too few elements (or combination of them) exist for being consistent, i.e., whether corresponding condition elements are missing or whether there are too many condition elements for which no consistent models can be found by adding further ones.
+We did, however, find in \cite[Table~5.7]{saglam2020ma} that the distinction regarding elements does not provide any insights and benefits when tracing the failures back to the causal mistakes.
 We do, however, consider \emph{duplications} as one specific additional failure type, which can lead to both the return of inconsistent models or non-termination, depending on whether the application algorithm aborts or not.
 Duplications of elements are of special importance, because they are the essential manifestation of missing synchronization in transformations, as we have discussed in \autoref{chap:synchronization:achieving}.
 
 \begin{figure}
     \centering
-    \input{figures/correctness/errors/categorization.tex}\\
-    \includegraphics[width=\textwidth]{figures/correctness/errors/categorization.jpg}
+    \input{figures/correctness/errors/categorization.tex}
+    %\includegraphics[width=\textwidth]{figures/correctness/errors/categorization.jpg}
     \caption[Categorization of mistakes, faults and failures]{Categorization and dependencies of mistakes, faults and failures.}
-    \todo{Add failure type $\bot$.}
     \label{fig:errors:categorization}
 \end{figure}
 
-\mnote{Failures only occur with specific application algorithms}
-In \autoref{fig:errors:categorization}, we depict the different failures types with their specializations, which we discuss in the following.
-Please note that we do not assume a specific application algorithm when discussing failures.
+\mnote{Failures depending on application algorithm}
+In \autoref{fig:errors:categorization}, we depict the different failure types with their specializations, which we discuss in the following.
+Note that we do not assume a specific application algorithm when discussing failures.
 Whether a potential failure occurs or not highly depends on the used algorithm.
-For example, using the provenance algorithm proposed in \autoref{chap:orchestration:algorithm} will neither lead to non-termination, nor to inconsistent models, at least if the consistency check is implemented properly, but may only lead to returning $\bot$.
-Having an artificial upper bound for the number of transformation executions, for sure, always prevents from non-termination.
+For example, using the provenance algorithm proposed in \autoref{chap:orchestration:algorithm} will neither lead to non-termination nor to inconsistent models, at least if the consistency check is implemented properly, but may only lead to returning $\bot$.
+Having an artificial upper bound for the number of transformation executions, of course, always prevents from non-termination.
 Only if transformations are executed without checking consistency afterwards or without defining an execution bound, the discussed failures can actually occur.
 %In other cases, the actual failures are masked by the algorithm simply aborting and returning $\bot$.
 Whenever an algorithm returns $\bot$, it can, however, be an indicator whether the algorithm fails because an artificial execution bound was reached or because a transformation cannot be applied anymore, because it is not able to process the given changes.
@@ -105,30 +104,31 @@ We further distinguish the already discussed failure types as follows.
     \item[Non-termination:] \mnote{Non-termination in terms of alternation or divergence}
     Non-termination means that the application algorithm does not terminate, but executes transformations indefinitely without achieving a consistent state of the models.
     We can further distinguish between \emph{alternation} and \emph{divergence} as defined in \autoref{def:applyalternation}.
-    Alternation means that the same model states are produced repeatedly, which can for example be because a feature, such as an attribute or reference, alternates between two or more values.
-    In other cases, we have divergence, which means that some feature values are changed indefinitely, such as a number counting up or a string being repeatedly appended, or an infinite number of elements is created.
-    While an alternating algorithm can easily run endlessly, a diverging algorithm with abort at some point in time in many cases, because endless element creation or string concatenation can lead to an overflow of available memory.
+    Alternation means that the same model states are produced repeatedly, which can, for example, be because a feature, such as an attribute or reference, alternates between two or more values.
+    In other cases, divergence occurs, which means that some feature values are changed indefinitely, such as a number counting up or a string being appended repeatedly, or an infinite number of elements is created.
+    While an alternating algorithm can easily run endlessly, a diverging algorithm will abort at some point in time in many cases, because endless element creation or string concatenation can lead to an overflow of available memory.
     
     \item[Returning $\bot$:] \mnote{Termination without yielding consistent models}
     The application algorithm may terminate and return $\bot$ to indicate that it was not able to find an orchestration that yields consistent models.
     This may either be because no such orchestration exists or can be found even though no mistakes were made, or because the transformation network actually contains mistakes that prevents the algorithm from finding a consistent orchestration.
-    For example, if transformations are not synchronizing, the application algorithm will, in general, not be able to executed them in a way that they deliver consistent models.
+    For example, if transformations are not synchronizing, the application algorithm will, in general, not be able to execute them in a way that they deliver consistent models.
     This kind of failure is different from the others, as it is intended behavior of the algorithm to return $\bot$ rather than returning inconsistent models or not terminating at all, but still it is not the intended result which may be caused by an actual mistake made by the transformation developer.
 
     \item[Duplications:] \mnote{Element duplications as a special case leading to non-termiation or inconsistent termination}
     As a more specific failure case, we have introduced element duplications, which can especially arise if transformations are not synchronizing and thus do not match existing elements rather than creating new ones.
-    We can further separate this into \emph{multiple instantiation}, which can occur because different consistency preservation rules instantiate an element multiple times, although all of them represent the same element, and into \emph{multiple referencing}, which can occur because an element is inserted into a reference or attribute list several times, although it should be inserted only once. 
-    In fact, such duplications ultimately can ultimately also lead to inconsistent termination, non-termination, or returning $\bot$, because either the algorithm returns after a finite number of transformation executions without checking consistency or checking it and returning $\bot$, or the transformations are not able to restore consistency for the models and the algorithm does thus not terminate.
-    Duplications, however, represent a special case, which, as we will see in the evaluation in \autoref{chap:correctness_evaluation}, is one of the most important error case for transformation networks.
+    We can further separate this into \emph{multiple instantiation}, which can occur because different consistency preservation rules instantiate an element multiple times, although all of them represent the same one, and \emph{multiple insertion}, which can occur because an element is inserted into a reference or attribute list several times, although it should be inserted only once. 
+    In fact, such duplications can ultimately also lead to inconsistent termination, non-termination, or returning $\bot$, because either the algorithm returns after a finite number of transformation executions without checking consistency or checking it and returning $\bot$, or the transformations are not able to restore consistency for the models and the algorithm does thus not terminate.
+    Duplications, however, represent a special case, which, as we will see in the evaluation in \autoref{chap:correctness_evaluation}, is one of the most important error cases for transformation networks.
     Thus, identifying such duplications in the generated models can ease finding the causal mistake in terms of missing synchronization.
 \end{properdescription}
 
-\mnote{Consistency checks are prone to not work properly}
-We have discussed that if an application algorithm checks consistency and has an artificial execution bound it will only return $\bot$ rather than having any other failure, especially not the more specific duplications. Knowing the other failures and their relation to the causal mistakes is still important.
+\mnote{Consistency checks problematic}
+We have discussed that if an application algorithm checks consistency and has an artificial execution bound, it will only return $\bot$ rather than having any other failure, especially not the more specific duplications. Knowing the other failures and their relation to the causal mistakes is still important.
 First, when a transformation network with such an application algorithm yields $\bot$ in most cases, there will likely be a fault in the transformation implementations.
 Temporarily replacing the algorithm with a less restrictive one can help to find the reasons, because then, for example, duplications may be detectable that help to identify missing synchronization.
-Second, in many transformation languages, consistency relations are not represented explicitly, thus consistency checks are performed by executing the transformation and checking whether changes were performed.
-Then, if transformations are non-synchronizing, they return an actually inconsistent state, which may, however, not be identified by the transformation as such, because it does not expect the synchronization scenario and thus assumes that consistency is achieved by construction, i.e., that changes must only be processed for one model and thus the models are consistent after executing the consistency preservation rules.
+Second, in many transformation languages consistency relations are not represented explicitly, thus consistency checks are performed by executing the transformation and checking whether changes were performed.
+Then, if transformations are non-synchronizing, they return an actually inconsistent state, which may, however, not be identified by the transformation as such.
+This is due to the fact that those transformations do not expect the synchronization scenario and thus assume that consistency is achieved by construction, i.e., that changes must only be processed for one model and thus the models are consistent after executing the consistency preservation rules.
 
 % If mistakes are made during the specification of consistency, no matter on which of the levels introduced in \autoref{sec:process:levels}, this can finally lead to failures in the consistency preservation executed on an actual system. Before identifying the causing mistakes, we first give an overview on the types of failures that may occur and separate them into three categories.\\[-0.7em]
 
