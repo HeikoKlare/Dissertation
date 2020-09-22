@@ -1,0 +1,73 @@
+	%\SetDataSty{textsf}
+
+    %\hspace*{\algorithmicindent} \textbf{Input:}\\
+    %\hspace*{\algorithmicindent} \textbf{Output:} 
+    \begin{algorithmic}[1]
+        \Procedure{\function{ProvenanceApply}}{$\transformationset{T}, \modeltuple{m} %= \tupled{\model{m}{1}, \dots, \model{m}{n}}
+        , \changetuple{\metamodeltuple{M}}$}
+            \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\transformationset{T}, \modeltuple{m}$)
+            \If{$\neg \mathvariable{isConsistent}$}
+                \State \Return{$\bot$} \label{algo:orchestration:provenance:line:bot_input}
+            \EndIf
+            \State $\changetuple{\metamodeltuple{M},\mathvariable{res}} \gets %\tupled{\change{\metamodel{M}{1}, \mathvariable{res}}, \dots, \change{\metamodel{M}{1}, \mathvariable{res}}} \gets 
+            \function{Propagate}(\transformationset{T}, \modeltuple{m}, \changetuple{\metamodeltuple{M}})$
+            \If{$\changetuple{\metamodeltuple{M},\mathvariable{res}} = \bot$}
+                \State \Return{$\bot$} \label{algo:orchestration:provenance:line:bot_orchestration}
+            \EndIf
+            \State $\modeltuple{m}_{res} \leftarrow \changetuple{\metamodeltuple{M},\mathvariable{res}}(\modeltuple{m})$
+            \State \Return{$\modeltuple{m}_{res}$} \label{algo:orchestration:provenance:line:return_result}
+        \EndProcedure
+        \vspace{\baselineskip}
+        \Procedure{\function{Propagate}}{$\transformationset{T}, \modeltuple{m} %= \tupled{\model{m}{1}, \dots, \model{m}{n}}
+        , \changetuple{\metamodeltuple{M}} %= \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}}
+        $}
+            \vspace{0.15\baselineskip}
+            \State $\provalgexecuted \gets \emptyset$ \label{algo:orchestration:provenance:line:executed_init}
+            %\State $\mathvariable{accumulatedChanges} \gets \changetuple{\metamodeltuple{M}}$         
+            \vspace{0.3\baselineskip}
+            
+            \For{$\provalgcandidate \in \transformationset{T} \setminus \provalgexecuted \mid \changetuple{\metamodeltuple{M}}.\mathvariable{affects}(\provalgcandidate)$} \label{algo:orchestration:provenance:line:loop_start}
+                %\vspace{0.15\baselineskip}
+                \State $\mathvariable{appResult} \gets \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{candidate}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ \label{algo:orchestration:provenance:line:first_execution}
+                \If{$\mathvariable{appResult} = \bot$}
+                    \State \Return{$\bot$} \label{algo:orchestration:provenance:line:bot_application}
+                \EndIf
+                \State $\tupled{\modeltuple{m}, \changetuple{\metamodeltuple{M},\mathvariable{candidate}}} \gets \mathvariable{appResult}$
+                %\State $\transformationset{T}_{\mathvariable{subnetwork}} \gets \transformationset{T}.\mathvariable{edgeInducedSubgraph}(\transformationset{T}_\mathvariable{executed})$
+                %\State $\changetuple{\metamodeltuple{M},\mathvariable{propagation}} \gets \function{Propagate}(\transformationset{T}_{\mathvariable{subnetwork}}, \modeltuple{m}, \changetuple{\metamodeltuple{M},\mathvariable{candidate}})$ \label{line:recursive-call}
+                \State $\changetuple{\metamodeltuple{M},\mathvariable{propagation}} \gets \function{Propagate}(\provalgexecuted, \modeltuple{m}, \changetuple{\metamodeltuple{M},\mathvariable{candidate}})$ \label{algo:orchestration:provenance:line:recursive_call}
+                \If{$\changetuple{\metamodeltuple{M},\mathvariable{propagation}} = \bot$}
+                    \State \Return{$\bot$} \label{algo:orchestration:provenance:line:bot_recursion}
+                \EndIf
+                %\State $\changetuple{\metamodeltuple{M},\mathvariable{candidate}} \gets \mathvariable{candidate}.\mathvariable{execute}(\mathvariable{accumulatedChanges})$ \label{line:check-execution}
+                \State $\modeltuple{m}_{\mathvariable{propagation}} \gets \changetuple{\metamodeltuple{M},\mathvariable{propagation}}(\modeltuple{m})$ %\tupled{\change{\metamodel{M}{1},\mathvariable{propagation}}(\model{m}{1}), \dots, \change{\metamodel{M}{n},\mathvariable{propagation}}(\model{m}{n})}$
+                \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\provalgcandidate, \modeltuple{m}_{\mathvariable{propagation}})$
+                \If{$\neg \mathvariable{isConsistent}$} \label{algo:orchestration:provenance:line:bot_failcheck}
+                    \State \Return{$\bot$} \label{algo:orchestration:provenance:line:bot_nonreactiveconverging}
+                \EndIf
+                %\vspace{0.3\baselineskip}
+                \State $\changetuple{\metamodeltuple{M}} \gets \changetuple{\metamodeltuple{M},\mathvariable{propagation}}$
+                \State $\provalgexecuted \gets \provalgexecuted \cup \setted{\provalgcandidate}$ \label{algo:orchestration:provenance:line:executed_update}
+            \EndFor
+            \State \Return{$\changetuple{\metamodeltuple{M}}$}
+        \EndProcedure
+        \end{algorithmic}
+        % \Procedure{\(\Propagate\,\mathsf{(}\network,\changes\mathsf{)}\)}{
+        % \vspace{0.15\baselineskip}		
+        % \(\executed\gets\emptyset\)\;																		\label{line:executed-init}
+        % \(\accumulatedChanges\gets\changes\)\;         
+        % \vspace{0.3\baselineskip}
+        
+        % \ForEach{\(\candidate\in\network\mid\candidate\notin\executed\land\accumulatedChanges.\adjacentTo\text{\,(}\candidate\text{)}\)}{	\label{line:loop-start}
+        % \vspace{0.15\baselineskip}
+        % 		\(\candidateChanges\gets\candidate.\execute\,\text{(}\accumulatedChanges\text{)}\)\;			\label{line:first-execution}
+        % 		\(\subnetwork\gets\network.\edgeInducedSubgraph\,\text{(}\executed\)\()\)\;
+        % 		\(\propagationChanges\gets\Propagate\,\text{(}\subnetwork,\candidateChanges\text{)}\)\;			\label{line:recursive-call}
+        % 		\(\candidateChanges\gets\candidate.\execute\,\text{(}\accumulatedChanges\text{)}\)\;			\label{line:check-execution}
+        % 		\lIf{\(\candidateChanges.\adjacentToAny\,\text{(}\executed\text{)}\)}{\(\fail\,\text{()}\)}		\label{line:fail}				
+        % \vspace{0.3\baselineskip}
+        % 		\(\accumulatedChanges\cupgets\propagationChanges\cup\candidateChanges\)\;
+        % 		\(\executed\cupgets\candidate\)\;																\label{line:executed-update}
+        % 	}
+        % \Return\(\accumulatedChanges\)\;
+        % }
