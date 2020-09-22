@@ -9,12 +9,40 @@
   {mdframed}
 
 % Modified from thm-listof.sty to remove left margin in list of theorems
+\providecommand{\thmtlo@newentry}
 \makeatletter
 \renewcommand{\thmtlo@newentry}{%
-    \@xa\def\csname l@\thmt@envname\endcsname{%
-      \@dottedtocline{1}{0em}{\thmt@listnumwidth}%
+  \@xa\def\csname l@\thmt@envname\endcsname{%
+    \@dottedtocline{1}{0em}{\thmt@listnumwidth}%
+  }%
+}
+% Patch the following command for compatibility with TexLive 2019 in Overleaf
+\renewcommand{\thmt@mklistcmd}{%
+  \thmtlo@newentry
+  \ifthmt@isstarred
+    \@xa\def\csname ll@\thmt@envname\endcsname{%
+      \protect\ifthmt@listswap
+      \protect\else
+        \protect\numberline{\protect\let\protect\autodot\protect\@empty}%
+      \protect\fi
+      \thmt@thmname
+      \ifx\@empty\thmt@shortoptarg\else\protect\thmtformatoptarg{\thmt@shortoptarg}\fi
     }%
-  }
+  \else
+    \@xa\def\csname ll@\thmt@envname\endcsname{%
+      \protect\ifthmt@listswap
+        \thmt@thmname~\csname the\thmt@envname\endcsname
+      \protect\else
+        \protect\numberline{\csname the\thmt@envname\endcsname}%
+        \thmt@thmname
+      \protect\fi
+      \ifx\@empty\thmt@shortoptarg\else\protect\thmtformatoptarg{\thmt@shortoptarg}\fi
+    }%
+  \fi
+  \@xa\gdef\csname thmt@contentsline@\thmt@envname\endcsname{%
+    \thmt@contentslineShow% default:show
+  }%
+}
 \makeatother
 
 \mdfdefinestyle{theoremframestyle}{% 
