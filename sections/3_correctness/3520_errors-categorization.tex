@@ -163,11 +163,11 @@ This is due to the fact that those transformations do not expect the synchroniza
 % Wir nehmen wir Korrektheit einer Transformation an!
 % In der Evaluation werden wir das noch entsprechend unterscheiden.
 
-\mnote{Mistakes and faults derived from the specification levels}
+\mnote{Mistakes by specification levels}
 Developers can make different kinds of mistakes at each of the specification levels, which lead to faults in the implementation and eventually to different kinds of failures during transformation execution.
 In the following, we derive mistakes and faults from the specification levels, depicted in \autoref{fig:errors:categorization}.
 
-\mnote{Technical mistakes excluded, transformations assumed to be correct}
+\mnote{Excluded mistake types}
 We explicitly focus on conceptual mistakes and faults concerned with the development of transformation networks.
 This especially excludes two types of mistakes:
 \begin{properdescription}
@@ -179,11 +179,11 @@ In fact, technical mistakes usually also lead to incorrectness of the transforma
 
 \subsubsection*{\LevelTransformation Level}
 
-\mnote{Correctness requires synchronizing transformations}
+\mnote{Correctness by synchronizing transformations}
 Correctness at the \leveltransformation level requires each transformation to be synchronizing.
 We have discussed in \autoref{chap:synchronization:achieving} that the essential requirement to make ordinary transformations synchronizing is the matching of existing elements, because transformations that were not developed for the synchronization case do usually not assume elements to be already existing but to be either added by changes that are processed by the transformation or created by the transformation itself.
 
-\mnote{Mistake is missing considering or knowledge about synchronization, leading to missing element matchings}
+\mnote{Missing knowledge about synchronization}
 The mistake a transformation developer can make at this level is not to consider that synchronization is necessary, potentially because he or she does not even know that it is necessary. Then the transformation may be correct but not synchronizing.
 In the implementation, this manifests as the absence of necessary matchings of elements.
 We have already discussed that this finally leads to the duplicate creation or insertion of model elements when executing such transformations.
@@ -191,7 +191,7 @@ We have already discussed that this finally leads to the duplicate creation or i
 
 \subsubsection*{\LevelNetworkRelation Level}
 
-\mnote{Correctness of consistency relations can be in compabination or individual}
+\mnote{Correctness by combination or individual}
 The \levelnetworkrelation level concerns correctness of the consistency relations in a transformation network.
 In general, we can distinguish two notions of correctness for them, like we have discussed in \autoref{chap:correctness:notions_correctness}.
 First, the relations must reflect some intended, probably informal notion of consistency.
@@ -200,7 +200,7 @@ Second, the relations have to be compatible.
 As discussed in \autoref{chap:compatibility}, this is necessary to enable the consistency preservation rules to find consistent models at all.
 In the worst case, there may not be a single tuple of models that is consistent to all consistency relations when they are incompatible.
 
-\mnote{Individual correctness of consistency relation irrelevant}
+\mnote{Individual correctness irrelevant}
 The first correctness notion, however, only concerns a single consistency relation rather than the combination of them.
 We thus assume it to be correct, as we assume each single transformation to be already correct.
 Finally, such incorrectness would not be even interesting, because additional constraints do not lead to failures but, in the worst case, only lead to not finding consistent models although they exist, and missing constraints simply lead to inconsistent models, as the result does not fulfill the constraints of the existing, informal notion of consistency.
@@ -217,18 +217,18 @@ Finally, if the algorithm implements an artificial execution bound and consisten
 
 \subsubsection*{\LevelNetworkRule Level}
 
-\mnote{No precise notion of correctness for consistency preservation rules}
+\mnote{No precise correctness notion}
 The \levelnetworkrule level concerns correctness of the complete transformations of a network.
 We did not give a precise definition of what this correctness means.
 In \autoref{chap:orchestration}, we have discussed assumptions to transformations to enable an application function to solve the orchestration problem, which could be a reasonable correctness measure.
 We have, however, also discussed that we cannot make any practical assumptions to the transformations such that they improve the ability of the application algorithm to find a consistent orchestration if it exists.
 
-\mnote{One possible mistake is selection of contradicting options}
+\mnote{Mistake possibility by contradicting options}
 We only know from \autoref{chap:orchestration:decidability:restriction} that consistency relations providing multiple options for corresponding elements to consider models consistent can lead to consistency preservation rules that always select elements which are not in the overlap of those options between different transformations.
 In consequence, if transformation developers decide to implement consistency preservation rules that make such contradicting selections or generations of elements, the transformations may fail due to the same reasons as discussed for the \levelnetworkrelation level.
 In this case, the causing mistake is that the transformation developers make contradicting selections of available options to restore consistency.
 
-\mnote{No complete overview of potential mistakes}
+\mnote{No complete mistakes overview}
 Since we did not find and define a property that a set of transformations and especially their consistency preservation rules have to fulfill and instead concluded to deal with the orchestration problem by means of a conservative application algorithm, we cannot give a reasonable or even complete overview of potential mistakes transformation developers can make at this level.
 
 % \subsubsection{Global Level}
@@ -350,7 +350,7 @@ Since we did not find and define a property that a set of transformations and es
 
 \subsection{Causal Chains}
 
-\mnote{Overview of dependencies between mistakes, faults and failures}
+\mnote{Mistakes, faults, failures dependencies}
 We have already discussed the relevant causal chains between mistakes, faults and failures when introducing the relevant mistake types.
 The full overview of these dependencies is given in \autoref{fig:errors:categorization}.
 Mistakes at the \levelnetworkrelation and \levelnetworkrule levels can always lead to any kind of failure, namely non-termination, inconsistent termination, or returning $\bot$, depending on how the application algorithm operates.
@@ -375,7 +375,7 @@ We will further discuss the detection and avoidance of mistakes in the subsequen
     \label{fig:errors:mistake_effects_example_cases}
 \end{figure}
 
-\mnote{Examples for mistakes at each level}
+\mnote{Mistake examples at each level}
 In \autoref{fig:errors:mistake_effects_example_metamodels}, we depict slightly modified consistency relations from the running example.
 Based on these consistency relations, \autoref{fig:errors:mistake_effects_example_cases} depicts three scenarios of transformation executions with mistakes at each of the three introduced levels.
 Each scenario assumes a person to be introduced by a user change.
@@ -384,13 +384,13 @@ The creation of an element is denoted by a \enquote{+}, whereas the removal of a
 In one transformation step, multiple elements may be removed or created.
 The arrows indicate that the change of the source element leads to the addition or removal of the target element.
 
-\mnote{Duplicate element creation by missing synchronization}
+\mnote{Missing synchronization}
 The example for the \leveltransformation level considers the compatible consistency relations $\consistencyrelation{CR}{PE}$, $\consistencyrelation{CR}{PR}$ and $\consistencyrelation{CR}{ER}$. It assumes that the transformation developer made the mistake of not considering the necessity of synchronization, thus not implementing a matching of existing elements.
 This can lead to the depicted fault that two residents with the same name may be created by both the transformation between employees and residents, as well as the one between persons and residents.
 In consequence, the transformation may not be able to process the occurring situation, or, as discussed before,  assumes consistency by construction and thus identifies the models as consistent although they are actually not.
 %In this case, the transformation network fails because the transformation were not developed synchronizing.
 
-\mnote{Inconsistent termination by incompatibility}
+\mnote{Incompatibility}
 The example for the \levelnetworkrelation level considers the incompatible consistency relations $\consistencyrelation{CR}{PE}$, $\consistencyrelation{CR}{PR}$ and $\consistencyrelation{CR}{ER}'$. Thus, the transformation developers made the mistake of not having a compatible knowledge about consistency constraints.
 In consequence, the developed transformations may try to resolve the occurring inconsistencies by adding further elements required to fulfill the consistency relations.
 This results in the depicted models, which are not consistent to $\consistencyrelation{CR}{ER}'$, because both employees correspond to the resident without the possibility to add a further resident to which one of the employees corresponds.
@@ -398,7 +398,7 @@ In fact, the transformations would need to remove the initially added person and
 Due to incompatibility, in fact there is no consistent tuple of models containing the initially added person.
 The algorithm may fail at the depicted state because the transformation between employees and residents is not able to restore consistency.
 
-\mnote{Non-termination by contradicting option selection for consistency restoration}
+\mnote{Contradicting option selection}
 Finally, the example for the \levelnetworkrule level considers the consistency relations $\consistencyrelation{CR}{PE}$, $\consistencyrelation{CR}{PR}'$ and $\consistencyrelation{CR}{ER}$.
 The relations require that for each person, employee and resident one with swapped first and last name exists.
 Whether or not these are reasonable relations, they can be fulfilled by simply adding the appropriate elements.
@@ -408,7 +408,7 @@ In this case, although transformations were developed synchronizing and relation
 This is analogous to the example depicted in \autoref{fig:orchestration:no_orchestration}, for which no orchestration exists.
 In fact, this is also a problem of selecting incompatible options, as discussed in \autoref{chap:orchestration:decidability:restriction}, because each transformation always restores consistency in a way that is not consistent with the other transformation, thus selecting an option from the consistency relations that is not in the overlap with consistency relations of the other transformations.
 
-\mnote{Incompatible constraints and contradiction option selection cannot always be distinguished}
+\mnote{Distinguishing network level mistakes}
 In fact, whether incompatible constraints or a contradicting selection of options to restore consistency leads to a fault and thus potential failures during execution can often not be distinguished.
 This is especially the case when consistency relations are not explicitly defined, but assumed to be implied by the image of the consistency preservation rules.
 If then the execution of transformations fails because the consistency relations induced by the consistency preservation rules are incompatible, it is unclear whether the, only implicitly known, consistency relations according to which the transformation developer defined the transformations are actually incompatible, or whether the defined transformations only make a contradicting selection of options for restoring consistency, which then implies such incompatible consistency relations.
