@@ -1,25 +1,32 @@
 \begin{algorithmic}[1]
-    \Procedure{\function{ExecuteSync}}{$\transformation{T} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}, \model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}$}
+    \Procedure{\function{ExecuteSync}}{$\transformation{t} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}, \model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}$}
+        \algindentskip
         \If{$\neg (\tupled{\model{m}{1}, \model{m}{2}} \consistenttomath \consistencyrelationset{CR})$}
             \State \Return{$\bot$}
         \EndIf
-        \If{$\neg (\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}} \consistenttomath \consistencyrelationset{CR})$} \label{algo:synchronization:executesynchronizingbidirectionaltransformation:line:synchronizationstart}
-            \State $executionResult$ $\leftarrow$ $\function{SyncEx}_\transformation{T}^1(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}})$
+        \algblockskip
+
+        \If{$\neg (\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}} \consistenttomath \consistencyrelationset{CR})$} \label{algo:synchronization:execute_synchronizing_bidirectional_transformation:line:synchronizationstart}
+            \State $executionResult$ $\leftarrow$ $\function{SyncEx}_\transformation{t}^1(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}})$
             \If{$executionResult = \bot$}
-                \State \Return{$\bot$} \label{algo:synchronization:executesynchronizingbidirectionaltransformation:line:returnbot1}
+                \State \Return{$\bot$} \label{algo:synchronization:execute_synchronizing_bidirectional_transformation:line:returnbot1}
             \Else
-                \State ($\model{m}{1}, 
-                \model{m}{2}, \change{\metamodel{M}{1}}$) $\equalsperdefinition$ $executionResult$
+                \State $(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) \gets executionResult$
             \EndIf
-        \EndIf \label{algo:synchronization:executesynchronizingbidirectionaltransformation:line:synchronizationend}
+        \EndIf \label{algo:synchronization:execute_synchronizing_bidirectional_transformation:line:synchronizationend}
+        \algblockskip
+
         \While{$\neg (\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}} \consistenttomath \consistencyrelationset{CR})$}
-            \State $executionResult$ $\leftarrow$ $\function{Ex}_\transformation{T}^1(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}})$
+            \State $executionResult$ $\leftarrow$ $\function{Ex}_\transformation{t}^1(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}})$
             \If{$executionResult = \bot$}
-                \State \Return{$\bot$} \label{algo:executesynchronizingbidirectionaltransformation:line:returnbot2}
+                \State \Return{$\bot$} \label{algo:execute_synchronizing_bidirectional_transformation:line:returnbot2}
             \Else
-                \State ($\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}$) $\equalsperdefinition$ $executionResult$
+                \State $(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) \gets executionResult$
             \EndIf
         \EndWhile
-        \State \Return{$\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}}$} \label{algo:synchronization:executesynchronizingbidirectionaltransformation:line:returnresult}
+        \algblockskip
+
+        \State \Return{$\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}}$} \label{algo:synchronization:execute_synchronizing_bidirectional_transformation:line:returnresult}
+        \algindentskip
     \EndProcedure
 \end{algorithmic}

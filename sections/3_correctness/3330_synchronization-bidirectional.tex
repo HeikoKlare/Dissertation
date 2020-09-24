@@ -158,7 +158,7 @@ To these resulting models and the resulting change the execution step can be rea
 %For models $\model{m}{1} \in \metamodelinstanceset{M}{1}$, $\model{m}{2} \in \metamodelinstanceset{M}{2}$ and a change $\change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}}$ to $\model{m}{1}$ and the resulting changes $\change{\metamodel{M}{1}}'$ and $\change{\metamodel{M}{2}}'$ from an execution step, we can apply the next execution step to models $\change{\metamodel{M}{1}}(\model{m}{1})$ and $\change{\metamodel{M}{2}}'(\model{m}{2})$ and the change $\change{\metamodel{M}{1}}'$.
 
 \mnote{Execution of bidirectional transformation}
-The execution of a bidirectional transformation then consists of the consecutive application of execution steps until the delivered models are consistent, as defined in \autoref{algo:synchronization:executebidirectionaltransformation}.
+The execution of a bidirectional transformation then consists of the consecutive application of execution steps until the delivered models are consistent, as defined in \autoref{algo:synchronization:execute_bidirectional_transformation}.
 Although we, theoretically, require the consistency preservation rules to be able to handle initial models that can be arbitrarily inconsistent, it will not be possible to define such rules in practice.
 Since we follow a delta-based notion of consistency preservation, we will therefore stick to the requirement that inconsistencies are introduced by changes.
 Then it is up to the consistency preservation rules to process the changes in a way and produce new changes that all introduced inconsistencies can be resolved.
@@ -209,7 +209,7 @@ When finally coming to the synchronization scenario, in which both models have b
 \begin{algorithm}
     \input{algorithms/correctness/synchronization/execute_bidirectional_transformation.tex}
     \caption[Execution of a bidirectional transformation]{Execution of a bidirectional transformation.}
-    \label{algo:synchronization:executebidirectionaltransformation}
+    \label{algo:synchronization:execute_bidirectional_transformation}
 \end{algorithm}
 
 % \todo{Möglicherweise müssen wir hier auch noch die Deltas rausgeben, weil die ja von den anderen Transformationen im Netzwerk noch bearbeitet werden müssen. Hierfür könnten wir später definieren, wann eine BX Sync emulierend ist.}
@@ -233,12 +233,12 @@ Additionally, we can easily show that in all other cases, if the algorithm termi
 
 \begin{lemma}[Bidirectional Transformation Execution Consistency]
     \label{lemma:bidirectionaltransformationconsistency}
-    If \autoref{algo:synchronization:executebidirectionaltransformation} terminates, it either returns $\bot$ or a consistent model pair.
+    If \autoref{algo:synchronization:execute_bidirectional_transformation} terminates, it either returns $\bot$ or a consistent model pair.
 \end{lemma}
 \begin{proof}
-    \autoref{algo:synchronization:executebidirectionaltransformation} can terminate by one of its two return statements in \autoref{algo:synchronization:executebidirectionaltransformation:line:returnbot} and \autoref{algo:synchronization:executebidirectionaltransformation:line:returnresult}.
-    \autoref{algo:synchronization:executebidirectionaltransformation:line:returnbot} returns $\bot$, which fulfills the lemma statement.
-    \autoref{algo:synchronization:executebidirectionaltransformation:line:returnresult} returns the model pair $\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}}$.
+    \autoref{algo:synchronization:execute_bidirectional_transformation} can terminate by one of its two return statements in \autoref{algo:synchronization:execute_bidirectional_transformation:line:returnbot} and \autoref{algo:synchronization:execute_bidirectional_transformation:line:returnresult}.
+    \autoref{algo:synchronization:execute_bidirectional_transformation:line:returnbot} returns $\bot$, which fulfills the lemma statement.
+    \autoref{algo:synchronization:execute_bidirectional_transformation:line:returnresult} returns the model pair $\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}}$.
     The only possibility to achieve this statement is the termination of the previous while loop.
     Since the loop can only terminate due to the other return statement or the non-fulfillment of the loop condition, we can only reach this statement by non-fulfillment of the loop condition.
     Since the negation of the loop condition is $\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}} \consistenttomath \consistencyrelationset{CR}$, the result fulfills the lemma statement.
@@ -307,7 +307,7 @@ Then the size of both the maximal consistent subsets as well as the models thems
 \begin{lemma}[Bidirectional Transformation Execution Termination] %Bidirectional Transformation Execution Termination]
     \label{lemma:bidirectionaltransformationtermination}
     Let $\transformation{t} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}$ be a partial-consistency-improving bidirectional transformation.
-    Then \autoref{algo:synchronization:executebidirectionaltransformation} does always terminate.
+    Then \autoref{algo:synchronization:execute_bidirectional_transformation} does always terminate.
 \end{lemma}
 \begin{proof}
     The while loop of the algorithm consecutively applies an execution step of the bidirectional transformation $\transformation{t}$.
@@ -534,26 +534,26 @@ This way, we ensure that all inconsistencies are introduced by changes that are 
 \mnote{Single execution of synchronization step}
 The synchronizing bidirectional execution step is necessary to first integrate the changes made in both models.
 It is defined such that it only produces a change in the first model, such that afterwards ordinary transformation execution steps that only need to deal with a change to one model have to be applied.
-This leads to \autoref{algo:synchronization:executesynchronizingbidirectionaltransformation} for the execution of a synchronizing bidirectional transformation.
+This leads to \autoref{algo:synchronization:execute_synchronizing_bidirectional_transformation} for the execution of a synchronizing bidirectional transformation.
 %Step integrates both changes, comparable to ordinary step, but first treats changes to m2 as already applied, i.e., given models are inconsistent, then processes the changes in the opposite direction to generate necessary changes to restore consistency from them.
 
 \begin{algorithm}
     \input{algorithms/correctness/synchronization/execute_synchronizing_bidirectional_transformation.tex}
     \caption[Synchronizing execution of a bidirectional transformation]{Synchronizing execution of a bidirectional transformation.}
-    \label{algo:synchronization:executesynchronizingbidirectionaltransformation}
+    \label{algo:synchronization:execute_synchronizing_bidirectional_transformation}
 \end{algorithm}
 
 \mnote{Consistent termination of synchronizing transformation execution}
-This algorithm has the same properties as the one for the non-synchronizing case given in \autoref{algo:synchronization:executebidirectionaltransformation}.
+This algorithm has the same properties as the one for the non-synchronizing case given in \autoref{algo:synchronization:execute_bidirectional_transformation}.
 It does always terminate and either returns $\bot$ or a consistent pair of models.
 
 \begin{theorem}[Synchronizing Transformation Termination] % Synchronizing Bidirectional Transformation Consistent Termination %Synchronizing Bidirectional Transformation Execution]
     \label{theorem:synchronizingbidirectionaltransformationconsistencytermination}
     Let $\transformation{t} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}$ be a partial-consistency-improving bidirectional transformation.
-    Then \autoref{algo:synchronization:executesynchronizingbidirectionaltransformation} does always terminate and either returns $\bot$ or a consistent model pair.
+    Then \autoref{algo:synchronization:execute_synchronizing_bidirectional_transformation} does always terminate and either returns $\bot$ or a consistent model pair.
 \end{theorem}
 \begin{proof}
-    The algorithm is identical to \autoref{algo:synchronization:executebidirectionaltransformation}, except for Lines~\ref{algo:synchronization:executesynchronizingbidirectionaltransformation:line:synchronizationstart}--\ref{algo:synchronization:executesynchronizingbidirectionaltransformation:line:synchronizationend}, which add the initial synchronization step.
+    The algorithm is identical to \autoref{algo:synchronization:execute_bidirectional_transformation}, except for Lines~\ref{algo:synchronization:execute_synchronizing_bidirectional_transformation:line:synchronizationstart}--\ref{algo:synchronization:execute_synchronizing_bidirectional_transformation:line:synchronizationend}, which add the initial synchronization step.
     These lines add a single return statement that can return $\bot$.
     Since the return statement not returning $\bot$ is still preceded by the while loop having the loop condition that the model pair needs to be inconsistent, the argument of the proof for \autoref{lemma:bidirectionaltransformationconsistency} regarding non-synchronizing bidirectional transformations ensuring that only consistent models are returned still applies.
     Thus, we know the algorithm either returns $\bot$ or a consistent model pair.
@@ -653,7 +653,7 @@ Nevertheless, we can show that both have equal expressiveness, i.e., they can al
         = \change{\metamodel{M}{2}}'(\model{m}{2})
     \end{align*}
     So $\function{SyncEx}_{\transformation{t}}^1$ produces $\model{m}{1}^{s}$, $\model{m}{2}^{s}$ and $\change{\metamodel{M}{1}}^{s}$ for which we know that $\change{\metamodel{M}{1}}^{s}\model{m}{1}^{s})$ and $\model{m}{2}^{s}$ are consistent, because their equivalents $\change{\metamodel{M}{1}}'(\model{m}{1})$ and $\change{\metamodel{M}{2}}'(\model{m}{2})$ are consistent by assumption.
-    Thus, the execution of the synchronizing bidirectional transformation $\transformation{t}$ according to \autoref{algo:synchronization:executesynchronizingbidirectionaltransformation} terminates after the conditional statement in \autoref{algo:synchronization:executesynchronizingbidirectionaltransformation:line:synchronizationstart} with the same consistent models that are delivered the applying the changes calculated by the consistency preservation rule $\consistencypreservationrule{}$ of the assumed synchronizing transformation.
+    Thus, the execution of the synchronizing bidirectional transformation $\transformation{t}$ according to \autoref{algo:synchronization:execute_synchronizing_bidirectional_transformation} terminates after the conditional statement in \autoref{algo:synchronization:execute_synchronizing_bidirectional_transformation:line:synchronizationstart} with the same consistent models that are delivered the applying the changes calculated by the consistency preservation rule $\consistencypreservationrule{}$ of the assumed synchronizing transformation.
 
     With these construction approaches in both directions, we have shown that each synchronizing transformation can be expressed by a synchronizing bidirectional transformation and vice versa.
 \end{proof}
