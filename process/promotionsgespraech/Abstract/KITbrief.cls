@@ -250,7 +250,7 @@
         \pgftext[at=\pgfpoint{198mm}{6mm},right,base]
           {\fontsize{15pt}{18pt}\bfseries\color{KITfoot}\KIT@Web}
       \fi
-      \pgftext[at=\pgfpoint{189.65mm}{281mm},right,top]{\KIT@pgsz\thepage}
+      %\pgftext[at=\pgfpoint{189.65mm}{281mm},right,top]{\KIT@pgsz\thepage}
     \end{tikzpicture}%
     }
   \def\@oddfoot{}
