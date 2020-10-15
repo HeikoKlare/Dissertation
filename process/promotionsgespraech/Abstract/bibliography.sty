@@ -1,0 +1,57 @@
+\RequirePackage{hyperref}
+% \makeatletter
+% \newcommand{\blx@aux@read@bbl@mdfivesum}{}
+% \makeatother
+\usepackage[%
+	citestyle=numeric,%
+	style=numeric,%
+	doi=false,isbn=false,url=false,% no long URLs except for online resources
+	giveninits=true,% abbreviate first names
+	hyperref,% clickable citations
+	maxcitenames=1,% truncate author lists in citations
+	maxbibnames=99,
+	labelnumber,%  pass number of the bibliography entry to bibliography driver for numeric citation schemes
+	backend=biber,
+]{biblatex}
+
+\AtEveryBibitem{% Clean up the reference list rather than editing the entries
+	\clearname{editor}%
+	\clearlist{language}%
+	\clearfield{month}%
+	\clearlist{location}%
+	\clearfield{venue}
+%	\clearfield{series}
+	\clearfield{address}
+}
+\DeclareSourcemap{ 
+	\maps[datatype=bibtex]{
+		\map{
+			\step[fieldsource=series, match=Lecture Notes in Computer Science, replace=LNCS]
+			\step[fieldsource=publisher, match=\regexp{Gesellschaft .* Informatik}, replace=GI]
+			\step[fieldsource=publisher, match=\regexp{ \(GI\)}, replace=]           
+		}
+	}      
+}
+\AtEveryCitekey{% Clean up citations rather than editing the entries
+	\clearname{editor}%
+}
+% BEGIN link bib entries trying first doi then url
+% from http://tex.stackexchange.com/questions/48400/biblatex-make-title-hyperlink-to-dois-url-or-isbn
+\newbibmacro{string+doiurlisbn}[1]{%
+	\iffieldundef{doi}{%
+		\iffieldundef{url}{%
+			% \ifdraft{\PackageWarning{bibliography}{URL/DOI missing for entry: \thefield{author}, \thefield{title}}}{}
+	 		#1
+		}{%
+			\href{\thefield{url}}{#1}%
+		}%
+	}{%
+		\href{http://dx.doi.org/\thefield{doi}}{#1}%
+	}%
+}
+\DeclareFieldFormat{title}{\usebibmacro{string+doiurlisbn}{\mkbibemph{#1}}}
+\DeclareFieldFormat[article,incollection,inproceedings,thesis]{title}%
+    {\usebibmacro{string+doiurlisbn}{\mkbibquote{#1}}}
+% END link bib entries trying first doi then url
+
+\DeclareBibliographyCategory{ownpublications}
