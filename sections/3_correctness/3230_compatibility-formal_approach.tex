@@ -1,21 +1,23 @@
 \section{A Formal Approach to Prove Compatibility}
 \label{chap:compatibility:formal_approach}
 
-\begin{copiedFrom}{SoSym MPM4CPS}
+%\begin{copiedFrom}{SoSym MPM4CPS}
 
-In this section, we use the definition of compatibility to derive a formal approach for proving compatibility of consistency relations.
-The approach bases on two ideas:
+\mnote{Compatibility validation approach}
+In this section, we derive a formal approach for proving compatibility of consistency relations from the given definition.
+It bases on two ideas:
 \begin{longenumerate}
     \item A set of consistency relations in which each pair of classes is only related across one concatenation of relations is inherently compatible, because there cannot be any contradictory relations. We precisely define this in a specific notion of \emph{consistency relation trees}.
     \item A consistency relation that is redundant in a set of relations, i.e., a relation that does not alter the notion of consistency for models regarding the other relations in that set, does not affect compatibility and can thus be removed from that set of relations. % in which it is redundant.
 \end{longenumerate}
-Given a set of consistency relations, compatibility can be proven inductively if a consistency relation tree that is equivalent to the set of relations can be found by only removing redundant relations from that set.
-Finding such an equivalent consistency relation tree serves as a \emph{witness} for compatibility of a set of relations.
+Given a set of consistency relations, compatibility can be proven inductively if a consistency relation tree that is equivalent to the set of relations, or multiple such trees, can be found by only removing redundant relations from that set.
+Finding such equivalent consistency relation trees serves as a \emph{witness} for compatibility of a set of relations.
 In the following, we formalize and prove this inductive approach to check compatibility of a set of consistency relations.
 %This constitutes our contribution \ref{contrib:formalapproach}.
 
-The sketched approach for witnessing compatibility is based on a definition of equivalence for sets of consistency relations.
-We consider two sets of consistency relations equivalent if they consider the same sets of models as consistent:
+\mnote{Equivalence of consistency relations}
+The sketched approach is essentially based on a notion of equivalence for sets of consistency relations.
+We consider two sets of consistency relations equivalent if they consider the same model tuples consistent:
 
 \begin{definition}[Consistency Relations Equivalence]
 \label{def:equivalence}
@@ -23,36 +25,39 @@ We consider two sets of consistency relations equivalent if they consider the sa
     We say that:
     \begin{align*}
         &
-        \consistencyrelationset{CR}_{1} \equivalenttomath \consistencyrelationset{CR}_{2} \equivalentperdefinition \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \\
+        \consistencyrelationset{CR}_{1} \equivalenttomath \consistencyrelationset{CR}_{2} \equivalentperdefinition  \\
         %& \formulaskip
         %\forall \modelset{m} = \setted{\model{m}{1}, \dots \model{m}{k}}, \model{m}{i} \in \metamodelinstances{\metamodel{M}{i}} : \\ 
         & \formulaskip%\formulaskip
-        \modeltuple{m} \consistenttomath \consistencyrelationset{CR}_{1} \equivalent \modeltuple{m} \consistenttomath \consistencyrelationset{CR}_{2}
+        \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \modeltuple{m} \consistenttomath \consistencyrelationset{CR}_{1} \equivalent \modeltuple{m} \consistenttomath \consistencyrelationset{CR}_{2}
     \end{align*}
 \end{definition}
 
 %Two sets of consistency relations are considered equivalent if any set of models is either considered consistent or not by both of them in the same way.
 
-The goal of our approach is to find a set of consistency relations that is compatible and equivalent to a given consistency relation set.
-We will later use equivalence to introduce a specific notion of redundancy that is compatibility-preserving.
-In the following, we first consider structures of consistency relation sets that are inherently compatible and afterwards consider redundancy as a means to find an equivalent representation of a relation set that has such a structure.
+%The goal of our approach is to find a set of consistency relations that is compatible and equivalent to a given consistency relation set.
+\mnote{Usage of equivalence}
+We later use the notion of equivalence to introduce a specific notion of redundancy that is compatibility-preserving.
+In the following, we first consider structures of consistency relation sets that are inherently compatible and afterwards consider redundancy as a means to reduce and decompose a relation set into an equivalent composition of such inherently compatible structures.
 
 %%
 %% Properties for inherent compatibility
 %%
-We first consider two essential properties of a consistency relation set that lead to its inherent compatibility:
+\mnote{Inherent compatibility properties}
+We consider two properties of a consistency relation set that lead to its inherent compatibility:
 \begin{properdescription}
-    \item[Composability:] We show that the union of independent, compatible sets of consistency relations is compatible.
-    \item[Trees:] We show that relations fulfilling a special notion of \emph{consistency relation trees} are inherently compatible.
+    \item[Composability:] The union of independent, compatible sets of consistency relations is compatible.
+    \item[Trees:] Relations fulfilling a special notion of \emph{consistency relation trees} are inherently compatible.
 \end{properdescription}
-In consequence, we know that a consistency relation set that is composed of independent subsets of consistency relation trees is inherently compatible.
-Afterwards, we discuss how to find redundant consistency relations to be able to reduce and decompose sets of relations into compositions of independent consistency relation trees.
+In consequence of showing that these properties imply compatibility, we know that a consistency relation set of independent subsets of consistency relation trees is inherently compatible.
+%Afterwards, we discuss how to find redundant consistency relations to be able to reduce and decompose sets of relations into compositions of independent consistency relation trees.
 
 
 \subsection{Independence of Consistency Relations}
 \label{chap:compatibility:formal_approach:independence}
 
-We consider consistency relation sets as independent if there are no transitive consistency relations induced by relations from both sets, i.e., for each object in a model consistency is only restricted by one of those sets.
+\mnote{Independence of relation sets}
+We consider two consistency relation sets to be independent if the tuples of classes they put into relation are disjoint.
 
 \begin{definition}[Consistency Relation Sets Independence]
     \label{def:independence}
@@ -61,13 +66,10 @@ We consider consistency relation sets as independent if there are no transitive 
         &
         \consistencyrelationset{CR}_{1} \andmath \consistencyrelationset{CR}_{2} \mathtextspacearound{are independent} \equivalentperdefinition \\
         & \formulaskip
-        \forall \consistencyrelation{CR}{} \in \consistencyrelationset{CR}_{1} : \forall \consistencyrelation{CR}{}' \in \consistencyrelationset{CR}_{2} : %\\
-        %& \formulaskip 
-        \forall \consistencyrelation{CR}{1}, \dots, \consistencyrelation{CR}{k} \in \consistencyrelationset{CR}_{1} \cup \consistencyrelationset{CR}_{2} : \\
-        & \formulaskip\formulaskip
-        \consistencyrelation{CR}{} \concat \consistencyrelation{CR}{1} \concat \dots \concat \consistencyrelation{CR}{k} \concat \consistencyrelation{CR}{}' = \emptyset \\
-        & \formulaskip\formulaskip
-        \land \consistencyrelation{CR}{}' \concat \consistencyrelation{CR}{1} \concat \dots \concat \consistencyrelation{CR}{k} \concat \consistencyrelation{CR}{} = \emptyset
+        \bigcup_{\consistencyrelation{CR}{} \in \consistencyrelationset{CR}_1} \classtuple{C}{r,\consistencyrelation{CR}{}} \cap \bigcup_{\consistencyrelation{CR}{} \in \consistencyrelationset{CR}_2} \classtuple{C}{l,\consistencyrelation{CR}{}} = \emptyset \\
+        & \formulaskip
+        \land 
+        \bigcup_{\consistencyrelation{CR}{} \in \consistencyrelationset{CR}_2} \classtuple{C}{r,\consistencyrelation{CR}{}} \cap \bigcup_{\consistencyrelation{CR}{} \in \consistencyrelationset{CR}_1} \classtuple{C}{l,\consistencyrelation{CR}{}} = \emptyset
     \end{align*}
     We call $\consistencyrelationset{CR}$ \emph{connected} if there is no partition of a consistency relation set $\consistencyrelationset{CR}$ into two subsets that are independent, i.e.
     \begin{align*}
@@ -75,10 +77,66 @@ We consider consistency relation sets as independent if there are no transitive 
         \forall \consistencyrelationset{CR}_{1}, \consistencyrelationset{CR}_{2} \subseteq \consistencyrelationset{CR} : %\\
         %& \formulaskip 
         \consistencyrelationset{CR}_{1} \cap \consistencyrelationset{CR}_{2} = \emptyset \land \consistencyrelationset{CR}_{1} \cup \consistencyrelationset{CR}_{2} = \consistencyrelationset{CR}  \\
-        & \formulaskip\formulaskip
+        & \formulaskip%\formulaskip
         \Rightarrow \neg (\consistencyrelationset{CR}_{1} \andmath \consistencyrelationset{CR}_{2} \mathtextspacearound{are independent)}
     \end{align*}
 \end{definition}
+
+\mnote{More general independence notions}
+In fact, this notion of independence is not the most general one we can give to ensure preservation of compatibility.
+Such a notion would only require that for each condition element in any of the consistency relation sets still a consistent model tuple can be found when both consistency relation sets are considered together.
+This means that it is only necessary that for all instances of class tuples that may be required by one of the consistency relation sets to produce a consistent model tuple for each of the condition elements there is no condition element within the consistency relations of the other set.
+Since such a notion does, however, become more complicated to validate and the given one already reflects a reasonable notion of independence, which, as we will see later, is sufficient for all cases of our evaluation indicating general adequacy, we stick to the given notion of independence.
+
+% \mnote{Independence of relation sets}
+% We consider two consistency relation sets to be independent if there are no transitive consistency relations composed of relations from both sets, i.e., for each object in a model consistency is only restricted by one of those sets.
+% This means that the union of the transitive closure of both sets is equivalent to the transitive closure of the union of both sets.
+
+% \begin{definition}[Consistency Relation Sets Independence]
+%     \label{def:independence}
+%     Let $\consistencyrelationset{CR}_{1}$ and $\consistencyrelationset{CR}_{2}$ be two sets of consistency relations. We say that:
+%     \begin{align*}
+%         &
+%         \consistencyrelationset{CR}_{1} \andmath \consistencyrelationset{CR}_{2} \mathtextspacearound{are independent} \equivalentperdefinition \\
+%         & \formulaskip
+%         \transitiveclosure{(\consistencyrelationset{CR}_1 \cup \consistencyrelationset{CR}_2)} = \transitiveclosure{\consistencyrelationset{CR}_2} \cup \transitiveclosure{\consistencyrelationset{CR}_2}
+%     \end{align*}
+%     We call $\consistencyrelationset{CR}$ \emph{connected} if there is no partition of a consistency relation set $\consistencyrelationset{CR}$ into two subsets that are independent, i.e.
+%     \begin{align*}
+%         &
+%         \forall \consistencyrelationset{CR}_{1}, \consistencyrelationset{CR}_{2} \subseteq \consistencyrelationset{CR} : %\\
+%         %& \formulaskip 
+%         \consistencyrelationset{CR}_{1} \cap \consistencyrelationset{CR}_{2} = \emptyset \land \consistencyrelationset{CR}_{1} \cup \consistencyrelationset{CR}_{2} = \consistencyrelationset{CR}  \\
+%         & \formulaskip%\formulaskip
+%         \Rightarrow \neg (\consistencyrelationset{CR}_{1} \andmath \consistencyrelationset{CR}_{2} \mathtextspacearound{are independent)}
+%     \end{align*}
+% \end{definition}
+
+% \begin{definition}[Consistency Relation Sets Independence]
+%     \label{def:independence}
+%     Let $\consistencyrelationset{CR}_{1}$ and $\consistencyrelationset{CR}_{2}$ be two sets of consistency relations. We say that:
+%     \begin{align*}
+%         &
+%         \consistencyrelationset{CR}_{1} \andmath \consistencyrelationset{CR}_{2} \mathtextspacearound{are independent} \equivalentperdefinition \\
+%         & \formulaskip
+%         \forall \consistencyrelation{CR}{} \in \consistencyrelationset{CR}_{1} : \forall \consistencyrelation{CR}{}' \in \consistencyrelationset{CR}_{2} : %\\
+%         %& \formulaskip 
+%         \forall \consistencyrelation{CR}{1}, \dots, \consistencyrelation{CR}{k} \in \consistencyrelationset{CR}_{1} \cup \consistencyrelationset{CR}_{2} : \\
+%         & \formulaskip\formulaskip
+%         \consistencyrelation{CR}{} \concat \consistencyrelation{CR}{1} \concat \dots \concat \consistencyrelation{CR}{k} \concat \consistencyrelation{CR}{}' = \emptyset \\
+%         & \formulaskip\formulaskip
+%         \land \consistencyrelation{CR}{}' \concat \consistencyrelation{CR}{1} \concat \dots \concat \consistencyrelation{CR}{k} \concat \consistencyrelation{CR}{} = \emptyset
+%     \end{align*}
+%     We call $\consistencyrelationset{CR}$ \emph{connected} if there is no partition of a consistency relation set $\consistencyrelationset{CR}$ into two subsets that are independent, i.e.
+%     \begin{align*}
+%         &
+%         \forall \consistencyrelationset{CR}_{1}, \consistencyrelationset{CR}_{2} \subseteq \consistencyrelationset{CR} : %\\
+%         %& \formulaskip 
+%         \consistencyrelationset{CR}_{1} \cap \consistencyrelationset{CR}_{2} = \emptyset \land \consistencyrelationset{CR}_{1} \cup \consistencyrelationset{CR}_{2} = \consistencyrelationset{CR}  \\
+%         & \formulaskip%\formulaskip
+%         \Rightarrow \neg (\consistencyrelationset{CR}_{1} \andmath \consistencyrelationset{CR}_{2} \mathtextspacearound{are independent)}
+%     \end{align*}
+% \end{definition}
 
 \begin{figure}
     \centering
@@ -91,25 +149,43 @@ We consider consistency relation sets as independent if there are no transitive 
 %We call two consistency relation sets independent if the sets of elements that they relate to each other are completely independent of each other.
 \begin{example}
 \autoref{fig:compatibility:independence_example} depicts a simple example with two consistency relations $\consistencyrelation{CR}{1}$ and $\consistencyrelation{CR}{2}$, each relating instances of two disjoint classes with each other.
-Since there is no overlap in the objects that are related by the consistency relations, they are considered independent according to \autoref{def:independence}.
+Since there is no overlap in the classes that are related by the consistency relations, they are considered independent according to \autoref{def:independence}.
 \end{example}
 
-An important property of independent sets of consistency relations is that computing their union is compatibility-preserving, i.e., the union of compatible, independent consistency relation sets is compatible as well:
+An important property of independent consistency relation set is that computing their union is compatibility-preserving, i.e., the union of compatible, independent consistency relation sets is compatible as well:
 
+\todo{Revise to equivalence rather than unidirectional}
 \begin{theorem}[Independent Relation Sets Compatibility] \label{theorem:independencecompatibility}
-    Let $\consistencyrelationset{CR}_{1}$ and $\consistencyrelationset{CR}_{2}$ be two compatible sets of consistency relations. Then $\consistencyrelationset{CR}_{1} \cup \consistencyrelationset{CR}_{2}$ is compatible.
+    Let $\consistencyrelationset{CR}_{1}$ and $\consistencyrelationset{CR}_{2}$ be two sets of consistency relations. Then:
+    \begin{align*}
+        \consistencyrelationset{CR}_{1} \cup \consistencyrelationset{CR}_{2} \compatiblemath \equivalent \consistencyrelationset{CR}_{1} \compatiblemath \land \consistencyrelationset{CR}_{2} \compatiblemath
+    \end{align*}
 \end{theorem}
-
-\todoLater{Revise proof with explicit references to independence definition}
+% \begin{proof}
+%     Let us assume that $\consistencyrelationset{CR}_{1} \cup \consistencyrelationset{CR}_{2}$ is incompatible.
+%     This means there is a consistency relation $\consistencyrelation{CR}{} \in \consistencyrelationset{CR}_{1} \cup \consistencyrelationset{CR}_{2}$ with a condition element $\conditionelement{c}{} \in \condition{c}{l,\consistencyrelation{CR}{}}$ such that there is no model tuple $\modeltuple{m}$ containing $\conditionelement{c}{}$ that is consistent to $\consistencyrelationset{CR}_{1} \cup \consistencyrelationset{CR}_{2}$.
+%     Assume that, without loss of generality, $\consistencyrelation{CR}{} \in \consistencyrelationset{CR}_{1}$.
+%     Then there are model tuples $\modeltuple{m}$ containing $\conditionelement{c}{}$ that are consistent to $\consistencyrelationset{CR}_1$.
+%     We consider any of these model tuples $\modeltuple{m}$.
+%     $\modeltuple{m}$ is inconsistent to $\consistencyrelationset{CR}_2$, thus there is a consistency relation $\consistencyrelation{CR}{}' \in \consistencyrelationset{CR}_2$ that contains a condition element $\conditionelement{c}{l}' \in \condition{c}{l,\consistencyrelation{CR}{}'}$ with $\modeltuple{m} \containsmath \conditionelement{c}{l}'$ and for all $\conditionelement{c}{r}'$ with $\tupled{\conditionelement{c}{l}', \conditionelement{c}{r}} \in \consistencyrelation{CR}{}'$ we know that $\neg (\modeltuple{m} \containsmath \conditionelement{c}{r})$.
+% \end{proof}
 \begin{proof}
+    The forward direction of the equivalence is trivially given. 
+    Compatibility of the union of the consistency relation sets means that for every condition element in the consistency relations of the union, a model tuple containing that condition element which is consistent to the union of the consistency relation sets can be found. Then the same model tuple is consistent to each of the consistency relation sets and in particular the one containing the condition element.
+
+    The backward direction of the equivalence can be seen by construction.
     Since $\consistencyrelationset{CR}_{1}$ is compatible, per definition there is a model tuple $\modeltuple{m}$ for each condition element $\conditionelement{c}{}$ of the left condition of each consistency relation in $\consistencyrelationset{CR}_{1}$ that contains $\conditionelement{c}{}$ and that is consistent to $\consistencyrelationset{CR}_{1}$.
-    Taking such an $\modeltuple{m}$, we create a new $\modeltuple{m'}$ by removing all elements from $\modeltuple{m}$, which are contained in any condition elements in any consistency relation in $\consistencyrelationset{CR}_{2}$ and thus potentially require other elements to occur to be considered consistent to that consistency relation.
-    In consequence, $\modeltuple{m'}$ does not contain any condition elements from consistency relations in $\consistencyrelationset{CR}_{2}$ and is thus consistent to $\consistencyrelationset{CR}_{2}$ by definition. 
-    Additionally, $\modeltuple{m'}$ is still consistent to $\consistencyrelationset{CR}_{1}$, because due to the independence of $\consistencyrelationset{CR}_{1}$ and $\consistencyrelationset{CR}_{2}$, there cannot be any consistency relations in $\consistencyrelationset{CR}_{1}$, which require the existence of the removed elements.
+    Taking any such $\modeltuple{m}$, we create a new $\modeltuple{m'}$ by removing all elements from $\modeltuple{m}$ that are contained in any condition elements of the left conditions in any consistency relation $\consistencyrelation{CR}{} \in \consistencyrelationset{CR}_{2}$ and thus potentially require other elements to occur to be considered consistent to that consistency relation.
+    The classes of these elements are thus in $\classtuple{C}{l,\consistencyrelation{CR}{}}$.
+    In consequence, $\modeltuple{m'}$ does not contain any condition elements in left conditions of consistency relations in $\consistencyrelationset{CR}_{2}$ and is thus consistent to $\consistencyrelationset{CR}_{2}$ by definition. 
+    Additionally, $\modeltuple{m'}$ is still consistent to $\consistencyrelationset{CR}_{1}$, because due to the independence of $\consistencyrelationset{CR}_{1}$ and $\consistencyrelationset{CR}_{2}$, there cannot be any consistency relation $\consistencyrelation{CR}{}' \in \consistencyrelationset{CR}_{1}$, which require the existence of the removed elements.
+    Otherwise, the classes of these elements would be in $\classtuple{C}{r,\consistencyrelation{CR}{}'}$.
+    Per definition of independence, however, $\classtuple{C}{l,\consistencyrelation{CR}{}} \cap \classtuple{C}{r,\consistencyrelation{CR}{}'} = \emptyset$, which is a contradiction.
     In consequence, for each condition element $\conditionelement{c}{}$ of each consistency relation in $\consistencyrelationset{CR}_{1}$ there is a model tuple that contains $\conditionelement{c}{}$ and that is consistent to $\consistencyrelationset{CR}_{1} \cup \consistencyrelationset{CR}_{2}$.
     The analogous argumentation applies to the consistency relations in $\consistencyrelationset{CR}_{2}$, which is why the definition of compatibility is fulfilled for all condition elements of all consistency relations in $\consistencyrelationset{CR}_{1} \cup \consistencyrelationset{CR}_{2}$.
 \end{proof}
 
+\mnote{Construtive proof example}
 The constructive proof can also be reflected exemplarily in \autoref{fig:compatibility:independence_example}: Take any tuple of models that, for example, contains a resident with an arbitrary name and is consistent to $\consistencyrelation{CR}{1}$, i.e., that also contains an employee with the same name.
 If that tuple of models contains any addresses or locations, they can be removed %without removing the resident from the model and 
 without violating consistency to $\consistencyrelation{CR}{1}$, because addresses and locations are independently related by $\consistencyrelation{CR}{2}$.
@@ -119,10 +195,11 @@ without violating consistency to $\consistencyrelation{CR}{1}$, because addresse
 
 \subsection{Consistency Relation Trees}
 
-\mnote{Intuitively, trees are compatible}
-We want to find a property or specific structure of consistency relation sets, which leads to inherent consistency of the contained relations.
-If we can then prove for a set of relations that we reduce it to such a structure in a compatibility-preserving way, we know that the relations are compatible.
-Intuitively, such a structure is given by a kind of trees, because then there are no two concatenations of consistency relations which can relate elements in a contradictory way.
+\mnote{Intuitive tree notion}
+In addition to independence of consistency relation sets as a property that inherently implies compatibility, we aim at finding a specific structure of a connected consistency relation set, which leads to inherent compatibility of the contained relations.
+In consequence, if we can reduce sets of consistency relations to independent sets of such a structure in a compatibility-preserving way, we know that the relations are compatible.
+%If we can then prove for a set of relations that we reduce it to such a structure in a compatibility-preserving way, we know that the relations are compatible.
+Intuitively, such a structure can be expected from a kind of trees, because then there are no two concatenations of relations that can relate elements in a contradictory way.
 
 \begin{figure}
     \centering
@@ -131,20 +208,20 @@ Intuitively, such a structure is given by a kind of trees, because then there ar
     \label{fig:compatibility:hypertree}
 \end{figure}
 
-\mnote{Relations may be compatible if their induced hypergraphs are hypertrees}
-Since consistency relations put tuple of classes into relation, it may seem natural to use a hypergraph, consisting of the classes as vertices and the class tuples of the consistency relations as hyperedges, to describe them, and expect that if the hypergraph induced by the consistency relations forms a hypertree\footnote{A hypergraph is a hypertree if there is a tree, such that every edge of the hypergraph is a set of vertices of a connected subtree of the tree~\cite{brandstaedt1998hypertrees}. Such a tree is called a \emph{host graph}.}, it is compatible.
+\mnote{Hypertrees for compatibility}
+Since consistency relations put tuples of classes into relation, it may seem natural to use a hypergraph, consisting of the classes as vertices and the class tuples of the consistency relations as hyperedges, to describe them, and expect that if the hypergraph induced by the consistency relations forms a hypertree\footnote{A hypergraph is a hypertree if there is a tree, such that every edge of the hypergraph is a set of vertices of a connected subtree of the tree~\cite{brandstaedt1998hypertrees}. Such a tree is called a \emph{host graph}.}, it is compatible.
 An example for a hypertree is depicted in \autoref{fig:compatibility:hypertree}.
 It consists of two hyperedges, one only relating persons and residents and one relating persons with residents and their address locations.
 This is a scenario that may occur when one consistency relation puts persons and residents with their names into relation, and another describes the relation of their addresses.
 These relations form a hypertree, as there is a tree, depicted in the figure, of which the vertices of all hyperedges are connected subtrees.
 
-\mnote{Relations inducing hypertrees are not necessarily compatible}
-The relations in the example may, however, not be necessarily compatible.
+\mnote{Hypertrees not inducing compatibility}
+The relations in the example may, however, not necessarily be compatible.
 They can, for example, define a contradictory relation between the names of persons and residents.
 In general, hypertrees induced by consistency relations are not necessarily compatible, because hyperedges can be subsets of other hyperedges and the relations inducing these hyperedges may contradict each other.
-Additionally, the hyperedges to do only put sets of classes into relation and are not able distinguish between the sets belonging to different metamodels.
+Additionally, the hyperedges do only put sets of classes into relation and are not able to distinguish between the sets that belong to different metamodels.
 Thus, we have to exclude that the same classes are put into relation by multiple consistency relations in a different way.
-This leads to our definition consistency relation trees.
+This leads to the following definition of consistency relation trees.
 
 \todoLater{Maybe we can remove symmetry and define some restriction for inverse relations. It could be useful to think about implicit relations, which are induced by another one, so that the "signatures" of forward and backward direction match.}
 \begin{definition}[Consistency Relation Tree] \label{def:relationtree}
@@ -195,7 +272,8 @@ This leads to our definition consistency relation trees.
 \end{definition}
 \todoLater{We have to assume, that no element is mapped to two elements of the same class, because then it would be possible to have an incompatible network}
 
-The definition of a consistency relation tree requires that there are no sequences of consistency relations that put the same classes into relation, i.e. between all pairs of classes there is only one concatenation of consistency relations that puts them into relation.
+\mnote{Relation tree definition}
+The definition of a consistency relation tree requires that there are no sequences of consistency relations that put the same classes into relation, i.e., between all pairs of classes there is only one concatenation of consistency relations that puts them into relation.
 Since we assume a symmetric set of consistency relations, we exclude the symmetric relations from that argument, as otherwise there would always be two such concatenations by adding a consistency relation and its transposed relation to any other concatenation.
 
 \begin{figure}
@@ -208,21 +286,21 @@ Since we assume a symmetric set of consistency relations, we exclude the symmetr
 
 \begin{example}
 \autoref{fig:compatibility:tree_example} depicts a rather simple consistency relation tree. 
-Persons are related to residents and residents are related to employees, all having the same names respectively a concatenation of $\mathvariable{firstname}$ and $\mathvariable{lastname}$, by the relations $\consistencyrelation{CR}{1}, \consistencyrelation{CR}{2}$, as well as their transposed relations $\consistencyrelation{CR}{1}^T, \consistencyrelation{CR}{2}^T$.
+Persons are related to residents and residents are related to employees, all having the same names or a concatenation of $\mathvariable{firstname}$ and $\mathvariable{lastname}$, respectively, by the relations $\consistencyrelation{CR}{1}, \consistencyrelation{CR}{2}$, as well as their transposed relations $\consistencyrelation{CR}{1}^T, \consistencyrelation{CR}{2}^T$.
 There are no classes that are put into relation across different paths of consistency relations, thus the definition for a consistency relation tree is fulfilled. 
 If an additional relation between persons and employees was specified, like in \autoref{fig:compatibility:three_persons_example_extended}, the tree definition would not be fulfilled.
 \end{example}
 
+\mnote{Compatibility of relation trees}
 The definition also covers the more complicated case in which multiple classes may be put into relation by consistency relations but there is only a subset of them that is put into relation by different consistency relations.
 %
 %\todoDiss{Subsection with discussion about why hypertrees are not suitable here}
 %
 We can now prove that a set of consistency relations that is a consistency relation tree is always compatible.
-To not disturb the reading flow due to the complexity of the proof for that statement, the complete proof with an auxiliary lemma can be found in \autoref{chap:appendix:compatibility_proofs}.
-We only provide a proof sketch in the following.
+To preserve the reading flow, we only provide a proof sketch in the following and refer for the complete proof with an auxiliary lemma to \autoref{chap:appendix:compatibility_proofs}.
 
 \begin{theorem}[Consistency Relation Tree Compatibility] \label{theorem:treecompatibility}
-    Let $\consistencyrelationset{CR}$ be a consistency relation tree, then $\consistencyrelationset{CR}$ is compatible.
+    Let $\consistencyrelationset{CR}$ be a consistency relation tree. Then $\consistencyrelationset{CR}$ is compatible.
 \end{theorem}
 
 \begin{figure}
@@ -236,7 +314,7 @@ We only provide a proof sketch in the following.
 \begin{proof}[Proof Sketch]
     The complete proof is given in \autoref{chap:appendix:compatibility_proofs}.
     It is based on a proven lemma stating that in a consistency relation tree, starting with each of the consistency relations there is a sequence of the consistency relations such that there is no overlap in the classes of the conditions at the right sides of these relations and that for each relation there is no overlap in the classes of the condition at the left side with the ones at the right side of any subsequent relation in the sequence.
-    More informally speaking, the relations induce no cycle between any of the classes in the metamodels.
+    More informally speaking, the relations do not induce a cycle between any of the classes in the metamodels.
     We can use this insight to define a construction approach for such sequences given a set of consistency 
     relations that forms a consistency relation tree.
     For proving compatibility, we need to show that for each condition element in a consistency relation we are able to find a consistent model tuple that contains this condition element.
@@ -251,6 +329,7 @@ We only provide a proof sketch in the following.
 %%
 %% Summary: Independent trees are compatible
 %%
+\mnote{Compatibility of independence and trees}
 Summarizing, \autoref{theorem:independencecompatibility} and \autoref{theorem:treecompatibility} have shown that consistency relation sets fulfilling a special notion of trees are compatible and that combining compatible independent sets of relations is compatibility-preserving.
 In consequence, having a consistency relation set that consists of independent subsets that are consistency relation trees, this set of relations is inherently compatible.
 An approach that evaluates whether a given set of consistency relations fulfills \autoref{def:independence} and \autoref{def:relationtree} for independence and trees can be used to prove compatibility of those relations.
@@ -258,7 +337,8 @@ An approach that evaluates whether a given set of consistency relations fulfills
 %%
 %% Transition: Actual sets may generally not be trees
 %%
-However, consistency relations fulfill such a structure only in specific cases.
+\mnote{Inherent compatibility as special case}
+Consistency relations, however, fulfill such a structure only in specific cases.
 In general, like in our motivational example in \autoref{fig:compatibility:three_persons_example_extended}, there may be different consistency relations putting the same elements into relation, such that the definition for consistency relation trees is not fulfilled.
 In the following, we discuss how to find a consistency relation tree that is equivalent to a given set of consistency relations, such that this equivalence witnesses compatibility.
 
@@ -272,15 +352,17 @@ In the following, we discuss how to find a consistency relation tree that is equ
 %%
 %% Problem: Not having a compatible structure, compatibility is unclear
 %%
+\mnote{Not inherently compatible sets}
 We have introduced specific structures of consistency relations that are inherently compatible.
 If a given set of consistency relations does not represent one of those structures, especially because there are multiple consistency relations putting the same classes into relation, it is unclear whether such a set is compatible.
 
 %%
 %% Idea: Find and virtually remove redundant relations
 %%
-In the following, we present an approach to reduce a set of consistency relations to a structure of independent consistency relation trees.
-The essential idea is to find relations within the set, which do not change compatibility of the consistency relation set whether or not they are contained in it.
-An approach that finds such relations and, for the scope of the analysis,, removes them from the set until the remaining relations form a set of independent consistency relation trees, proves compatibility of the given set of relations.
+\mnote{Compatibility preservation}
+In the following, we present an approach to reduce the relations in a set of consistency relations to, in the best case, a set of independent consistency relation trees.
+The essential idea is to identify relations within the set that do not change compatibility of the consistency relation set whether or not they are contained in it.
+An approach that finds such relations and, for the scope of the analysis, removes them from the set until the remaining relations form a set of independent consistency relation trees, proves compatibility of the given set of relations.
 We first define the term of a \emph{compatibility-preserving} relation.
 
 \begin{definition}[Compatibility-Preserving Consistency Relation]
@@ -294,7 +376,8 @@ We first define the term of a \emph{compatibility-preserving} relation.
     \end{align*}
 \end{definition}
 
-To be able to find such a compatibility-preserving relation, we introduce the notion of \emph{redundant} relations and prove the property of being compatibility preserving.
+\mnote{Redundant relations}
+To find such compatibility-preserving relations, we introduce the notion of \emph{redundant} relations and prove the property of being compatibility preserving.
 Informally speaking, a relation is redundant if it is expressed transitively across others, i.e., if it does not restrict or relax consistency compared to a combination of other relations.
 We precisely specify a notion of redundancy in the following.
 
@@ -346,9 +429,10 @@ We precisely specify a notion of redundancy in the following.
 
 \todoLater{Add examples for redundancy! How do the elements of the redundant relation have to be related to the ones in $\consistencyrelation{CR}{}'$?}
 \todoLater{Can we define an even more general notion of redundancy, not stating about the relation to a single consistency relation but the set of consistency relation, abstracting the implication to consistency to the whole set of relations?}
+\mnote{Redundancy ensures equivalence}
 The definition of redundancy of a consistency relation $\consistencyrelation{CR}{}$ ensures that there is another consistency relation, possibly transitively expressed across others, such that if a model is consistent to that other relation, it is also consistent to $\consistencyrelation{CR}{}$.
 This means that there are no model tuples that are considered inconsistent to $\consistencyrelation{CR}{}$, but not to another relation, thus $\consistencyrelation{CR}{}$ does not restrict consistency.
-Actually, the definition of redundancy implies that the set of consistency relations with and without the redundant one are equivalent according to \autoref{def:equivalence}, thus both consider the same model tuples as consistent.
+Actually, the definition of redundancy implies that the set of consistency relations with and without the redundant one are equivalent according to \autoref{def:equivalence}, thus both consider the same model tuples to be consistent.
 
 % The definition of redundancy ensures that the redundant relation does not provide any relaxation (first equivalence) or restriction (second equivalence) regarding existing consistency relations and that there is at least one overlapping consistency relation, as otherwise the relation will always restrict consistent models.
 % Intuitively, redundancy could also be defined by requiring equivalence of the set of consistency relations with and without the redundant relation. In that case, exactly the same models would be considered consistent with and without the redundant relation.
@@ -362,7 +446,7 @@ Actually, the definition of redundancy implies that the set of consistency relat
 \end{lemma}
 
 \begin{proof}
-    Like discussed in \autoref{lemma:consistencytransitiveclosure}, adding a consistency relation to a set of consistency relations can never lead to a relaxation of consistency, i.e., models becoming consistent that were not considered consistent before. This is a direct consequence of \autoref{def:consistency} for consistency, which requires models be consistent to all consistency relations in a set to be considered consistent, thus restricting the set of consistent model tuples by adding further consistency relations.
+    As discussed in \autoref{lemma:consistencytransitiveclosure}, adding a consistency relation to a set of consistency relations can never lead to a relaxation of consistency, i.e., models becoming consistent that were not considered consistent before. This is a direct consequence of \autoref{def:consistency} for consistency, which requires models be consistent to all consistency relations in a set to be considered consistent, thus restricting the set of consistent model tuples by adding further consistency relations.
     In consequence, it holds that:
     \begin{align*}
         \formulaskip
@@ -404,6 +488,7 @@ Actually, the definition of redundancy implies that the set of consistency relat
     \label{fig:compatibility:redundancyrelationextremes}
 \end{figure}
 
+\mnote{Redundancy by weaker consistency requirements}
 In general, to consider a consistency relation redundant in %a set of consistency relation
 $\consistencyrelationset{CR}$, it has to define equal or weaker requirements for consistency than one of the other relations in $\consistencyrelationset{CR}$.
 Informally speaking, such weaker requirements mean that the redundant relation must have weaker conditions, i.e., it must require consistency for less objects and consider the same or more objects consistent to each of the left condition elements. %, i.e., it must have a weaker left condition, and consider the same or more elements consistent to those of the left condition.
@@ -457,11 +542,12 @@ In case of $\consistencyrelation{CR}{1}$, it only requires an employee to exist 
     \label{fig:compatibility:redundancy_compatibility_counterexample}
 \end{figure}
 
+\mnote{Redundancy not preserving compatibility}
 Our goal is to have a compatibility-preserving notion of redundancy, i.e., adding a redundant relation to a compatible relation set should preserve compatibility.
-Unfortunately, our intuitive redundancy definition is not compatibility-preserving. % with our intuitive notion of redundancy, a consistency relation $\consistencyrelation{CR}{}$ that is redundant to a compatible set of consistency relations $\consistencyrelationset{CR}$ does not imply that $\consistencyrelationset{CR} \cup \setted{\consistencyrelation{CR}{}}$ is compatible.
+Unfortunately, the yet given intuitive redundancy definition is not compatibility-preserving. % with our intuitive notion of redundancy, a consistency relation $\consistencyrelation{CR}{}$ that is redundant to a compatible set of consistency relations $\consistencyrelationset{CR}$ does not imply that $\consistencyrelationset{CR} \cup \setted{\consistencyrelation{CR}{}}$ is compatible.
 
 \begin{proposition}[Redundant Relations Non-Compatibility] \label{prop:redundantnotimpliescompatible}
-    Let $\consistencyrelationset{CR}$ be a compatible set of consistency relations and let $\consistencyrelation{CR}{}$ be a consistency relation that is redundant in $\consistencyrelationset{CR} \cup \setted{\consistencyrelation{CR}{}}$.
+    Let $\consistencyrelationset{CR}$ be a compatible consistency relation set and let $\consistencyrelation{CR}{}$ be a consistency relation that is redundant in $\consistencyrelationset{CR} \cup \setted{\consistencyrelation{CR}{}}$.
     Then $\consistencyrelation{CR}{}$ is in general not compatibility-preserving, i.e., $\consistencyrelationset{CR} \cup \setted{\consistencyrelation{CR}{}}$ is in general not compatible.
     % it holds that:
     % \begin{align*}
@@ -474,15 +560,16 @@ Unfortunately, our intuitive redundancy definition is not compatibility-preservi
 We prove the proposition by providing a counterexample. % for the implication.
 Consider the example in \autoref{fig:compatibility:redundancy_compatibility_counterexample}. 
 $\consistencyrelation{CR}{2}$ relates each employee to a person with the same name and $\consistencyrelation{CR}{3}$ relates each person to a resident with the same name in lowercase.
-The consistency relation set $\setted{\consistencyrelation{CR}{2}, \consistencyrelation{CR}{3}}$ is obviously compatible, because for each employee and each person, which constitute the left condition elements of the consistency relations, a consistent model tuple containing the person respectively employee can be created by adding the appropriate person or employee with the same name and a resident with the name in lowercase.
+The consistency relation set $\setted{\consistencyrelation{CR}{2}, \consistencyrelation{CR}{3}}$ is obviously compatible, because for each employee and each person, which constitute the left condition elements of the consistency relations, a consistent model tuple containing the person and employee, respectively, can be created by adding the appropriate person or employee with the same name and a resident with the name in lowercase.
 Furthermore, $\consistencyrelation{CR}{1}$ is redundant in $\setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR}{2}, \consistencyrelation{CR}{3}}$ according to \autoref{def:redundancy}, because if a model is consistent to $\consistencyrelation{CR}{2}$ it is also consistent to $\consistencyrelation{CR}{1}$, since $\consistencyrelation{CR}{1}$ also requires persons with the same name as an employee to be contained in a model tuple but in less cases, precisely only those in which the model also contains a resident such that the employee name is the one of the resident in uppercase.
 
-However, $\setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR}{2}, \consistencyrelation{CR}{3}}$ is not compatible.
+$\setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR}{2}, \consistencyrelation{CR}{3}}$ is, however, not compatible.
 Intuitively, this is due to the fact that $\consistencyrelation{CR}{1}$ and $\consistencyrelation{CR}{3}$ define an incompatible mapping between the names of residents and persons.
 This is also reflected by \autoref{def:compatibility} for compatibility. Take a model with an employee and a resident named $A$. This is a condition element in $\condition{c}{l,\consistencyrelation{CR}{1}}$. 
-Consequentially, $\consistencyrelation{CR}{1}$ requires a person $A$ to exist. Furthermore $\consistencyrelation{CR}{3}$ requires a resident with name $a$ to exist.
-In consequence, there are two tuples of employees and residents, both with employee $A$ and one with resident $A$ respectively resident $a$ each, for which a consistent person with name $A$ is required by $\consistencyrelation{CR}{1}$.
-However, $\consistencyrelation{CR}{1}$ actually forbids to have two residents, one having the lowercase name of the other, because both are condition elements in $\consistencyrelation{CR}{1}$ requiring an appropriate person to occur in a consistent model, but there is only one person to which both can be mapped, namely the one with the uppercase name, so there is no witness structure with a unique mapping as required by \autoref{def:consistency} for consistency.
+Consequentially, $\consistencyrelation{CR}{1}$ requires a person $A$ to exist. Furthermore $\consistencyrelation{CR}{3}$, requires a resident with name $a$ to exist.
+In consequence, there are two tuples of employees and residents, both with the employee $A$ and one with resident $A$ as well as one with resident $a$, for which a consistent person with name $A$ is required by $\consistencyrelation{CR}{1}$.
+However, $\consistencyrelation{CR}{1}$ actually forbids to have two residents, one having the lowercase name of the other, because both are condition elements in $\consistencyrelation{CR}{1}$ requiring an appropriate person to occur in a consistent model, but there is only one person to which both can be mapped, namely the one with the uppercase name.
+In consequence, there is no witness structure with a unique mapping as required by \autoref{def:consistency} for consistency.
 This example shows that adding a redundant consistency relation to a compatible set of consistency relations does not lead to a compatible consistency relation set.
 \end{proof}
 
@@ -490,10 +577,11 @@ This example shows that adding a redundant consistency relation to a compatible 
 
 \subsection{Compatibility-Preserving Redundancy}
 
+\mnote{Stronger redundancy definition}
 In consequence of \autoref{prop:redundantnotimpliescompatible}, we need a stronger definition of redundancy that is compatibility-preserving. 
 %to be able to derive compatibility for a consistency relation set from adding a redundant relation to an already compatible consistency relation set.
 In the example in \autoref{fig:compatibility:redundancy_compatibility_counterexample} showing \autoref{prop:redundantnotimpliescompatible}, we have seen that it is problematic if a redundant consistency relation considers more classes in its left condition than the relation it is redundant to.
-Therefore, we restrict the left class tuple.
+For that reason, we define a stronger notion that restricts the left class tuple.
 
 \begin{definition}[Left-Equal Redundant Consistency Relation] \label{def:leftequalredundancy}
     Let $\consistencyrelationset{CR}$ be a set of consistency relations for a metamodel tuple $\metamodeltuple{M}$.
@@ -521,24 +609,24 @@ Therefore, we restrict the left class tuple.
 %The definition of left-equal redundancy restricts the notion of redundancy to cases in which the left side of the redundant consistency relation $\consistencyrelation{CR}{}$ considers instances of the same classes as another relation in the set of consistency relations.
 %As discussed before, redundancy in general allows that the left side of a redundant consistency relation $\consistencyrelation{CR}{}$ considers more classes than another relation in the set of consistency relations that induces consistency of a model set to $\consistencyrelation{CR}{}$, according to the definition of redundancy.
 
-The definition of left-equal redundancy is similar to the redundancy definition but restricts the notion of redundancy to cases in which the left condition of the redundant consistency relation $\consistencyrelation{CR}{}$ considers the same classes than the other relation in the set of consistency relations that induces consistency of a model tuple to $\consistencyrelation{CR}{}$.
+\mnote{Left-equal redundancy}
+The definition of left-equal redundancy is similar to the redundancy definition but restricts the notion of redundancy to cases in which the left condition of the redundant consistency relation $\consistencyrelation{CR}{}$ considers the same classes as the other relation in the set of consistency relations that induces consistency of a model tuple to $\consistencyrelation{CR}{}$.
 As discussed before, redundancy in general allows that the left condition of a redundant consistency relation can consider a superset of those classes. %than another relation in the set of consistency relations that induces consistency of a model set to $\consistencyrelation{CR}{}$, according to the definition of redundancy.
 
 \begin{lemma}[Left-Equal Redundancy to Redundancy] \label{lemma:leftequalredundancyimpliesredundancy}
     Let $\consistencyrelation{CR}{}$ be a consistency relation that is left-equal redundant in a set of consistency relations $\consistencyrelationset{CR}$. Then $\consistencyrelation{CR}{}$ is redundant in $\consistencyrelationset{CR}$.
 \end{lemma}
-
 \begin{proof}
-    Since the definition of left-equal redundancy is equal to the one for redundancy, apart from the additional restriction for the class tuples, redundancy of a left-equal redundant relation is a direct implication of the definition.
+    Since the definition of left-equal redundancy is equal to the one for redundancy, except for the additional class tuple restriction, redundancy of a left-equal redundant relation is a direct implication of the definition.
 \end{proof}
 
-
+\mnote{Redundancy of condition elements}
 Before showing that left-equal redundancy is compatibility-preserving, we introduce an auxiliary lemma that shows that if a model tuple contains any left condition element of a left-equal redundant relation, i.e., if that redundant relation requires the model tuple to contain corresponding elements for that object tuple to be consistent, there is also another relation that requires corresponding elements for that object tuple.
 
 %In the following, we will show that the notion of left-equal redundancy, in comparison to the weaker general redundancy property, can be used to inductively prove compatibility of a set of consistency relations.
 
 \begin{lemma}[Left-Equal Redundancy Containment] \label{lemma:leftequalredundancysubset}
-    Let $\consistencyrelation{CR}{}$ be a consistency relation that is left-equal redundant in a set of consistency relations $\consistencyrelationset{CR}$ for a tuple of metamodels $\metamodeltuple{M}$. Then it holds that: 
+    Let $\consistencyrelation{CR}{}$ be a consistency relation that is left-equal redundant in a consistency relation set $\consistencyrelationset{CR}$ for a metamodel tuple $\metamodeltuple{M}$. Then it holds that: 
     \begin{align*}
         &
         \exists \consistencyrelation{CR}{}' \in \transitiveclosure{(\consistencyrelationset{CR} \setminus \setted{\consistencyrelation{CR}{}})} : 
@@ -552,13 +640,13 @@ Before showing that left-equal redundancy is compatibility-preserving, we introd
 \end{lemma}
 %
 \begin{proof}
-    Due to left-equal redundancy of $\consistencyrelation{CR}{}$ in $\consistencyrelationset{CR}$, we know per definition that:
+    Due to left-equal redundancy of $\consistencyrelation{CR}{}$ in $\consistencyrelationset{CR}$, we know per definition:
     \begin{align*}
         &
         \exists \consistencyrelation{CR}{}' \in \transitiveclosure{(\consistencyrelationset{CR} \setminus \setted{\consistencyrelation{CR}{}})} :
         \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \\
         & \formulaskip
-        \modeltuple{m} \consistenttomath \consistencyrelation{CR}{}' \Rightarrow \modeltuple{m} \consistenttomath \consistencyrelation{CR}{} %\\
+        (\modeltuple{m} \consistenttomath \consistencyrelation{CR}{}' \Rightarrow \modeltuple{m} \consistenttomath \consistencyrelation{CR}{}) %\\
         %& \formulaskip
         \land 
         \classtuple{C}{l,\consistencyrelation{CR}{}} = \classtuple{C}{l,\consistencyrelation{CR}{}'}
@@ -633,7 +721,7 @@ Before showing that left-equal redundancy is compatibility-preserving, we introd
 %
 \begin{proof}
     Due to left-equal redundancy of $\consistencyrelation{CR}{}$ in $\consistencyrelationset{CR} \cup \setted{\consistencyrelation{CR}{}}$, which also implies general redundancy according to \autoref{def:redundancy}, $\consistencyrelationset{CR}$ and $\consistencyrelationset{CR} \cup \setted{\consistencyrelation{CR}{}}$ are equivalent, according to \autoref{lemma:redundancyimpliesequivalence}.
-    Due to that equivalence, we know that for any model tuple $\modeltuple{m} \in \metamodeltupleinstanceset{M}$:
+    Due to that equivalence, we know that for every model tuple $\modeltuple{m} \in \metamodeltupleinstanceset{M}$:
     \begin{equation} \label{eq:redundancyconsistency}
         \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \equivalent     \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \cup \setted{\consistencyrelation{CR}{}}
     \end{equation}
@@ -787,6 +875,7 @@ Before showing that left-equal redundancy is compatibility-preserving, we introd
     This is an inductive implication of \autoref{theorem:redundancycompatibility}, because $\consistencyrelationset{CR}$ is compatible and sequentially adding $\consistencyrelation{CR}{i}$ to $\consistencyrelationset{CR} \cup \setted{\consistencyrelation{CR}{1}, \dots, \consistencyrelation{CR}{i-1}}$ ensures that $\consistencyrelationset{CR} \cup \setted{\consistencyrelation{CR}{1}, \dots, \consistencyrelation{CR}{i}}$ is compatible, because $\consistencyrelationset{CR} \cup \setted{\consistencyrelation{CR}{1}, \dots, \consistencyrelation{CR}{i-1}}$ was compatible as well.
 \end{proof}
 
+\mnote{Proving compatibility}
 With \autoref{corollary:transitiveredundancycompatibility}, we have shown that if we have a set of consistency relations $\consistencyrelationset{CR}$ and are able to find a sequence of redundant consistency relations $\consistencyrelation{CR}{1}, \dots, {\consistencyrelation{CR}{k}}$ according to \autoref{corollary:transitiveredundancycompatibility} such that we know that $\consistencyrelationset{CR} \setminus \setted{ \consistencyrelation{CR}{1}, \dots, {\consistencyrelation{CR}{k}}}$ is compatible, then it is proven that $\consistencyrelationset{CR}$ is compatible.
 
 
@@ -794,6 +883,7 @@ With \autoref{corollary:transitiveredundancycompatibility}, we have shown that i
 \subsection{An Algorithm to Prove Compatibility} % Trees, Independence and Redundancy for Witnessing Compatibility
 \label{chap:compatibility:formal_approach:algorithm}
 
+\mnote{Insights for compatibility}
 In the previous sections, we have proven the following three central insights:
 \begin{longenumerate}
     \item Compatibility is composable: If independent sets of consistency relations are compatible, then their union is compatible as well (\autoref{theorem:independencecompatibility}).
@@ -801,6 +891,7 @@ In the previous sections, we have proven the following three central insights:
     \item Left-equal redundancy is compatibility-preserving: Adding a left-equal redundant consistency relation to a compatible set of consistency relations, that set unified with the redundant relation is still compatible (\autoref{corollary:transitiveredundancycompatibility}).
 \end{longenumerate}
 
+\mnote{Iterative process}
 These insights enable us to define a formal approach for proving compatibility of a set of consistency relations.
 Given a set of relations for which compatibility shall be proven, we search for consistency relations in that set that are left-equal redundant to it.
 If iteratively removing such redundant relations from the set leads to a set of independent consistency relation trees, it is proven that the initial set of consistency relations is compatible.
@@ -811,19 +902,20 @@ If iteratively removing such redundant relations from the set leads to a set of 
     \label{algo:compatibility:formal_proof}
 \end{algorithm}
 
+\mnote{Compatibility validation algorithm}
 An algorithm that realizes this procedure is given in \autoref{algo:compatibility:formal_proof}.
-It executes the described steps and assumes appropriate procedures to find out whether the given set of relations is a relation tree, whether it consists of independent subsets and whether there it contains a redundant relations.
+It executes the described steps and assumes appropriate procedures to find out whether the given set of relations is a relation tree, whether it consists of independent subsets and whether it contains a redundant relation.
 It is easy to see that this algorithm is correct, as is implements the proven findings of the previous sections.
 This does, however, not mean that implementing the sub-procedures is trivial.
 We will provide a practical approach to realize them in the subsequent section.
 
 \begin{theorem}[Compatibility Algorithm Correctness]
     \label{theorem:compatibilityalgorithmcorrectness}
-    \autoref{algo:compatibility:formal_proof} is correct, i.e., it only returns \textsc{true} if the given consistency relations set $\consistencyrelationset{CR}$ is actually compatible.
+    \autoref{algo:compatibility:formal_proof} is correct, i.e., it only returns \textsc{true} if the given consistency relation set $\consistencyrelationset{CR}$ is compatible.
 \end{theorem}
-
+%
 \begin{proof}
-    We make a case distinction for the situation in which the algorithm returns a result:
+    We make a case distinction for the situations in which the algorithm returns a result:
     \begin{longenumerate}
         \item When the consistency relation set is a tree, the algorithm directly returns \textsc{true} (Lines \ref{algo:compatibility:formal_proof:line:starttree}--\ref{algo:compatibility:formal_proof:line:endtree}), which is correct according to \autoref{theorem:treecompatibility}.
         \item When the consistency relation set can be split into independent sets, the algorithm returns \textsc{true} when both independent sets are identified as compatible by recursive application of the algorithm (Lines \ref{algo:compatibility:formal_proof:line:startindependence}--\ref{algo:compatibility:formal_proof:line:endindependence}), which is correct according to \autoref{theorem:independencecompatibility}.
@@ -833,17 +925,18 @@ We will provide a practical approach to realize them in the subsequent section.
     \end{longenumerate}
 \end{proof}
 
-The algorithm is, however, also \emph{conservative}.
+\mnote{Algorithm conservativeness}
+The algorithm operates, however, also \emph{conservatively}.
 %Such an approach to prove compatibility of consistency relations is \emph{conservative}.
 If the approach finds redundant relations, such that a consistency relation set can be reduced to a set of independent consistency relations trees, the set is proven compatible, as we have shown by proof.
 If the approach is not able to find such relations, the set may still be compatible, but the approach is not able to prove that.
-Conceptually, this can be due to the fact that there may be compatibility-preserving relations that do not fulfill the definition of left-equal redundancy.
-Furthermore, an actual technique to identify left-equal redundant relations may not be able to find all of them automatically, as we will see later.
+Conceptually, this can be due to the fact that there may be compatibility-preserving relations that do not fulfill the definition of left-equal redundancy, or because our independence definition is too restrictive.
+Furthermore, an actual technique to identify left-equal redundant relations may not be able to find all of them automatically, as we will see later at the practical approach.
 
 \begin{theorem}[Compatibility Algorithm Conservativeness]
-    \autoref{algo:compatibility:formal_proof} is conservative, i.e., it is correct, but if it returns \textsc{false} the given consistency relations set $\consistencyrelationset{CR}$ is not necessarily incompatible.
+    \autoref{algo:compatibility:formal_proof} operates conservatively, i.e., it is correct, but if it returns \textsc{false} the given consistency relation set $\consistencyrelationset{CR}$ is not necessarily incompatible.
 \end{theorem}
-
+%
 \begin{proof}
     We know that the algorithm is correct due to \autoref{theorem:compatibilityalgorithmcorrectness}.
     Additionally, it is easy to find examples for which the algorithm cannot prove compatibility, although the relations are compatible.
@@ -852,12 +945,14 @@ Furthermore, an actual technique to identify left-equal redundant relations may 
     Then $\setted{\consistencyrelation{CR}{},\consistencyrelation{CR}{}'}$ is, by construction, compatible, but the two relations are neither independent or a consistency relation tree, as they relate the same classes, nor are they redundant according to \autoref{def:leftequalredundancy}, because the left-side class tuples are not equal.
 \end{proof}
 
-The example given in the proof for conservativeness shows that the strictness of our definition for left-equal redundancy (\autoref{def:leftequalredundancy}).
+\mnote{Relevance of conservativeness}
+The example given in the proof for conservativeness shows that the strictness of our definition for left-equal redundancy (\autoref{def:leftequalredundancy}) can prevent the algorithm from proving compatibility.
 We will, however, see in the evaluation that it is still sufficient in realistic cases, although such special cases as discussed in the proof are not supported.
 
+\mnote{Approach operationalization}
 In the following, we discuss how such an approach can be operationalized.
 First, we discuss how actual transformations, at the example of \qvtr, can be represented in a graph-based structure, such that it conforms to our formal notion and allows to check whether the structure is an independent set of consistency relation trees.
-Second, we present an approach for finding consistency relations that are left-equal redundant, by the means of an SMT solver applied to the constraints defined in \qvtr relations.
+Second, we present an approach for finding consistency relations that are left-equal redundant by the means of an SMT solver applied to the constraints defined in \qvtr relations.
 
 
 \todoLater{We partly did that by the expressiveness section for model-level and fine grained relations: Construction of valid models. Valid models may restrict the usable instances of a metamodel. Discuss impact on definitions and theorems and especially the constructive discussions within the proofs. Especially consider the meaning of references in models.}
@@ -869,4 +964,4 @@ Second, we present an approach for finding consistency relations that are left-e
 %    \item Explain conservativeness
 %\end{itemize}
 
-\end{copiedFrom} % SoSym MPM4CPS
+%\end{copiedFrom} % SoSym MPM4CPS
