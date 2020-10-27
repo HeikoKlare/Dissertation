@@ -1,43 +1,48 @@
-\begin{tikzpicture}
+\begin{tikzpicture}[
+  qvtbox/.style={text width=9.3em, inner sep=3pt, align=center, anchor=center},
+  z3box/.style={text width=8.8em, inner sep=3pt, align=center, anchor=center}
+]
     %% FRAMES
     % \draw[dotted, anchor=west] (-0.3, -1) rectangle (6, 7.5);
     %\draw[dotted, anchor=west] (7.2, -1) rectangle (12.3, 7.5);
 
-    \node (r1) at (2.85,3.25) [draw, kit-green100, thick, dashed, minimum width=6.3cm,minimum height=8.5cm] {};
-    \node (r2) at (9.75,3.25) [draw, kit-green100, thick, dashed, minimum width=5.1cm,minimum height=8.5cm] {};
-    \draw[->, ultra thick, kit-green100] (r1) -- (r2);
+    \node (r1) at (0em,18em) [draw, kit-green100, thick, dashed, anchor=north west, minimum width=11.5em,minimum height=21em,inner sep=0em] {};
+    \node (r2) at (12.5em,18em) [draw, kit-green100, thick, dashed, anchor=north west, minimum width=11em,minimum height=21em] {};
+    \draw[-latex, thick, kit-green100] (r1) -- (r2);
     
     %% OCL EXPRESSIONS
-    \node[name=persEmp, anchor=west, minimum width=5.5cm, text width=5.5cm, align=left] at (0, 5) {%
-\begin{lstlisting}[language=framedQVT,linewidth=5.5cm, mathescape=true]
+    \node[qvtbox, name=persEmp] at (5.75em, 12.25em) {%
+\begin{lstlisting}[language=framedQVT, basicstyle=\footnotesize\ttfamily, mathescape=true, escapechar=§]
 Person::firstname = fstn
 $\land$ Person::lastname = lstn
-$\land$ Employee::name = fstn + ' ' + lstn
+$\land$ Employee::name
+§\hspace{1em}§ = fstn + ' ' + lstn
 \end{lstlisting}
         };
         
-    \node[name=empRes, anchor=west, minimum width=5.5cm, text width=5.5cm, align=left] at (0, 1.5) {%
-\begin{lstlisting}[language=framedQVT,linewidth=5.5cm, mathescape=true]
+    \node[qvtbox, name=empRes] at (5.75em, 4em) {%
+\begin{lstlisting}[language=framedQVT, basicstyle=\footnotesize\ttfamily, mathescape=true]
 Resident::name = n
 $\land$ Employee::name = n
 \end{lstlisting}
         };
         
-    \node[name=persRes, anchor=west, minimum width=5.5cm, text width=5.5cm, align=left] at (0, 0) {%
-\begin{lstlisting}[language=framedQVT,linewidth=5.5cm, mathescape=true]
+    \node[qvtbox, name=persRes] at (5.75em, 0) {%
+\begin{lstlisting}[language=framedQVT, basicstyle=\footnotesize\ttfamily, mathescape=true, escapechar=§]
 Person::firstname = fstn
 $\land$ Person::lastname = lstn
-$\land$ Resident::name = fstn + ' ' + lstn
+$\land$ Resident::name 
+§\hspace{1em}§ = fstn + ' ' + lstn
 \end{lstlisting}
         };
     
     %% LABELS    
-    \node[above=0.1cm of persEmp, align=center] (possiblyredundant_label) {\large Possibly\\ \large redundant predicate};
-    \node[above=0.1cm of empRes, align=center] (alternative_label) {\large Alternative sequence\\ \large of predicates};
+    \node[above=-0.75em of persEmp.north, anchor=south, align=center] (possiblyredundant_label) {Possibly\\ redundant predicate};
+    \node[above=-0.75em of empRes.north, anchor=south, align=center] (alternative_label) {Alternative sequence\\ of predicates};
     
     %% SMT FORMULAE
-    \node[name=smtPersEmp, anchor=west, right=2cm of persEmp, minimum width=4cm, text width=4cm, align=left] {%
-\begin{lstlisting}[language=framedQVT,linewidth=4cm]
+    \node[name=smtPersEmp, right=12.25em of persEmp.center, yshift=-0.55em, z3box] {%
+\begin{lstlisting}[language=framedQVT, basicstyle=\footnotesize\ttfamily]
 (not
   (and
     (= firstname fstn)
@@ -52,39 +57,39 @@ $\land$ Resident::name = fstn + ' ' + lstn
 \end{lstlisting}
         };
         
-    \node[name=smtEmpRes, anchor=west, right=2cm of empRes, minimum width=4cm, text width=4cm, align=left] {%
-\begin{lstlisting}[language=framedQVT,linewidth=4cm]
+    \node[name=smtEmpRes, right=12.25em of empRes.center, z3box] {%
+\begin{lstlisting}[language=framedQVT, basicstyle=\footnotesize\ttfamily]
 ...
 \end{lstlisting}
         };
         
-    \node[name=smtPersRes, anchor=west, right=2cm of persRes, minimum width=4cm, text width=4cm, align=left] {%
-\begin{lstlisting}[language=framedQVT,linewidth=4cm]
+    \node[name=smtPersRes, right=12.25em of persRes.center, z3box] {%
+\begin{lstlisting}[language=framedQVT, basicstyle=\footnotesize\ttfamily]
 ...
 \end{lstlisting}
         };
         
-    \draw[->] (persEmp) to (smtPersEmp);
-    \draw[->] (empRes) to (smtEmpRes);
-    \draw[->] (persRes) to (smtPersRes);
+    \draw[-latex] (persEmp) to ([yshift=0.5em]smtPersEmp.west);
+    \draw[-latex] (empRes) to (smtEmpRes);
+    \draw[-latex] (persRes) to (smtPersRes);
     
-    \node[above=-0.3cm of smtEmpRes] (wedge1) {$\land$};
-    \node[above=-0.3cm of smtPersRes] (wedge2) {$\land$};
+    \node[above=-1em of smtEmpRes] (wedge1) {$\land$};
+    \node[above=-1em of smtPersRes] (wedge2) {$\land$};
         
     %% SMT SOLVER
-    \node[draw,rectangle, minimum size=2cm, kit-blue100, fill=kit-blue30, align=center] (smtsolver) at (14.5, 3.15){\large SMT\\\large Solver};
-    \draw[->, ultra thick, kit-green100] (r2) -- (smtsolver);
+    \node[draw,rectangle, minimum width=4em, minimum height=3em, fill=kit-blue30, above right=9em and 1.25em of r2.east, anchor=west, align=center] (smtsolver) {SMT\\ Solver};
+    \draw[-latex, thick, kit-green100] ([yshift=9em]r2.east) -- (smtsolver);
     
     %% OUTCOMES
-    \node[text width=3cm] (sat) at (18, 6.5){\textbf{SAT}. The initial Horn clause is not always valid so the predicate is not entirely redundant. \textit{No removal.}};
-    \node[text width=3cm] (unknown) at (18, 3.25){\textbf{UNKNWON}. By conservativeness. \textit{No removal.}};
-    \node[text width=3cm] (unsat) at (18, 0){\textbf{UNSAT}. The initial Horn clause is valid so the predicate is redundant. \textit{Removal.}};
+    \node[text width=6em, font=\footnotesize, below left=1.25em and 1em of smtsolver.south west, anchor=north west] (sat) {\textbf{SAT}. The initial Horn clause is not always valid, so the predicate is not entirely redundant.\\ \emph{No removal.}};
+    \node[text width=6em, font=\footnotesize, below=0.2em of sat.south west, anchor=north west] (unknown) {\textbf{UNKNOWN}. By conservativeness.\\ \emph{No removal.}};
+    \node[text width=6em, font=\footnotesize, below=0.2em of unknown.south west, anchor=north west] (unsat) {\textbf{UNSAT}. The initial Horn clause is valid, so the predicate is redundant.\\ \emph{Removal.}};
     
-    \draw[->] (smtsolver) -- (sat);
-    \draw[->] (smtsolver) -- (unknown);
-    \draw[->] (smtsolver) -- (unsat);
+    \draw[-latex] (smtsolver.south) -- (smtsolver.south|-sat.north);
+    %\draw[-latex] (smtsolver) -- (unknown);
+    %\draw[-latex] (smtsolver) -- (unsat);
     
-    \node[below = 0.25cm of r1] {\textbf{OCL Expressions}};
-    \node[below = 0.25cm of r2, name=smtf] {\textbf{SMT Formula}};
-    \node[right = 4cm of smtf] {\textbf{Redundancy Test}};
+    \node[below = 0.2em of r1] {\textbf{OCL Expressions}};
+    \node[below = 0.2em of r2, name=smtf] {\textbf{SMT Formula}};
+    \node[right = 8.125em of smtf.center, anchor=center] {\textbf{Result}};
 \end{tikzpicture}
