@@ -5,7 +5,7 @@
 We have presented a formal and proven correct approach for validating compatibility of consistency relations in the previous section.
 It comprises the reduction of a given set of consistency relations by removing redundant relations to result in independent consistency relation trees.
 In this section, we propose an algorithm that turns the formal approach into an operational procedure.
-For the most part, this algorithm is based on results developed and described in detail in the master's thesis of \textcite{pepin2019ma}, which was supervised by the author of this thesis.
+For the most part, this approach is based on results developed and described in detail in the master's thesis of \textcite{pepin2019ma}, which was supervised by the author of this thesis.
 
 \mnote{Approach for \qvtr}
 We call the process of removing redundant relations from a consistency relation set to generate independent consistency relation trees \emph{decomposition}.
@@ -18,7 +18,7 @@ In contrast, imperative languages would first require an extraction of consisten
 \mnote{Procedure overview}
 In the following, we first present a mapping between the formalization of the previous sections to the \qvtr transformation language through the use of \emph{predicates}.
 We then propose a fully automated decomposition produces that takes a set of \qvtr transformations, called a \emph{consistency specification}, as an input and removes redundant consistency relations as far as possible.
-To find a redundant relation, the procedure identifies an alternative concatenation of consistency relations relating the same \metaclasses, according to \autoref{def:leftequalredundancy}, and then performs a redundancy test with respect to that alternative concatenation.
+To find a redundant relation, the procedure identifies an alternative concatenation of consistency relations relating the same \metaclasses, according to \autoref{def:leftequalredundancy}, and then performs a \emph{redundancy test} with respect to that alternative concatenation.
 We explicitly separate the identification of candidates for the alternative concatenation from the redundancy test to allow the exchangeability of the redundancy test approach.
 
 % Constructing a consistency relation tree can be achieved by finding and, for the scope of the analysis, removing every redundant consistency relation in a given set of consistency relation set $\consistencyrelationset{CR}$. %Such a result facilitates the development of software systems. First, developers build transformations independently, resulting in a transformation network. Then,~they regularly run a procedure that assesses the compatibility of consistency relations specified in transformations by checking the existence of a consistency relation tree.
@@ -41,39 +41,39 @@ For example, an \texttt{Employee} and a \texttt{Resident} are considered consist
 Conditions represent predicates, i.e., Boolean-valued filter functions.
 Consistency relations are then defined as sets of condition element pairs for which the predicate evaluates to \textsc{true}.
 In \autoref{chap:correctness:notions_consistency:intensional_extensional}, we have already shown that this type of specification has equal expressiveness and can be transformed into an extensional specification
-We define such a predicate based on combinations of properties, selected from each metamodel, that we introduced in the following.
+We define such a predicate based on combinations of properties, selected from each metamodel, whic we introduce in the following.
 
 \begin{definition}[Property Set]
-A property set for a class $\class{C}{}$ is a subset $\propertyset{P}{\class{C}{}}$ of properties of $\class{C}{}$, i.e., $\propertyset{P}{\class{C}{}} = \{P_{\class{C}{}, 1}, \dots, P_{\class{C}{}, n}\}$ such that $P_{\class{C}{}, i} \in \class{C}{}$.
+A property set $\propertyset{P}{\class{C}{}}$ for a class $\class{C}{}$ is a subset of properties of $\class{C}{}$, i.e., $\propertyset{P}{\class{C}{}} = \setted{P_{\class{C}{}, 1}, \dots, P_{\class{C}{}, n}}$ such that $P_{\class{C}{}, i} \in \class{C}{}$.
 \end{definition}
 
 \mnote{Consistency-relevant properties}
 A property set represents a selection of properties of a class that are relevant for the definition of a predicate in order to distinguish consistent and non-consistent condition elements. For a consistency relation, not all properties of a class may be relevant and thus need to be considered. In a case of an extensional specification at the level of classes rather than properties, such as the one defined \autoref{def:consistencyrelation}, this is expressed by enumerating all objects with all possible values of the irrelevant properties. Thus, expressing the relations at the level of classes or properties have equal expressiveness.
 
 \begin{definition}[Tuple of Property Sets]
-For a class tuple $\classtuple{C}{} = \tupled{\class{C}{1}, \dots, \class{C}{n}}$, it is possible to build a tuple of property sets by defining a property set for every class, i.e., $\propertysettuple{P}{\classtuple{C}{}} = \tupled{\propertyset{P}{\class{C}{1}}, \dots, \propertyset{P}{\class{C}{n}}} = \tupled{\{P_{\class{C}{1}, 1}, \dots, P_{\class{C}{1}, m}\}, \dots, \{P_{\class{C}{n}, 1}, \dots, P_{\class{C}{n}, k}\}}$.
+For a class tuple $\classtuple{C}{} = \tupled{\class{C}{1}, \dots, \class{C}{n}}$, we denote a property tuple $\propertysettuple{P}{\classtuple{C}{}}$ as a tuple of property sets for every class, i.e., $\propertysettuple{P}{\classtuple{C}{}} = \tupled{\propertyset{P}{\class{C}{1}}, \dots, \propertyset{P}{\class{C}{n}}} = \tupled{\setted{P_{\class{C}{1}, 1}, \dots, P_{\class{C}{1}, m}}, \dots, \setted{P_{\class{C}{n}, 1}, \dots, P_{\class{C}{n}, k}}}$.
 \end{definition}
 
 \mnote{Property tuples for class tuples}
 Since condition elements in consistency relations consist of multiple classes, property set tuples generalize the use of property sets to class tuples.
 
 \begin{definition}[Property Value Set]
-A property value set $\propertyvalueset{p}{\class{C}{}}$ for a property set $\propertyset{P}{\class{C}{}}$ is a set in which each property in $\propertyset{P}{\class{C}{}}$ is instantiated, i.e., $\propertyvalueset{p}{\class{C}{}} = \{p_{\class{C}{}, 1}, \dots, p_{\class{C}{}, n}\}$ with $p_{\class{C}{}, i} \in I_{P_{\class{C}{}, i}}$. 
+A property value set $\propertyvalueset{p}{\class{C}{}}$ for a property set $\propertyset{P}{\class{C}{}} = \setted{P_{\class{C}{}, 1}, \dots, P_{\class{C}{}, n}}$ is a set in which each property in $\propertyset{P}{\class{C}{}}$ is instantiated, i.e., $\propertyvalueset{p}{\class{C}{}} = \setted{p_{\class{C}{}, 1}, \dots, p_{\class{C}{}, n}}$ with $p_{\class{C}{}, i} \in I_{P_{\class{C}{}, i}}$. 
 Analogously, a tuple of property value sets is built from a tuple of property sets by instantiating each property set in it.
 \end{definition}
 
 \mnote{Relevant property values}
-A property value set is a subset of property values of an object $\object{o}{}$ that instantiates $\class{C}{}$, like a property set is a subset of properties of a class $\class{C}{}$. Such a property value set represents the information of an $\object{o}{}$ that is relevant for consistency according to a specific consistency relation.
+A property value set is a subset of property values of an object $\object{o}{}$ that instantiates $\class{C}{}$, like a property set is a subset of properties of a class $\class{C}{}$. Such a property value set represents the information of an object $\object{o}{}$ that is relevant for consistency according to a specific consistency relation.
 
 \begin{definition}[Predicate]
-A predicate for two class tuples $\classtuple{C}{l}$ and $\classtuple{C}{l}$ is a triple $\pi = \tupled{\propertysettuple{P}{\classtuple{C}{l}}, \propertysettuple{P}{\classtuple{C}{r}}, \function{f}_\pi}$ where $\propertysettuple{P}{\classtuple{C}{l}} = \tupled{\propertyset{P}{\class{C}{l,1}}, \dots, \propertyset{P}{\class{C}{l,n}}}$ (resp. $\propertysettuple{P}{\classtuple{C}{r}}$) is a tuple of property sets of $\classtuple{C}{l} = \tupled{\class{C}{l,1}, \dots, \class{C}{l,n}}$ (resp. $\classtuple{C}{r}$) and $\function{f}_\pi$ is a Boolean-valued function for instances of $\tuple{P}_{\classtuple{C}{l}}$ and $\tuple{P}_{\classtuple{C}{r}}$, i.e., $\function{f}_\pi : \instances{\propertysettuple{P}{\classtuple{C}{l}}} \times \instances{\propertysettuple{P}{\classtuple{C}{r}}} \to \{\textsc{true}, \textsc{false}\}$.
+A predicate for two class tuples $\classtuple{C}{l}$ and $\classtuple{C}{l}$ is a triple $\pi = \tupled{\propertysettuple{P}{\classtuple{C}{l}}, \propertysettuple{P}{\classtuple{C}{r}}, \function{f}_\pi}$ where $\propertysettuple{P}{\classtuple{C}{l}} = \tupled{\propertyset{P}{\class{C}{l,1}}, \dots, \propertyset{P}{\class{C}{l,n}}}$ (resp. $\propertysettuple{P}{\classtuple{C}{r}}$) is a tuple of property sets of $\classtuple{C}{l} = \tupled{\class{C}{l,1}, \dots, \class{C}{l,n}}$ (resp. $\classtuple{C}{r}$) and $\function{f}_\pi$ is a Boolean-valued function for instances of $\tuple{P}_{\classtuple{C}{l}}$ and $\tuple{P}_{\classtuple{C}{r}}$, i.e., $\function{f}_\pi : \instances{\propertysettuple{P}{\classtuple{C}{l}}} \times \instances{\propertysettuple{P}{\classtuple{C}{r}}} \to \setted{\textsc{true}, \textsc{false}}$.
 \end{definition}
 
 \mnote{Property union}
 For readability purposes, we define the property collection $\propertycollection{\pi}$ of a predicate $\pi = (\propertysettuple{P}{\classtuple{C}{l}}, \propertysettuple{P}{\classtuple{C}{r}}, \function{f}_\pi)$ as the union of all properties in that predicate:
 \begin{align*}
     &
-    \propertycollection{\pi} = \bigcup_{k} (\propertyset{P}{\class{C}{l,k}} \cup \propertyset{P}{\class{C}{r,k}})
+    \propertycollection{\pi} = \bigcup_{j} \propertyset{P}{\class{C}{l,j}} \cup \bigcup_{k} \propertyset{P}{\class{C}{r,k}}
 \end{align*}
 
 \mnote{Conditions by predicates}
@@ -82,21 +82,25 @@ If $\function{f}_\pi$ evaluates to \textsc{true} for given property values of tw
 %The expression of $f_\pi$ is the choice of the developer who defines it according to consistency criteria.
 
 \mnote{Consistency relations by predicates}
-Predicates thus model how consistency relations are defined in model transformation languages in terms of conditions, i.e., predicates, to evaluate for given object tuples, i.e., condition elements, rather than enumerating all consistent pairs of condition elements.
-We define when we consider property values to match objects and then derive how consistency relations can be defined based on predicates.
+Predicates thus model how consistency relations are defined in model transformation languages in terms of conditions to evaluate for object tuples, i.e., condition elements, rather than enumerating all consistent pairs of condition elements.
+We define when we consider property values to match objects and then derive how consistency relations can be defined by predicates.
 
 %\subsubsection{Predicate-Based Consistency Relations}
 
 \begin{definition}[Property Matching]
-A property value set $\propertyvalueset{p}{\class{C}{}} = \{p_{\class{C}{}, 1}, \dots, p_{\class{C}{}, n}\}$ matches an object $\object{o}{}$ if, and only if,
+Let $\propertyvalueset{p}{\class{C}{}} = \setted{p_{\class{C}{}, 1}, \dots, p_{\class{C}{}, n}}$ be a property value set. We say that:
+%A property value set $\propertyvalueset{p}{\class{C}{}} = \{p_{\class{C}{}, 1}, \dots, p_{\class{C}{}, n}\}$ matches an object $\object{o}{}$ if, and only if,
 \begin{align*}
     &
+    \propertyvalueset{p}{\class{C}{}} \matchesmath \object{o}{} \equivalentperdefinition
     \object{o}{} \in I_{\class{C}{}} \land \forall p_{\class{C}{}, i} : p_{\class{C}{}, i} \in \object{o}{}
 \end{align*}
 %
-Similarly, a tuple of property value sets $\propertyvaluesettuple{p}{\classtuple{C}{}} = \tupled{\propertyvalueset{p}{\class{C}{1}}, \dots, \propertyvalueset{p}{\class{C}{n}}}$ matches a tuple of objects $\tuple{o} = \tupled{\object{o}{1}, \dots, \object{o}{n}}$ if, and only if,
+Similarly, let $\propertyvaluesettuple{p}{\classtuple{C}{}} = \tupled{\propertyvalueset{p}{\class{C}{1}}, \dots, \propertyvalueset{p}{\class{C}{n}}}$ be a tuple of property value sets and $\tuple{o} = \tupled{\object{o}{1}, \dots, \object{o}{n}}$ a tuple of objects. We say that:
 \begin{align*}
-    \forall i : \propertyvalueset{p}{\class{C}{i}}\ \text{matches}\ \object{o}{i}
+    &
+    \propertyvaluesettuple{p}{\classtuple{C}{}} \matchesmath \tuple{o} \equivalentperdefinition
+    \forall i : \propertyvalueset{p}{\class{C}{i}} \matchesmath \object{o}{i}
 \end{align*}
 \end{definition}
 
@@ -115,32 +119,36 @@ Let $\Pi$ be a set of predicates for $\classtuple{C}{\condition{c}{l}}$ and $\cl
 % \end{align*}
 \begin{align*}
 &
-CR_{\Pi} = \{(\conditionelement{c}{l}, \conditionelement{c}{r}) \mid \forall \tupled{\propertysettuple{P}{\classtuple{C}{\condition{c}{l}}}, \propertysettuple{P}{\classtuple{C}{\condition{c}{r}}}, \function{f}_\pi} \in \Pi : \\
+CR_{\Pi} = \setted{(\conditionelement{c}{l}, \conditionelement{c}{r}) \mid \forall \tupled{\propertysettuple{P}{\classtuple{C}{\condition{c}{l}}}, \propertysettuple{P}{\classtuple{C}{\condition{c}{r}}}, \function{f}_\pi} \in \Pi : \\
 & \formulaskip\formulaskip
 \exists \propertyvalueset{p}{\classtuple{C}{\condition{c}{l}}} \in \instances{\propertysettuple{P}{\classtuple{C}{\condition{c}{l}}}},
 \propertyvalueset{p}{\classtuple{C}{\condition{c}{r}}} \in \instances{\propertysettuple{P}{\classtuple{C}{\condition{c}{r}}}}:\\
 & \formulaskip
-\propertyvaluesettuple{p}{\classtuple{C}{\condition{c}{l}}} \mathtextspacearound{matches} \conditionelement{c}{l} %\\
+\propertyvaluesettuple{p}{\classtuple{C}{\condition{c}{l}}} \matchesmath \conditionelement{c}{l} %\\
 %& \formulaskip
-\land \propertyvaluesettuple{p}{\classtuple{C}{\condition{c}{r}}} \mathtextspacearound{matches} \conditionelement{c}{r} %\\
+\land \propertyvaluesettuple{p}{\classtuple{C}{\condition{c}{r}}} \matchesmath \conditionelement{c}{r} %\\
 %& \formulaskip 
-\land \function{f}_{\pi}(\propertyvaluesettuple{p}{\classtuple{C}{\condition{c}{l}}}, \propertyvaluesettuple{p}{\classtuple{C}{\condition{c}{r}}}) = \textsc{true}\}
+\land \function{f}_{\pi}(\propertyvaluesettuple{p}{\classtuple{C}{\condition{c}{l}}}, \propertyvaluesettuple{p}{\classtuple{C}{\condition{c}{r}}}) = \textsc{true}}
 \end{align*}
 \end{definition}
 
 \mnote{Intensional consisteny relations}
 The construction of consistency relations by means of predicates is comparable to the one discussed in \autoref{chap:correctness:notions_consistency:intensional_extensional} at the level of models.
 \autoref{def:predicatebasedconsistencyrelation} extends that construction to fine-grained consistency relations.
-It expresses how consistency relations enumerating consistent object tuples can be defined by means of predicates, i.e., conditions expressed in actual model transformation languages.
+It expresses how consistency relations enumerating consistent object tuples can be defined by means of predicates. %, i.e., conditions expressed in actual model transformation languages.
 The construction of the consistency relation fully amounts to the evaluation of the predicate function.
 
 \begin{example}
-The following example demonstrates how to build a consistency relation $\consistencyrelation{CR}{PR}$ based on predicates between \texttt{Person} and \texttt{Resident} metamodels, according to the example in \autoref{fig:compatibility:three_persons_example_extended}. $\consistencyrelation{CR}{PR}$ ensures that the \texttt{name} of a \texttt{Resident} object is the concatenation of \texttt{firstname} and \texttt{lastname} of a \texttt{Person} object. It also ensures that both objects have the same address. First, $\consistencyrelation{CR}{PR}$ involves one class in
-each metamodel, resulting in two class tuples: $\classtuple{C}{P} = \tupled{Person}$ and $\classtuple{C}{R} = \tupled{Resident}$. There are two conditions to achieve consistency, which are equal names and equal addresses, so $\consistencyrelation{CR}{PR}$ will be made up of two predicates. The first predicate needs the \texttt{firstname} and \texttt{lastname} attributes in \texttt{Person} and the \texttt{name} in \texttt{Resident}, so $\propertysettuple{P}{\classtuple{C}{P}, 1} = \tupled{\setted{\mathvariable{firstname}, \mathvariable{lastname}}}$ and $\propertysettuple{P}{\classtuple{C}{R}, 1} = \tupled{\setted{name}}$. Similarly, $\propertysettuple{P}{\classtuple{C}{P}, 2} = \tupled{\setted{address}}$ and $\propertysettuple{P}{\classtuple{C}{R}, 2} = \tupled{\setted{address}}$.
-The functions of the predicate, shortly denoting \texttt{name} as $n$, \texttt{firstname} as $\mathvariable{fn}$, \texttt{lastname} as $\mathvariable{ln}$, as well as \texttt{address} of \texttt{Person} as $a_P$ and of \texttt{Resident} as $a_R$, look as follows:
+We construct a consistency relation $\consistencyrelation{CR}{PR}$ based on predicates between \texttt{Person} and \texttt{Resident} metamodels, according to \autoref{fig:compatibility:three_persons_example_extended}. 
+$\consistencyrelation{CR}{PR}$ ensures that the \texttt{name} of a \texttt{Resident} concatenates the \texttt{firstname} and \texttt{lastname} of a \texttt{Person} and that both have the same address. 
+$\consistencyrelation{CR}{PR}$ involves one class in each metamodel, resulting in two class tuples $\classtuple{C}{P} = \tupled{\class{C}{\mathvariable{Person}}}$ and $\classtuple{C}{R} = \tupled{\class{c}{\mathvariable{Resident}}}$. 
+Two predicates need to represent consistency conditions, which are equal names and equal addresses.
+The first predicate considers \texttt{firstname} and \texttt{lastname} in \texttt{Person} and \texttt{name} in \texttt{Resident}, so $\propertysettuple{P}{\classtuple{C}{P}, 1} = \tupled{\setted{\mathvariable{firstname}, \mathvariable{lastname}}}$ and $\propertysettuple{P}{\classtuple{C}{R}, 1} = \tupled{\setted{name}}$. 
+Similarly, $\propertysettuple{P}{\classtuple{C}{P}, 2} = \tupled{\setted{address}}$ and $\propertysettuple{P}{\classtuple{C}{R}, 2} = \tupled{\setted{address}}$.
+The functions of the predicate, shortly denoting \texttt{name} as $n$, \texttt{firstname} as $\mathvariable{fn}$, \texttt{lastname} as $\mathvariable{ln}$, as well as \texttt{address} of \texttt{Person} as $a_P$ and of \texttt{Resident} as $a_R$, are:
 \begin{align*}
    &
-   \function{f}_{\pi, 1}(\tupled{\setted{n}}, \tupled{\setted{\mathvariable{fn}, \mathvariable{ln}}}) = \begin{cases} 
+   \function{f}_{\pi, 1}(\tupled{\setted{\mathvariable{fn}, \mathvariable{ln}}}, \tupled{\setted{n}}) = \begin{cases} 
       \textsc{true} & \mathtextspaceafter{if} n = \mathvariable{fn} + \textnormal{\enquote{\textvisiblespace}} + \mathvariable{ln} \\
       \textsc{false} & \mathtextspaceafter{otherwise}
    \end{cases} \\
@@ -171,13 +179,13 @@ $\consistencyrelation{CR}{PR}$ is a $\Pi$-based consistency relation where $\Pi$
 We decided to use \qvtr as the relational language of the \gls{QVT} standard~\cite{qvt} for implementing the formal approach for validating compatibility.
 The defined relations can be interpreted as predicates defining $\Pi$-based consistency relations.
 The language can be executed in \emph{checkonly} mode to check models for fulfillment of consistency relations, or in \emph{enforce} mode to repair consistency in a specified direction if not all relations are fulfilled.
-The simplified structure of a QVT-R transformation is as follows and also depicted in \autoref{lst:compatibility:qvtr_structure}. 
+The relevant parts of the structure of a QVT-R transformation are as follows and also depicted in \autoref{lst:compatibility:qvtr_structure}. 
 
 % The most relevant language for consistency specification is QVT Relations (QVT-R). It is a declarative and relational language that shares many concepts with the consistency framework developed before. It lends itself well to mathematical formalization~\cite{stevens2010sosym}. As with consistency relations, QVT-R supports bidirectionality. Transformations written in QVT-R can be used with two execution modes. First, a \textit{checkonly} mode to check that models fulfill consistency relations. Second, an \textit{enforce} mode to repair consistency in a given direction if not all relations are fulfilled. The simplified structure of a QVT-R transformation is as follows and also depicted in \autoref{qvt:structure}. 
 
 \mnote{\qvtr structure}
 A \qvtr \texttt{transformation} receives models, which conform to defined metamodels, and checks or repairs their consistency.
-Each \texttt{transformation} is composed of \texttt{relation}s, which define when objects of both models are considered consistent. These relations are only invoked if they are prefixed by the \texttt{top} keyword, if they belong to the precondition (\texttt{when}) of a relation to be invoked, or if they belong to the invariant (\texttt{where}) of a relation already invoked. 
+Each \texttt{transformation} is composed of \texttt{relation}s, which define when objects of both models are considered consistent. These relations are only invoked if they are prefixed by the \texttt{top} keyword, if they belong to the precondition (\texttt{when}) of a relation to be invoked, or if they belong to the invariant (\texttt{where}) of a relation that was already invoked. 
 The \qvtr mechanism for checking consistency is based on pattern matching.
 The relations between information in the different models are represented by variables assigned to class properties. 
 These variables contain values that must remain consistent from one object to another. 
@@ -194,13 +202,14 @@ To consider models consistent, there must exist some assignment that matches all
 \mnote{Constraints in \qvtr}
 More precisely, each \qvtr \texttt{relation} contains two \texttt{domain}s, which in turn contain \emph{domain patterns}. 
 In \gls{QVT} terminology, a domain pattern is a variable instantiating a class. 
-This variable can take values that are constrained by conditions on its properties, known as \emph{property template items}.These conditions are expressed by \gls{OCL} constraints~\cite{ocl}.
+This variable can take values that are constrained by conditions on its properties, known as \emph{property template items}.
+These conditions are expressed by \gls{OCL} constraints~\cite{ocl}.
 %OCL operations provide the ability to describe more complex constraints than equalities between property values and variables. 
 We give an example for the domains of persons and employees according to the running example in \autoref{lst:compatibility:qvtr_domain_patterns}, in which each domain has one pattern.
 These patterns filter \texttt{Person} objects with three property template items for first name, last name and income, and \texttt{Employee} objects with two property template items for name and salary, respectively. 
-For two objects to be consistent, there must exist values of \texttt{fstn}, \texttt{lstn} and \texttt{inc} that match property values of these objects, thus ensuring the fact that the name of the employee equals the concatenation of the first name and the last name of the person and the fact that both instances have the same income. 
+For two objects to be consistent, there must exist values of \texttt{fstn}, \texttt{lstn} and \texttt{inc} that match property values of these objects, thus ensuring that the employee name equals the concatenation of the first and the last name of the person and that both have the same income. 
 If objects are inconsistent, e.g., if the person and the employee have different incomes, then there is no such variable assignment.
-The complete \qvtr transformation for the running example in \autoref{fig:compatibility:three_persons_example_extended} are depicted in \autoref{lst:compatibility:qvtr_running_example}.
+The complete \qvtr transformations for the running example in \autoref{fig:compatibility:three_persons_example_extended} are depicted in \autoref{lst:compatibility:qvtr_running_example}.
 
 \lstinputlisting[float,
     language=QVT, 
@@ -214,12 +223,12 @@ The complete \qvtr transformation for the running example in \autoref{fig:compat
 %QVT-R relations are defined intensionally. In \textit{checkonly} mode, a \texttt{relation} does not check that metamodel instances are consistent by looking for them in an existing set of pairs of consistent models. 
 \mnote{\qvtr to formalism}
 In \emph{checkonly} mode, \qvtr evaluates the existence of a value that fulfills all property template items in domain patterns. These patterns can be regarded as predicates. %Thus, it is relevant to correlate QVT-R relations and predicate-based consistency relations. 
-To transfer \qvtr relations into our formalism, each relation can be translated into one or more predicates.
+To transfer \qvtr relations into our formalism, each relation is translated into one or more predicates.
 A predicate is formed by the properties that are bound to the same \qvtr variables, because having \qvtr variables in common means that values of these properties are interrelated and thus need to fulfill some consistency constraints.
-The properties of each domain, i.e., each metamodel, form one of the property sets of a predicate.
-The predicate function is generated by extracting the OCL constraints of the property template items. 
-These property sets together with the predicate function represent a predicate. 
-We present a formal construction of predicates from \qvtr in the subsequent section.
+The properties of each domain form one of the property sets of a predicate.
+Extracting the \gls{OCL} constraints of the property template items generated the predicate function. 
+The property sets together with the predicate function represent a predicate. 
+We subsequently present a formal construction of predicates from \qvtr.
 
 %As a result, QVT-R is a language suitable for writing consistency relations according to our formalism. The decomposition procedure presented in this section treats a set of (binary) QVT-R \texttt{transformation}s as a consistency relation set and checks its compatibility.
 
@@ -240,7 +249,7 @@ We present a formal construction of predicates from \qvtr in the subsequent sect
 %the procedure considers transformations written using the QVT-R language. %The shift from QVT-R transformations to consistency relations was exposed in the previous section.
 
 \mnote{Redundancy in predicate-based consistency relations}
-In the subsequent subsections, we introduce the decomposition procedure for proving compatibility, which relies on an algorithmic way to detect redundant consistency relations. 
+In the following, we introduce the decomposition procedure for proving compatibility, which relies on an algorithmic way to detect redundant consistency relations. 
 We have defined the notion of left-equal redundancy for extensionally specified consistency relations in \autoref{def:leftequalredundancy}.
 That notion is based on classes, whereas predicate-based consistency relations are defined for properties.
 We have, however, already discussed that both have equal expressiveness.
@@ -256,41 +265,37 @@ Comparing predicate-based consistency relations of different transformations to 
 %%          ↑ (and to perform a decomposition)
 
 \mnote{Graph representation}
-Consistency specifications induce a graph of class properties, which are related by edges that are labeled with the predicates defining the consistency relations.
-We employ such a graph representation to be able to apply graph algorithms for determining independent und redundant consistency relations.
+Consistency specifications induce a graph of class properties, which are related by edges labeled with the predicates defining the consistency relations.
+Such a graph representation enables the application of graph algorithms to identify independent und redundant consistency relations.
 %As a result, transformations are both edges of a graph and sets of consistency relations with exact definitions. Although both aspects are essential for decomposing transformations, the graph can be generated from consistency relation definitions. That is, vertices of the graph are metamodels and whenever a consistency relation definition relates two elements from two different metamodels, there is an edge between these metamodels. To take advantage of both aspects, we propose to perform redundancy tests on a single structure: a graph of class properties labeled by predicates that define consistency relations. 
-The proposed decomposition procedure thus operates in two phases, first creating such a graph out of \qvtr transformations and then detecting redundant relations in that graph. 
-We denote such a graph as a \emph{property graph}.
+The decomposition procedure thus creates such a graph, denoted as a \emph{property graph}, out of \qvtr transformations and detects redundant relations in that graph.
+%We denote such a graph as a \emph{property graph}.
 It represents properties and predicates as a hypergraph with labeling.
 
-\begin{definition}[Property Graph]
+\begin{definition}[Property Graph] \label{def:propertygraph}
 Let $\consistencyrelationset{CR} = \setted{\consistencyrelation{CR}{1}, \dots, \consistencyrelation{CR}{n}}$ be a set of consistency relations where each consistency relation $\consistencyrelation{CR}{i}$ is based on a set of predicates $\Pi_i$. 
 A property graph is a couple $\mathcal{M}=\tupled{\mathcal{H}, \function{l}}$, such that $\mathcal{H} = \tupled{V_{\mathcal{H}}, E_{\mathcal{H}}}$ is a hypergraph and $\function{l}$ %\colon E_{\mathcal{H}}\to \setted{\textsc{true}, \textsc{false}}^{I_{\propertysettuple{P}{\classtuple{C}{l}}} \times I_{\propertysettuple{P}{\classtuple{C}{r}}}}$ 
 is a hyperedge labeling:
         %\begin{itemize}
             %\item 
-            
 $V_{\mathcal{H}}$ is the set of vertices, i.e., the union of properties in all predicates:
 \begin{align*}
     V_{\mathcal{H}} = \bigcup_{i = 1}^{n} \bigcup_{\pi \in \Pi_{i}} \propertycollection{\pi}
 \end{align*}
 %            \item 
-
 $E_{\mathcal{H}}$ is the set of hyperedges, i.e., $E_{\mathcal{H}} \subseteq \mathcal{P}(V_{\mathcal{H}}) \setminus \setted{\varnothing}$. Each hyperedge consists of the properties of one predicate:
 \begin{align*}
     E_{\mathcal{H}} = \bigcup_{i = 1}^{n} \bigcup_{\pi \in \Pi_{i}} \setted{\propertycollection{\pi}}
 \end{align*}
 %\bigcup_{\tupled{\propertysettuple{P}{\classtuple{C}{l}}, \propertysettuple{P}{\classtuple{C}{r}}, f_\pi} \in \Pi_{i}} \setted{\propertysettuple{P}{\classtuple{C}{l}} \cup \propertysettuple{P}{\classtuple{C}{r}}}\]
 %            \item 
-
-$l$ is a function that labels each hyperedge with its corresponding predicate function:
+$\function{l}$ labels each hyperedge with its corresponding predicate function:
 \begin{align*}
     &\forall i \in \setted{1, \dots, n} : \forall \pi = \tupled{\propertysettuple{P}{\classtuple{C}{l}}, \propertysettuple{P}{\classtuple{C}{r}}, \function{f}_\pi} \in \Pi_{i} : %\\
     % \formulaskip 
     \function{l}(\propertycollection{\pi}) = \function{f}_\pi
 \end{align*}
         %\end{itemize}
-        \label{def:propertygraph}
 \end{definition}
 
 \mnote{Independence and redundancy in property graph}
@@ -310,12 +315,12 @@ On the contrary, if multiple sequences of hyperedges relate the same properties,
 \end{figure}
 
 \mnote{Need for hypergraph}
-A property graph needs to be a hypergraph because a predicate can relate more than two properties, so an edge must be able to relate more than two vertices.
+A property graph needs to be a hypergraph, because a predicate can relate more than two properties, so an edge must be able to relate more than two vertices.
 For example, the consistency relation $\consistencyrelation{CR}{PE}$ of the running example, which ensures equality of an employee's name and the concatenation of first and last name of a person, contains three properties.
 We depict the complete hypergraph for the running example in \autoref{fig:compatibility:propertygraph_example}.
 % Metamodel elements participating in the consistency specification are vertices of the hypergraph. Then, metamodel elements that appear in the same consistency specification. Each edge is labeled with the QVT-R relation(s) (i.e.\ fine-grained consistency relations) from which it is derived, so that no information is lost during the construction of the metagraph.
 In the following, we discuss the construction of such a graph from \qvtr transformations.
-The identification of actual redundancies within the represented consistency relations is part of the subsequent section.
+The identification of actual redundancies within the represented consistency relations is part of the subsequent subsection.
 
 % \paragraph{Input and Transformation Parsing}
 % The procedure takes a set of well-formed QVT-R files as inputs. Each file contains one or more transformations.
@@ -335,10 +340,10 @@ The construction of the property graph for a given set of \qvtr transformations 
 Since transformations are not executed but only transformed into a property graph, the processing order is not relevant.
 Each transformations consists of a set of \qvtr relations, of which each usually only defines consistency for small parts of the metamodels.
 Those relations depend on each other and can thus not be processed in arbitrary order.
-Only those relations that may be invoked during the execution of transformations need to be considered, which can be derived from a call graph.
+Only those relations that may be invoked during the execution of transformations need to be considered, which could be derived from a call graph.
 While top-level relations are always invoked during executing, other relations are only invoked in \texttt{where} or \texttt{when} clauses of other relations similar to function calls. 
 Since \texttt{when} and \texttt{where} clauses are dual to each other, we restrict ourselves to relations that are invoked in \texttt{where} clauses. 
-Then, starting from top-level relations, relevant relations can be identified by a depth-first traversal. 
+Then, starting from top-level relations, relevant relations can simply be identified by a depth-first traversal. 
 
 % \lstinputlisting[float,
 %     language=QVT, 
@@ -354,17 +359,18 @@ For every processed \qvtr relation, vertices and a hyperedge may be added.
 Each \qvtr relation needs to be translated into a set of predicates, which are represented by labeled hyperedges, in accordance with \autoref{def:propertygraph}.
 As an example, we consider the relation \texttt{PE} of our running example in \autoref{lst:compatibility:qvtr_running_example}, which relates the domains for persons and employees.
 For each domain of a relation, the class tuples of the predicates are specified in the domain patterns.
-In the example, these class tuples are $\classtuple{C}{\mathvariable[{person}} = \tupled{\class{C}{\mathvariable{Person}}}$ and $\classtuple{C}{\mathvariable{employee}} = \tupled{\class{C}{\mathvariable{Employee}}}$.
+In the example, these class tuples are $\classtuple{C}{\mathvariable{person}} = \tupled{\class{C}{\mathvariable{Person}}}$ and $\classtuple{C}{\mathvariable{employee}} = \tupled{\class{C}{\mathvariable{Employee}}}$.
 Each class in each class tuple is associated with a set of property template items.
 A property template item relates a property to an OCL expression. 
 For example, the property template item $\mathvariable{name} = \mathvariable{fstn} + \text{\enquote{\textvisiblespace}} + \mathvariable{lstn}$ defines that the property $\mathvariable{name}$ must match the OCL expression $\mathvariable{fstn} + \text{\enquote{\textvisiblespace}} + \mathvariable{lstn}$.
 The OCL expressions, in turn, contain \qvtr variables, such as $\mathvariable{fstn}$ and $\mathvariable{lstn}$.
-Predicates are supposed to relate those properties that actually share a consistency relations, i.e., that are actually put into relation by the \qvtr relation.
+Predicates are supposed to relate those properties that actually share a consistency relation, i.e., that are actually put into relation by the \qvtr relation.
 Such a relation is only given if two properties are related by the same \qvtr variables, because in such a case a value assignment to that variable must satisfy the property template items of both properties.
 In such a case, a hyperedge is created and labeled with a function that realizes the conditions of the property template item.
 For example, $\mathvariable{Person.firstname}$, $\mathvariable{Person.lastname}$ and $\mathvariable{Employee.name}$ are related by the \qvtr variables $\mathvariable{fstn}$ and $\mathvariable{lstn}$, thus a hyperedge is generated between them.
-In contrast, constraints on $\mathvariable{Employee.salary}$ and $\mathvariable{Employee.name}$ are independent, because the property template items relate them to different \qvtr variables, namely $\mathvariable{fstn}$ and $\mathvariable{lstn}$, as well as $\mathvariable{inc}$, thus consistency of one does not depend on consistency of the other.
-In addition to property template items, OCL expressions relating properties occur in \texttt{when} and \texttt{where} clauses, of which we, again, focus on invariants defined in \texttt{where} clauses.
+In contrast, constraints on $\mathvariable{Employee.salary}$ and $\mathvariable{Employee.name}$ are independent, because the property template items relate them to disjoint sets of \qvtr variables. %, namely $\mathvariable{fstn}$ and $\mathvariable{lstn}$, as well as $\mathvariable{inc}$, 
+Thus consistency of one does not depend on consistency of the other.
+In addition to property template items, OCL expressions relating properties occur in \texttt{when} and \texttt{where} clauses, of which we, again, focus on invariants of \texttt{where} clauses.
 Like for property template items, properties related by shared \qvtr variables in these clauses have to be grouped into a hyperedge.
 
 % \paragraph{From QVT-R Relation to Hyperedge}
@@ -379,10 +385,10 @@ Like for property template items, properties related by shared \qvtr variables i
 \end{algorithm}
 
 \mnote{Merge algorithm}
-\autoref{algo:compatibility:merge_properties} expresses the sketched procedure of merging properties to predicates that finally represent hyperedges of the property graph.
-The algorithm manages couples of properties and \qvtr variables, each such couple called an \emph{entry}.
+\autoref{algo:compatibility:merge_properties} expresses the sketched procedure merging properties to predicates that finally represent hyperedges of the property graph.
+It manages couples, called \emph{entries}, of properties and \qvtr variables.
 These entries denote that a set of properties is related by the according set of \qvtr variables.
-The algorithm starts with a set of couples, each couple $(\setted{p}, V_{\setted{p}})$ consisting of a singleton $\setted{p}$ that represents a single property $p$ and the \qvtr variables $V_{\setted{p}}$ it is related to by its property template item.
+The algorithm starts with a set of couples, each couple $\tupled{\setted{p}, V_{\setted{p}}}$ consisting of a singleton $\setted{p}$ that presents a property $p$ and the \qvtr variables $V_{\setted{p}}$ it is related to by its property template item.
 In each iteration, the algorithm chooses one reference entry and merges it with all other entries to which the intersection of their \qvtr variables is not empty.
 The algorithm terminates when all sets of \qvtr variables are pairwise disjoint.
 
@@ -399,20 +405,20 @@ The relation \texttt{PE} of the \qvtr transformation \texttt{PersonEmployee} in 
     \tupled{\setted{\propdisplay{name}}, \setted{\mathvariable{fstn}, \mathvariable{lstn}}},
     \tupled{\setted{\propdisplay{salary}}, \setted{\mathvariable{inc}}}
 \end{align*}
-After the execution of the algorithm, properties are merged as follows:
+After the execution of the algorithm, properties are merged into two sets:
 \begin{align*}
 &
-    \tupled{\setted{\propdisplay{firstname}, \propdisplay{lastname}, \propdisplay{name}}, \setted{\mathvariable{fstn}, \mathvariable{lstn}}},\\
-&
+    \tupled{\setted{\propdisplay{firstname}, \propdisplay{lastname}, \propdisplay{name}}, \setted{\mathvariable{fstn}, \mathvariable{lstn}}}, %\\
+%&
     \tupled{\setted{\propdisplay{income}, \propdisplay{salary}}, \setted{\mathvariable{inc}}}
 \end{align*}
-This results in two sets of properties.
+%This results in two sets of properties.
 \end{example}
 
 \mnote{Hypergraph from algorithm}
 Each entry delivered by the algorithm can be transformed into a hyperedge.
-To this end, the properties are grouped into two tuples according to the domains they domains they originally belonged to.
-The predicate function is given by the conjunction of all OCL expression associated with properties of the entry, i.e., property template items and invariants.
+To this end, the properties are grouped into two tuples according to the domains they originally belonged to.
+The predicate function is given by the conjunction of all \gls{OCL} expressions associated with properties of the entry, i.e., property template items and invariants.
 For the subsequent identification of redundant relations, we only need to operate on this hypergraph rather than the original metamodels or \qvtr transformations.
 
 % At the end of the algorithm, each entry can be transformed into a hyperedge. To do so, properties of the entry are assigned to the classes out of which they originate to form property sets. These property sets are grouped into two tuples. The predicate function is the conjunction of all OCL expressions associated with properties of the entry.
@@ -436,7 +442,7 @@ For a property graph $\mathcal{M} = \tupled{\mathcal{H}, \function{l}}$, this is
 Redundancy according to \autoref{def:leftequalredundancy} is given if for a consistency relation an alternative concatenation of consistency relations that relates the at least partly same classes does not restrict consistency.
 In terms of a graph, this means that there must be two paths between the same properties.
 Independence of consistency relations is then given by connected components of the hypergraph, because they represent the properties that are related by constraints involving the same \qvtr variables.
-According to \autoref{theorem:independencecompatibility}, consistency relations are compatible if hey are composed of independent, compatible subsets, thus if for the relations in each connected component of the hypergraph compatibility can be shown, their union is compatible as well.
+According to \autoref{theorem:independencecompatibility}, consistency relations are compatible if they are composed of independent, compatible subsets, thus if for the relations in each connected component of the hypergraph compatibility can be shown, their union is compatible as well.
 
 % Given a property graph $\mathcal{M} = (\mathcal{H}, l)$, decomposition is accomplished by removing redundant consistency relations (hyperedges of $\mathcal{H}$) until all relations have been tested once or until the property graph is only composed of trees.
 % The hypergraph $\mathcal{H}$ provides valuable information about the nature of the consistency specification. First, a necessary condition for a consistency relation between two metamodels $\metamodel{M}{1}$ and $\metamodel{M}{2}$ to be redundant according to \autoref{def:leftequalredundancy} is the existence of an alternative concatenation of relations that links $\metamodel{M}{1}$ and $\metamodel{M}{2}$ too. In terms of graph, there must exist a path between $\metamodel{M}{1}$ and $\metamodel{M}{2}$. Second, consistency relation definitions can be independent from each other, in the sense that they share no properties. Following \autoref{theorem:independencecompatibility}, the union of two independent and compatible consistency relations is also compatible. Independency in the hypergraph is given by connected components. An important aspect of the decomposition procedure is to find consistency relation definitions that can be tested for redundancy. Taking advantage of the structure of the graph is useful for listing these relations.
@@ -458,7 +464,7 @@ An example for the dual of a property graph of the running example is given in \
 %\todoLater{Prove that if the dual of the meta graph is a tree, it is a consistency relation tree}
 
 \begin{definition}[Dual of a Property Graph]
-Let $\mathcal{M} = (\mathcal{H}, l)$ be a property graph. The dual of the property graph $\mathcal{M}$, denoted $\mathcal{M^{*}}$ is a tuple $\tupled{\mathcal{G}, \function{v}, \function{l}}$ with a simple graph $\mathcal{G}$ and two functions $\function{v}$ and $\function{l}$ such that:
+Let $\mathcal{M} = (\mathcal{H}, l)$ be a property graph. The dual of the property graph $\mathcal{M}$, denoted $\mathcal{M^{*}}$, is a tuple $\tupled{\mathcal{G}, \function{v}, \function{l}}$ with a simple graph $\mathcal{G}$ and two functions $\function{v}$ and $\function{l}$ such that:
     \begin{itemize}
         \item $V_{\mathcal{G}} = E_{\mathcal{H}}$
         \item $E_{\mathcal{G}} = \setted{\setted{E_1, E_2} \mid \forall \tupled{E_1, E_2} \in E_{\mathcal{H}}^2 : E_1 \cap E_2 \neq \varnothing}$
@@ -475,15 +481,15 @@ Given a dual $\mathcal{M^{*}} = \tupled{\mathcal{G}, \function{v}, \function{l}}
 Independence of consistency relations in the property graph is characterized by the existence of two (or more) subhypergraphs\footnote{A subhypergraph of a hypergraph $\mathcal{H} = (V_{\mathcal{H}}, E_{\mathcal{H}})$ is a hypergraph $\mathcal{S} = \tupled{V_{\mathcal{S}}, E_{\mathcal{S}}}$ such that $E_{\mathcal{S}} \subseteq E_{\mathcal{H}}$ and $V_{\mathcal{S}} = \bigcup_{E \in E_{\mathcal{S}}} E$} such that there is no path (i.e., sequence of incident hyperedges) from one to the other.
 In the dual of the property graph, such a situation is represented by two subgraphs that are not connected to each other.
 This conforms to the notion of connected components, which are maximal subgraphs such that there exists a path between any two vertices in it and reflects the notion of independence given in \autoref{def:independence}.
-Each subgraphs does, per definition, relate disjoint sets of properties, as otherwise an edge between two vertices that contain an intersection of these properties would exist.
-These property sets occurs in independent sets of consistency relations, as other there would be a vertex in the dual of the property graph for a hyperedge of the property graph that relates the properties, which are linked by any OCL expression and according \qvtr variables in the consistency relations.
+Each subgraph does, per definition, relate disjoint sets of properties, as otherwise an edge between two vertices that contain an intersection of these properties would exist.
+These property sets occur in independent sets of consistency relations, as otherwise there would be a vertex in the dual of the property graph for a hyperedge of the property graph that relates the properties that are linked by an \gls{OCL} expression and according \qvtr variables.
 We use Tarjan's algorithm to compute the connected components of the dual of the property graph in linear time~\cite{tarjan1972depth}.
 These independent subgraphs can be processed independently, since their compatibility composes according to \autoref{theorem:independencecompatibility}.
 
 \mnote{Trees in property graphs}
 In addition to independence, \autoref{theorem:treecompatibility} stating that consistency relation trees are compatible also applies to the dual of the property graph.
-When there are not two paths relating the same classes or properties, respectively, the notion of a consistency relation tree is fulfilled, thus the represented consistency relations are inherently compatible.
-Thus, if the dual of the property graph is only composed on independent trees, i.e., if it is a \emph{forest}, it is inherently compatible.
+When there are no two paths relating the same classes or properties, respectively, the notion of a consistency relation tree is fulfilled, thus the represented consistency relations are inherently compatible.
+Consequently, if the dual of the property graph is only composed of independent trees, i.e., if it is a \emph{forest}, it is inherently compatible.
 
 % \paragraph{Independent Subsets of Consistency Relations}
 % In a consistency specification, consistency relations can form independent sets, in the sense that the consistency of one set can be checked and repaired independently without affecting the consistency of the other set. This occurs at two levels. 
@@ -497,12 +503,12 @@ Thus, if the dual of the property graph is only composed on independent trees, i
 
 \mnote{Redundancy in property graphs}
 Finally, \autoref{corollary:transitiveredundancycompatibility} has shown that adding left-equal redundant consistency relations to a compatible consistency relation set preserves its compatibility.
-According to the redundancy definition in \autoref{def:leftequalredundancy}, we consider a predicate and its representing hyperedge, respectively, redundant, if there is another concatenation of predicates that are always fulfilled if the redundant one is fulfilled.
-In the hypergraph, this conform to an alternative sequence of hyperedges that represent those predicates, which relates the same properties as the possibly redundant one.
+According to \autoref{def:leftequalredundancy} for redundancy, we consider a predicate and its representing hyperedge, respectively, redundant if there is another concatenation of predicates that are always fulfilled if the redundant one is fulfilled.
+In the hypergraph, this conforms to an alternative sequence of hyperedges that represent those predicates, which relates the same properties as the possibly redundant one.
 In our operationalization, we only consider the case when the exact same classes are related by both the possibly redundant and the alternative concatenation of predicates, although the definition only requires the classes at the left side to be equal.
 The existence of such an alternative path is, however, only a necessary but not a sufficient condition.
-The predicates must also relate the properties in the same way, as, for example, one predicate may ensure that two string attributes are equals, whereas an alternative sequence of predicates only ensures that they have the same length.
-This is the reason why we perform a redundancy test for redundancy candidates given by such alternative path, which we explain in the subsequent subsection.
+The predicates must also relate the properties in the same way, as, for example, one predicate may ensure that two string attributes are equal, whereas an alternative sequence of predicates only ensures that they have the same length.
+This is the reason why we perform a redundancy test for redundancy candidates given by such an alternative path, which we explain in the subsequent subsection.
 
 \mnote{Alternative paths in property graphss}
 An alternative path for a hyperedge $E$, which represents a predicate in the property graph, is a sequence of pairwise incident hyperedges, of which the first and last edge are incident to $E$.
@@ -533,23 +539,23 @@ The problem of finding all simple cycles in an undirected graph is called \emph{
 
 \mnote{Redundant relation removal algorithm}
 \autoref{algo:compatibility:cycle_enumeration} implements the enumeration of alternative paths for predicates and their removal in case they are redundant.
-The implementation of identifying a candidate predicate as actually redundant within a cycle is assumes to be available as an external function $\function{IsRedundant}$.
+The implementation of identifying a candidate predicate as actually redundant within a cycle is assumed to be available as an external function $\function{IsRedundant}$.
 As discussed before, this allows us to plug in different possible implementations for the redundancy test, of which we will depict one in the subsequent subsection.
 The algorithm is mainly concerned with the enumeration of alternative paths.
 
 \mnote{Cycle enumeration}
 The algorithm relies on the computation of a \emph{cycles basis}, which is a set of simple cycles from which all other simple cycles of the graph can be derived by combination.
-This cycles basis is computed using Paton's algorithm~\cite{paton1969algorithm}.
+This cycle basis is computed using Paton's algorithm~\cite{paton1969algorithm}.
 For a given predicate, the enumeration processes each cycle from the cycle basis and merges it with all cycles that have been processed so far. 
-Every cycles is represented as a set of edges.
+Every cycle is represented as a set of edges.
 We denote the symmetric difference with the $\oplus$ sign, i.e., $A \oplus B$ is the set of edges that are in $A$ or in $B$ but not in both.
 The set $\mathvariable{foundCycles}$ contains all linear combinations of cycles that have been processed so far.
 Merged with cycles of the basis $\mathvariable{base}_1, \dots, \mathvariable{base}_n$, these linear combinations are used to merge more than two cycles of the basis.
-In each iteration of \autoref{algo:compatibility:cycle_enumeration}, processing a new cycle from the cycle basis $\mathvariable{base}$, new simple cycles are in $\mathvariable{currentCycles} \cup \setted{\mathvariable{base}}$. Edge-disjoint or non-simple cycles are stored in $\mathvariable{currentCycles}^*$.
+In each iteration of \autoref{algo:compatibility:cycle_enumeration}, processing a new cycle $\mathvariable{base}$ from the cycle basis, new simple cycles are in $\mathvariable{currentCycles} \cup \setted{\mathvariable{base}}$. Edge-disjoint or non-simple cycles are stored in $\mathvariable{currentCycles}^*$.
 
 \mnote{Redundancy test}
 The redundancy test is performed in \autoref{algo:compatibility:cycle_enumeration:line:newCycles} whenever new cycles are generated.
-It checks for the given predicate $\mathvariable{pred}$ whether one of the newly generated cycles is redundant, i.e., whether it contains $\mathvariable{pred}$ and $\mathvariable{pred}$ can be replaced by the concatenation of other predicates.
+It checks for the given predicate $\mathvariable{pred}$ whether one of the newly generated cycles is redundant, i.e., whether it contains $\mathvariable{pred}$ and whether $\mathvariable{pred}$ can be replaced by the concatenation of other predicates.
 If the redundancy test is positive for an alternative sequence of predicates, the candidate can be removed without testing other candidates.
 The algorithm then proceeds with further possibly redundant predicates.
 It terminates as soon as all predicates have been tested.
@@ -577,14 +583,15 @@ In the following, we discuss how such a redundancy test can be realized.
 \label{chap:compatibility:practical_approach:redundancies}
 
 \mnote{Redundancy test as black box}
-We have up to now considered the redundancy test of predicates in the decomposition procedure as a black box, which can be realized by any approach that is able to prove redundancy of predicates, to foster independent reuse of the proposed decomposition procedure and the redundancy test to be presented in the following.
+We have so far considered the redundancy test of predicates in the decomposition procedure as a black box, which can be realized by any approach that is able to prove redundancy of predicates.
+This fosters independent reuse of the proposed decomposition procedure and the redundancy test to be presented in the following.
 \autoref{algo:compatibility:cycle_enumeration} contains the function \function{IsRedundant} that needs to realize this check.
 
 \mnote{Redundancy undecidability}
-Since OCL expressions have equal expressiveness than fist-order logic, reasoning about OCL constraints such as satisfiability is undecidable~\cite{beckert2002ocltranslation}.
+Since \gls{OCL} expressions have equal expressiveness than fist-order logic, reasoning about \gls{OCL} constraints such as satisfiability is undecidable~\cite{beckert2002ocltranslation}.
 Deciding whether a predicate is redundant reduces to deciding satisfiability, which is why no strategy that always decides redundancy can be defined.
 In the following, we first discuss how predicates can be generally compared to prove compatibility.
-We then present an approach that translates OCL constraints of the predicates into first-order logic formulae and applies a theorem prover.
+We then present an approach that translates \gls{OCL} constraints of the predicates into first-order formulae and applies a theorem prover.
 Finally, we discuss the limitations of the approach especially arising from the translation to first-order logic and the use of a theorem prover.
 
 % In the decomposition procedure, enumerating possibly redundant predicates and proving that such predicates are redundant are uncoupled tasks. 
@@ -596,38 +603,37 @@ Finally, we discuss the limitations of the approach especially arising from the 
 %\subsubsection{Intensional Comparison of Predicates}
 
 \mnote{Redundancy notion for predicates}
-A redundancy test takes a couple $\tupled{E, \tupled{E_1, \dots, E_n}}$ and return \textsc{true} whenever the predicate $E$ is proven to be redundant to the sequence of predicates $\tupled{E_1, \dots, E_n}$.
+A redundancy test takes a couple $\tupled{E, \sequenced{E_1, \dots, E_n}}$ and returns \textsc{true} whenever the predicate $E$ is proven to be redundant to the sequence of predicates $\sequenced{E_1, \dots, E_n}$.
 Redundancy as defined in \autoref{def:leftequalredundancy} requires the set of consistency relations, which are defined by the predicates, to be equivalent with and without the redundant relation.
-This especially means that removing the redundant relation need not weaken consistency, i.e., lead to models being considered consistent without that relation that are not considered consistent with that relation.
+This especially means that removing the redundant relation must not weaken consistency, i.e., it must not lead to models being considered consistent without that relation that are not considered consistent with that relation.
 This is equivalent for a property graph, in which a redundant predicate may not restrict consistency by considering a model with specific property values inconsistent that are considered consistent by an alternative sequence of predicates.
-A predicate $E$ can thus only be removed if all instances matching the predicate also match predicates $\tupled{E_1, \dots, E_n}$.
+A predicate $E$ can thus only be removed if all instances matching the predicate also match predicates $\sequenced{E_1, \dots, E_n}$.
 In fact, \autoref{def:leftequalredundancy} limits redundancy to relations in which the left side classes are equal.
 We do, however, only consider relations between the same sets of properties, thus being restricted to relations between the same sets of classes anyway.
 
 \mnote{Extensional redundancy test}
 In consequence, a redundancy test realizes the comparison of two sets of instances of models or, in particular, property values.
-A predicate can, however, be fulfilled by an infinite number of property values, i.e., condition elements in terminology of consistency relations, such as equivalence of person incomes and employee salaries inducing an infinite number of integer pairs to be considered consistent.
-An extensional element per element comparison is thus generally impossible.
+A predicate can, however, be fulfilled by an infinite number of property values, i.e., condition elements in terminology of consistency relations, such as consistency of person incomes and employee salaries by an infinite number of integer pairs.
+An extensional elementwise comparison is thus generally impossible.
 
 \mnote{Intensional redundancy test}
 For that reason, we consider the intensional specification of consistency relations by means of OCL constraints.
 These constraints are annotated to the property graph as hyperedge labels.
 The redundancy test can thus be realized by a static analysis of these labels and \qvtr relation conditions in \texttt{when} and \texttt{where} clauses.
-One such strategy is the transformation of OCL expressions into first-order logic and the reasoning about the resulting first-oder logic formulae~\cite{beckert2002ocltranslation, berardi2005umlreasoning}.
-We set up the first-order logic formulae such that it is valid, i.e., \textsc{true} under every possible interpretation, whenever the redundancy test is positive.
-This transformation benefits from the availability of theorem proving tools for reasoning about first-order logic formulae.
+One such strategy is the transformation of OCL expressions into first-order logic and the reasoning about the resulting first-oder formulae~\cite{beckert2002ocltranslation, berardi2005umlreasoning}.
+We set up the first-order formulae such that they are valid, i.e., \textsc{true} under every possible interpretation, whenever the redundancy test is positive.
+This transformation benefits from the availability of theorem proving tools for reasoning about first-order formulae.
 
 \mnote{First-order logic representation}
 Since first-order logic is generally undecidable, redundancy of a relation cannot be proven for every derived formula.
-Thus, the quality of the results of the decomposition procedure highly depend on the quality of the theorem prover.
-The transformation of OCL to logic formulae requires a representation of all constructs, such as arithmetic operations, strings, array etc., into formulae.
-Theories of theorem provers can represent all kinds of objects, such as strings, floats, sequences and so on.
+Thus, the result quality of the decomposition procedure depends on the quality of the theorem prover.
+The transformation of \gls{OCL} to logic formulae requires a representation of all constructs, such as arithmetic operations, strings, arrays, etc., in formulae.
+Objects, such as strings, flotas, sequences and so can be represented by theories of theorem provers.
 With theories, the satisfiability problem equates to assigning values to variables in first-order logic sentences such that their evaluation returns \textsc{true}.
 For example, the formula $(a \times b = 6) \land (a + b > 0)$ is satisfiable given the assignment $\setted{a = 2, b = 3}$.
 This extension is known as \gls{SMT}.
 Formulae for the \gls{SMT} problem are called \emph{\gls{SMT} instances}.
-Some theorem provers provide built-in theories and are thus called \emph{theory-based theorem provers}.
-For our redundancy test, we translate OCL constraints into built-in theories of such a prover.
+\emph{Theory-based theorem provers} provide built-in theories, to which we translate \gls{OCL} constraints for our redundancy test.
 
 % Whatever the strategy, the \textit{redundancy test} takes a couple $(E, \tupled{E_1, \dots, E_n})$ as an input and returns \textsc{true} if the predicate $E$ was proven redundant because of the sequence of predicates $\tupled{E_1, \dots, E_n}$, \textsc{false} otherwise. As stated in \autoref{def:leftequalredundancy}, a consistency relation is considered left-equal redundant if its removal from the set of consistency relations leads to an equivalent set and relates the same kinds of elements at the left side. For the relation to be redundant, there must be an alternative sequence of relations that already fulfills the role of the initial relation. This also applies to the property graph: for a predicate to be removed, there must exist another sequence of predicates relating the same properties that is strict enough not to weaken the consistency specification. Weakening the consistency specification means allowing models that would have been considered non-consistent before the removal of the predicate. 
 % Since we only consider predicates that relate the same properties the additional requirement of left-equal redundancy in comparison to general redundancy in \autoref{def:redundancy} is always fulfilled. In the following, we thus only discuss redundancy rather then left-equal redundancy, as it is always given by construction.
@@ -656,10 +662,10 @@ For our redundancy test, we translate OCL constraints into built-in theories of 
 
 \mnote{Redundancy of predicates}
 The information that is necessary for a redundancy test is given by the predicates passed to the test.
-Let $E = (\propertysettuple{P}{\classtuple{C}{l}}, \propertysettuple{P}{\classtuple{C}{r}}, \function{f}_E)$ be a predicate for two class tuples $\classtuple{C}{l}$ and $\classtuple{C}{l}$. 
+Let $E = \tupled{\propertysettuple{P}{\classtuple{C}{l}}, \propertysettuple{P}{\classtuple{C}{r}}, \function{f}_E}$ be a predicate for two class tuples $\classtuple{C}{l}$ and $\classtuple{C}{r}$. 
 During the construction of the property graph, a hyperedge composed of all properties in $\propertysettuple{P}{\classtuple{C}{l}}$ and $\propertysettuple{P}{\classtuple{C}{r}}$ is labeled with the description of the predicate function $\function{f}_E$.
-Such a predicate $E$ can be replaced by a sequence of other predicates $\tupled{E_1, \dots, E_n}$ if $\function{f}_E$ evaluates to \textsc{true} whenever $\function{f}_{E_1} \wedge \dots \wedge \function{f}_{E_n}$ evaluates to \textsc{true}.
-In that case, the removal of the consistency relation given by $E$ does not weaken consistency, because it is fulfilled only when  the relation given by the concatenation of $\tupled{E_1, \dots, E_n}$ is fulfilled anyway.
+Such a predicate $E$ can be replaced by a sequence of other predicates $\sequenced{E_1, \dots, E_n}$ if $\function{f}_E$ evaluates to \textsc{true} whenever $\function{f}_{E_1} \wedge \dots \wedge \function{f}_{E_n}$ evaluates to \textsc{true}.
+In that case, the removal of the consistency relation given by $E$ does not weaken consistency, because it is fulfilled only when  the relation given by the concatenation of $\sequenced{E_1, \dots, E_n}$ is fulfilled anyway.
 In consequence, $E$ is redundant.
 This redundancy test can be encoded as a formula in the following way:
 \begin{align*}
@@ -669,11 +675,11 @@ This redundancy test can be encoded as a formula in the following way:
 
 \mnote{Horn clauses}
 This formula is a \emph{Horn clause}.
-According to common terminology, we call terms on the left-hand side of the clause \textit{facts} and the term on the right-hand side \textit{goal}.
+According to common terminology, we call terms at the left-hand side of the clause \textit{facts} and the term at the right-hand side \textit{goal}.
 The assignment of values to variables in the Horn clause also models the instantiation of properties, i.e., the assignment of property values.
 If the Horn clause is valid, then the alternative sequence of predicates can replace the other predicate for every instance.
 Horn clauses are usually described without quantifiers, but all variables are implicitly quantified universally.
-Predicate function of OCL expressions, however, need to contain existentially quantified \qvtr variables, as the pattern matching of the expression requires the existence of a value for such a variable.
+Predicate functions of \gls{OCL} expressions, however, need to contain existentially quantified \qvtr variables, as the pattern matching of the expressions requires the existence of values for these variables.
 
 % \paragraph{Modeling as a Horn Clause}
 
@@ -691,7 +697,7 @@ Predicate function of OCL expressions, however, need to contain existentially qu
 
 \begin{example}
 \autoref{fig:compatibility:dual_propertygraph_example} depicts the dual of the property graph for the motivational example in \autoref{lst:compatibility:qvtr_running_example}. 
-It contains four connected components, of which three three contain one predicate only. 
+It contains four connected components, of which three contain only one predicate. 
 These three components are trivial trees, such compatibility for them is proven.
 The other component consists of three predicates and contains a cycle ($\sequenced{1, 2, 3}$).
 Let $3$ be the possibly redundant predicate.
@@ -712,23 +718,30 @@ This leads to the following formula with facts $1$ and $2$ and goal $3$:
         [\exists n : (\propdisplay{Resident::name} = \mathvariable{n}) \land (\propdisplay{Employee::name} = \mathvariable{n})]
 \end{align*}
 \qvtr variables have been renamed to avoid conflicts, because they are no longer isolated as they were before in distinct \qvtr relations.
-The formula is valid and will be identifies as such by an \gls{SMT} solver.
+The formula is valid and will be identified as such by an \gls{SMT} solver.
 For that reason, predicate~$3$ can be removed from the property graph and its dual. 
 Since the component then only consists of two predicates and thus forms a tree, the represented consistency relations are compatible.
-Since all independent consistency relations sets, represented by the independent connected components of predicates, are compatible, the complete consistency specification is compatible.
+Since all independent consistency relation sets, represented by the independent connected components of predicates, are compatible, the complete consistency specification is compatible.
 \end{example}
+
+\begin{figure}
+    \centering
+    \input{figures/correctness/compatibility/redundancy_test}
+    \caption[Redundancy test overview]{Overview of the redundancy test from \gls{OCL} expressions to the \gls{SMT} solver results. Taken from \owncite{klare2020compatibility-report}.}
+    \label{fig:compatibility:redundancytest}
+\end{figure}
 
 \mnote{Satisfiability of negation}
 Whenever such a Horn clause is valid, i.e., true under every interpretation, redundancy of the consistency relation represented by the predicate given as the clause goal is proven.
 The \gls{SMT} solver takes the clause as an \gls{SMT} instance and verifies its satisfiability, whenever possible.
 Proving that a Horn clause $H$ is valid is equivalent to proving that its negation $\neg H$ is unsatisfiable.
-Therefore, we actually let the \gls{SMT} prove that the \gls{SMT} instance $\function{f}_{E_1} \wedge \dots \wedge \function{f}_{E_n} \wedge \neg \function{f}_{E}$ is unsatisfiable.
+Therefore, we actually let the \gls{SMT} solver prove that the \gls{SMT} instance $\function{f}_{E_1} \wedge \dots \wedge \function{f}_{E_n} \wedge \neg \function{f}_{E}$ is unsatisfiable.
+The complete process of the redundancy test is depicted in \autoref{fig:compatibility:redundancytest}.
 The solver can provide the following three results:
-
 \begin{properdescription}
     \item[Satisfiable:] If $\neg H$ is satisfiable, then $H$ is not valid. This means that an interpretation exists, i.e., an instantiation of properties, that fulfills the possibly redundant predicate but not the alternative sequence of predicates. Thus, the predicate is not redundant and cannot be removed.
     \item[Unsatisfiable:] If $\neg H$ is unsatisfiable, then $H$ is valid. Thus, when the alternative sequence is fulfilled the predicate is fulfilled as well. It is redundant and can be removed.
-    \item[Unknown:] First-order logic being undecidable, not all formulae can be proven valid. When a theorem prover is unable to evaluate the satisfiability of a formula, it returns \textit{Unknown}. By application of the conservativeness principle, the redundancy test is considered negative. As a result, the predicate is not removed.
+    \item[Unknown:] First-order logic being undecidable, a theorem prover cannot evaluate satisfiability of all formulae, thus also returning \emph{Unknown}. By application of the conservativeness principle, the redundancy test is considered negative. As a result, the predicate is not removed.
 \end{properdescription}
 
 %\paragraph{Redundancy Test}
@@ -743,25 +756,15 @@ The solver can provide the following three results:
 %     \item[Unknown.] First-order logic being undecidable, not all formulae can be proven valid. When a theorem prover is unable to evaluate the satisfiability of a formula, it returns \textit{Unknown}. By application of the conservativeness principle, the redundancy test is considered negative. As a result, the predicate is not removed.
 % \end{properdescription}
 
-\begin{figure}
-    \centering
-    \input{figures/correctness/compatibility/redundancy_test}
-    \caption[Redundancy test overview]{Overview of the redundancy test, from \gls{OCL} expressions to the \gls{SMT} solver. Taken from \owncite{klare2020compatibility-report}.}
-    \label{fig:compatibility:redundancytest}
-\end{figure}
-
-\mnote{Process overview}
-The complete process of the redundancy test from OCL expressions, across logic formulae for the \gls{SMT} solver to the possible results is depicted in \autoref{fig:compatibility:redundancytest}.
-
 \mnote{Translation to logic formulae}
-For the concrete translation of \gls{OCL} expressions in \qvtr relations to \gls{SMT} instances, we refer to general existing work on translating \gls{OCL} to first-order logic formulae~\cite{beckert2002ocltranslation} and, in particular, to our work presenting the specific translation developed for proving compatibility~\owncite{klare2020compatibility-report}.
-\qvtr uses a subset of OCL called \emph{EssentialOCL}~\cite{qvt}, which is a side-effect free sublanguage that provides primitive data types, data structures and operations to express constraints on models.
-Several constructs of \gls{OCL} have a direct equivalent in theories of the theorem prover or can be mapped to the combination of primitive constructs.
-We employ the SMT-LIB specification, which is a standard that provides an input language for \gls{SMT} solvers~\cite{smtlib2017}, and the Z3 theorem prover~\cite{z32008} for realizing the redundancy test.
+For the actual translation of \gls{OCL} expressions in \qvtr relations into \gls{SMT} instances, we refer to existing work on translating \gls{OCL} to first-order formulae~\cite{beckert2002ocltranslation} and, in particular, to our work presenting the specific translation for proving compatibility~\owncite{klare2020compatibility-report}.
+\qvtr uses a subset of \gls{OCL} called \emph{EssentialOCL}~\cite{qvt}, which is a side-effect-free sublanguage that provides primitive data types, data structures and operations to express constraints on models.
+Several \gls{OCL} constructs have a direct equivalent in theories of the theorem prover or can be mapped to a combination of primitive constructs.
+We employ the SMT-LIB specification, which is a standard that provides an input language for \gls{SMT} solvers~\cite{smtlib2017}, and the Z3 theorem prover~\cite{z32008} to realize the redundancy test.
 A complete reference of translated constructs has been developed in the master's thesis of~\textcite{pepin2019ma}.
 
 \mnote{Untranslatability}
-In addition to general undecidability of \gls{OCL}, some \gls{OCL} operations are said to be \emph{untranslatable}, because no mapping between them and feature of \gls{SMT} solvers were found yet.
+In addition to general undecidability of \gls{OCL}, some \gls{OCL} operations are said to be \emph{untranslatable}, because no mapping between them and features of \gls{SMT} solvers were found yet.
 In consequence, some \qvtr relations cannot be processed automatically by the proposed decomposition procedure.
 For example, string operations like \texttt{toLower} and \texttt{toUpper} cannot be easily translated into logic formulae for \gls{SMT} solvers without several used-defined axioms.
 Although decision procedures for such a case exist~\cite{veanes2012transducers}, they are not yet integrated into solvers.
@@ -817,9 +820,10 @@ Although decision procedures for such a case exist~\cite{veanes2012transducers},
 % If an SMT solver proves unsatisfiability of that clause, the checked predicate is redundant and can be removed.
 
 \mnote{Practical approach summary}
-In this subsection, we have discussed discussed how proving compatibility of relations as depicted in \autoref{algo:compatibility:formal_proof} for the formal approach can be realized for specifications in \qvtr.
-We have defined a representation of consistency relations by graphs and explained how they can be derived from \qvtr transformations.
-We have discussed how a consistency relation tree and independent relation sets manifests in such a representation and how candidates for redundancies in connected components of such a representation can be found by computing a cycle basis.
-Based on \autoref{theorem:independencecompatibility} and \autoref{theorem:treecompatibility}, as well as \autoref{corollary:transitiveredundancycompatibility}, this algorithm is able to prove compatibility by removing redundant relations, such that the resulting network is a composition of independent trees.
-Finally, we presented a realization of the redundancy test, also depicted in \autoref{fig:compatibility:redundancytest}, based on transforming \gls{OCL} expressions for predicates of potentially redundant consistency relations into Horn clauses that are solved by \gls{SMT} solvers.
-If an \gls{SMT} solver proves unsatisfiability of such a clause, the checked predicate is redundant and can be removed.
+In this subsection, we have discussed how proving compatibility of relations as depicted in \autoref{algo:compatibility:formal_proof} for the formal approach can be realized for \qvtr specifications.
+We have defined a representation of consistency relations inc graphs and explained how they can be derived from \qvtr transformations.
+We have discussed how a consistency relation tree and independent relation sets manifest in such a graph and how candidates for redundancies can be found in it. %in connected components of such a representation can be found by computing a cycle basis.
+%Based on \autoref{theorem:independencecompatibility} and \autoref{theorem:treecompatibility}, as well as \autoref{corollary:transitiveredundancycompatibility},
+The algorithm is able to prove compatibility by removing redundant relations, such that the resulting network is a composition of independent trees.
+Finally, we have presented a realization of the redundancy test based on transforming \gls{OCL} expressions for predicates of potentially redundant relations into Horn clauses that are solved by \gls{SMT} solvers.
+%If an \gls{SMT} solver proves unsatisfiability of such a clause, the checked predicate is redundant and can be removed.
