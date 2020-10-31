@@ -1,0 +1,55 @@
+\newcommand{\hdistance}{8.5em}
+\newcommand{\vdistance}{4.5em}
+\newcommand{\classwidth}{5em}
+\newcommand{\smallclasswidth}{3.5em}
+\newcommand{\classwidthdifference}{1.5em}
+
+\begin{tikzpicture}[
+    consistency relation/.style={consistency related element, dashed, latex-latex}
+]
+
+\umlclassvarwidth{pcm_component}{}{Component\sameheight}{
+}{\classwidth}
+\umlclassvarwidth[,below=\vdistance of pcm_component.north, anchor=north]{pcm_interface}{}{Interface\sameheight}{
+}{\classwidth}
+
+\umlassociationfromto{([xshift=-1em]pcm_component.south) -- node[uml role end, left] (provides_label) {provides} node[uml cardinality end, right] {*} ([xshift=-1em]pcm_interface.north)}
+\umlassociationfromto{([xshift=1em]pcm_component.south) -- node[uml role end, right] (requires_label) {requires} node[uml cardinality end, left] {*} ([xshift=1em]pcm_interface.north)}
+
+
+\umlclassvarwidth[,above right=0.55*\vdistance and 2*\hdistance of pcm_component.north, anchor=north]{java_classifier}{}{Classifier\sameheight}{
+}{\classwidth}
+\umlclassvarwidth[,below left=1.1*\vdistance and 0.5*\hdistance of java_classifier.north, anchor=north]{java_class}{}{Class\sameheight}{
+}{\smallclasswidth}
+\umlclassvarwidth[,below right=1.1*\vdistance and 0.5*\hdistance of java_classifier.north, anchor=north]{java_interface}{}{Interface\sameheight}{
+}{\smallclasswidth}
+\umlclassvarwidth[,below right=\vdistance and 0.5*\classwidthdifference of java_class.north, anchor=north]{java_field}{}{Field\sameheight}{
+}{\classwidth}
+\umlclassvarwidth[,below=\vdistance of java_field.north, anchor=north]{java_constructor}{}{Constructor\sameheight}{
+}{\classwidth}
+\umlclassvarwidth[,right=\hdistance of java_constructor.north, anchor=north]{java_parameter}{}{Parameter\sameheight}{
+}{\classwidth}
+
+\umlsuperclassof{java_classifier.south}{-- ++(0,-1em) -|}{java_class}
+\umlsuperclassof{java_classifier.south}{-- ++(0,-1em) -|}{java_interface}
+
+\umlassociationfromto{(java_class) -- node[uml role end, pos=1, below left] (implements_label) {implements} node[uml cardinality end, pos=1, above left] {*} (java_interface)}
+\umlassociationfromto{(java_class) -- %node[uml role end, right] {fields} 
+node[uml cardinality end, left] {*} (java_class|-java_field.north)}
+\umlassociationfromto{(java_class.west) -- ++(-1em,0) |- node[uml cardinality end, below] {*} (java_constructor)}
+\umlassociationfromto{(java_field.east) -- ++(\hdistance-\classwidthdifference+0.5em,0) |- node[uml cardinality end, pos=1, above right] {1} ([yshift=-0.7em]java_classifier.east)}
+\umlassociationfromto{(java_constructor) -- node[uml cardinality end, below] {*} (java_parameter)}
+\umlassociationfromto{([xshift=2.5em]java_parameter.north) |- node[uml cardinality end, pos=1, above right] {1} ([yshift=0.7em]java_classifier.east)}
+
+\draw[consistency relation] ([xshift=0.5em]provides_label.north west) -- ++(0,\vdistance) -| ++(1.5*\hdistance,-0.65*\vdistance) -| ([yshift=0.3em]implements_label.north);
+\draw[consistency relation] (pcm_component) -- ++(0.7*\hdistance,0) |- ([yshift=0.7em]java_class.west);
+\draw[consistency relation] (requires_label.east) -- ++(0.5*\hdistance,0) |- (java_field);
+%\draw[consistency relation] (requires_label.east) -| ++(.5*\hdistance,-1.45*\vdistance) -| (java_parameter);
+\coordinate (requires_crosspoint) at ($(requires_label.east)+(.5*\hdistance,0)$);
+\draw[consistency relation, -latex] (requires_crosspoint|-java_field) -- ++(0,-0.4*\vdistance) -| (java_parameter);
+\draw[consistency relation] (pcm_interface) -| (java_interface);
+
+
+\node[above=0.5em of java_classifier.north, anchor=south, font=\bfseries] (java_label) {\gls{UML} / Java};
+\node[anchor=south, font=\bfseries] at (pcm_component.north|-java_label.south) {\gls{PCM}};
+\end{tikzpicture}
