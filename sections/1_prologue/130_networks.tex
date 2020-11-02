@@ -1,11 +1,11 @@
-\chapter{Models, Consistency and Processes
+\chapter{Consistency, Processes, and Models
     \pgsize{15 p.}
 }
 \label{chap:networks}
 
 \mnote{Chapter summary}
-In this chapter, we discuss general terms and notions that we consider to clarify the scope of this thesis.
-We discuss different dimensions of consistency, its specification and consistency preservation, as well as the process of specifying consistency with a depiction of the involved roles and relevant scenarios.
+In this chapter, we discuss general terms and notions as considered by us to clarify the scope of this thesis.
+We discuss different dimensions of consistency, its specification and preservation, as well as the process of specifying consistency with a depiction of the involved roles and relevant scenarios.
 We introduce the general notion of models used in this thesis and the notations that we use for them.
 Finally, we introduce a running example.
 
@@ -13,26 +13,26 @@ Finally, we introduce a running example.
 %%
 %% CONSISTENCY NOTIONS
 %%
-\section{Dimensions of Consistency, Specification and Preservation}
+\section{Dimensions of Consistency}
 
 \mnote{Consistency overview}
-In the following, we clarify different dimensions of how consistency can be considered and specified, which types of consistency can be distinguished and how these types induce different processes of checking and enforcing them.
+In the following, we clarify different dimensions of how consistency can be considered and specified, which types of consistency can be distinguished, and how these types induce different processes of checking and enforcing them.
 This leads to the restriction of our work to normative specifications of preservation for structural consistency relations.
 
 \subsection{Normative and Descriptive Specification}
 \label{chap:networks:notions:normative_descriptive}
 
 \mnote{Specification types}
-We have so far informally considered consistency as the absence of some kind of contradictions in different models.
+We have so far informally considered consistency as the absence of contradictions between different models.
 It is, however, unclear when to consider information in models contradictory.
-Consistency can be considered \emph{normatively} or \emph{descriptively}, depending on whether a notion of consistency already exists.
+Consistency can be considered \emph{normatively} or \emph{descriptively}~\cite[Sec.3.1.2]{kramer2017a}, depending on whether a notion of consistency already exists.
 
 \mnote{Normative consistency}
 With a normative (or \emph{prescriptive}) specification of consistency, we consider models consistent whenever we want them to be consistent.
 Thus, if someone specifies consistency, for example, in terms of a transformation, models are considered consistent when they adhere to that specification.
 Anything that this person defines as consistent is actually considered as consistent, i.e., the transformation \emph{prescribes} consistency.
 Such a specification can always be considered \emph{correct}, because there is no external specification to which it has to adhere.
-For example, it is usually not predefined when an architecture specification, be it in \gls{UML}, \gls{PCM}, or some other language, is considered consistent to its realization in code, so a transformation normatively defines how consistency is considered.
+For example, it is usually not predefined under which conditions an architecture specification, be it in \gls{UML}, \gls{PCM}, or some other language, is considered consistent to its realization in code, so a transformation normatively defines how consistency is considered.
 
 \mnote{Descriptive consistency}
 In the case of a \emph{descriptive} specification of consistency, we assume that consistency is already defined and we have to adhere to that definition.
@@ -47,7 +47,7 @@ Thus, any transformation has to describe that existing notion of consistency.
 In this thesis, we always assume a normative specification of consistency.
 This does not mean that we exclude languages for which some notion of consistency already exists, such as \gls{UML} and Java code, but we assume that a specification of that consistency is normative.
 This means, if there is an existing notion of consistency, we do not consider whether the specification is correct with respect to that existing notion, but we assume it to be correct by construction.
-It is subject to other research, including general requirements engineering and especially transformation validation~\cite{rahim2015SurveyTransformationVerification-SoSym}, to check whether a transformation is correct with respect to some expectation, reflecting an existing notion of consistency.
+It is subject to other research, including general requirements engineering and especially transformation validation~\cite{rahim2015SurveyTransformationVerification-SoSym}, to check whether a transformation is correct with respect to some expectation, which reflects an existing notion of consistency.
 This includes validation or verification of invariants~\cite{cabot2010VerificationInvariants-JSS} or contracts~\cite{azizi2017ContractVerification-ICCKE, vallecillo2012FormalTesting-FMMDE}.
 
 
@@ -55,12 +55,12 @@ This includes validation or verification of invariants~\cite{cabot2010Verificati
 \label{chap:networks:notions:types}
 
 \mnote{Execution semantics as distinction}
-In addition to the distinction between normative and descriptive consistency, we can distinguish different types of consistency relations.
+In addition to the distinction between normative and descriptive consistency specification, we can distinguish different types of consistency relations.
 From a pragmatic perspective, we can at least differentiate between \emph{structural} and \emph{behavioral} consistency relations, conforming to the distinction of structural and behavioral models in the \gls{UML} standard~\cite{uml}.
 While structural consistency concerns everything that has no execution semantics, behavioral consistency concerns semantics and thus also, for example, method bodies.
 Structural consistency can thus be checked without executing the model, comparable to the distinction between \emph{static} and \emph{execution} semantics of models, as introduced in \autoref{chap:foundations:modeling:models}.
-For example, having the same classes and method signatures in a \gls{UML} model and Java code would be considered a structural relation, whereas the equivalence of a \gls{UML} state machine and its Java code implementation would be considered a behavioral relation, because they need to have the same execution semantics.
-Thus, the mechanisms for checking these different types of consistency are supposed to be different.
+For example, having the same classes and method signatures in a \gls{UML} model and Java code would be considered a structural relation, whereas the equivalence of a \gls{UML} state machine and its Java implementation would be considered a behavioral relation, as they must have the same execution semantics.
+Thus, the mechanisms for checking these two types of consistency are likely to be different.
 
 \mnote{No strict separation}
 The distinction between structural and behavioral relations is, however, not strict.
@@ -70,10 +70,12 @@ In consequence, one might argue that structural consistency relations are a spec
 \mnote{Decidability as distinction}
 One approach to precisely define a separation between structural and behavioral relations is decidability.
 %From a theoretical perspective, we can distinguish between decidable consistency and undecidable consistency relations.
-While structural consistency relations do not consider execution semantics and will thus usually decidable, behavioral consistency relations will usually be undecidable, because as soon as we have Turing-complete descriptions of behavior, we cannot decide their semantic equivalence. %\todo{add cite?}
-An approach that checks behavioral consistency can be further distinguished regarding the statements it is able to make about consistency relations:
+It can be reasonable to consider every decidable relation as a structural consistency relation, as it does not consider execution semantics anyway, whereas undecidable relations may be considered behavioral,
+%While structural consistency relations do not consider execution semantics and will thus usually decidable, behavioral consistency relations will usually be undecidable, 
+because as soon as we have Turing-complete descriptions of behavior, we cannot decide semantic equivalence. %\todo{add cite?}
+More precisely, an approach checking consistency can make statements at the following levels: %An approach that checks consistency can be further distinguished regarding the statements it is able to make about consistency relations:
 \begin{properdescription}
-    \item[Universally quantified:] The approach can validate that a consistency relation holds for all instances of the modeled system. This can, for example, be achieved with verification techniques, model checking and other analyses. An exemplary application scenario is the equivalence of decidable behavior descriptions.
+    \item[Universally quantified:] The approach can validate that a consistency relation holds for all instances of the modeled system. This can, for example, be achieved with verification techniques, model checking and other analyses. An exemplary application scenario is the equivalence of decidable consistency relations.
     \item[Existentially quantified:] The approach can validate that a consistency relation holds at least for some instances of the modeled system. This can, for example, be achieved with tests. In the best case, the test cases cover a representative subset of the possible instances. An exemplary application scenario is the equivalence of undecidable behavior descriptions.
     \item[Statistical:] The approach can make statistical statements about the consistency relations, such as the probability for a relation to be fulfilled in an instance. This can, for example, be achieved by simulation. An exemplary application is consistency between quality requirements and the system realization, such as the fulfillment of a performance requirement in the implementation.
 \end{properdescription}
@@ -82,7 +84,7 @@ While universally quantified statements can only be made about decidable consist
 
 \mnote{Structural relations supposed to be decomposable}
 At a Dagstuhl seminar about multidirectional transformations~\cite{cleve2019dagstuhl}, different consistency relation scenarios were considered, in which more than two models were related.
-A central hypothesis was that probably relations between more than two models can be decomposed into binary relations as long as the relations are structural.
+A central hypothesis was that relations between more than two models can be decomposed into binary relations as long as the relations are structural.
 Whether two or more models fulfill a behavioral requirement, however, may not be easily decomposed into multiple binary relations between model pairs.
 
 \mnote{Structural relations in thesis}
@@ -100,10 +102,10 @@ Basically, we can distinguish whether a process is only \emph{checking} or also 
 Some consistency relations may only be checked and have to be manually ensured, whereas others can (semi-)automatically be enforced.
 
 \mnote{Enforcing structural and checking behavioral relations}
-Behavioral consistency relations may be hard to enforce but can, in the best case, only be checked.
-This also includes relations that define quality properties of behavior, such as performance of a behavior specification regarding performance requirements.
-For example, it will usually not possible to automatically adapt the source code after a change leads to the violation of a consistency relation between the performance of the implementation and the performance requirements.
-On the contrary, we expect that structural consistency relations can often also be enforced, at least collecting some additional information from the developer, because having redundant representations of structural elements is likely to provide only one or few options how to restore consistency rather than solving the violation of a performance requirement.
+Behavioral consistency relations may be hard to enforce but can, in the best case, at least be checked.
+This also includes relations that define quality properties, such as performance of an implementation regarding performance requirements.
+For example, it will usually not be possible to automatically adapt the source code after a change leads to the violation of a consistency relation between the performance of the implementation and the performance requirements.
+On the contrary, we expect that structural consistency relations can often also be enforced, at least collecting additional information from the developer, because having redundant representations of structural elements is likely to provide only one or few options how to restore consistency rather than solving the violation of a performance requirement.
 
 \mnote{Efficiency and granularity of checking and enforcing relation types}
 In addition, it can be reasonable to check and enforce structural consistency relations more often, because they can be checked in a rather fine-grained way and more efficiently, in the extreme case even just-in-time.
@@ -111,13 +113,14 @@ Checking behavioral relations may also include long-running analyses or simulati
 This at least applies to relations for which only existentially quantified or statistical statements can be made.
 For example, adding an architectural component to a \gls{PCM} model can and should directly lead to the creation of an implementing class in Java code. %$ or method in \gls{UML} can and should directly lead to the creation of an appropriate class or method in Java.
 %Adding an architectural component can directly lead to the creation of an implementing class.
-But whether a Java method fulfills some behavioral consistency relation to another model, such as the behavioral service specifications in a \gls{PCM} model, usually makes sense less often, as it requires more coarse-grained modifications to achieve consistency and checking may take more time because of complex analyses or simulations to run.
+But whether a Java method fulfills some behavioral consistency relation to another model, such as the behavioral service specifications in a \gls{PCM} model, usually makes sense less often, as it requires more coarse-grained modifications to achieve consistency, and checking may take more time because of complex analyses or simulations to run.
 The developer may explicitly indicate when a development state is reached at which behavioral consistency relations can be checked.
 For behavioral relations about which universally quantified statements can be made, such as a security analysis, it may be up to the scenario whether checks should be performed just-in-time or only at specific points in time.
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.8\textwidth]{figures/prologue/networks/process_structure_behavior.png}
+    \input{figures/prologue/networks/process_structure_behavior.tex}
+    %\includegraphics[width=0.8\textwidth]{figures/prologue/networks/process_structure_behavior.png}
     \caption[Process for preserving structural and behavioral consistency]{Proposed process for continuously preserving structural and explicitly checking behavioral consistency}
     \label{fig:networks:process_structure_behavior}
 \end{figure}
@@ -127,8 +130,8 @@ In consequence, the distinction between structural and behavioral consistency re
 While structural consistency relations may be preserved often in a fine-grained way, behavioral consistency relations may be checked less often.
 We depict the proposed process in \autoref{fig:networks:process_structure_behavior}.
 In the best case, a consistency mechanism can give hints to potential behavioral consistency violations more often.
-For example, a performance-relevant modification of the implementation could lead to a hint for the developer that performance may be affected by his modification with the information about the previous analysis result, such that he or she can guess whether his modification will violate the requirement.
-Given the information that a response time requirement of 10 milliseconds was fulfilled during the last check by an actual response time of 1 millisecond could help the developer to decide that his or her modification will not violate that requirement.
+For example, a performance-relevant modification of the implementation could lead to a hint for the developer that performance may be affected by his modification with the information about the previous analysis result, such that he or she can guess whether his or her modification will violate the requirement.
+Given the information that a response time requirement of 10 milliseconds was fulfilled during the last validation by an actual response time of 1 millisecond could help the developer to decide that his or her modification will not violate that requirement.
 
 \mnote{We focus on structural relations}
 In this thesis, we are interested in processes that continuously preserve and not only check consistency.
@@ -145,16 +148,17 @@ As another consequence, those structural relations that we consider are supposed
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{figures/prologue/networks/roles_and_process}
+    \input{figures/prologue/networks/roles_and_process.tex}
+    %\includegraphics[width=\textwidth]{figures/prologue/networks/roles_and_process}
     \caption[Roles in a transformation network specification process]{Roles involved in a process for specifying a transformation network, their responsibilities and dependencies. Extended from~\owncite{klare2019dagstuhl}.}
     \label{fig:networks:roles_and_process}
 \end{figure}
 
 \mnote{Roles and scenarios}
 In this thesis, we are concerned with the process of specifying consistency in terms of a transformation network and different problems arising in that process.
-We therefore discuss which roles are involved in that process and which different scenarios can be considered that induce requirements and exemplify the application contexts of our later contributions.
+We therefore discuss which roles are involved in that process and which scenarios can be considered that induce specific requirements and exemplify the application contexts of our contributions.
 \autoref{fig:networks:roles_and_process} gives an overview of the roles and the essential specification process.
-While that specification process is concerned with the metamodel level (M2), a transformation network is finally applied at the model level (M1) to a concrete system under development.
+While that process focuses on the metamodel level (M2), a transformation network is finally applied at the model level (M1) to a concrete system under development.
 
 \subsection{Roles}
 
@@ -176,7 +180,7 @@ Whenever the distinction is not relevant, we will refer to both transformation a
 Concrete systems are developed with the use of transformation networks by system developers, who perform changes of models via the tools they use.
 Thus, we also call them tool users.
 Usually different system developers will be responsible for different models.
-In our introductory example, we distinguished between software architects, developers, requirements engineers and so on.
+In our introductory example, we distinguished between software architects, developers, performance and requirements engineers.
 Performing changes leads to the application of the transformation network to restore consistency of the models.
 In this thesis, we refer to system developers as \emph{users}, as they are the ones using the transformation networks we are concerned with.
 
@@ -191,7 +195,7 @@ Potentially, a domain expert may even be the one who develops a concrete system 
 \subsection{Scenarios}
 
 \mnote{Generic and project-specific transformations}
-Both for the development of transformations as well as for the combination of transformations to a network, different development scenarios can be distinguished.
+Both for the development of transformations as well as for their combination to a network, different development scenarios can be distinguished.
 Transformations can be developed generically or specific for a project.
 \begin{properdescription}
     \item[Generic:] Transformations are developed as artifacts off-the-shelf, which can be used in any project. This especially applies for descriptive transformations (cf. \autoref{chap:networks:notions:normative_descriptive}), which encode a common understanding of consistency, such as for \gls{UML} class models and Java code.
@@ -209,13 +213,12 @@ The combination of transformations to networks can be distinguished especially r
 For us, it is not relevant whether transformations are developed in a generic or project-specific way.
 The distinction of scenarios in which transformation networks are developed is, however, of special interest.
 It can be beneficial for transformation developers to get feedback on the compatibility of their developed transformations with others on-the-fly.
-This makes locating a problem easier, because only the last changes may have introduced it, whereas with an a-posteriori checking in a big bang process the effort to find compatibility problems may increase because of missing locality.
+This makes locating a problem easier, because only the recent changes may have introduced it, whereas with an a-posteriori checking in a big bang process the effort to find compatibility problems may increase because of missing locality.
 
 \mnote{Mixing processes}
-While both generic as well as project-specific transformations can be mixed in a single project, also the process of combining them may be mixed.
-Some of the transformations may be integrated in a big bang fashion, whereas others are continuously integrated.
-This can also be a result of where the transformations come from.
-A generic transformation cannot be continuously integrated, because it is not specific for a single project to integrate it into.
+While generic and project-specific transformations can obviously be mixed in a single project, also the processes of combining them may be mixed.
+Some of the transformations may be integrated in a big bang fashion, whereas others are integrated continuously.
+This can result from the project specificity of transformations, because a generic transformation cannot be integrated continuously, as it not specific for a single project to integrate it into.
 
 
 %%

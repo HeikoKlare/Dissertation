@@ -1,33 +1,88 @@
+\newcommand{\referstotext}{«refers to»}
+\newcommand{\conformstotext}{«conforms to»}
+\newcommand{\changestext}{«changes»}
+\newcommand{\appliestext}{«applies»}
+\newcommand{\usestext}{«uses»}
+\newcommand{\hdistance}{6.5em}
+\newcommand{\vdistance}{7em}
+
 % From Dagrep 18491
 \begin{tikzpicture}[
+	every node/.style={font=\scriptsize},
 	mmrelated/.style={color=gray},
-	mmref/.style={mmrelated, -latex, font=\scriptsize\itshape, dashed},
-	process/.style={-latex, font=\scriptsize}
+	metamodel/.style={draw, circle, mmrelated, inner sep=0.15em},
+	model/.style={draw, circle, inner sep=0.15em},
+	mmref/.style={mmrelated, inner sep=0.2em, -latex, densely dashed},
+	generalreltext/.style={font=\sffamily\scriptsize},
+	reltext/.style={mmrelated, generalreltext, inner sep=0.2em},
+	process/.style={-latex, font=\scriptsize},
+	role/.style={consistency related element},
+	consistency preservation/.style={consistency execution}
 ]
-	\node[draw] (mx_req) {*X-Req};
-	\node[draw, right=6em of mx_req] (mx_script) {*X-Script};
-	\node[mmrelated, draw, circle, above=6em of mx_script] (mm1) {MM1};
-	\node[mmrelated, draw, circle, below=6em of mx_script] (mm2) {MM2};
-	\node[draw, circle, above right=2em and 6em of mx_script] (m1) {M1};
-	\node[draw, circle, below right=2em and 6em of mx_script] (m2) {M2};
-	\node[draw, circle, right=2em of m2] (m*) {M*};
-	\node[draw, circle] at (mm2-|m*) (mm*) {MM*};
-		
-	\node[label=270:{\small Domain Expert}, left=6em of mx_req] (domain_expert) {\includegraphics[width=1.5em]{persongeneric.png}};
-	\node[label=270:{\small MX Developer}] at ([yshift=-1.6em]$(mx_req)!0.5!(mx_script)$) (mx_developer) {\includegraphics[width=1.5em]{persongeneric.png}};
-	\node[label={[align=center]270:\small Tool User\\ (M1 or M2)}] at ([yshift=-1.6em, xshift=2em]mx_script.east) (mx_developer) {\includegraphics[width=1.5em]{persongeneric.png}};
+	\node[draw, align=center] (rel1) {Consistency\\ Relation 1};
+	\node[draw, right=2*\hdistance of rel1.center, anchor=center, align=center] (rel2) {Consistency\\ Relation 2};
+	\node[draw, below=\vdistance of rel1.center, anchor=center, align=center] (trans1) {Transfor- \\ mation 1};
+	\node[draw, below=\vdistance of rel2.center, anchor=center, align=center] (trans2) {Transfor-\\ mation 2};
+	\node[draw, below right=\vdistance and 0.8*\hdistance of trans1.center, anchor=center] (network) {Network};
+	\node[metamodel, left=\hdistance of trans1.center, anchor=center, align=center] (mm1) {Meta- \\model\\ 1};
+	\node[metamodel, right=\hdistance of trans1.center, anchor=center, align=center] (mm2) {Meta- \\model\\ 2};
+	\node[metamodel, right=\hdistance of trans2.center, anchor=center, align=center] (mm3) {Meta- \\model\\ 3};
 	
-	\draw[process] (domain_expert) -- node[above, align=center] {Requirements\\ Engineering} (mx_req);
-	\draw[process] (mx_req) -- node[above] {Formalization} (mx_script);
-	\draw[process] (mx_script) -- node[above] {Execution} ($(m1)!0.5!(m2)$);
-	\draw[process,latex-latex] (m1) -- (m2);
-	\draw[process,latex-latex] (m1) -- (m*);
+	\umlhuman{domain_expert1}{}{left=0.7*\hdistance of rel1, role}{}{0.3};
+	\node[below=-0.2em of domain_expert1.south, anchor=north, align=center, role] {Domain\\ Expert};
+	\umlhuman{domain_expert2}{}{right=0.7*\hdistance of rel2, role}{}{0.3};
+	\node[below=-0.2em of domain_expert2.south, anchor=north, align=center, role] {Domain\\ Expert};
+	\draw[process] (domain_expert1) -- node[above, align=center] {Requirements\\ Engineering} (rel1);
+	\draw[process] (domain_expert2) -- node[above, align=center] {Requirements\\ Engineering} (rel2);
+
+	\draw[process] (rel1) -- node[right, pos=0.7] {Formalization} node[left, pos=0.8, align=center, role] (trans_developer1) {Transformation\\ Developer} (trans1);
+	\umlhuman{}{}{above=0.5em of trans_developer1.north, anchor=south, role}{}{0.3};
+	\draw[process] (rel2) -- node[left, pos=0.7] {Formalization} node[right, pos=0.8, align=center, role] (trans_developer2) {Transformation\\ Developer} (trans2);
+	\umlhuman{}{}{above=0.5em of trans_developer2.north, anchor=south, role}{}{0.3};
 	
-	\draw[mmref] (mx_req) -- node[above left] {refers to} (mm1);
-	\draw[mmref] (mx_req) to[bend right=40] node[below left] {refers to} (mm2);
-	\draw[mmref] (mx_script) -- node[left] {refers to} (mm1);
-	\draw[mmref] (mx_script) -- node[left, pos=0.75] {refers to} (mm2);
-	\draw[mmref] (m1) -- node[above right] {conforms to} (mm1);
-	\draw[mmref] (m2) to[bend left=30] node[below right] {conforms to} (mm2);
-	\draw[mmref] (m*) -- node[left] {conforms to} (mm*);
+	\draw[process] (trans1) -- ++(0.8*\hdistance, -0.5*\vdistance) -- node[right, align=left] {Combi- \\nation} (network);
+	\draw[process, -] (trans2) -- ++(-1.2*\hdistance, -0.5*\vdistance);
+	\node[draw, circle, above=0.5*\vdistance of network.center, anchor=center] {};
+	\node[above left=0em and 0.2em of network.north, anchor=south east, align=center, role] (network_developer) {Transformation\\ Network\\ Developer};
+	\umlhuman{}{}{left=0em of network_developer.west, anchor=east, role}{}{0.3};
+
+	
+	% Metamodel references
+	\draw[mmref] (rel1) to[bend right=25] node[reltext, above left, pos=0.7] {\referstotext} (mm1);
+	\draw[mmref] (rel1) to[bend left=25] node[reltext, above right] {\referstotext} (mm2);
+	\draw[mmref] (rel2) to[bend right=25] node[reltext, above left, pos=0.3] {\referstotext} (mm2);
+	\draw[mmref] (rel2) to[bend left=25] node[reltext, above right, pos=0.7] {\referstotext} (mm3);
+	\draw[mmref] (trans1) -- node[reltext, above] {\referstotext} (mm1);
+	\draw[mmref] (trans1) -- node[reltext, above] {\referstotext} (mm2);
+	\draw[mmref] (trans2) -- node[reltext, above] {\referstotext} (mm2);
+	\draw[mmref] (trans2) -- node[reltext, above] {\referstotext} (mm3);
+	
+	\node[model, below right=2.3*\vdistance and 0.5*\hdistance of mm1.center, anchor=center, align=center] (m1) {Model\\ 1};
+	\node[model, below right=2.3*\vdistance and 0em of mm2.center, anchor=center, align=center] (m2) {Model\\ 2};
+	\node[model, below left=2.3*\vdistance and 0.5*\hdistance of mm3.center, anchor=center, align=center] (m3) {Model\\ 3};
+
+	\draw[mmref] (m1) -- node[reltext, sloped, above, pos=0.65] {\conformstotext} (mm1);
+	\draw[mmref] (m2) to[bend right=40] node[reltext, sloped, above, pos=0.65] {\conformstotext} (mm2);
+	\draw[mmref] (m3) -- node[reltext, sloped, above, pos=0.65] {\conformstotext} (mm3);
+
+	\node[draw, above left=2.5em and 0.7*\hdistance of m1.center, minimum height=5em, minimum width=4.4*\hdistance, anchor=north west] (system) {};
+	\node[below right=0em of system.north west, anchor=north west, font=\scriptsize\bfseries] {System};
+
+	\umlhuman{system_developer}{}{above left=3em and 0.7*\hdistance of system.north, anchor=south, role}{}{0.3};
+	\node[left=-0.5em of system_developer.west, anchor=east, role] {System Developer};
+
+	\draw[-latex] (system_developer) -- node[generalreltext, sloped, above, pos=0.4] (changes_label) {\changestext} (m1);
+	\coordinate (application_start) at ($(system_developer)!0.3!(m1)$);
+	\coordinate (application_cross) at ([xshift=0.7*\hdistance]application_start);
+	\draw[consistency execution] (application_start) -- node[right=0.5em, pos=1, generalreltext, consistency execution] {\appliestext} (application_cross);
+	\draw[consistency execution, -latex] (application_cross) --(m1);
+	\draw[consistency execution, -latex] (application_cross) --(m2);
+	\draw[consistency execution, -latex] (application_cross) --(m3);
+	\draw[consistency execution, latex-, densely dashed] (network) -- node[below, pos=0.7, sloped, generalreltext, consistency execution] {\usestext} ($(application_start)!0.5!(application_cross)$);
+
+	\draw[color=darkorange] ([yshift=0.65*\vdistance]system.north west) -- ([yshift=0.65*\vdistance]system.north east);
+
+	\node[above=0.65*\vdistance+0.5em of system.north west, anchor=south west, color=darkorange] {M2};
+	\node[above=0.65*\vdistance-0.5em of system.north west, anchor=north west, color=darkorange] {M1};
+
 \end{tikzpicture}
