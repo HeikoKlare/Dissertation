@@ -22,11 +22,11 @@ Thus, we introduce an artificial upper bound for the number of transformation ex
 That bound will be well-defined, such that we can reasonably assume that no more execution are practically necessary.
 
 \mnote{Design goals of orchestration}
-In the following, we propose design goals for a conservative application algorithm and the so called \emph{provenance algorithm} itself and finally prove its correctness and termination properties.
-That algorithm was developed together with Joshua Gleitze in a scientific internship and published in \cite{gleitze2020orchestration}.
+In the following, we propose design goals for a conservative application algorithm and the so called \emph{provenance algorithm}, and finally prove its correctness and termination properties.
+The algorithm was developed together with Joshua Gleitze in a scientific internship and published in \cite{gleitze2020orchestration}.
 
 % FROM MODELS:
-% Finally, one could question whether it is relevant if an executionstrategy can be guaranteed to terminate. Execution strategies will beused to tell users whether changes they made can be incorporatedinto the other models automatically. In consequence, users shouldreliably and timely get a response. We might compare this situationto merging changes in version control systems. There, users alsowant a reliable and timely response on whether their changes couldbe incorporated automatically, or whether they need to resolveconflicts manually
+% Finally, one could question whether it is relevant if an execution strategy can be guaranteed to terminate. Execution strategies will be used to tell users whether changes they made can be incorporated into the other models automatically. In consequence, users should reliably and timely get a response. We might compare this situation to merging changes in version control systems. There, users also want a reliable and timely response on whether their changes could be incorporated automatically, or whether they need to resolve conflicts manually
 
 % From an engineering perspective, unbounded numbers of executions is still unwanted behavior. We claim that a transformation network that takes thousands of executions of the same transformation to find a consistent state works not as expected and if running into a failure would expose severe problems to find the reasons for that failures.
 % Thus, we propose to simply abort the execution after some time to be sure not to run in an endless loop.
@@ -130,10 +130,10 @@ In effect, the strategy realizes the defined principle in a recursive manner, be
 
 \begin{figure}
     \centering
-    \resizebox{\textwidth}{!}{\input{figures/correctness/orchestration/provenance_example.tex}}
+    \input{figures/correctness/orchestration/provenance_example.tex}
     \caption[Exemplary execution of the provenance algorithm]{%
     Exemplary execution of the provenance algorithm for a change in the topmost model. 
-    The transformations present to the current execution of \function{Propagate}, as well as the executed and candidate transformations $\provalgexecuted$ and $\provalgcandidate$ are depicted for each iteration (horizontal) and recursion step (vertical).
+    The transformations present to the current execution of \function{Propagate}, as well as the executed and candidate transformations $\provalgexecuted$ and $\provalgcandidate$ are depicted for each iteration (horizontal) and recursion step (vertical). Taken from \cite{gleitze2020orchestration}.
 }
     \label{fig:orchestration:provenance_example}
 \end{figure}
@@ -178,7 +178,7 @@ First, it is easy to see that the algorithm does always terminate and always eit
 
     Let us assume that \autoref{algo:orchestration:provenance} does not realize a correct application function.
     \function{ProvenanceApply} may return $\bot$ in \autoref{algo:orchestration:provenance:line:bot_input} or \autoref{algo:orchestration:provenance:line:bot_orchestration}, or it may return models in \autoref{algo:orchestration:provenance:line:return_result}.
-    Correctness requires the function to either return $\bot$ or consistent models, which may only be violated by \function{ProvenanceApply} by returning models that are not consistent.
+    Correctness requires the function to either return $\bot$ or consistent models, which may only be violated by \function{ProvenanceApply} returning inconsistent models.
     This means that for some input models and changes, \function{ProvenanceApply} returns models $\modeltuple{m}_\mathvariable{res}$, such that there is a transformation $\transformation{t} \in \transformationset{T}$ to which $\modeltuple{m}_\mathvariable{res}$, or more specifically two models $\model{m}{i}$ and $\model{m}{k}$, 
     whose metamodels are related by $\transformation{t}$, are not consistent.
     We distinguish three cases:
@@ -214,7 +214,7 @@ In addition to these essential properties, we can also derive the upper bound fo
 \end{proof}
 
 \mnote{Design principle fulfillment}
-Finally, the algorithm was constructed in order to implement the principle defined in \autoref{chap:orchestration:algorithm:goals} to ensure consistency among the transformations that have already been executed before executing a transformation that has not been executed yet.
+Finally, the algorithm shall implement the principle defined in \autoref{chap:orchestration:algorithm:goals} to ensure consistency among the transformations that have already been executed before executing a transformation that has not been executed yet.
 
 \begin{theorem}[Provenance Algorithm Design Principle]
     \autoref{algo:orchestration:provenance} ensures consistency among the transformations that have already been executed before executing a transformation that has not been executed yet.
@@ -222,14 +222,14 @@ Finally, the algorithm was constructed in order to implement the principle defin
 \begin{proof}
 	After the recursive call in Line~\ref{algo:orchestration:provenance:line:recursive_call}, the current model tuple $\modeltuple{m}_{\mathvariable{propagation}}$ is consistent to all executed transformations in $\provalgexecuted$, according to \autoref{theorem:provenance_correctness}. % and
 %	\Cref{thm:strategy-correct} applies for every recursive execution of the strategy. 
-	%no changes to models involved  to an executed syncx are allowed.% after the recursive call in \cref{line:recursive-call}.
+	%no changes to models involved  to an executed transformations are allowed.% after the recursive call in \cref{line:recursive-call}.
 %	Hence,
 	% \executed is either empty or 
 %	the current model assignment is consistent with all transformations in \executed whenever the algorithm executes a new transformation in \cref{line:first-execution}.
 \end{proof}	
 
 \mnote{Algorithm optimality}
-We have given \autoref{def:reactiveconverging} for specifying the property of a transformation set to be reactive converging.
+We have given \autoref{def:reactiveconverging} the property of a transformation set to be reactive converging.
 This property defines that we do not want transformations to be required to react to changes they performed themselves if all other transformation have been executed afterwards, as we assume this to be a reasonable property that induces an upper bound for the number of transformation executions.
 We have used that property as a design goal for the proposed algorithm and can now show that the algorithm actually always returns consistent models when the transformations fulfill that property, which means that the algorithm implements an optimal application function.
 
@@ -294,7 +294,7 @@ This is exactly the information for which we already discussed in \autoref{chap:
 Thus, implementing the algorithm such that it also delivers $\provalgcandidate$, $\provalgexecuted$ and the current changes $\changetuple{\metamodeltuple{M}}$ reduces the necessary model states and transformations to consider for a transformation user or developer to identify why no consistent orchestration was found.
 
 %Unfortunately, the algorithm does help in finding whether no orchestration exists at all or whether only the algorithm was not able to find it.
-%Maybe map that to unapplicability of transformations to non-existence vs. fail after recursive application to non-finding
+%Maybe map that to inapplicability of transformations to non-existence vs. fail after recursive application to non-finding
 
 \mnote{Improving locality}
 The algorithm and the ability to identify reasons for the algorithm to fail may be further improved by determining a reasonable order for the execution of transformations in the loop of the \function{Propagate} function.

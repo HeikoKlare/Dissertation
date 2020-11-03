@@ -8,14 +8,14 @@ The notion of correctness for the application function given in \autoref{def:app
 We did, however, not yet define when we expect the function to return consistent models and when we allow it to return $\bot$, as this requires further discussion of the alternatives, which we provide in the following.
 
 \mnote{Dependence on orchestration function}
-In fact, the application function highly depends on the results of the orchestration function.
+The application function highly depends on the results of the orchestration function.
 If that function does not deliver an orchestration that yields consistent models, a correct application function may only return $\bot$.
-Thus, we are specifically concerned with ensuring that the orchestration function finds an orchestration that yields consistent models as often as possible.
+Thus, we are particularly concerned with ensuring that the orchestration function finds an orchestration that yields consistent models as often as possible.
 We call an orchestration that yields consistent models a \emph{consistent orchestration}.
 Precisely, we define an orchestration and a consistent orchestration as follows.
 
 \begin{definition}[Orchestration]
-    Let $\transformationset{T}$ be a set of transformations.
+    Let $\transformationset{T}$ be a transformation set.
     We call a sequence of these transformations $\sequenced{\transformation{t}_{1}, \transformation{t}_{2}, \dots} \in \transformationset{T}^{< \mathbb{N}} \equalsperdefinition \emptyset \cup \transformationset{T}^1 \cup \transformationset{T}^2 \cup \dots$ an \emph{orchestration} of them.
 
     For models $\modeltuple{m} \in \metamodeltuple{M}$ and changes $\changetuple{\metamodeltuple{M}} \in \changeuniverse{\metamodeltuple{M}}$, we say that an orchestration $\sequenced{\transformation{t}_{1}, \dots, \transformation{t}_{n}}$ is \emph{consistent} if, and only if, the subsequent application of the transformations to $\modeltuple{m}$ and $\changetuple{\metamodeltuple{M}}$  is consistent, i.e., 
@@ -29,8 +29,8 @@ Precisely, we define an orchestration and a consistent orchestration as follows.
 
 \mnote{Length of orchestrations}
 The definition of an orchestration function allows it to determine an arbitrarily long sequence of transformations, also including each transformation multiple times.
-We have introduced this general notion to avoid unnecessary restrictions without discussing such restriction.
-In the following, we show the necessity of having this unrestricted notion rather than allowing each transformation to be executed only once, as proposed by existing work such as \cite{stevens2020BidirectionalTransformationLarge-SoSym}.
+We have introduced this general notion to avoid unnecessary restrictions.
+In the following, we show the necessity of having this unrestricted notion rather than allowing each transformation to be executed only once, as proposed by existing work~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
 From the insight that we need to allow transformations to be executed multiple times, we derive and discuss when we expect the application function to return consistent models, to finally come up with a notion of \emph{optimality} for the orchestration function determining the execution order.
 This leads to the definition of the central \emph{orchestration problem} that we want a transformation network to solve.
 
@@ -55,7 +55,7 @@ In the following, we demonstrate why a single execution of each transformation i
 
 \mnote{Spanning trees insufficient}
 The even stronger restriction to spanning trees is obviously not sufficient.
-Consider the following consistency relations. For reasons of simplicity, we use \modellevelconsistencyrelations according to \autoref{def:modellevelconsistencyrelation} instead of fine-grained ones:
+Consider the following consistency relations. For simplicity reasons, we use \modellevelconsistencyrelations (\autoref{def:modellevelconsistencyrelation}) instead of fine-grained ones:
 \begin{align*}
     & 
     \consistencyrelation{CR}{12} = \setted{\tupled{\model{m}{1}, \model{m}{2}}, \tupled{\model{m}{1}, \model{m}{2}'}, \tupled{\model{m}{1}', \model{m}{2}'}, \tupled{\model{m}{1}', \model{m}{2}''}} \\
@@ -71,8 +71,7 @@ Then we can distinguish three possibly spanning trees of transformations that tr
 Each tree consists of two transformations:
 \begin{properdescription}
     \item[$\transformation{t}_{12}$, $\transformation{t}_{13}$:] 
-    $\transformation{t}_{12}$ may change $\model{m}{2}$ to $\model{m}{2}'$. $\transformation{t}_{13}$ does nothing, because $\model{m}{1}'$ and $\model{m}{3}$ are already consistent to $\consistencyrelation{CR}{13}$.
-    $\model{m}{2}'$ and $\model{m}{3}$ are, however, not consistent to $\consistencyrelation{CR}{23}$.
+    $\transformation{t}_{12}$ may change $\model{m}{2}$ to $\model{m}{2}'$. $\transformation{t}_{13}$ does nothing, because $\model{m}{1}'$ and $\model{m}{3}$ are already consistent to $\consistencyrelation{CR}{13}$, but $\model{m}{2}'$ and $\model{m}{3}$ are not consistent to $\consistencyrelation{CR}{23}$.
     \item[$\transformation{t}_{12}$, $\transformation{t}_{23}$:] 
     Like before, $\transformation{t}_{12}$ may change $\model{m}{2}$ to $\model{m}{2}'$. 
     $\transformation{t}_{23}$ may then change $\model{m}{3}$ to $\model{m}{3}''$. 
@@ -90,17 +89,16 @@ To show that, we consider examples that we derived from those we have already pr
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{figures/correctness/orchestration/necessity_multiple_executions.jpg}
+    \includegraphics[width=\textwidth]{figures/correctness/orchestration/necessity_multiple_executions.png}
     \caption[Necessity of executing a transformation multiple times]{Necessity of executing a transformation multiple times.}
-    \todo{Change color of arrows to green}
     \label{fig:orchestration:necessity_multiple_executions}
 \end{figure}
 
 \mnote{Example scenario for \gls{PCM}, UML and Java}
-Consider the example in \autoref{fig:orchestration:necessity_multiple_executions}, which describes the example depicted in \autoref{fig:introduction:scenario_duplicate_execution} within the introduction more precisely.
+Consider the example in \autoref{fig:orchestration:necessity_multiple_executions}, which depicts the introductory one of \autoref{fig:introduction:scenario_duplicate_execution} more precisely.
 In the example, interfaces in UML and Java are related to architectural interfaces in a \gls{PCM} model.
 \gls{PCM} components are realized by equally named classes in UML and Java.
-Additionally, when a \gls{PCM} component requires an interface, this is realized by a field with the interface type in the component realization class in UML and Java and an appropriate constructor argument.
+Additionally, when a \gls{PCM} component requires an interface, this is realized by a field of the interface type and an appropriate constructor parameter in the component realization class in UML and Java.
 Consistency is defined by transformations between \gls{PCM} and UML, as well as between UML and Java.
 
 \mnote{Duplicate execution of transformation}
@@ -190,27 +188,27 @@ Thus, it is not sufficient to execute each transformation only once in this netw
     Then the result of every orchestration function $\orcfunction{\transformationset{T}_\mathvariable{inc}}$ with $\appfunction{\orcfunction{\transformationset{T}_\mathvariable{inc}}}(\tupled{\model{m}{1},\model{m}{2},\model{m}{3}},\tupled{\change{\metamodel{M}{1}},\identitychange,\identitychange}) \consistenttomath \consistencyrelationset{CR}$ contains $\transformation{t}_{12}$ at least $x-1$ times.
 \end{lemma}
 \begin{proof}
-    $\appfunction{\orcfunction{\transformationset{T}_\mathvariable{inc}}}$ can only return consistent models when it applies the transformations in the order delivered by $\orcfunction{\transformationset{T}_\mathvariable{inc}}$ by definition in \autoref{def:applicationfunction}.
-    We thus consider every order of transformations, as delivered by any orchestration function, to show that it contains $\transformation{t}_{12}$ at least $x-1$ times to deliver consistent models.
+    $\appfunction{\orcfunction{\transformationset{T}_\mathvariable{inc}}}$ can only return consistent models when it applies the transformations in the order delivered by $\orcfunction{\transformationset{T}_\mathvariable{inc}}$ by \autoref{def:applicationfunction}.
+    We thus consider every orchestration, as delivered by any orchestration function, to show that it contains $\transformation{t}_{12}$ at least $x-1$ times to deliver consistent models.
     
-    Let $max_n(\model{m}{1},\model{m}{2},\model{m}{3}) \equalsperdefinition max\setted{e.n \mid e \in \model{m}{1} \cup \model{m}{2} \cup \model{m}{3}}$ be the maximal value of $n$ among all instances of \modelelement{A}, \modelelement{B} and \modelelement{C} in the given models $\model{m}{1}$, $\model{m}{2}$ and $\model{m}{3}$. In the following, we shortly note $max_n$ if the concrete models are currently not relevant.
+    Let $max_n(\model{m}{1},\model{m}{2},\model{m}{3}) \equalsperdefinition max\setted{e.n \mid e \in \model{m}{1} \cup \model{m}{2} \cup \model{m}{3}}$ be the maximal value of $n$ among all instances of \modelelement{A}, \modelelement{B} and \modelelement{C} in the given models $\model{m}{1}$, $\model{m}{2}$ and $\model{m}{3}$. In the following, we shortly note $max_n$ whenever the concrete models are not relevant. We show three statements that together prove the lemma.
 
     \begin{properdescription}
-        \item[Executing $\transformation{t}_{13}$ and $\transformation{t}_{23}$ an arbitrary number of times does not increase $max_n$:]
-        The transformations do only ensure that for given models the returned models contain all elements with the same values of $n$ and do not introduce new elements with values of $n$ larger than the existing ones.
+        \item[Executing $\transformation{t}_{13}$ and $\transformation{t}_{23}$ does not increase $max_n$:]
+        The transformations only ensure that for given models the returned models contain all elements with the same values of $n$ and do not introduce new elements with values of $n$ larger than the existing ones.
         \item[A single execution of $\transformation{t}_{12}$ increases $max_n$ by at most one:]
         There is no \modelelement{A} or \modelelement{B} with $n > max_n$.
         For every \modelelement{A} with $n < max_n$, $\transformation{t}_{12}$ creates, if necessary, a \modelelement{B} with value $n + 1 \leq max_n$, thus not increasing $max_n$.
         For every \modelelement{B} with $n \leq max_n$, it creates, if necessary, an \modelelement{A} with value $n-1 < max_n$.
         For every \modelelement{A} with $n = max_n$, a \modelelement{B} with value $n+1 = max_n + 1$ is created, as long as $n \neq x-1$.
-        For the newly created \modelelement{B}, no further elements needs to be created to fulfill the consistency relations.
+        For the newly created \modelelement{B}, no further elements need to be created to fulfill the relations.
         Thus, $max_n$ is, at most, increased by $1$.
-        \item[ When $max_n(\model{m}{1},\model{m}{2},\model{m}{3}) < x-1$, then $\model{m}{1},\model{m}{2},\model{m}{3}$ are not consistent to $\consistencyrelationset{CR}$:]
+        \item[$max_n(\model{m}{1},\model{m}{2},\model{m}{3}) < x-1 \Rightarrow \model{m}{1},\model{m}{2},\model{m}{3}$ are not consistent to $\consistencyrelationset{CR}$:]
         There is at least one element within the models with $n = max_n$.
-        If the element with $n = max_n$ is an \modelelement{A}, then there must be a \modelelement{B} with value $n+1$, because of $\consistencyrelationset{CR}_{12}$ and because $n < x-1$.
-        But since $n = max_n$, such a \modelelement{B} cannot exist, because otherwise $max_n = n+1$, so this is a contradiction.    
-        If the element with $n = max_n$ is a \modelelement{C}, then $\consistencyrelationset{CR}_{13}$ requires an \modelelement{A} with the same value of $n$ to exist and the same argument as before leads to a contradiction.
-        Finally, if the element with $n = max_n$ is a \modelelement{B}, then because of $\consistencyrelationset{CR}_{23}$ a \modelelement{C} with the same value must exist and then the same argument as before leads to a contradiction.
+        If the element with $n = max_n$ is an \modelelement{A}, there must be a \modelelement{B} with value $n+1$ due to $\consistencyrelationset{CR}_{12}$ and $n < x-1$.
+        But due to $n = max_n$ such a \modelelement{B} cannot exist, because otherwise $max_n = n+1$, so this is a contradiction. 
+        If the element with $n = max_n$ is a \modelelement{C}, $\consistencyrelationset{CR}_{13}$ requires an \modelelement{A} with the same value of $n$ to exist and the same argument as before leads to a contradiction.
+        Finally, if the element with $n = max_n$ is a \modelelement{B}, then because of $\consistencyrelationset{CR}_{23}$ a \modelelement{C} with the same value must exist and the same argument as before leads to a contradiction.
     \end{properdescription}
 
     In summary, we have shown that models $\model{m}{1},\model{m}{2},\model{m}{3}$ are only consistent to $\consistencyrelationset{CR}$ when $max_n(\model{m}{1},\model{m}{2},\model{m}{3}) \geq x-1$.
@@ -228,19 +226,19 @@ With this insight, it directly follows that we cannot find an approach to define
     For a set of transformations $\transformationset{T}$, there can be models $\modeltuple{m}$ and changes $\changetuple{}$ to them for which each possible orchestration function $\orcfunction{\transformationset{T}}$ with whom $\appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{})$ is consistent, delivers a sequence as $\orcfunction{\transformationset{T}}(\modeltuple{m}, \changetuple{})$ that contains at least one transformation twice.
 \end{theorem}
 \begin{proof}
-    We know from \autoref{lemma:minimal_executions} that $\transformationset{T}_\mathvariable{inc}$ requires at least $2$ executions of $\transformation{t}_{12}$ for the inputs defined in \autoref{lemma:minimal_executions} when selecting $x \geq 3$.
+    According to \autoref{lemma:minimal_executions}, $\transformationset{T}_\mathvariable{inc}$ requires at least two executions of $\transformation{t}_{12}$ for the inputs in \autoref{lemma:minimal_executions} and $x \geq 3$.
     This proves the theorem by example.
 \end{proof}
 
 \mnote{Single execution insufficient}
-In fact, for a concrete set of transformations it may be possible that a there is an orchestration for all possible models and changes to them leading to a consistent state and only requiring each transformation to be executed once.
+Of course, for a concrete set of transformations it may be possible that a there is an orchestration for all possible models and changes to them leading to a consistent state and only requiring each transformation to be executed once.
 %We have, however, shown that this cannot be assumed in general.
-We know, however, from \autoref{theorem:orchestration_single} that this cannot be assumed in general.
+\autoref{theorem:orchestration_single} shows, however, that this cannot be assumed in general.
 If we execute each transformation only once, we may exclude cases for which multiple executions of transformations would have led to a consistent tuple of models.
 The example we have given in \autoref{fig:orchestration:necessity_multiple_executions} is a simplification of a realistic transformation scenario, which we generalized to the previous network with transformations $\transformationset{T}_\mathvariable{inc}$.
-Thus, we can conclude that the insight is potentially relevant for realistic scenarios.
+For that reason, the insight is likely to be relevant in realistic scenarios.
 We should not restrict orchestration to execute each transformation only once, as there can be realistic scenarios in which multiple executions are necessary to find consistent models.
-In the following, we thus, for first, allow an arbitrary number of executions of each transformation.
+In the following, we thus allow an arbitrary number of executions of each transformation.
 
 \mnote{Authoritative models}
 In addition, the examples, both the concrete one and the generalized abstract one, demonstrate that it can be necessary to modify the model that was originally changed by the user again.
@@ -278,10 +276,10 @@ There can be different reasons why the orchestration function may not deliver su
 %It may always return $\bot$ to be correct, this is however not what we want.
 %We can distinguish three levels of reasons why the function may not be able to find consistent models:
 \begin{properdescription}
-    \item[Relations are incompatible:] If the consistency relations are incompatible, a user change may introduce an element for which no consistent models exist. In consequence, the transformations cannot be executed in an order such that the resulting models are consistent and still reflect the given user change.
+    \item[Relations are incompatible:] If the consistency relations are incompatible, a user change may introduce an element for which no consistent models exist. In consequence, the transformations cannot be executed in an order returning models that are consistent and still reflect the user change.
     %(example with employee for which no consistent other models can be found)
-    \item[No consistent orchestration exists:] Even if the relations are compatible, transformations may be defined in a way that they make contradictory decisions for locally consistent solutions. Thus, for a given a change the consistency relations allow different ways to store consistency, of which the transformations always select a way that is not consistent to one of the other relations.
-    Then no order of the transformations can restore consistency, although models exist that fulfill consistency for the given change.
+    \item[No consistent orchestration exists:] Even if relations are compatible, transformations may be defined in a way that they make contradictory decisions for locally consistent solutions. Thus, for a given a change the consistency relations provide different ways of restoring consistency, of which each transformation selects one that is not consistent to one of the other relations.
+    Then no order of the transformations can restore consistency, although consistent models exist for the given change.
     % (example with three options for name mapping with one overlapping, where each transformation always selects the one that is not appropriate for the other). We can further distinguish here whether there is always a change that cannot be processed by a CPR (then the change conflicts with the consistency relations and thus has to be rejected like any change may need to be rejected), or whether an arbitrary long sequence of transformations exists that can be applied but does never yield a consistent set of models.
     \item[No consistent orchestration found:] Finally, although an order of transformations for given changes exists that delivers consistent models, the orchestration function may not deliver it. 
     %finally, the application/orchestration may not be able to find an order of transformations that leads to a consistent state although it exists.
@@ -321,7 +319,7 @@ More precisely, if the consistency preservation rules for $\consistencyrelation{
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.9\textwidth]{figures/correctness/orchestration/no_orchestration.png}
+    \includegraphics[width=0.85\textwidth]{figures/correctness/orchestration/no_orchestration.png}
     \caption[Consistency preservation rules without orchestration]{Consistency relations with options for corresponding elements leading to consistency preservation rules for which no consistent orchestration exists.}
     \label{fig:orchestration:no_orchestration}
 \end{figure}
@@ -359,9 +357,9 @@ After adding a person, first executing the transformation from persons to employ
 Finally, after adding a resident we can, for example, first apply the transformation between residents and employees and then the one between residents and persons, resulting in consistent models due to the same reasons as above.
 
 \mnote{Only specific orchestrations are consistent}
-Although there are consistent orchestrations of the transformations with the consistency preservation rule defined as alternative 2, not every execution order leads to consistent models.
-In the scenarios discussed above, we have ensured that the transformation between residents and persons is executed after the addition of a resident first.
-If that transformation is first executed after the addition of a person, then a comma is added, which leads to the subsequent application of the same consistency preservation rules as with alternative 1, meaning that no further orchestration yields consistent models.
+Although consistent orchestrations of the transformations with the consistency preservation rule defined as alternative 2 exist, not every execution order leads to consistent models.
+In the scenarios discussed above, we have ensured that the transformation between residents and persons is executed after the addition of a resident.
+If, however, that transformation is executed after the addition of a person, a comma is added, which leads to the subsequent application of the same consistency preservation rules as with alternative 1, implying that no further orchestration yields consistent models.
 
 \mnote{Necessity to find consistent orchestrations}
 No matter whether exactly those consistency relations and preservation rules for them may occur in an actual transformation network, they exemplify the general situation of having consistency preservation rules that select one of different options provided by the consistency relations to introduce corresponding elements to restore consistency.
@@ -374,8 +372,8 @@ In contrast to existing work, we do, however, not restrict ourselves to a single
 
 \mnote{Necessity to deal with unresolvability}
 We have to accept that transformation networks may be unresolvable, i.e., that there is no consistent orchestration of the transformations.
-Ensuring that a network is resolvable for any changes would lead to restrictions for the individual transformations that would especially require different transformations to be aligned with each other.
-Since that conflicts our assumption of independent development and modular reuse, we do not focus on that problem, but accept that it can occur and instead focus on how we can find an orchestration if it exists. 
+Ensuring that a network is resolvable for every change would lead to restrictions for the individual transformations that would especially require different transformations to be aligned with each other.
+Since that conflicts our assumption of independent development and modular reuse, we accept unresolvability and instead focus on how we can find an orchestration if it exists. 
 
 \mnote{Optimality property of orchestration function}
 In conclusion, we expect the application function to deliver consistent models whenever a consistent orchestration, i.e., an execution order that yields consistent models, exists.
@@ -567,7 +565,7 @@ In fact, both these problems are equivalent in the sense that having a solution 
 \end{proof}
 
 \mnote{Problem to optimality equivalence}
-Since the orchestration problem is derived from the goal of finding an optimal application function, it is obviously equivalent to find an optimal application function or to solve the orchestration and the orchestration existence problem.
+Since the orchestration problem is derived from the goal of finding an optimal application function, it is obviously equivalent to find an optimal application function or to solve the orchestration (existence) problem.
 %As both problems are equivalent, we prove this for the orchestration existence problem.
 
 \begin{theorem}[Optimality / Orchestration Problem Equivalence]
