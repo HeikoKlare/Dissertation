@@ -47,7 +47,7 @@ In our evaluation in \autoref{chap:correctness_evaluation}, we will see that it 
 \mnote{Inconsistency introduced by changes}
 For the execution of synchronizing bidirectional transformations, we have assumed that inconsistencies are only introduced by changes.
 Thus, defining a consistency preservation rule that processes changes in one model, it has to deal with the situation that the other model has been changed as well.
-Although this might intuitively lead to the expectation that distinguishing the different types of changes, such as element insertions, removals or changes, helps to identify different relevant scenarios, it is easy to see that actually the modification of condition elements of the consistency relations rather than individual elements is relevant.
+Although this might intuitively lead to the expectation that distinguishing the different types of changes, such as element insertions and removals, helps to identify relevant scenarios, actually the modification of condition elements of the consistency relations rather than individual elements is relevant.
 
 \mnote{No case distinction by models changes types}
 If we process a change $\change{\metamodel{M}{1}}$ to model $\model{m}{1}$, and $\model{m}{2}$ was changed by $\change{\metamodel{M}{2}}$ as well,
@@ -120,11 +120,11 @@ According to the defined notion of consistency, these potential conflicts are ju
     If the models were consistent before, the corresponding element must necessarily exist and thus can be removed.
     If the corresponding condition element is not present because it was removed from the other model already, the element can but also does not need to be removed anymore.
     It must only be considered that the existence of the corresponding element cannot be assumed.
-    \item[Change:] When model elements are changed such that they now represent a different condition element of the same condition as before, they usually also require the corresponding element to be updated to represent the condition element of an applicable consistency relation pair.
-    If the corresponding element is removed, the other consistency preservation rule will remove the changed condition element anyway to restore consistency.
-    Thus nothing has to be done and the consistency preservation rule must only consider that the corresponding element may have been removed.
-    If the corresponding element was changed, which is identified by the trace model that still contains a trace link to a changed element, the corresponding element must be adapted such that it reflects the given change.
-    The modification to the corresponding element will then be propagated back by the consistency preservation rule in the opposite direction.
+    \item[Change:] When model elements are changed such that they represent a different condition element of the same condition as before, they usually also require the corresponding element to be updated to represent the condition element of an applicable consistency relation pair.
+    If the corresponding element is removed, the opposite consistency preservation rule will remove the changed condition element anyway to restore consistency.
+    Thus, the consistency preservation rule must only consider that the corresponding element may have been removed, but must do nothing.
+    If the corresponding element was changed, which is identified by the trace model that still contains a link to a changed element, it must be adapted such that both elements form a consistency relation pair again.
+    The modification to the corresponding element will then be propagated back by the opposite consistency preservation rule.
 \end{properdescription}
 
 \mnote{Problematic scenario is duplicate addition of condition elements}
@@ -178,7 +178,7 @@ An intuitive attempt might be to use the trace links of the other transformation
 For example, if for a \gls{PCM} component a UML class is created and for this UML class a Java class is created, then there are trace links between the \gls{PCM} component and the UML class, as well as between the UML class and the Java class.
 Synchronizing the addition of the \gls{PCM} component and the Java class should not result in a redundant addition of, for example, a further Java class.
 Resolving the existing trace links transitively is, however, not a solution.
-In this case, there exists a unique one-to-one mapping that actually traces the \gls{PCM} component to the corresponding Java class.
+In this case, a unique one-to-one mapping exists that actually traces the \gls{PCM} component to the corresponding Java class.
 It would, however, also be possible that a \gls{PCM} component has trace links to several elements in the Java model across UML.
 If those elements are even multiple classes, such as one public and one internal utility class, but the consistency relation between \gls{PCM} and Java only requires one Java class for a \gls{PCM} component, it would be unclear which to select.
 
@@ -198,11 +198,11 @@ We come up with three levels of identifying corresponding elements:
 \begin{properdescription}
     \item[Explicit unique:] The information that elements correspond is unique and represented explicitly, e.g., within a trace model. %Existing transformation languages usually use this technique.
     \item[Implicit unique:] The information that elements correspond is unique, but represented implicitly, e.g., in terms of key information within the models, such as element names. %types and element names.
-    \item[Non-unique:] Without unique information, heuristics must be used, e.g. based on ambiguous information or transitive resolution of indirect trace links.
+    \item[Non-unique:] Without unique information, heuristics based on ambiguous information or transitive resolution of indirect trace links must be used.
 \end{properdescription}
 
 \mnote{Explicit and unique identification by trace links}
-In the best case, a trace link already exists between the corresponding elements. This can be due to the reason that a consistency preservation rule in one direction created the corresponding element and added the trace link. Then the consistency preservation rule in the other direction processes the change that introduced the corresponding element, but now can already retrieve the trace link.
+In the best case, a trace link already exists between the corresponding elements. This can be because a consistency preservation rule in one direction created the corresponding element and added the trace link. Then the consistency preservation rule in the other direction processes the change that introduced the corresponding element, but now can already retrieve the trace link.
 This is what we call \emph{explicit unique} information, because the information is represented explicitly and unambiguously in the trace model.
 
 \mnote{Implicit and unique identification by key information}
@@ -224,7 +224,7 @@ In that case, only trace links identify that the elements are corresponding.
 Thus, if other transformations created the element and thus no direct trace link exists, it is impossible to identify that these elements are to be corresponding.
 Since no information to identify that the elements should be corresponding is present anyway and since this requires a relaxed consistency notion, we assume this scenario unlikely to occur at all and did not face it in our evaluation at any time.
 If, nevertheless, this scenario occurs, only heuristics can be used to identify corresponding elements without any guarantee of success.
-It would also be possible to involve the developer and let him decide whether an element should be considered corresponding or not.
+It would also be possible to involve the developer and let him decide whether an element should be considered corresponding.
 
 \mnote{Extension of ordinary transformations}
 In summary, it is necessary that transformation developers use key information for identifying corresponding elements based on \emph{implicit unique} information in addition to the usage of \emph{explicit unique} information in terms of trace links. %, like already used for ordinary transformations.
@@ -356,10 +356,10 @@ In comparison to the original model at \cite[Fig. 5.3]{kramer2017a}, we made the
 \end{properdescription}
 
 \mnote{Case distinction of model changes}
-The set of all possible types of changes in Ecore-based models can be derived by enumerating all valid configurations of the feature model.
+The set of all possible change types in Ecore-based models is given by enumerating all valid configurations of the feature model.
 We discuss for each of the resulting changes the types of condition element changes it may induce.
 \begin{properdescription}
-    \item[Additive root change (possibly create):] Adding a root element can lead to the addition of a condition element, which consists only of this root element. It may neither induce a change or removal of a condition element.
+    \item[Additive root change (possibly create):] Adding a root element can lead to the addition of a condition element, which consists only of this root element. It may not induce a change or removal of a condition element.
     \item[Subtractive root change (possibly delete):] The removal of a root element can lead to the removal of a condition element, which involves the root element. Since it completely removes an element, it can neither lead to a change or addition of a condition element.
     \item[Single-valued attribute change:] Changing an attribute can lead to either an addition, removal or change of a condition element. The change may lead to an element that now, potentially together with other elements, forms a condition element. It may also lead to a different condition element of the same condition, for example, by renaming an element. Finally, it can also lead to an element that is not present in a condition anymore. This does apply no matter whether the attribute change is only additive, only subtractive, or both, thus whether it adds, removes or replaces the attribute value.
     \item[Additive multi-valued attribute change:] Adding a value to a multi-valued attribute can lead to either an addition, removal or change of a condition element. The change can lead to the situation that the element is now part of condition element, is not part of a condition element anymore, or that it represents a different condition element of the same condition and is thus comparable to the change of a single-valued attribute.
