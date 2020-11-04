@@ -1,7 +1,7 @@
 \section{Orchestration Algorithm}
 
 \mnote{Usefulness evaluation}
-In \autoref{chap:orchestration:algorithm}, we have proposed the provenance algorithm, which is proven correct, i.e., which returns only consistent models and does always terminate.
+In \autoref{chap:orchestration:algorithm}, we have proposed an application algorithm for transformation networks, which is proven correct, i.e., which returns only consistent models and does always terminate.
 Thus, it conservatively approximates the orchestration problem.
 We have motivated the strategy with its assistance in finding the reasons whenever it fails to deliver consistent models.
 Since this property is difficult to prove, we provide an evaluation in the following.
@@ -10,19 +10,19 @@ Since this property is difficult to prove, we provide an evaluation in the follo
 \label{chap:correctness_evaluation:orchestration:goals}
 
 \mnote{Recapture algorithm}
-The proposed provenance algorithm (see \autoref{algo:orchestration:provenance}) iteratively achieves consistency according to subsets of the transformations.
+The proposed provenance algorithm (see \autoref{algo:orchestration:provenance}) iteratively achieves consistency for subsets of the transformations.
 This is based on the idea that if the algorithm fails, we know that all but the last executed transformation were executed in an order that yields consistent models and only the last executed transformation introduced some decision such that no consistent orchestration could be found anymore.
 
 \begin{table}
     \renewcommand{\arraystretch}{1.4}
     \rowcolors{0}{\secondlinecolor}{\firstlinecolor}
-    \begin{tabular}{p{8em} p{20em}}
+    \begin{tabular}{L{8em} L{20em}}
         \toprule
         \rowcolor{\headinglinecolor}
         \goal{Orchestration} & 
             Show that the orchestration strategy helps transformation developers to find the cause for a transformation network not being able to find a consistent orchestration.\\
         \question[eq:orchestration:usefulness]{Usefulness} & 
-            \questiontext{Does the provenance algorithm improve the ability of identifying the reasons for a network not being able to find a consistent orchestration regarding an arbitrary strategy?} \\
+            \questiontext{How far does the provenance algorithm improve the ability of identifying the reasons for a network not being able to find a consistent orchestration regarding an arbitrary strategy?} \\
         \metric &
             \metrictext{Considered transformations ratio: Ratio between the number of transformations to consider for finding a fault and the total number of transformations} \\
         \bottomrule
@@ -39,7 +39,7 @@ Like we have discussed for the case studies in \autoref{chap:correctness_evaluat
 
 \mnote{Controlled experiment}
 Most meaningful results for this goal and question could be achieved with a controlled experiment, in which participants are confronted with the information provided by the proposed strategy for a set of scenarios in which it fails, as well as a control group to which the information delivered by other orchestration strategies is provided.
-Then, metrics like the time or the number of steps required to find the reasons for the transformation networks to fails could be measured and compared.
+Then, metrics like the time or the number of steps required to find the reasons for the transformation networks to fail could be measured and compared.
 Additionally, qualitative statements from interviews could be evaluated.
 
 \mnote{Scenario-based discussion}
@@ -67,7 +67,8 @@ The other scenario contains a consistent orchestration. It may, however, take an
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{figures/correctness/evaluation/orchestration_scenario_cbse.png}
+    \input{figures/correctness/evaluation/orchestration_scenario_cbse.tex}
+    %\includegraphics[width=\textwidth]{figures/correctness/evaluation/orchestration_scenario_cbse.png}
     \caption[Example scenario with incompatibility]{Consistency relations between basic components in \gls{PCM} model, components in \gls{UML} component models, classes in \gls{UML} class models and classes in Java models.}
     \label{fig:correctness_evaluation:orchestration:scenario_cbse}
 \end{figure}
@@ -136,7 +137,7 @@ In the example, if the cycle of transformations between \gls{UML} component mode
 \end{figure}
 
 \mnote{Scenario description}
-\autoref{fig:correctness_evaluation:orchestration:scenario_counting} shows the second scenario.
+\autoref{fig:correctness_evaluation:orchestration:scenario_counting} depictes the second scenario.
 It is an extension of the abstract example depicted in \autoref{fig:orchestration:no_upper_bound} as a demonstration for the non-existence of an upper bound for the number of necessary transformation executions in a transformation network.
 The extended example contains an additional metamodel, thus consisting of four metamodels, each containing one \metaclass. 
 Apart from that, it also contains consistency relations that require for each of the abstract elements \texttt{A}, \texttt{B}, \texttt{C} and \texttt{D} other elements with the same value of $n$ to exist.
@@ -154,10 +155,10 @@ In consequence, any useful application algorithm will fail in that example.
 \mnote{Number of considered transformations}
 While an arbitrary application algorithm with an artificial termination criterion will fail in an unexpected state without any guarantee for usefulness of the state in which it fails to identify the reason for the failure, the provenance algorithm fails in the same cases and in the same way that we have already discussed for the first scenario.
 As soon as a transformation is executed that induces a cycles with the executed ones and contains the transformation between \texttt{A} and \texttt{B}, the algorithm will fail.
-In that case, the developer knows that the problem arises from the transformations in the cycles that was closed by the last executed transformation.
+In that case, the developer knows that the problem arises from the transformations in the cycle that was closed by the last executed transformation.
 This improves the process of finding the cause for the failure in the way as in the first example.
 In the worst case, the first cycle closed during execution containing the transformation between \texttt{A} and \texttt{B} is the one of length $4$ between all metamodels.
-Thus, in this case we have:
+Thus, we have:
 \begin{align*}
     \mathvariable{considered\ transformations\ ratio} = \frac{4}{5}
 \end{align*}
@@ -181,16 +182,15 @@ In fact, it ensures that in a network of $n$ metamodels at most $n$ transformati
 
 \mnote{Transformation selection order}
 This also shows that we can further improve the algorithm by determining a reasonable selection order for the transformations.
-Rather than choosing an arbitrary transformation to be executed next, first cycles should be closed, because this ensures that smaller simple cycles are closed early.
+Rather than choosing an arbitrary transformation to be executed next, cycles should be closed first, because this ensures that smaller simple cycles are closed early.
 As an example, consider the second scenario.
 If we first execute the transformation between \texttt{A} and \texttt{B} and then the one between \texttt{B} and \texttt{C}, it is better to then execute the one between \texttt{A} and \texttt{C} to close the cycle, as the algorithm then already fails.
 If the transformations to \texttt{D} are executed before closing that cycle, we first close a cycle of length $4$ rather than one of length $3$. Both lead to a failure, but we expect the effort to find the fault in the latter case to be lower.
 
 \mnote{Evidence of results}
-Since we did not perform an empirical evaluation but only a scenario-based discussion, we can only consider our finding as an initial indicator for the usefulness of the provenance algorithm in terms of improving the ability to identify reasons for it to fail as asked by \autoref{eq:orchestration:usefulness}.
-Still, we found a criterion in the scenarios that limits the number of transformations that need to be considered in case of a failure by construction of the algorithm.
-Thus, regarding the number of transformations that need to be considered to identify a fault, it guarantees an improvement regarding an arbitrary other strategy, which, in the worst case, can require the investigation of all transformations.
-Whether or not this metric reasonably reflects usefulness of the approach does, however, remain one threat to validity until its validation in an experiment.
+Since we did not perform an empirical evaluation but only a scenario-based discussion, our finding only serve as an initial indicator for the usefulness of the provenance algorithm in terms of improving the ability to identify reasons for failing as asked by \autoref{eq:orchestration:usefulness}.
+Still, we found a criterion in the scenarios that limits the number of transformations that need to be considered to identify a fault by construction of the algorithm, which is an improvement regarding any arbitrary other strategy, which, in the worst case, can require the investigation of all transformations.
+Whether or not this metric reasonably reflects usefulness of the approach does, however, remain a threat to validity until its validation in an experiment.
 
 %Could be beneficial to execute in different orders. This allows to identify the cycle. E.g., in first scenario, if problematic transformation is executed last, then unclear which of the two involved cycles is the problem. 
 
@@ -204,16 +204,16 @@ Whether or not this metric reasonably reflects usefulness of the approach does, 
 
 \subsubsection{Threats to Validity}
 
-In the evaluation, we found a general criterion that shows that the proposed algorithm improves the investigated metric in all cases.
+In the evaluation, we found a criterion that shows that the proposed algorithm improves the investigated metric in all cases.
 Still, there are threats to construct and external validity that need to be mitigated by further studies.
 
 \mnote{Construct validity}
 We assumed the number of transformations to consider to be related to the usefulness of the strategy in terms of the ability to find a fault.
-Whether this assumptions holds is a threat to construct validity.
+Whether this assumption holds is a threat to construct validity.
 To mitigate this threat, we did not only focus on the evaluation of that metric but also presented qualitative arguments and discussed further quantifiable improvements, such as the restriction of consistency relations to consider in the failure case.
 
 \mnote{External validity}
-Finally, we compared our proposed approach with an arbitrary strategy for transformation orchestration.
+Finally, we have compared our proposed approach with an arbitrary strategy for transformation orchestration.
 In this comparison, we always guarantee an improvement in worst-case performance.
 There may, however, be another strategy that performs better or at least equal to the proposed approach in all cases.
 This can limit external validity of the results.
@@ -228,9 +228,9 @@ Thus, we do not expect another strategy to be systematically better than the one
 \paragraph{Evidence for Generalizability}
 \mnote{Controlled experiment}
 The most relevant limitation of the proposed algorithm concerns the validity of the evaluation results regarding the proposed properties of the approach.
-While statements on the correctness and well-definedness of the approach have been proven, its usefulness was only validated in a scenario-based discussion, which especially suffers from potential threats to construct validity, as it is unclear whether the metrics we have investigated actually reflect usefulness of the strategy in terms of reducing the time and effort when identifying faults in transformation network.
-Thus, in future work, we plan to perform a controlled experiment in which the information delivered by our approach and by other strategies are presented to different groups of developers.
-Evaluating how long they take to find an fix faults and how successful they are in both situations helps us to further validate the expected properties and improve evidence of the results.
+While statements on the correctness and well-definedness of the approach have been proven, its usefulness was only validated in a scenario-based discussion, which especially suffers from potential threats to construct validity, as it is unclear whether the metric we have investigated actually reflect usefulness of the strategy in terms of reducing the time and effort when identifying faults in transformation networks.
+Thus, in future work we plan to perform a controlled experiment in which the information delivered by our approach and by other strategies are presented to different groups of developers.
+Evaluating how long they take to find and fix faults and how successful they are in both situations helps us to further validate the expected properties and improve evidence of the results.
 
 \paragraph{Well-defined Design Property}
 \mnote{Usefulness of design property}
@@ -238,7 +238,7 @@ The provenance algorithm gives the guarantee of finding a consistent orchestrati
 This property can, however, neither be easily guaranteed nor analyzed.
 We have argued why this is still a reasonable property, but a property that can at least be analyzed at design time to avoid failures during execution would still be beneficial.
 Such a property can, however, easily restrict expressiveness of transformations, as we have discussed in \autoref{chap:orchestration:decidability:restriction}.
-Still, finding such a property would be a valuable contribution and thus serves as a starting found for future work.
+Still, finding such a property would be a valuable contribution and thus serves as a starting point for future work.
 
 \paragraph{Transformation Selection Order}
 \mnote{Systematic execution order}
@@ -250,7 +250,7 @@ While the considerations in the evaluation scenarios indicate it to be reasonabl
 Finally, we have only discussed how our proposed approach supports a transformation developer in identifying faults in transformations.
 In practice, a failure may however not occur when a transformation developer tests a transformation network, which allows him to directly identify and fix the fault.
 Instead, a transformation network may be in productive use, thus a failure occurs when a user of that network applies the transformations to preserve consistency.
-Then, a holistic process is required for reporting and fixing such a errors, which needs to define the responsibilities.
+Then, a holistic process is required for reporting and fixing such errors, which needs to define the responsibilities.
 Additionally, such a process will not be just-in-time, thus the project in which the transformation network is applied needs to be able to deal with the fact that consistency cannot be preserved for some time.
 Such a process is, for example, also part of the research in the \vitruv project (see~\cite{klare2020Vitruv-JSS}), to which the results of this thesis contribute, and thus a general topic of future work.
 The author of this thesis also contributed to a group discussion in a Dagstuhl seminar that considered that topic~\owncite{klare2019dagstuhl}.

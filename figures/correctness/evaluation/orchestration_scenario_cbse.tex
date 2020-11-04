@@ -1,0 +1,51 @@
+\newcommand{\hdistance}{19em}
+\newcommand{\vdistance}{9.5em}
+\newcommand{\classwidth}{6.7em}
+
+\begin{tikzpicture}[
+    relation/.style={consistency relation, font=\footnotesize}
+]
+
+\umlclassvarwidth{pcm_component}{}{BasicComponent\sameheight}{
+entityName
+}{\classwidth}
+
+\umlclassvarwidth[,right=\hdistance of pcm_component.north, anchor=north]{uml_class}{}{Class\sameheight}{
+name
+}{\classwidth}
+
+\umlclassvarwidth[,below=\vdistance of pcm_component.north, anchor=north]{uml_component}{}{Component\sameheight}{
+name
+}{\classwidth}
+
+\umlclassvarwidth[,right=\hdistance of uml_component.north, anchor=north]{java_class}{}{Class\sameheight}{
+name
+}{\classwidth}
+
+\node[above=0.2em of pcm_component.north, anchor=south, align=center, font=\bfseries] {\gls{PCM}};
+\node[below=0.2em of uml_component.south, anchor=north, align=center, font=\bfseries] {UML Component};
+\node[above=0.2em of uml_class.north, anchor=south, align=center, font=\bfseries] {UML Class};
+\node[below=0.2em of java_class.south, anchor=north, align=center, font=\bfseries] {Java};
+
+% CONSISTENCY RELATIONS
+\draw[relation] (pcm_component.east) -- node[pos=0, below right] {$bc$} node[above ,align=center] {
+    $\{\tupled{bc, cl} \mid$\\
+    $\mathvariable{bc.entityName} = \mathvariable{cl.name}\}$
+} node[pos=1, below left] {$cl$} (uml_class.west);
+\draw[relation] (pcm_component.south) -- node[pos=0, below right] {$bc$} node[left, align=center] {
+    $\{\tupled{bc, co} \mid$\\
+    $\mathvariable{bc.entityName}$\\
+    $= \mathvariable{co.name}\}$
+} node[pos=1, above right] {$co$} (uml_component.north);
+\draw[relation] (uml_component.east) -- node[pos=0, above right] {$co$} node[below] {$\setted{\tupled{co, cl} \mid \mathvariable{co.name} = \mathvariable{cl.name}}$} node[pos=1, above left] {$cl$} (java_class.west);
+\draw[relation] (uml_class.south) -- node[pos=0, below left] {$ucl$} node[right, align=center] {
+    $\{\tupled{ucl, jcl} \mid$\\
+    $\mathvariable{ucl.name}$\\
+    $= \mathvariable{jcl.name}\}$
+} node[pos=1, above left] {$jcl$} (java_class.north);
+\draw[relation] (uml_component) -- node[pos=0, above left=0em and -0.2em] {$co$} node[anchor=center, sloped, align=center] {
+    $\{\tupled{co, cl} \mid$\\[0.3em]
+    $\mathvariable{co.name} + \text{\enquote{Impl}} = \mathvariable{cl.name}\}$
+} node[pos=1, below] {$cl$} (uml_class);
+
+\end{tikzpicture}
