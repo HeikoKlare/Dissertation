@@ -1,45 +1,49 @@
-\newcommand{\hdistance}{12em}
-\newcommand{\vdistance}{8em}
+\newcommand{\hdistance}{17em}
+\newcommand{\vdistance}{6.2em}
 
 \begin{tikzpicture}[
     model style/.style={color=darkgray},
-    concept/.style={draw, minimum width=7em, inner sep=0.5em},
+    concept/.style={draw, minimum width=8.5em, minimum height=3em, inner sep=0.5em},
     model concept/.style={model style, concept},
-    metamodel concept/.style={concept},
+    metamodel concept/.style={concept, align=center},
     model relation/.style={model style},
     metamodel relation/.style={},
 ]
 
-\node[model concept] (model) {Model};
-\node[model concept, right=\hdistance of model.north, anchor=north] (view) {View};
-\node[model concept, right=\hdistance of view.north, anchor=north] (vsum) {V-SUM};
+%\node[model concept, minimum height=1.5em, minimum width=6em] (model) {Model};
+%\node[metamodel concept, minimum height=1.5em, minimum width=6em, right=0.7*\hdistance of model.north, anchor=north] (metamodel) {Metamodel};
 
-\node[metamodel concept, below=\vdistance of model.north, anchor=north] (metamodel) {Metamodel};
-\node[metamodel concept, right=\hdistance of metamodel.north, anchor=north] (viewtype) {View Type};
-\node[metamodel concept, right=\hdistance of viewtype.north, anchor=north] (vsumm) {V-SUM Metamodel};
+\node[metamodel concept, minimum height=1.5em] (metamodel) {Metamodel};
 
-\node[metamodel concept, below=\vdistance of metamodel.north, anchor=north] (cr) {Consistency Rule};
-\node[metamodel concept, right=\hdistance of cr.north, anchor=north] (cpr) {Consistency Preservation Rule};
-\node[metamodel concept, right=\hdistance of cpr.north, anchor=north] (app) {Application Function};
+\node[metamodel concept, below left=0.9*\vdistance and 0.5*\hdistance of metamodel.north, anchor=north] (mlcr) {Model-Level\\ Consistency Relation};
+\node[metamodel concept, below right=0.9*\vdistance and 0.5*\hdistance of metamodel.north, anchor=north] (cr) {(Fine-Grained)\\ Consistency Relation};
+\node[metamodel concept, below=1.15*\vdistance of mlcr.north, anchor=north] (cpr) {Consistency\\ Preservation Rule};
+\node[metamodel concept, below=1.15*\vdistance of cr.north, anchor=north] (transformation) {Transformation};
+\node[metamodel concept, below=\vdistance of transformation.north, anchor=north] (orchestration) {Orchestration\\ Function};
+\node[metamodel concept, below=\vdistance of orchestration.north, anchor=north] (network) {Transformation\\ Network};
+\node[metamodel concept, left=\hdistance of orchestration.north, anchor=north] (application) {Application\\ Function};
 
-\draw[model relation, -latex] (view) -- node[uml cardinality start, very near start, above right] {*} node[uml association name, below] {is projection of} node[uml cardinality end, above left] {1..*} (model);
-\draw[model relation, -latex] (view) -- node[uml cardinality start, very near start, above left] {*} node[uml association name, below] {projected from} node[uml cardinality end, very near end, above right] {1} (vsum);
-\draw[model relation, open diamond-latex] (vsum) -- node[uml cardinality start, right] {1} ++(0,3em) -| node[uml association name, pos=0.25, below] {consists of} node[uml cardinality end, very near end, left] {*} (model);
+%\draw[model relation, dashed, -angle 60] (model) -- node[uml cardinality start, pos=0, below right] {*} node[uml association name, above] {\guillemotleft instance of\guillemotright} node[uml cardinality end, pos=1, below left] {1} (metamodel);
 
-\draw[model relation, dashed, -latex] (model) -- node[uml cardinality start, above left] {*} node[uml association name, right] {\guillemotleft instance of\guillemotright} node[uml cardinality end, below left] {1} (metamodel);
-\draw[model relation, dashed, -latex] (view) -- node[uml cardinality start, above left] {*} node[uml association name, right] {\guillemotleft instance of\guillemotright} node[uml cardinality end, below left] {1} (viewtype);
-\draw[model relation, dashed, -latex] (vsum) -- node[uml cardinality start, above left] {*} node[uml association name, right] {\guillemotleft instance of\guillemotright} node[uml cardinality end, below left] {1} (vsumm);
+\draw[metamodel relation, open diamond-angle 60] (mlcr) -- node[uml cardinality start, pos=0, above right=0em and 1em] {*} node[uml association name, pos=0.35, above left=0em and -0.3em, align=center] {describes\\ consistency\\ between} node[uml cardinality end, pos=1, below right] {2} ([xshift=-1.5em]metamodel.south);
+\draw[metamodel relation, open diamond-angle 60] (cr) -- node[uml cardinality start, pos=0, above left=0em and 1em] {*} node[uml association name, pos=0.35, above right=0em and -0.3em, align=center] {describes\\ consistency\\ between} node[uml cardinality end, pos=1, below left] {2} ([xshift=1.5em]metamodel.south);
+\draw[metamodel relation, -angle 60] (cr) -- node[uml cardinality start, pos=0, below left] {*} node[uml association name, above, align=center] {implies} node[uml cardinality end, pos=1, below right] {1} (mlcr);
 
-\draw[metamodel relation, open diamond-latex] ([xshift=1em]viewtype.north west) -- node[uml cardinality start, pos=0.25, right] {*} ++(0,2em) -| node[uml association name, pos=0.25, below] {has} node[uml cardinality end, pos=0.75, left] {1} ([xshift=-1em]metamodel.north east);
-\draw[metamodel relation, -latex] (viewtype) -- node[uml cardinality start, very near start, above right] {*} node[uml association name, below] {projects from} node[uml cardinality end, above left] {1..*} (metamodel);
-\draw[metamodel relation, -latex] (viewtype) -- node[uml cardinality start, very near start, above left] {*} node[uml association name, below] {used for} node[uml cardinality end, above right] {1..*} (vsumm);
+\coordinate (crosspoint) at ($(cpr)!0.5!(cr)$);
+\draw[metamodel relation, -angle 60] (crosspoint) -- node[uml role start, pos=0, above=0.5em] {either or} node[uml cardinality end, pos=1, below left] {1} (mlcr);
+\draw[metamodel relation, -angle 60] (crosspoint) -- node[uml cardinality end, pos=1, below right] {1..*} (cr);
+\draw[metamodel relation, dashed] ([xshift=-2em]crosspoint) -- ([xshift=2em]crosspoint);
+\draw[metamodel relation, -angle 60] ([yshift=0.3em]cpr.east) -| node[uml cardinality start, pos=0, above right=0em] {*} node[uml association name, pos=1, below left, align=center] {preserves\\ consistency\\ to} ([xshift=-0.5em]crosspoint);
+\draw[metamodel relation, -angle 60] ([yshift=0.3em]transformation.west) -| node[uml cardinality start, pos=0, above left] {*} node[uml association name, pos=1, below right, align=center] {consists\\ of} ([xshift=0.5em]crosspoint);
+\draw[metamodel relation, open diamond-angle 60] ([yshift=-0.5em]transformation.west) -- node[uml cardinality start, pos=0, below left] {*} node[uml association name, pos=0.5, below, align=center] {consists of} node[uml cardinality end, pos=1, below right] {1} ([yshift=-0.5em]cpr.east);
 
-\draw[metamodel relation, open diamond-latex] (cr) -- node[uml cardinality start, below left] {*} node[uml association name, pos=0.4, right, align=left] {describes\\ consistency\\ between} node[uml cardinality end, above left] {2} (metamodel);
-\draw[metamodel relation, open diamond-latex] (cpr) -- node[uml cardinality start, above right] {*} node[uml association name, below] {preserves} node[uml cardinality end, very near end, above left] {1} (cr);
-\draw[metamodel relation, open diamond-latex] (app) -- node[uml association name, below] {orchestrates} node[uml cardinality end, very near end, above left] {*} (cpr);
+\draw[metamodel relation, -angle 60] (orchestration) -- node[uml cardinality start, pos=0, above left] {*} node[uml association name, right] {orchestrates} node[uml cardinality end, pos=1, below left] {*} (transformation);
+\draw[metamodel relation, -angle 60] (application) -- node[uml cardinality start, pos=0, above left] {*} node[uml association name, above, pos=0.35, sloped] (executes_label) {executes} node[uml cardinality end, pos=1, below right] {*} (transformation);
+\draw[metamodel relation, densely dashed] (executes_label) -- node[uml association name, below, sloped] {orchestrated by} node[uml cardinality end, pos=1, above left=0.5em and 0em] {1} (orchestration.west);
 
-\draw[metamodel relation, open diamond-latex] ([xshift=-4em]vsumm.south) -- node[uml cardinality start, pos=0.5, left] {*} ++(0,-2em) -| node[uml association name, pos=0.25, below] {consists of} node[uml cardinality end, pos=0.75, left] {*} ([xshift=-1em]metamodel.south east);
-\draw[metamodel relation, open diamond-latex] ([xshift=-2em]vsumm.south) -- node[uml cardinality start, pos=0.25, left] {*} ++(0,-4em) -| node[uml association name, pos=0.25, below] {consists of} node[uml cardinality end, pos=0.75, below left] {*} (cpr.north);
-\draw[metamodel relation, open diamond-latex] (vsumm) -- node[uml cardinality start, above left] {*} node[uml association name, right] {consists of} node[uml cardinality end, below left] {1} (app);
+\draw[metamodel relation, open diamond-angle 60] (network) -- node[uml cardinality start, pos=0, above left] {*} node[uml association name, right] {consists of} node[uml cardinality end, pos=1, below left] {1} (orchestration);
+\draw[metamodel relation, open diamond-angle 60] (network.west) -- node[uml cardinality start, pos=0, above left] {*} node[uml association name, above, sloped] {consists of} node[uml cardinality end, pos=1, below left] {1} (application);
+\draw[metamodel relation, open diamond-angle 60] (network.east) -- node[uml cardinality start, pos=0, above right] {*} ++(2em, 0) |- node[uml association name, pos=0.25, sloped, above, align=center] {consists of} node[uml cardinality end, pos=1, above right] {*} (transformation.east);
+
 
 \end{tikzpicture}
