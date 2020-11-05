@@ -7,12 +7,12 @@
 
 \mnote{Synchronizing bidirectional transformation}
 We have introduced the notion of synchronizing bidirectional transformations, which can be used within transformation networks in place of synchronizing transformations.
-They are composed of two unidirectional consistency preservation rules, which fits to the way how transformations are specified in actual transformation languages.
-In contrast to only being correct, as it is commonly required of transformations, they need to fulfill the notion of being partial-consistency-improving to be used instead of synchronizing transformations.
+They are composed of two unidirectional consistency preservation rules, which fits to the way how transformations are specified in transformation languages.
+In contrast to only being correct, as commonly required of transformations, they need to fulfill the notion of being partial-consistency-improving to be used instead of synchronizing transformations.
 
 \mnote{Partial consistency improvement no canonically achievable}
 The knowledge about this requirement, theoretically, gives a transformation developer the ability to define appropriate transformations to be used in transformation networks.
-Although we have discussed that the requirement for transformations to be partial-consistency-improving is reasonable as it reflect intuitive requirements to transformations to always restore more consistency than is violated by their execution.
+We have discussed that the requirement for transformations to be partial-consistency-improving is reasonable as it reflect intuitive requirements to transformations to always restore more consistency than is violated by their execution.
 There is, however, still no canonical way to fulfill that requirement.
 It may be possible to define analyses for transformations or even appropriate transformation languages that guarantee that property by construction.
 This could, however, even lead to severe restrictions in expressiveness, if analyzability is the primary goal.
@@ -20,11 +20,11 @@ In addition, research about synchronizing concurrent changes (e.g.~\cite{hermann
 Thus, we do not discuss or investigate such approaches in this thesis.
 
 \mnote{Systematic avoidance of synchronization problems}
-We leave it up to transformation developers to thoroughly define their transformation such that they fulfill the required property.
-Having precise knowledge about the property that needs to be fulfilled by the transformations already provides a benefit regarding the baseline of using ordinary transformations in a transformation networks without knowing how the transformations have to be improved to work properly.
+We leave it up to transformation developers to thoroughly define their transformations such that they fulfill the required property.
+Having precise knowledge about the property that needs to be fulfilled by the transformations already provides a benefit regarding the baseline of using ordinary transformations in a transformation network without knowing how the transformations have to be improved to work properly.
 In addition, we discuss a distinction of possible scenarios that can occur when changes need to be synchronized and come up with engineering considerations how to systematically deal with these scenarios.
 We identify one essentially problematic scenario and propose a strategy to avoid that problem by proper construction of transformations.
-In our evaluation in \autoref{chap:correctness_evaluation}, we will see that it is actually the most relevant problem scenario that transformation developers have to deal with when developing synchronizing bidirectional transformations.
+In our evaluation in \autoref{chap:correctness_evaluation}, we will see that it is actually the only occurring and thus most relevant problem scenario that transformation developers have to deal with when developing synchronizing bidirectional transformations.
 
 % \todo{Special case: Changes witness inconsistency. In the previous definition, we can give arbitrary models and even empty changes to the models and still require them to get consistent.}
 
@@ -53,7 +53,7 @@ Although this might intuitively lead to the expectation that distinguishing the 
 If we process a change $\change{\metamodel{M}{1}}$ to model $\model{m}{1}$, and $\model{m}{2}$ was changed by $\change{\metamodel{M}{2}}$ as well,
 a consistency preservation rule $\consistencypreservationrule{}^{\rightarrow}$ from $\metamodel{M}{1}$ to $\metamodel{M}{2}$ of a synchronizing bidirectional transformation $\transformation{t}$ produces a change $\change{\metamodel{M}{2}}'$ in the execution of the synchronizing execution step $\function{SyncEx}_{\transformation{t}}^1$.
 If we assume that $\change{\metamodel{M}{1}}$ performs a change that introduces a new condition element, $\consistencypreservationrule{}^{\rightarrow}$ is responsible for adding a corresponding element to $\change{\metamodel{M}{2}}(\model{m}{2})$ such that partial consistency between the two is improved, and in the best case already be restored to $1$.
-$\consistencypreservationrule{}^{\rightarrow}$ must also consider the change $\change{\metamodel{M}{2}}$, which may have already added an appropriate corresponding element, such that adding a further one may reduce rather than improve partial consistency.
+$\consistencypreservationrule{}^{\rightarrow}$ must also consider the change $\change{\metamodel{M}{2}}$, which may have already added an appropriate corresponding element, such that adding a further one may reduce instead of improve partial consistency.
 Adding a condition element to a model can, however, not only be the result of adding an element, but also of different types of changes, such as also the change of an attribute or reference.
 In fact, it must only be considered that a condition element was added, but not which kind of change introduced it.
 
@@ -76,31 +76,31 @@ In fact, it must only be considered that a condition element was added, but not 
 % \todo{Das könnten wir wirklich noch tun!}
 
 \mnote{Case distinction fpr condition element change types}
-We already discussed in \autoref{chap:synchronization:gap:alignment} that the addition, removal and change of condition elements are the relevant scenarios that can lead to the violation of consistency.
+We have already discussed in \autoref{chap:synchronization:gap:alignment} that the addition, removal and change of condition elements are the relevant scenarios that can lead to consistency violation.
 In case of adding a condition element, an appropriate corresponding element for it may be missing, such that no witness structure for consistency is given.
 This requires an appropriate element to be added.
 In case of removing a condition element, the element was corresponding to another one, which now has no corresponding element anymore.
 This requires the corresponding condition element to be removed.
-Changing a condition element can be seen as a modification of model elements such that they now represent another condition element of the same condition and, thus, are still part of the same consistency relation.
-We then usually require the consistency preservation rule to update the corresponding condition element appropriately.
+Changing a condition element can be seen as a modification of model elements such that they represent another condition element of the same condition, thus still belonging to the same consistency relation.
+The consistency preservation rule must then update the corresponding condition element appropriately.
 
 \mnote{Intuitive behavior ensuring partial consistency improvement}
 That behavior is what consistency preservation rules are actually supposed to implement.
-A bidirectional transformation with such consistency preservation rules is inherently supposed to fulfill the property of being partial-consistency-improving, because the elements, which have no corresponding elements due to the modification, are not part of the maximal consistent subsets before executing the consistency preservation rule.
+A bidirectional transformation with such consistency preservation rules is inherently supposed to fulfill the property of being partial-consistency-improving, because the elements that have no corresponding elements due to the modification are not part of the maximal consistent subsets before executing the consistency preservation rule.
 After executing it, either the corresponding element is removed and thus the model size decreases, or a corresponding element is added, such that the size of maximal consistent subsets improves.
 
 \mnote{Interference of condition elements}
-In addition to the above considerations, a transformation may be prevented from being partial-consistency-improving by the addition or removal of a condition element to improve consistency affects further condition elements.
-This may be due to the reason that condition elements overlap, i.e., some model elements may be part of several condition elements.
+In addition to the above considerations, a transformation may be prevented from being partial-consistency-improving because the addition or removal of a condition element to improve consistency affects further condition elements.
+This can occur because these condition elements overlap, i.e., some model elements may be part of several condition elements.
 Then, if all elements of a condition element are removed, the other condition element is not present anymore as well.
 A consistency preservation rule must thus be carefully defined such that removing one condition element does not lead to the removal of another one, which was actually part of the maximal consistent subset.
 Otherwise the consistency preservation rule introduces a new violation of consistency.
 The same applies to the scenario of adding condition elements. 
-If the addition leads to the introduction of an additional condition element, because some elements of the added condition element together with other existing elements form a condition element of any consistency relation, this may introduce an inconsistency if no corresponding element already exists, thus reducing partial consistency.
+If the addition leads to the introduction of an additional condition element, because some objects in the added condition element together with other existing objects form a condition element of another consistency relation, this introduces an inconsistency if no corresponding element exists yet, thus reducing partial consistency.
 If the previously existing elements within the induced condition element were part of the maximal consistent subset, the consistency preservation rule is actually not correct.
 If the models were consistent before and only the change to one model is performed, correctness of the consistency preservation rule requires the result to be consistent.
 It, however, introduces a further condition element that has no corresponding element, thus the result is not consistent.
-If, on the other hand, the previously existing elements within the induced condition element were not part of the maximal consistent subset, then it is fine that these elements are still inconsistent, as the consistency preservation rules still need to process them anyway.
+If, on the other hand, the previously existing elements within the induced condition element were not part of the maximal consistent subset, it is fine that these elements are still inconsistent, as the consistency preservation rules still need to process them anyway.
 These problems are comparable to those of fine-grained transformation rules, as discussed in \autoref{chap:correctness:finegrained:relations}, which need to be defined such that one rule does not lead to the violation of the consistency relation of another.
 
 \mnote{Conflicts between condition element changes}
@@ -109,7 +109,7 @@ If the other model was changed as well, the combinations of changes can lead to 
 We therefore distinguish the addition, removal or change of a condition element to be processed by the consistency preservation rule and discuss what conflicts may occur by changes performed in the other model.
 Changes of condition elements are, in practice, traced by the usage of trace models that store trace links between corresponding elements.
 It can be seen as a representation of the witness structure we defined for identifying consistency.
-If elements get changed, the trace links still exist and indicate which corresponding elements need to be adapted.
+If elements become changed, the trace links still exist and indicate which corresponding elements need to be adapted.
 According to the defined notion of consistency, these potential conflicts are just based on the question whether appropriate condition elements exist or not.
 \begin{properdescription}
     \item[Addition:] Whenever a condition element is added to one model, it must be ensured that a corresponding condition element in the other model exists.
@@ -122,8 +122,8 @@ According to the defined notion of consistency, these potential conflicts are ju
     It must only be considered that the existence of the corresponding element cannot be assumed.
     \item[Change:] When model elements are changed such that they represent a different condition element of the same condition as before, they usually also require the corresponding element to be updated to represent the condition element of an applicable consistency relation pair.
     If the corresponding element is removed, the opposite consistency preservation rule will remove the changed condition element anyway to restore consistency.
-    Thus, the consistency preservation rule must only consider that the corresponding element may have been removed, but must do nothing.
-    If the corresponding element was changed, which is identified by the trace model that still contains a link to a changed element, it must be adapted such that both elements form a consistency relation pair again.
+    Thus, the consistency preservation rule must only consider that the corresponding element may have been removed, but must perform no changes.
+    If the corresponding element was changed, which is identified by the trace model still containing a link to a changed element, it must be adapted such that both elements form a consistency relation pair again.
     The modification to the corresponding element will then be propagated back by the opposite consistency preservation rule.
 \end{properdescription}
 
@@ -131,9 +131,9 @@ According to the defined notion of consistency, these potential conflicts are ju
 In summary, we have to deal with two specific situations that can occur when the target model of a consistency preservation rule may have been changed.
 First, when adding condition elements, their corresponding elements may already exist in the other model.
 Second, when removing condition elements, their corresponding elements may have already been removed from the other model.
-While the second scenario is easy to handle by doing nothing whenever the corresponding elements of removed condition elements are not present anymore, the first scenario requires an approach to find out whether corresponding elements already exist or not.
-While existing corresponding elements can be retrieved from the trace model, there are no trace links for these elements yet.
-In the following, we discuss an approach how to find such corresponding elements.
+While the second scenario is easy to handle by doing nothing whenever the corresponding elements of removed elements are not present anymore, the first scenario requires an approach to identify whether corresponding elements already exist.
+While existing corresponding elements can be retrieved from a trace model, no trace links exist for these elements yet.
+In the following, we discuss an approach to find corresponding elements.
 
 % Inkonsistenzen werden dadurch eingeführt, dass neue Condition Elements hinzugefügt werden, für die es keine eindeutigen korrespondierenden Elemente gibt, d.h. keine Witness-Struktur aufgebaut werden kann.
 % Dies ist der Fall sein, wenn Elemente erzeugt werden, um notwendige Konsistenz herzustellen, dadurch aber neue Condition Elements induziert werden, die wieder Konsistenzhaltung bedürfen.
@@ -165,16 +165,16 @@ In the following, we discuss an approach how to find such corresponding elements
 \mnote{Identification of corresponding elements}
 Whenever a condition element is added, which requires a corresponding element to exist in the other model, the consistency preservation rule will usually create appropriate elements in the other model.
 This is due to the reason that in the case when that model may not have been modified as well, these elements cannot already exist.
-In the synchronization case, however, the change to the other model may have already introduced those elements, thus it is necessary to find them to avoid a duplicate creation.
+In the synchronization case, however, the change to the other model may have already introduced those elements, thus it is necessary to find them to avoid their duplicate creation.
 
 \mnote{Trace links}
-In \owncite{klare2019icmt}, we have proposed a strategy to identify such corresponding elements.
+In previous work~\owncite{klare2019icmt}, we have proposed a strategy to identify such corresponding elements.
 Transformation languages usually use trace models to store the information which elements are corresponding to each other.
 Thus, whenever the consistency preservation rule in the opposite direction added the element whose addition is currently processed, a trace link already exists.
 When the corresponding elements were created by different transformations, however, there will not be a trace link between them.
 
 \mnote{Transitive trace links}
-An intuitive attempt might be to use the trace links of the other transformations across which they were created.
+An intuitive attempt would be to use the trace links of the other transformations across which they were created.
 For example, if for a \gls{PCM} component a UML class is created and for this UML class a Java class is created, then there are trace links between the \gls{PCM} component and the UML class, as well as between the UML class and the Java class.
 Synchronizing the addition of the \gls{PCM} component and the Java class should not result in a redundant addition of, for example, a further Java class.
 Resolving the existing trace links transitively is, however, not a solution.
@@ -184,7 +184,7 @@ If those elements are even multiple classes, such as one public and one internal
 
 \mnote{Semantics of trace links}
 Transformation languages usually tag trace links with additional information, for example, containing the transformation rule that created them, to distinguish links to instances of the same class.
-Since these tags are created by other transformations, considering them would violate our assumption of independent development of transformation and modular reuse.
+Since these tags are created by other transformations, considering them would violate our assumption of independent development of transformations and modular reuse.
 Even worse, it could also be the case that another third class is required by the consistency relation between \gls{PCM} and Java.
 Finally, it is up to the actual consistency relation to define when elements are to be considered corresponding, because there may be more semantics beyond the types of the elements related by a trace link that determines how they belong together.
 
@@ -229,7 +229,7 @@ It would also be possible to involve the developer and let him decide whether an
 \mnote{Extension of ordinary transformations}
 In summary, it is necessary that transformation developers use key information for identifying corresponding elements based on \emph{implicit unique} information in addition to the usage of \emph{explicit unique} information in terms of trace links. %, like already used for ordinary transformations.
 In case that corresponding elements are found based on implicit unique information, they need to establish a trace link for the elements.
-We define this behavior in \autoref{algo:synchronization:find_corresponding_elements}, which is an extended version of \cite[Algorithm 1]{saglam2020ma} defined in the Master's thesis of \citeauthor{saglam2020ma}, which was supervised by the author of this thesis, and adapted to our formalism.
+We define this behavior in \autoref{algo:synchronization:find_corresponding_elements}, which is an extended version of an algorithm~\cite[Algorithm 1]{saglam2020ma} defined in the Master's thesis of \citeauthor{saglam2020ma}, which was supervised by the author of this thesis, and adapted to our formalism.
 
 \begin{algorithm}
     \input{algorithms/correctness/synchronization/find_corresponding_elements.tex}
@@ -238,12 +238,12 @@ We define this behavior in \autoref{algo:synchronization:find_corresponding_elem
 \end{algorithm}
 
 \mnote{Algorithm for finding corresponding elements}
-\autoref{algo:synchronization:find_corresponding_elements} receives the consistency relation for which corresponding elements shall be found, the condition element $\conditionelement{c}{l}$ of the condition $\condition{c}{l,\consistencyrelation{CR}{}}$ that was added to model $\model{m}{1}$ for which corresponding elements shall be found or created, the second model $\model{m}{2}$ in which the corresponding elements shall be searched, and the trace model $\model{traces}{} \subseteq \mathcal{P}(\model{m}{1}) \times \mathcal{P}(\model{m}{2})$ containing pairs of elements in $\model{m}{1}$ and $\model{m}{2}$, which represents a combination of witness structures for consistency relations between metamodels $\metamodel{M}{1}$ and $\metamodel{M}{2}$. 
+\autoref{algo:synchronization:find_corresponding_elements} receives the consistency relation for which corresponding elements shall be found, the condition element $\conditionelement{c}{l}$ of the condition $\condition{c}{l,\consistencyrelation{CR}{}}$ that was added to model $\model{m}{1}$ for which corresponding elements shall be found or created, the second model $\model{m}{2}$ in which the corresponding elements shall be searched, and the trace model $\model{m}{\mathvariable{traces}} \subseteq \mathcal{P}(\model{m}{1}) \times \mathcal{P}(\model{m}{2})$ containing pairs of elements in $\model{m}{1}$ and $\model{m}{2}$, which represents a combination of witness structures for consistency relations between metamodels $\metamodel{M}{1}$ and $\metamodel{M}{2}$. 
 The algorithm first retrieves all corresponding elements for the condition element from the trace model and then in the loop in \autoref{algo:synchronization:find_corresponding_elements:line:explicit} checks whether any of the corresponding elements according to the trace model is a corresponding element in the consistency relation $\consistencyrelation{CR}{}$.
 If this is the case, a corresponding element $\conditionelement{c}{r}$ is found and the procedure returns $\conditionelement{c}{r}$.
 Otherwise, model $\model{m}{2}$ is browsed for the existence of a corresponding element in the loop starting in \autoref{algo:synchronization:find_corresponding_elements:line:implicit}.
 It considers all subset of $\model{m}{2}$, i.e., the potency set $\mathcal{P}(\model{m}{2})$, of which each could be such a corresponding element.
-If one of them is corresponding according to $\consistencyrelation{CR}{}$, then the pair $\tupled{\conditionelement{c}{l},\conditionelement{c}{r}}$ is added to the trace model $\model{trace}{}$ as an appropriate trace link and the procedure returns the found element $\conditionelement{c}{r}$.
+If one of them is corresponding according to $\consistencyrelation{CR}{}$, then the pair $\tupled{\conditionelement{c}{l},\conditionelement{c}{r}}$ is added to the trace model $\model{m}{\mathvariable{trace}}$ as an appropriate trace link and the procedure returns the found element $\conditionelement{c}{r}$.
 If no such element is found, the procedure returns $\bot$ to indicate that no corresponding element is found and thus has to be created by the consistency preservation rule.
 
 \mnote{Efficient identification by key}
@@ -317,10 +317,10 @@ Although we derived the insights from thorough argumentation, we also validate t
 \label{chap:synchronization:achieving:changes}
 
 \mnote{Condition element changes induced by model element changes}
-The previous discussions were based on the distinction of different change scenarios for condition elements, as those are relevant when considering the synchronization case of bidirectional transformations.
-An actual transformation does, however, not receive changes of condition elements but changes of actual model elements.
+The previous discussions distinguished different change scenarios for condition elements, as those are relevant when considering the synchronization case of bidirectional transformations.
+A transformation does, however, not receive changes of condition elements but changes of actual model elements.
 These then eventually lead to the addition, removal or change of a condition element.
-Thus, a transformation developers needs to decide which model changes introduce which modifications of condition elements to determine the appropriate behavior of the consistency preservation rules.
+Thus, a transformation developer needs to decide which model changes introduce which modifications of condition elements to determine appropriate behavior of the consistency preservation rules.
 
 \mnote{EMOF- and Ecore-based models}
 The possible types of model changes are induced by the used modeling formalism, as the \metametamodel defines which changes can be performed in models.
@@ -340,17 +340,16 @@ Our modeling formalism introduced in \autoref{chap:networks:models} is conformin
 \end{figure}
 
 \mnote{Possible change types}
-\textcite{kramer2017a} proposes feature models that express all kinds of possible changes in these types of models.
-The feature model for changes in \gls{EMOF}-based models is given at \cite[Fig. 5.2]{kramer2017a} and the one for changes in Ecore-based models is given at \cite[Fig. 5.3]{kramer2017a}.
+\citeauthor{kramer2017a} proposes feature models that express all kinds of possible changes in \gls{EMOF}-based models~\cite[Fig. 5.2]{kramer2017a} and Ecore-based models~\cite[Fig. 5.3]{kramer2017a}.
 Since \gls{EMOF} and Ecore are rather similar (cf.~\autoref{chap:foundations:formalisms:differences}), we focus on Ecore as the practically realized modeling formalism.
 
 \mnote{Corrections of existing feature model}
 We depict a modified version of the feature model for changes in Ecore-based models in \autoref{fig:synchronization:change_feature_model}.
-In comparison to the original model at \cite[Fig. 5.3]{kramer2017a}, we made the following changes:
+In comparison to the original model by \textcite[Fig. 5.3]{kramer2017a}, we made the following changes:
 \begin{properdescription}
     \item[No compound changes:] We do not consider compound changes, because they are simply compositions of atomic changes and thus do not need to be considered explicitly.
     \item[No permutation:] We removed the \emph{Permutation} feature, because it can be considered as a compound change of a subtractive and additive multi-valued feature change. Whether or not permutation rather than the removal and addition is relevant is up to the interpretation of the change sequence and is comparable to moving an element from one reference to another, which is also modeled as a compound change.
-    \item[Mandatory content:] We made the \emph{Content} feature mandatory, as due to removal of the permutation every change is either additive or subtractive.
+    \item[Mandatory content:] We made the \emph{Content} feature mandatory, as due to the removal of the permutation every change is either additive or subtractive.
     \item[Constraints reduction:] We reduced the constraints to those that are still relevant after performing the previously discussed changes.
     \item[Error corrections:] We fixed an error in the constraints of the original model. They required a \emph{Create} change of a root element to be subtractive, which does not make sense. We corrected that error by simplification.
 \end{properdescription}
@@ -360,13 +359,13 @@ The set of all possible change types in Ecore-based models is given by enumerati
 We discuss for each of the resulting changes the types of condition element changes it may induce.
 \begin{properdescription}
     \item[Additive root change (possibly create):] Adding a root element can lead to the addition of a condition element, which consists only of this root element. It may not induce a change or removal of a condition element.
-    \item[Subtractive root change (possibly delete):] The removal of a root element can lead to the removal of a condition element, which involves the root element. Since it completely removes an element, it can neither lead to a change or addition of a condition element.
-    \item[Single-valued attribute change:] Changing an attribute can lead to either an addition, removal or change of a condition element. The change may lead to an element that now, potentially together with other elements, forms a condition element. It may also lead to a different condition element of the same condition, for example, by renaming an element. Finally, it can also lead to an element that is not present in a condition anymore. This does apply no matter whether the attribute change is only additive, only subtractive, or both, thus whether it adds, removes or replaces the attribute value.
-    \item[Additive multi-valued attribute change:] Adding a value to a multi-valued attribute can lead to either an addition, removal or change of a condition element. The change can lead to the situation that the element is now part of condition element, is not part of a condition element anymore, or that it represents a different condition element of the same condition and is thus comparable to the change of a single-valued attribute.
+    \item[Subtractive root change (possibly delete):] The removal of a root element can lead to the removal of a condition element, which involves the root element. Since it completely removes an element, it can neither lead to a change nor to an addition of a condition element.
+    \item[Single-valued attribute change:] Changing an attribute can lead to either an addition, removal or change of a condition element. The change may lead to an element that now, potentially together with other elements, forms a condition element. It may also lead to a different condition element of the same condition, e.g., by renaming an element. Finally, it can also lead to an element that is not present in a condition anymore. This applies no matter whether the attribute change is only additive, only subtractive, or both, thus whether it adds, removes or replaces the attribute value.
+    \item[Additive multi-valued attribute change:] Adding a value to a multi-valued attribute can lead to either an addition, removal or change of a condition element. The change can lead to the situation that the element is now part of a condition element, is not part of a condition element anymore, or that it represents a different condition element of the same condition and is thus comparable to the change of a single-valued attribute.
     \item[Subtractive multi-valued attribute change:] Removing a value from a multi-valued attribute can lead to either an addition, removal or change of a condition element, due to the same reasons as the additive multi-valued attribute change.
     \item[Single-valued reference change (possibly create/delete):] Changing a reference can lead to either an addition, removal or change of a condition element, due to the same reasons as for single-valued attribute changes. This is even independent from whether the added or removed element is created or deleted, respectively.
-    \item[Additive multi-valued reference change (possibly create):] \; Adding a value to a multi-valued reference can lead to either an addition, removal or change of a condition element, due to the same reasons as for adding an attribute to a multi-valued attribute. Like for single-valued reference changes this is even independent from whether the element was created or did already exist before.
-    \item[Subtractive multi-valued reference change (possibly delete):] \; The removal of a value from a multi-valued reference can lead to either an addition, removal or change of a condition element, due to the same reasons as for removing an attribute from a multi-valued attribute. Like for single-valued reference changes and additive multi-valued reference changes this is even independent from whether the element was created or did already exist before.
+    \item[Additive multi-valued reference change (possibly create):] \; Adding a value to a multi-valued reference can lead to either an addition, removal or change of a condition element, due to the same reasons as for adding an attribute to a multi-valued attribute. Like for single-valued reference changes this is even independent from whether the element was created or already existed before.
+    \item[Subtractive multi-valued reference change (possibly delete):] \; The removal of a value from a multi-valued reference can lead to either an addition, removal or change of a condition element, due to the same reasons as for removing an attribute from a multi-valued attribute. Like for single-valued reference changes and additive multi-valued reference changes this is even independent from whether the element was created or already existed before.
 \end{properdescription}
 
 \mnote{Relation between condition and model element changes}
@@ -383,7 +382,7 @@ For example, if a consistency relation puts two model elements having only refer
 The specific case of identifying corresponding elements during synchronization discussed in the previous subsection needs to be considered whenever a condition element was added.
 Since this can occur because of any type of change except for removals of root elements, we cannot make any general restrictions on the types of model changes that need to be explicitly considered for the synchronization case.
 The transformation developer must decide after which changes a condition element may be created, independent from whether corresponding elements may already exist or not.
-Thus he or she makes this decision anyway and must only extend the existing logic for finding corresponding elements according to the given algorithm.
+Thus, he or she makes this decision anyway and must only extend the existing logic for finding corresponding elements according to the given algorithm.
 
 % FROM MAX:
 % Different information and case distinctions are necessary to describe all possible model changes for modelling languages that follow the Essential Meta Object Facility (EMOF) standard or the Ecore variant. 
