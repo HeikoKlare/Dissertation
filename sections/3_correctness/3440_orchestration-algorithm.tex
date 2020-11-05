@@ -14,16 +14,16 @@ We have shown in \autoref{theorem:orchestration_fixed} that no natural upper bou
 Any arbitrary bound can prevent the algorithm from finding consistent orchestrations.
 
 \mnote{High number of executed transformation unwanted}
-From an engineers perspective, we may, however, consider the behavior that an arbitrary high number of transformation executions is required to yield consistent models unwanted.
+From an engineers perspective, we may, however, consider the behavior that an arbitrary high number of transformation executions is required to yield consistent models as unwanted.
 Although the examples we have given are valid, they are rather artificial.
 We claim that a transformation network that requires a rather high number of executions compared to the number of contained transformations to find consistent models does not operate as expected.
 In particular, if such a high number of executions is required to find a consistent orchestration, it will be difficult to identify the reason for not finding a consistent execution in case the algorithm returns $\bot$.
 Thus, we introduce an artificial upper bound for the number of transformation executions.
-That bound will be well-defined, such that we can reasonably assume that no more execution are practically necessary.
+That bound will be well-defined, such that we can reasonably assume that no more executions are practically necessary.
 
 \mnote{Design goals of orchestration}
 In the following, we propose design goals for a conservative application algorithm and the so called \emph{provenance algorithm}, and finally prove its correctness and termination properties.
-The algorithm was developed together with Joshua Gleitze in a scientific internship and published in \cite{gleitze2020orchestration}.
+The algorithm was developed together with Joshua Gleitze in a scientific internship~\cite{gleitze2020orchestration}.
 
 % FROM MODELS:
 % Finally, one could question whether it is relevant if an execution strategy can be guaranteed to terminate. Execution strategies will be used to tell users whether changes they made can be incorporated into the other models automatically. In consequence, users should reliably and timely get a response. We might compare this situation to merging changes in version control systems. There, users also want a reliable and timely response on whether their changes could be incorporated automatically, or whether they need to resolve conflicts manually
@@ -68,7 +68,7 @@ This ensures that consistency is preserved after each change in an incremental w
 \mnote{Principle benefits}
 This approach improves identifying provenance of a failure of the algorithm, because it restricts the potentially causal transformations to consider.
 If the algorithm fails after executing a subset of the transformations $\transformationset{T}_\mathvariable{exec} \subseteq \transformationset{T}$,
-then there is some transformation $\transformation{t} \in \transformationset{T}_{exec}$ that was executed for its first time last.
+then there is some transformation $\transformation{t} \in \transformationset{T}_\mathvariable{exec}$ that is the last of those transformation that was executed for its first time.
 Thus, the algorithm found an orchestration of $\transformationset{T}_\mathvariable{exec} \setminus \transformation{t}$ such that the models were consistent to all those transformation, but is was not able to execute $\transformation{t}$ and the transformations in $\transformationset{T}_\mathvariable{exec}$ afterwards, such that the models become consistent to all these transformations.
 This helps the transformation developer or user to understand and find the reason for failing in different ways.
 First, he or she can ignore any transformation in $\transformationset{T} \setminus \transformationset{T}_\mathvariable{exec}$, as the algorithm already failed to preserve consistency according to the other transformations, which can significantly reduce the number of transformations to consider.
@@ -77,25 +77,25 @@ Third, having a state of the models that is consistent to $\transformationset{T}
 
 \mnote{Principle not improving optimality}
 If the algorithm operates according to the introduced principle and is not able to preserve consistency anymore after it considers an additional transformation $\transformation{t}$, the selected execution order provides the discussed benefits for identifying the reasons for failing.
-There may, however, be another orchestration that is able to ensure consistency to $\transformationset{T}_\mathvariable{exec}$. Executing $\transformation{t}$ earlier or integrating further transformations in $\transformationset{T}$ before ensuring consistency to all transformations in $\transformationset{T}_\mathvariable{exec}$ can, of course, lead to the situation that the algorithm finds a consistent orchestration.
+There may, however, be another orchestration that is able to ensure consistency to $\transformationset{T}_\mathvariable{exec}$. Executing $\transformation{t}$ earlier or integrating further transformations in $\transformationset{T}$ before ensuring consistency to all transformations in $\transformationset{T}_\mathvariable{exec}$ can, of course, result in the algorithm finding a consistent orchestration.
 This can reduce optimality of the realized orchestration function, but we claim the discussed benefits to outweigh that.
 
 \mnote{Transformations reacting to others}
 We have shown that there is no inherent upper bound for the necessary number of transformation executions.
-Rather than specifying a concrete number, be it fixed or depending on the network size, we derive a reasonable artificial bound for the number of executions from a property that we assume reasonable for possible orchestrations of a set of transformations.
+Rather than specifying a concrete number, be it fixed or depending on the network size, we derive a reasonable artificial bound for the number of executions from a property that we assume reasonable for possible orchestrations of a transformation set.
 The idea of that property is that each transformation should be allowed to react to the execution of each possible sequence of all other transformations.
 It should, however, not be necessary that a transformation must be executed again after the other transformations reacted the execution of that transformation.
 Thus, if a transformation was executed after applying the other transformations in any possible order, we expect the models to be consistent to that transformation.
 
 \begin{definition}[Reactive Converging Transformations]
     \label{def:reactiveconverging}
-    A set of synchronizing transformations $\transformationset{T}$ is \emph{reactive converging} with respect to models $\modeltuple{m}$ and changes $\changetuple{\metamodeltuple{M}}$ if in any orchestration of $\transformationset{T}$ in which the last transformation $\transformation{t} \in \transformationset{T}$ of that sequence was executed after all other duplicate-free orders of transformations in that orchestration, the yielded models are consistent to $\transformation{t}$.
+    A set of synchronizing transformations $\transformationset{T}$ is \emph{reactive converging} with respect to models $\modeltuple{m}$ and changes $\changetuple{\metamodeltuple{M}}$ if any orchestration of any subset $\transformationset{T}_p \subseteq \transformationset{T}$ in which a transformation $\transformation{t} \in \transformationset{T}_P$ has been executed after a sequence of transformations in $\transformationset{T}_p$ that contains each permutation of those transformations as a (not necessarily continuous) subsequence yields models that are consistent to $\transformation{t}$.
 \end{definition}
 
 \mnote{Reactive converging transformations example}
-The property does not require that the other transformations were executed in each order consecutively, but only that the orchestration contains each order of those transformations, but potentially with other transformations in between.
-As an example, assume a set of transformations $\setted{\transformation{t}_{1}, \transformation{t}_{2}, \transformation{t}{3}}$, which is reactive converging for some input of models and changes.
-After executing them for these models and changes in the order $\sequenced{\transformation{t}_{1}, \transformation{t}_{2}, \transformation{t}{3}, \transformation{t}_{1}, \transformation{t}_{2}, \transformation{t}{3}}$, the models yielded by that orchestration may still be inconsistent to $\transformation{t}_{1}$, because it was not executed after the order of the transformations $\sequenced{\transformation{t}_{3}, \transformation{t}_{2}}$.
+The property does not require that the other transformations were executed in each order consecutively, but only that the orchestration contains each permutation of those transformations, but potentially with other transformations in between.
+As an example, assume a set of transformations $\setted{\transformation{t}_{1}, \transformation{t}_{2}, \transformation{t}_{3}}$, which is reactive converging for some input of models and changes.
+After executing them for these models and changes in the order $\sequenced{\transformation{t}_{1}, \transformation{t}_{2}, \transformation{t}_{3}, \transformation{t}_{1}, \transformation{t}_{2}, \transformation{t}_{3}}$, the models yielded by that orchestration may still be inconsistent to $\transformation{t}_{1}$, because it was not executed after the order of the transformations $\sequenced{\transformation{t}_{3}, \transformation{t}_{2}}$.
 After executing $\transformation{t}_{1}$ once more, the orchestration must yield consistent models, because $\transformation{t}_{1}$ was executed after the two orders of the other transformations $\sequenced{\transformation{t}_{2}, \transformation{t}_{3}}$ and $\sequenced{\transformation{t}_{3}, \transformation{t}_{2}}$.
 Likewise, $\transformation{t}_{2}$ was executed after $\sequenced{\transformation{t}_{1}, \transformation{t}_{3}}$ and $\sequenced{\transformation{t}_{3}, \transformation{t}_{1}}$, and $\transformation{t}_{3}$ was executed after $\sequenced{\transformation{t}_{1}, \transformation{t}_{2}}$ and $\sequenced{\transformation{t}_{2}, \transformation{t}_{1}}$.
 
@@ -116,7 +116,7 @@ Then the algorithm calls the recursive function \function{Propagate}, which impl
 While this behavior is equal to the one in \autoref{algo:orchestration:application}, the orchestration itself is implemented differently in a recursive rather than an iterative manner, which implicitly ensures termination.
 
 \mnote{Incremental consistency restoration principle}
-The function \function{Propagate} implementing the orchestration in a recursive manner acts as follows:
+The function \function{Propagate} implementing the orchestration in a recursive manner acts as follows.
 It selects one of the transformations as a candidate to execute next.
 This selection ensures that a transformation is selected whose models are affected by any already performed change, such that the transformation needs to perform changes.
 Models are affected by a change if any of the two changes in $\change{\metamodeltuple{M}}$ for either of the models that are kept consistent by the selected transformation is not the identity function $\identitychange$.
@@ -124,7 +124,7 @@ It then applies the transformation using the generalization function $\generaliz
 If the selected transformation is not defined for the given models and changes, the function may return $\bot$, so that the complete algorithm terminates with $\bot$.
 Afterwards, it recursively executes the function \function{Propagate} with the subnetwork given by the transformations that have already been executed and are stored in $\provalgexecuted$.
 After that recursive execution it is checked whether the models yielded by the resulting changes are still consistent to the candidate transformation.
-If this consistency check fails, the transformations do not fulfill the definition of being reactive converging according to \autoref{def:reactiveconverging}, as we will prove later.
+If this consistency check fails, the transformations do not fulfill the definition of being reactive converging according to \autoref{def:reactiveconverging}, as we prove later.
 If the models are consistent to the transformation, the next candidate is picked.
 In effect, the strategy realizes the defined principle in a recursive manner, because after executing a new transformations, the recursive execution ensures consistency to all already executed transformations by applying all already executed transformations again.
 
@@ -142,7 +142,7 @@ In effect, the strategy realizes the defined principle in a recursive manner, be
 \autoref{fig:orchestration:provenance_example} depicts an exemplary execution of the \function{ProvenanceApply} algorithm for a set of four transformations between four metamodels.
 We assume that the algorithm receives four initially consistent models and a change to the topmost one.
 The example shows that in each recursion step only the subnetwork of the already executed transformations in $\provalgexecuted$ is considered.
-Thus, the set of transformations gets smaller in each recursive call of \function{ProvenanceApply}.
+Thus, the set of transformations becomes smaller in each recursive call of \function{ProvenanceApply}.
 
 
 \subsection{Correctness, Termination and Goal Fulfillment}
@@ -153,7 +153,7 @@ Additionally, it is supposed to deliver consistent models whenever the given tra
 In the following, we prove that the algorithm actually fulfills these properties.
 
 \mnote{Termination and correctness}
-First, it is easy to see that the algorithm does always terminate and always either returns consistent models yielded by an orchestration of the given transformations or $\bot$, which realizes a correct application function according to \autoref{def:applicationfunction} and \autoref{def:applicationfunctioncorrectness}.
+First, it is easy to see that the algorithm always terminates and always either returns consistent models yielded by an orchestration of the given transformations or $\bot$, which realizes a correct application function according to \autoref{def:applicationfunction} and \autoref{def:applicationfunctioncorrectness}.
 
 \begin{theorem}[Provenance Algorithm Termination]
     \autoref{algo:orchestration:provenance} terminates for every possible input.
@@ -164,17 +164,17 @@ First, it is easy to see that the algorithm does always terminate and always eit
     \function{Propagate} contains a loop with a recursive call and the external calls of \function{CheckConsistency} as well as $\generalizationfunction{}$.
     Since \function{CheckConsistency} and $\generalizationfunction{}$ terminate, it may only be non-terminating because of the loop in Line~\ref{algo:orchestration:provenance:line:loop_start} and the recursive call in Line~\ref{algo:orchestration:provenance:line:recursive_call}.
     The number of loop executions is limited by the number of given transformations, i.e., $\abs{\transformationset{T}}$, as each iteration selects another transformation and adds it to $\provalgexecuted$, thus after selecting each transformation once, all transformations are in $\provalgexecuted$ and thus the loop condition is not fulfilled.
-    The recursive call receives a set of transformations that is at least one element smaller than the set of transformations given to the calling method, because if $\provalgexecuted = \transformationset{T}$ the loop precondition is not fulfilled. If the given set of transformations is empty, the loop is not entered and thus no recursive call is performed. In consequence, the recursion depth is never higher than $\abs{\transformationset{T}}$.
+    The recursive call receives a set of transformations that is at least one element smaller than the set of transformations given to the calling method, because if $\provalgexecuted = \transformationset{T}$ the loop precondition is not fulfilled. If the given set of transformations is empty, the loop is not entered and thus no recursive call is performed. Thus, the recursion depth never exceeds $\abs{\transformationset{T}}$.
 \end{proof}
 
 \begin{theorem}[Provenance Algorithm Correctness] \label{theorem:provenance_correctness}
-    \autoref{algo:orchestration:provenance} realizes a correct application function according to \autoref{def:applicationfunctioncorrectness}.
+    \autoref{algo:orchestration:provenance} realizes a correct application function. % according to \autoref{def:applicationfunctioncorrectness}.
 \end{theorem}
 \begin{proof}
     The algorithm receives models and changes to them and it returns models being instances of the same metamodels, thus it fulfills the signature of an application function.
     Additionally, if it returns models, they are the result of a consecutive application of transformations in $\transformationset{T}$, as \function{Propagate} calculates the changes that are applied to the input models to calculate the result by a repeated application of the generalization function $\generalizationfunction{}$ to transformations in $\transformationset{T}$.
     Thus, \function{Propagate} implicitly implements an orchestration function according to \autoref{def:orchestrationfunction} and applies the transformations in the determined order to calculate the result delivered by \function{ProvenanceApply}.
-    Thus \function{ProvenanceApply} fulfills \autoref{def:applicationfunction} for an application function.
+    Thus, \function{ProvenanceApply} fulfills \autoref{def:applicationfunction} for an application function.
 
     Let us assume that \autoref{algo:orchestration:provenance} does not realize a correct application function.
     \function{ProvenanceApply} may return $\bot$ in \autoref{algo:orchestration:provenance:line:bot_input} or \autoref{algo:orchestration:provenance:line:bot_orchestration}, or it may return models in \autoref{algo:orchestration:provenance:line:return_result}.
@@ -196,7 +196,7 @@ First, it is easy to see that the algorithm does always terminate and always eit
 In addition to these essential properties, we can also derive the upper bound for the number of transformation executions by the algorithm.
 
 \begin{theorem}[Provenance Algorithm Complexity]
-    \autoref{algo:orchestration:provenance} executes transformation at most $\mathcal{O}(2^{\abs{\transformationset{T}}})$ times.
+    \autoref{algo:orchestration:provenance} executes transformations at most $\mathcal{O}(2^{\abs{\transformationset{T}}})$ times.
 \end{theorem}
 \begin{proof}
 	Let $T(m)$ denote the number of transformation executions the algorithm invokes for a set of transformations $\transformationset{T}$ with $m = \abs{\transformationset{T}}$.
@@ -229,7 +229,7 @@ Finally, the algorithm shall implement the principle defined in \autoref{chap:or
 \end{proof}	
 
 \mnote{Algorithm optimality}
-We have given \autoref{def:reactiveconverging} the property of a transformation set to be reactive converging.
+We have given \autoref{def:reactiveconverging} for the property of a transformation set to be reactive converging.
 This property defines that we do not want transformations to be required to react to changes they performed themselves if all other transformation have been executed afterwards, as we assume this to be a reasonable property that induces an upper bound for the number of transformation executions.
 We have used that property as a design goal for the proposed algorithm and can now show that the algorithm actually always returns consistent models when the transformations fulfill that property, which means that the algorithm implements an optimal application function.
 
@@ -243,20 +243,20 @@ We have used that property as a design goal for the proposed algorithm and can n
     Since optimality allows the algorithm to return $\bot$ when the input models are inconsistent, returning $\bot$ in \autoref{algo:orchestration:provenance:line:bot_input} is valid.
     The algorithm returns $\bot$ in \autoref{algo:orchestration:provenance:line:bot_orchestration} if \function{Propagate} returns $\bot$, thus we show that \function{Propagate} does not return $\bot$.
     \function{Propagate} returns $\bot$ in \autoref{algo:orchestration:provenance:line:bot_application} if the application of a selected transformation in \autoref{algo:orchestration:provenance:line:first_execution} returns $\bot$. By assumption, all transformations are total, thus the application can never return $\bot$.
-    \function{Propagate} returns $\bot$ in \autoref{algo:orchestration:provenance:line:bot_recursion} if a recursive call returns $\bot$. If the loop in that recursive call is executed, the arguments for not returning $\bot$ apply recursively. If the loop is not executed in the recursion than the input changes are returned, which do not yield $\bot$.
+    \function{Propagate} returns $\bot$ in \autoref{algo:orchestration:provenance:line:bot_recursion} if a recursive call returns $\bot$. If the loop in that recursive call is executed, the arguments for not returning $\bot$ apply recursively. If the loop is not executed in the recursion than the input changes are returned, which does not yield $\bot$.
     
     Finally, \function{Propagate} returns $\bot$ in \autoref{algo:orchestration:provenance:line:bot_nonreactiveconverging} if the models yielded by the recursive call are not consistent with the transformation that is the candidate $\provalgcandidate$ in that loop iteration.
-    Since the transformation set is reactive converging, this can only be the case if not all orders of the transformations currently in $\provalgexecuted$ have been executed yet.
-    We show that all transformations in $\provalgexecuted$ have been executed by induction.
+    Since the transformation set is reactive converging, this can only be the case if not all permutations of the transformations currently in $\provalgexecuted$ have been executed yet.
+    We show that all transformations in $\provalgexecuted$ have been executed in every order by induction.
     In the first iteration of the loop only the candidate of that iteration is executed and $\provalgexecuted$ is empty, thus the statement is trivially true.
-    Let us assume that in a loop iteration with $\abs{\provalgexecuted} = i-1$ all orchestrations of transformations in $\provalgexecuted$ have been executed in Line~\ref{algo:orchestration:provenance:line:bot_nonreactiveconverging}, but that in the following loop iteration with $\abs{\provalgexecuted} = i$ this is not true.
+    Let us assume that in a loop iteration with $\abs{\provalgexecuted} = i-1$ all permutations of transformations in $\provalgexecuted$ have been executed in Line~\ref{algo:orchestration:provenance:line:bot_nonreactiveconverging}, but that in the following loop iteration with $\abs{\provalgexecuted} = i$ this is not true.
     This means that there is an order $\sequenced{\transformation{t}_{1}, \dots, \transformation{t}_{i}}$ of the transformations in $\provalgexecuted$, in which they have not been executed yet.
     Let $\transformation{t}$ be the candidate $\provalgcandidate$ of the last iteration with $\abs{\provalgexecuted} = i-1$. Let $k$ be the index of $\transformation{t}$ in that sequence, i.e., $\transformation{t} = \transformation{t}_{k}$. Then per induction assumption the sequence $\sequenced{\transformation{t}_{1}, \dots, \transformation{t}_{k}}$ has been executed in one of the previous iterations of the loop. 
     Afterwards $\transformation{t}$ was executed in Line~\ref{algo:orchestration:provenance:line:first_execution}.
     Additionally, the sequence $\sequenced{\transformation{t}_{k+1}, \dots, \transformation{t}_{i}}$ has been executed in the recursive call in Line~\ref{algo:orchestration:provenance:line:recursive_call} by induction assumption.
     Hence, the transformations have been executed in the order $\sequenced{\transformation{t}_{1}, \dots, \transformation{t}_{i}}$, which is a contradiction to our assumption.
 
-    In consequence, \function{Propagate} never returns $\bot$ and thus \function{ProvenanceApply} does not return $\bot$, except for inconsistent input models. Since we have already proven that the algorithm terminates always and implements a correct application function, it implements an optimal application function.
+    In consequence, \function{Propagate} and thus \function{ProvenanceApply} does never return $\bot$, except for inconsistent input models. Since we have already proven that the algorithm terminates always and implements a correct application function, it implements an optimal application function.
 \end{proof}
 
 \mnote{Optimality assumptions fulfillment}
@@ -266,7 +266,7 @@ In practice, this assumption will usually not be fulfilled.
 Nevertheless, it is theoretically possible to define such transformations and at least it leads to well-defined conditions for when we can assume the algorithm to realize an optimal orchestration function.
 
 \mnote{Orchestration problem non-existence}
-Although this means that under that specific conditions the algorithm is able to decide the orchestration problem, the problem is actually trivially solved in that case, because for every input there is a consistent orchestration, thus the problem is actually non-existent for these assumptions.
+Although this means that under such specific conditions the algorithm is able to decide the orchestration problem, the problem is actually trivially solved in that case, because for every input there is a consistent orchestration, thus the problem is actually non-existent under these assumptions.
 
 \mnote{Well-defined requirements}
 Finally, it is an open question how far we can assume sets of transformations to be reactive converging in practice.
@@ -278,16 +278,16 @@ In fact, it is only supposed to be a well-defined property that allows us to def
 
 \mnote{Information about failure state}
 We have motivated the provenance algorithm with the idea to improve the ability of a transformation developer or user to find the reason for the algorithm not to yield consistent models for certain inputs.
-The proposed \autoref{algo:orchestration:provenance} does only return $\bot$ in those situations and thus does not directly support that process.
+The proposed \autoref{algo:orchestration:provenance} only returns $\bot$ in those situations and thus does not directly support that process.
 The necessary information for improving the identification of provenance for the failure is, however, present in the algorithm and can be easily retrieved.
 
 \mnote{Reasons for algorithm failing}
-The algorithm may fail because it is, at some point, not able to execute a candidate transformation (Line~\ref{algo:orchestration:provenance:line:bot_application}), or because after executing a new transformation consistency to the previously executed transformations cannot be achieved without letting one of the transformations react to the reaction of all other transformations to its own changes (Line~\ref{algo:orchestration:provenance:line:bot_failcheck}), which we defined as the property of reactive convergence.
+The algorithm may fail, because it is, at some point, not able to execute a candidate transformation (Line~\ref{algo:orchestration:provenance:line:bot_application}), or because after executing a new transformation consistency to the previously executed transformations cannot be achieved without letting one of the transformations react to the reaction of all other transformations to its own changes (Line~\ref{algo:orchestration:provenance:line:bot_failcheck}), which we defined as the property of reactive convergence.
 In that case, we at least know that after the previous loop iteration consistency to all transformations that have been executed so far could be achieved.
 
 \mnote{Relevant failure state information}
-Whenever the \function{Propagate} function fails and returns $\bot$, we know that for the current transformations in $\provalgexecuted$ an orchestration exists that yields the current changes in $\changetuple{\metamodeltuple{M}}$ %= \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}}$
-, for which we know that applied to the original models the result $\changetuple{\metamodeltuple{M}}(\modeltuple{m})$ %\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \dots, \change{\metamodel{M}{n}}(\model{m}{n})}$
+Whenever the \function{Propagate} function fails and returns $\bot$, we know that for the current transformations in $\provalgexecuted$ an orchestration exists that yields the current changes in $\changetuple{\metamodeltuple{M}}$, %= \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}}$
+for which we know that applied to the original models, the result $\changetuple{\metamodeltuple{M}}(\modeltuple{m})$ %\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \dots, \change{\metamodel{M}{n}}(\model{m}{n})}$
 is at least consistent to $\provalgexecuted$.
 We also know that the algorithm was not able to ensure consistency to the current candidate transformation $\provalgcandidate$.
 This is exactly the information for which we already discussed in \autoref{chap:orchestration:algorithm:goals} the benefits with respect to the underlying design principle of recursively ensuring consistency for subsets of the transformations for the ability to identify the reasons for not finding a consistent orchestration.
@@ -301,6 +301,7 @@ The algorithm and the ability to identify reasons for the algorithm to fail may 
 The loop at least ensures that no transformations are executed that are not yet affected by any change and thus would not produce changes.
 It can, however, also be reasonable to first select transformations for which both models have already been modified before selecting transformations for which only one model has been modified.
 This can further improve locality of the changes made until the algorithm fails, because less models may have been modified until the algorithm fails.
+We also discuss these benefits as results of the evaluation in \autoref{chap:correctness_evaluation:orchestration}.
 
 %\todo{Discuss that is may make sense to first use transformations between already involved models rather than passing through the complete network.}
 
