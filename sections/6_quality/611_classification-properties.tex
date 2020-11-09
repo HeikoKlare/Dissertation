@@ -1,0 +1,134 @@
+\section{Properties of Transformation Networks}
+
+Transformation networks are software products to be used by software developers rather than end users, thus specific properties are of interest.
+We are most concerned with universality, as introduced in \autoref{chap:introduction}, to be applicable for all consistency scenarios, also denoted as functional completeness~\cite{iso25010}, and maintainability (modularity, reusability, modifiability (changes for same context) adaptability (changes for different context))
+
+\subsection{Correctness}
+Functional correctness in ISO
+(previous section)
+
+
+\subsection{Universality}
+Function completeness in ISO 
+
+Universality includes that it can be applied to every project, i.e., assumptions need to be fulfillable.
+One central assumption is the presence of models and their specification languages.
+If they do not exist, they need to be defined.
+There are several way to integrate multiple forms of artifacts, such as XML-based specifications, into modeling frameworks such as EMF (see \owncite{klare2020Vitruv-JSS} and copy citations from there).
+
+In addition, code often contains models implicitly, thus the defined tools, whose artifacts we want to keep consistent, have definitions of metamodels of their artifacts defined within the code.
+We have proposed an approach to make these implicit models explicit to use them within a modeling framework \owncite{klare2017models, klare2019modelsward}.
+\todo{Discuss integration of non-modelled artifacts into process with reference to Models/Modelsward paper. Probably add one section discussing the necessity, the drawbacks of not having modelled artifacts and the results of how to integrate them from \owncite{klare2017models,klare2019modelsward}.}
+
+
+\subsection{Maintainability}
+
+According to \cite{iso25010}, maintainability includes modularity, reusability, analysability, modifiability and testability.
+\enquote{degree of effectiveness and efficiency with which a product or system can be modified by the intended maintainers}~\cite[p. 14]{iso25010}.
+
+\begin{properdescription}
+    \item[Modularity:] 
+    Modularity is the degree to which a program, and thus also a transformation network, is composed of components such that changes only influence a part of it~\cite{iso25010}.
+    This property is degraded by having multiple paths expressing the same relations, as then these paths depend on each other and may be contradictory. 
+    Having such multiple paths can lead to incompatibilities (cf.\ \autoref{chap:compatibility}) or situations in which no consistent orchestration of the transformations exists (cf.\ \autoref{chap:orchestration}), thus such multiple paths degrade modularity.
+    \item[Reusability:]
+    Reusability is the degree to which assets, such as the single transformations of a transformation network, can be used in more than one system~\cite{iso25010}.
+    In terms of a transformation network, reusability of a transformation is given if it is independent from the other transformation and can be used together with others in a different context.
+    This conforms to our notion of independent development and modular reuse, given as assumptions in \autoref{chap:introduction}.
+    Reusability profits from having all relations between the involved metamodels expressed explicitly, thus leading to multiple paths of transformations expressing the same relations.
+    In that case, subsets of the transformations can be used in a different context, in which only a subset of the metamodels is used, as transformations can directly be reused and do not rely on transitively expressed relations.
+    For example, having the relation between \gls{PCM} and Java expressed directly instead of only expressing it transitively across \gls{UML} enables its reuse in other system development scenarios in which \gls{UML} is not used at all.
+    Thus, reusability degrades with improved modularity.    
+    \item[Analysability:] 
+    Analysability is the degree to which the impact of a change can be assessed effectively and efficiently or to which defects can be identified afterwards~\cite{iso25010}.
+    On the one hand, this is important for the single transformations, as analyzing the impact of a change especially concerns the intended change of the behavior of a transformation. That is, however, also a topic of dedicated research about transformation validation and verification~\cite{cabot2010VerificationInvariants-JSS, rahim2015SurveyTransformationVerification-SoSym, azizi2017ContractVerification-ICCKE, vallecillo2012FormalTesting-FMMDE}.
+    On the other hand, this is important for the interplay of transformations, thus how a change to one transformation affects interoperability with the others.
+    This is, again, directly related to the existence of multiple paths of transformations preserving consistency to the same relations, as this influences how many other transformations may be affected and potentially need to be updated due to the modification to one of them.
+    Consequently, the more relations are preserved across multiple paths of transformations, the more transformations may be affected by a single change and introduce interoperability problems that may be hard to analyze (cf.\ \autoref{chap:orchestration}).
+    Analyzability is also related to the notion of comprehensibility that we have introduced in \autoref{chap:introduction}. The lower analyzability is, the harder it becomes for a transformation developer to comprehend what the combination of transformations actually does and how an intended change can be performed and what its impact is.
+    We have also used comprehensibility to motivate the design of our orchestration algorithm in \autoref{chap:orchestration:algorithm}, which is driven by the goal of easing the analysis of failures of the transformation network, analogous to analyzability.
+    Thus, analyzability improves with modularity.
+    \item[Modifiability:]
+    Modifiability is the degree to which a system can be modified without introducing defects or degrading quality~\cite{iso25010}.
+    It is directly influenced by modularity and analyzability, as also stated by the ISO standard~\cite{iso25010}.
+    In terms of a transformation network this can include the adaptation of existing transformations or the extension of an existing network with further metamodels and transformations.
+    The same arguments as for modularity and analyzability apply and thus modifiability improves and degrades with modularity of the transformation network.
+    For example, the complexity of adding a new transformation, which is covered by modifiability, depends on the number transformations that already, and in particular transitively, preserve relations between the two metamodels to define the new transformation between.
+    \item[Testability:]
+    Testability is the degree with which test criteria can be effectively and efficiently established and evaluated by test cases for a product~\cite{iso25010}, such as a transformation network.
+    While there are many influencing factors for testability, such as encapsulation and coupling within the implementation, it is, again, also influenced by the number of paths across which consistency relations are defined.
+    This is because the more paths of transformations preserving the same consistency relations exist, the larger is the set of models to be considered and transformations to be executed for testing correctness of preserving consistency according to a certain relation.
+    This increases complexity of the tests to perform.
+    Testability is also highly related to the notion of comprehensibility that we have introduced in \autoref{chap:introduction} and also discussed for the property of analyzability. 
+    The higher the number of transformations that need to be executed to detect a failure, the more complex we can expect the process of identifying the causing mistake to be (cf.\ \autoref{chap:errors}).
+    Testability just like analyzability and modifiability thus improves with modularity.
+\end{properdescription}
+
+We do not measure these metrics, as it has been shown to be hard to assess software quality (CITE!) and we do neither aim to not need to solve that problem specifically for transformation networks in this thesis.
+Instead, we aim at identifying the influencing factors for these properties, especially with respect to topologies of the transformation network, which we discuss in the following.
+
+
+Modularity is degree to which a program is composed of components such that changes only influence a parts.
+This fits to our needs, because if we have a dense graph, modularity is low, as a change in one transformation may affect several others that need to be changed to restore compatibility and correctness.
+
+
+
+% \begin{copiedFrom}{DocSym}
+
+% %Even if independently developed transformations are interoperable, as discussed before, higher-level challenges remain when considering the way in which transformations express relations or occur if compatibility between the transformations is not given.
+% %Those challenges cannot be solved simultaneously, but induce trace-off decisions that have to be made regarding the way in which transformations are specified. %, as not all of them can be solved simultaneously.
+% %Depending on the topology of transformations that preserve the consistency, those challenges are addressed differently, which will be discussed afterwards. %in the subsequent section.
+% %We present already identified challenges in the following. % and discuss them regarding the combination of binary transformations. % as the state-of-the-art for multi-model consistency preservation.
+
+% % \compactsubsection{Uniqueness}
+% % Each consistency relation should only have to be specified once to reduce effort and the risk of contradictory specifications.
+% % In terms of transformations, this means that there should only be one path in the graph induced by the transformations to propagate information from one model to another.
+% % Using existing transformation languages, not knowing which relations have already been realized in which transformations can lead to duplication.
+% % This is especially the case, if one transformation is only the subsumption of others, like in \autoref{fig:binary_combination_example}. %of components and classes defined by
+% % %mapping \ac{PCM} to \ac{UML} components, \ac{UML} components to \ac{UML} classes, and those classes to Java classes. 
+% % \todo{Das folgende ist eigentlich schon im vorigen Abschnitt diskutiert worden}
+% % If the relation \ref{fig:Example:R3} between \ac{ADL} and Java is specified additionally to the transitive relation over \ac{UML}, the transformations derived from it must ensure that after creating an \ac{ADL} component only one Java class is created, that all necessary trace links are created, and that additional constraints, such as the convention to append \enquote{Impl} to the name, are consistently defined.
+
+% \begin{properdescription}
+% \item[Compatibility:]
+% Transformations preserve consistency, but also have to be consistent among themselves, i.e., they have to adhere to the same consistency relations, referred to as \emph{compatibility}.
+% %Contradictory specifications can, for example, arise from inconsistent realizations of the same consistency relations.
+% If, in our example in \autoref{fig:introduction:scenario_topologies}, the relation %\ref{fig:prologue:binary_combination_example:R3} 
+% between \gls{ADL} and Java is realized in addition to the transitive relation %$\mbox{\ref{fig:prologue:binary_combination_example:R1}} \concat \mbox{\ref{fig:prologue:binary_combination_example:R2}}$ 
+% over \gls{UML}, both relations must contain the same name attribute mapping.
+% If the \gls{ADL} to Java transformation adds an \enquote{Impl} suffix~\cite{langhammer2017a}, whereas the transformations over \gls{UML} omit that, they are \emph{incompatible}.
+% This can lead to propagation cycles due to alternating values, and to results depending on the transformation execution order. %depends on the transformation execution order. %, which means that the result depends on the execution order of the transformations. % (e.g. the propagation from \ac{PCM} to Java or from \ac{UML} to Java), the result differs (in the example the name of the class)
+% %\end{inparaenum}
+% While \emph{compatibility} concerns problems due to the realization of contradictory consistency relations, %the realization of the same consistency relations by different transformations, 
+% \emph{interoperability} concerns potentially unexpected behavior although all transformations follow to the same consistency relations.
+% %\todoErik{Ich finde diese Numerierungen immer ein bißchen affig, wenn man sich später nicht auf die Zahlen bezieht. \enquote{On the one hand \ldots on the other hand} sagt dasselbe aus.}
+% %A direct implication of inconsistent specifications is the non-uniqueness of the specifications.
+
+
+% \item[Modularity:]
+% The development of different systems requires the usage of different metamodels to describe them.
+% %One benefit of binary transformations is that they can be reused in different projects and especially different contexts with different selections of metamodels.
+% Therefore, transformations should be modular, so that an arbitrary selection of metamodels and transformations between them can be used within a concrete project.
+% If, in our example, transformations are specified transitively across \gls{UML}, it is impossible to use only the \gls{ADL} and Java in a concrete project, omitting the \gls{UML}. 
+% %This property is especially contradictory to the \emph{uniqueness} property when using transitively executed transformations.
+
+% \item[Comprehensibility:]
+% Maintainability of software development artifacts, including transformations, depends on their comprehensibility.
+% Comprehensibility can be seen as the number of transformations to consider if a specific consistency relation shall be understood.
+% Realizing consistency relations in transitive transformations can, for example, reduce comprehensibility, as a developer has to consider a set of transformations to understand a single consistency relation. 
+% %To ensure %\emph{uniqueness} and 
+% %transformation consistency %require consistency preservation to be only defined once between two metamodels, which
+% %it can be necessary to define transitive transformations %across other metamodels 
+% %to avoid redundant specifications.
+% %This can reduce comprehensibility as a developer has to consider a set of transformations to understand a single consistency relation. %, which is why this is a contradictory challenge to those others.
+% %\todoErik{Sie kann dadurch aber auch erhöht werden, weil die einzelnen Transformationen weniger komplex werden (divide et impera)} % Ja, das stimmt möglicherweise im Einzelfall. Aber dafür muss ein Transformationsentwickler im Allgemeinen auch potentiell wieder andere Domänen verstehen, was nicht so vorteilhaft ist.
+
+% \item[Evolvability:]
+% Whenever new transformations shall be defined, e.g. because a new metamodel shall be used and transformations for it have to be defined, the effort should be as low as possible.
+% This concerns the number of transformations to define and how many metamodels are involved in the transformations for one consistency relation if it is expressed transitively.
+% \end{properdescription}
+
+% %\subsection{Trade-off Solutions}
+
+% \end{copiedFrom} % DocSym
+
