@@ -1,8 +1,20 @@
 \section{Topologies of Transformation Networks}
 
+\mnote{Topology effects}
+Due to our assumption of \emph{universality} (cf.\ \autoref{chap:introduction}), we have allowed arbitrary topologies of transformation networks in our approaches for achieving correctness of transformation networks.
+The topology of a transformation network does, however, directly influence how prone it is to incorrectness and also to the fulfillment of other quality properties, which we introduced in the previous section.
+We consider the effects of a topology to different properties of transformation network, for which we first discuss the extreme cases of network topologies that have extreme effects on its properties.
+
+
 \subsection{Topology Categories}
 
-Dense graphs vs. trees
+\mnote{Transformation network induced graphs}
+Transformation networks induce a graph of metamodels as nodes and transformations between them as edges.
+Since we have restricted ourselves to binary transformations, this is an ordinary graph with each edge relating two nodes.
+In general, this induces a graph of arbitrary topology, as there can be transformations between any pair of metamodels, and, in particular, there can be multiple paths of transformations between two metamodels in this graph.
+As we have discussed in the previous section, properties of transformation networks are especially influenced by the presence of multiple paths of transformations between the same metamodels.
+Thus, the density of the graph, as induced by such multiple paths, has gradual influence on the quality properties of the transformation network.
+There are, however, two extreme cases of topologies in which the minimal and maximal number of paths between each pair of metamodels exist.
 
 \begin{figure}
     \centering
@@ -10,7 +22,7 @@ Dense graphs vs. trees
         \centering
         \input{figures/quality/properties/topologies_full.tex}
         \subcaption{Dense graph}
-        \label{fig:classification:topologies:full}
+        \label{fig:classification:topologies:complete}
     \end{minipage}
     \hfill
     \begin{minipage}[b]{0.49\columnwidth}
@@ -20,81 +32,200 @@ Dense graphs vs. trees
         \subcaption{Tree}
         \label{fig:classification:topologies:tree}
     \end{minipage}
-    \caption[Extremes of transformation network topologies]{Examples for extremes of transformation network topologies. Nodes depict metamodels and edges depict transformations. Adapted from~\owncite[Fig. 2]{klare2018docsym}.}
+    \caption[Extremes of transformation network topologies]{Examples for extremes of transformation network topologies. Nodes depict metamodels and edges depict transformations. Adapted from~\owncite[Fig.\ 2]{klare2018docsym}.}
     \label{fig:classification:topologies}
 \end{figure}
 
+\mnote{Topology extremes}
+These extreme cases of topologies are given by complete graphs and trees, as depicted in \autoref{fig:classification:topologies}.
+While complete graphs contain an edge between each pair of nodes, i.e., a represent one transformation between each pair of metamodels, in a tree there is only one path between two nodes, i.e., only one sequence of transformations between two metamodels.
+
+\mnote{Complete graphs}
+In a complete graph (see \autoref{fig:classification:topologies:complete}), each node is connected to each other by an edge.
+In consequence, each of the $n$ nodes has $n-1$ edges to the other nodes, leading to a total of $\frac{n*(n-1)}{2}$ edges.
+This conforms to the number of transformations defined in a transformation network that induces a complete graph.
+In addition, the paths of transformations between two metamodels is given by paths of all lengths between $1$ and $n-2$ involving all permutations of the remaining $n-2$ metamodels.
+This leads to $\sum_{i=0}^{n-2} \frac{(n-2)!}{(n-2-i)!} = \sum_{i=0}^{n-2} \binom{n-2}{i} i!$ transformation paths between each pair of metamodels.
+
+\mnote{Dense graphs in practice}
+In practice, the induced graph of a transformation network will, of course, usually not be complete but a somehow dense graph, in which there may be clusters of complete subgraphs.
+Imagine the development of an automobile, in which models from different domains, such as electrical engineering, mechanical engineering and software engineering are involved. 
+While models within one domain may all be related by transformations, there may be specific interface models that are used to relate the models of one domain to the others, which avoid the necessity to have knowledge about the relations between all models across existing domain borders.
+
+\mnote{Trees}
+In a tree (see \autoref{fig:classification:topologies:tree}), there is only one path between each pair of nodes.
+Thus, a tree of $n$ nodes has $n-1$ edges.
+A transformation network that induces a tree thus has a number of transformations reduced by $\frac{n}{2}$ in comparison to a complete graph and an even greater reduction in the number of transformation paths between two metamodels.
+This leads to significant advantages regarding interoperability of the transformations, as we have already introduced in the previous section and which we categorize in more detail in the following.
+
+\mnote{Natural topologies}
+A transformation network inducing a complete graph can be naturally achieved by expressing all existing consistency relations in terms of transformations.
+If two metamodels are not related at all, the according transformation will simply do nothing.
+Defining a tree is, however, more complex, as it imposes severe restriction regarding the transformations in which relations have to be preserved to ensure that there are not two paths of transformations between two metamodels.
+In the following, we discuss the effects of these extreme topologies and derive which inherent property guarantees a specific topology can give.
 
 
-\begin{copiedFrom}{DocSym}
+\subsection{Effects on Properties}
 
-%As discussed during the presentation of the challenges in the previous section, 
-We will focus on compatibility and modularity, as they are crucial for the applicability of transformations. %, whereas comprehensibility and development effort can be seen as usability problems. %, so we focus on those former two challenges.
-Defining binary transformations %to express consistency preservation 
-for a set of metamodels leads to a trade-off solution regarding those challenges, as they cannot be solved simultaneously.
-The intuitive way to define transformations %preservation of consistency relations is achieved by expressing each relation in a transformation.
-is to express each relation between two metamodels in one transformation, which leads to a dense graph of transformations. % between the metamodels.
-In the extreme case, if all pairs of metamodels have non-empty consistency relations, the graph is complete, as shown in \autoref{fig:classification:topologies:full}.
-In that case, modularity is high because each metamodel can be excluded without any drawback, %, comprehensibility is rather high as each relation is expressed directly between the involved metamodels, %(although it may be additionally expressed transitively), 
-but relations are likely to be incompatible, as, in the worst case, each relation is specified over $(n-1)!$ transformation paths if $n$ metamodels are involved.
-While comprehensibility is high, as each relation is explicitly expressed, adding a metamodel requires to define up to $n-1$ transformations, implying high evolution effort.
-%Finally, this also implies a high development effort, as adding a metamodel requires to define transformations to all existing ones.
+\mnote{Extreme property effects}
+We have already discussed in \autoref{chap:classification:properties} how the existence of multiple paths of transformations between two metamodels affects different quality properties of transformation networks.
+In the previous subsection, we have identified complete graphs and trees as two extremes of topologies for transformation networks that especially affect the existence of such multiple paths.
+In consequence, these topology extremes have extreme effects on the quality properties of a network and in particular those introduced in \autoref{chap:classification:properties}.
 
-Another extreme case is to have each consistency relation only defined over a single path in the transformations graph, which results in a tree of transformations, as shown in \autoref{fig:classification:topologies:tree}.
-In that case, compatibility of transformations is inherently given, as each relation is only defined once, but modularity is reduced, as only metamodels being leaves can be omitted.
-Comprehensibility is low, as each relation may be defined in a path of up to $n-1$ transformations, but evolvability is rather good, as each relation must only be defined once. %, but in a way such that the tree structure is maintained. %requires a critical investigation about how to express the consistency relations to maintain the tree structure.
-We summarize that impact of the topology in \autoref{tab:classification:topology_impact}.
-
-%In the following sections, we discuss our proposed solutions on how to deal with those trade-offs.
 \begin{table}
     \centering
-    \begin{tabular} {L{8em} C{6em} C{5em}}
+    \renewcommand{\arraystretch}{1.3}
+    \newcommand{\cc}{\cellcolor{\secondlinecolor}}
+    \begin{tabular} {L{7em} L{7em} C{6em} C{5em}}
         \toprule
-        \textbf{Challenge} & \textbf{Dense Graph} & \textbf{Tree}\\
+        \textbf{Category} & \textbf{Property} & \textbf{Complete Graph} & \textbf{Tree} \\
         \midrule
-    %    Uniqueness & - - & ++\\
-        Compatibility & - & ++\\
-        Modularity & ++ & -\\
-        Comprehensibility & + & -\\
-        Evolvability & - & +\\
+        \multirow{2}{*}{Functionality} &
+        \cc Correctness & \cc - & \cc ++ \\
+        & Completeness & ++ & - \\
+        \midrule
+        \multirow{5}{*}{Maintainability} &
+        \cc Modularity & \cc - & \cc + \\
+        & Reusability & ++ & - \\
+        & \cc Analyzability & \cc - & \cc + \\
+        & Modifiability & - & + \\
+        & \cc Testability & \cc - & \cc + \\
         \bottomrule
     \end{tabular}
-    \caption{Challenge fulfillment by transformation topology}
+    \caption[Topology effects on quality properties]{Effects of topology extremes on quality properties. \enquote{+} and \enquote{-} indicate whether a property is improved or degraded by a topology extreme, \enquote{++} denotes that this property is inherently optimized.}
     \label{tab:classification:topology_impact}
-    \vspace{-1.5em}
 \end{table}
 
-A tree topology has the drawback that it is not always applicable.
-It requires that the transformation developers
-%\todoErik{whom?}
-find a subset of all consistency relations between the metamodels that induces a tree and whose transitive closure contains all other relations.
-%This is necessary, because the transitive relations in the tree must also cover the direct relations between the metamodels that are omitted.
-In general, such a subset cannot be found.
-Of three metamodels, there must always be one containing the overlapping information of the two others, as only then the transitive closure of two consistency relations subsumes the third. 
-In the example in \autoref{fig:classification:tree_generation}, it is necessary that two relations are contained in the transitive closure of the others to get a tree that covers all relations.
-%An example for such a relation is given in the graphic.
+\mnote{Summary of topology effects of properties}
+\autoref{tab:classification:topology_impact} summarizes the impact of topologies on quality properties.
+That classification is only based on the existence of multiple transformation paths between the same pairs of metamodels, as we have discussed in \autoref{chap:classification:properties}.
+There are, of course, more influencing factors that can improve or degrade these properties.
+In fact, we are particularly interested in properties that are inherently optimized by specific topologies, which are functional correctness and completeness, as well as reusability.
 
-\begin{figure}[b]
+\mnote{Slight maintainability effects}
+Modularity, analyzability, modifiability and testability all benefit from the absence of multiple transformation paths between the same metamodels, because the information about one relation is only located at one place, which can be one transformation or a single sequence of them, but it is not duplicate across several transformation paths.
+Since we expect a high benefit from the absence of duplications for the mentioned properties, we classify them as improved by tree topologies and degraded by complete graphs.
+There are, however, further influencing factors that may mitigate this classification.
+For example, to achieve a tree it is necessary to express at least some of the relations indirectly across multiple transformations, as not each relation can be expressed directly.
+This can also degrade properties like modifiability, as it becomes more complicated to comprehend relations if they are defined across multiple transformations rather than expressing them in a single transformation.
+
+\begin{figure}
     \centering
     \input{figures/quality/properties/tree_generation.tex}
-    \caption{Reducing a consistency relation graph to a tree}
+    \caption[Reducibility of graph to tree]{Example for consistency relations in a graph that can be equally represented by consistency relations in a tree.}
     \label{fig:classification:tree_generation}
 \end{figure}
 
-In practice, the used topology will potentially be a mixture between those extremes.
-The natural way to foster the independent development of transformations %to specify consistency preservation 
-would be to define one transformation for each consistency relation, resulting in a dense graph with a high potential for incompatible transformations.
-To deal with that, mechanisms that analyze compatibility between transformations could be researched.
-Nevertheless, high expressiveness of transformation languages allows only conservative approximations. % without reducing the expressiveness of transformation languages, this easily leads to problems similar to those in static code analysis, which rely on approximations, due to the Halting problem.
-In our thesis, we will therefore investigate approaches that result in tree-like specifications that directly imply compatibility between the transformations, but with increased \emph{applicability} and \emph{modularity}. %of  try to achieve a tree of transformations, as this directly implies consistency between the transformations, but with increased modularity and with applicability.
+\mnote{Completeness in complete graphs}
+Completeness and reusability are inherently given in networks inducing a complete graph.
+A complete graph of transformations allows to preserve consistency to any set of binary consistency relations, as the topology does not restrict between which metamodels transformations are allowed to be expressed.
+Trees, on the other hand, do not allow to express every set of relations, as we have already motivated in \autoref{chap:introduction:challenges:quality:properties}.
+If, for example, \gls{PCM}, \gls{UML} and Java all share information pairwise, which cannot be expressed in instances of the third metamodel, there is no tree of transformations that preserves consistency for all this information.
+In general, of three metamodels there must always be one that is able to express the information shared between the two others to encode their consistency preservation in a tree topology of transformations.
+Transferred to \modellevelconsistencyrelations, this means that between three metamodels there must be a concatenation of two consistency relations that is a subset of the third.
+In that case, the third relation is subsumed by the concatenation of the others anyway and can thus be omitted.
+This situation is depicted in \autoref{fig:classification:tree_generation}.
 
-\end{copiedFrom} % DocSym
+\mnote{Reusability in complete graphs}
+In addition, reusability is given by complete graphs because preserving consistency between two metamodels is always represented in a direct transformation between them, which can readily be reused.
+From a transformation network inducing a tree, only subtrees of transformations can be reused without loosing guarantees for consistency preservation.
+If, for example, \gls{PCM} and Java are kept consistent via \gls{UML}, it is not possible to reuse the (indirectly expressed) transformation between Java and \gls{UML} for keeping them consistent without reusing \gls{UML}.
+This significantly restricts reusability in tree topologies.
 
-\subsection{Property Effects}
+\mnote{Correctness in trees}
+Correctness, on the other hand, is inherently given in networks inducing a tree.
+Between each pair of metamodel there is only one path of transformations.
+In consequence, there cannot be any incompatibility (cf.\ \autoref{chap:compatibility}), as this requires multiple contradicting sequences of consistency relations encoded into transformations.
+In addition, transformations do not need to be synchronizing (cf.\ \autoref{chap:synchronization}), as the situation that both models involved in a transformation have been modified is never given due to the missing situation of multiple transformation paths modifying the same models.
+Finally, orchestration of transformations (cf.\ \autoref{chap:orchestration}) in such trees is trivial, because there are no cycles of transformations that need to be orchestrated, thus any topological order of transformations starting with the node representing the metamodel of the changed model represents a valid orchestration.
+Together, this leads to inherent functional correctness as defined in \autoref{chap:correctness}.
+Thus, in a network that induces a tree, several severe challenges for correctness of transformation networks do actually not occur.
 
-Modularity, independence, correctness and comprehensibility directly induced by specific topologies
-Universality not given for trees, has to be ensures for dense graphs (depends on orchestration strategy, see existing work)
-Trade-off between Modularity/Independence (inherent in dense graph) and Correctness/Comprehensibility (inherent in tree)
+\mnote{Gradual improvement in actual networks}
+An actual transformation network will usually neither induce a complete graph nor a tree, although we have already discussed that complete graphs are more natural to achieve.
+Thus, such a network will not inherently optimize any of these properties but will gradually optimize some of them, depending on whether there are more or less duplications of preserving consistency relations within the transformations.
+This leads to a trade-off between different properties depending on the achieved topology.
+More duplications lead to higher completeness and reusability, whereas less duplications improve inherent correctness and also likely improve further quality properties, such as modularity, analyzability, modifiability and testability.
+
+\mnote{Benefit of trees}
+Although trees are not easy to achieve in practice due to the missing ability of transformation networks with such a topology to express every possible consistency relations, their inherent correctness guarantee is still interesting, as we have seen how difficult correctness is to achieve in networks of arbitrary topology in the previous chapters.
+In the following chapter, we thus identify and discuss how we can use this essential benefit of trees to construct networks that still provide a high level of completeness and reusability.
+
+\mnote{Fine-grained topology notion}
+In fact, we have up to now discussed the topology of transformation networks at the level of complete metamodels and transformations between them.
+Transformations are, however, composed of rules that preserve consistency according to fine-grained consistency relations, such as the ones we have specified in \autoref{def:consistencyrelation}.
+Thus, we can even generalize the insights regarding topologies from complete metamodels and transformations to metamodel elements and fine-grained consistency relations, which then mitigates some of the drawbacks regarding completeness of trees.
+This conforms to the notion of \emph{non-interference} identified by \textcite{stevens2020BidirectionalTransformationLarge-SoSym}, which defines transformations as non-interfering as long as they affect independent subsets of the metamodels.
 
 
-Realizing consistency relations in transitive transformations can, for example, reduce comprehensibility, as a developer has to consider a set of transformations to understand a single consistency relation. 
+% Modularity, independence, correctness and comprehensibility directly induced by specific topologies
+% Universality not given for trees, has to be ensures for dense graphs (depends on orchestration strategy, see existing work)
+% Trade-off between Modularity/Independence (inherent in dense graph) and Correctness/Comprehensibility (inherent in tree)
+
+% Realizing consistency relations in transitive transformations can, for example, reduce comprehensibility, as a developer has to consider a set of transformations to understand a single consistency relation. 
+
+
+% \begin{copiedFrom}{DocSym}
+
+% %As discussed during the presentation of the challenges in the previous section, 
+% We will focus on compatibility and modularity, as they are crucial for the applicability of transformations. %, whereas comprehensibility and development effort can be seen as usability problems. %, so we focus on those former two challenges.
+% Defining binary transformations %to express consistency preservation 
+% for a set of metamodels leads to a trade-off solution regarding those challenges, as they cannot be solved simultaneously.
+% The intuitive way to define transformations %preservation of consistency relations is achieved by expressing each relation in a transformation.
+% is to express each relation between two metamodels in one transformation, which leads to a dense graph of transformations. % between the metamodels.
+% In the extreme case, if all pairs of metamodels have non-empty consistency relations, the graph is complete, as shown in \autoref{fig:classification:topologies:complete}.
+% In that case, modularity is high because each metamodel can be excluded without any drawback, %, comprehensibility is rather high as each relation is expressed directly between the involved metamodels, %(although it may be additionally expressed transitively), 
+% but relations are likely to be incompatible, as, in the worst case, each relation is specified over $(n-1)!$ transformation paths if $n$ metamodels are involved.
+% While comprehensibility is high, as each relation is explicitly expressed, adding a metamodel requires to define up to $n-1$ transformations, implying high evolution effort.
+% %Finally, this also implies a high development effort, as adding a metamodel requires to define transformations to all existing ones.
+
+% Another extreme case is to have each consistency relation only defined over a single path in the transformations graph, which results in a tree of transformations, as shown in \autoref{fig:classification:topologies:tree}.
+% In that case, compatibility of transformations is inherently given, as each relation is only defined once, but modularity is reduced, as only metamodels being leaves can be omitted.
+% Comprehensibility is low, as each relation may be defined in a path of up to $n-1$ transformations, but evolvability is rather good, as each relation must only be defined once. %, but in a way such that the tree structure is maintained. %requires a critical investigation about how to express the consistency relations to maintain the tree structure.
+% We summarize that impact of the topology in \autoref{tab:classification:topology_impact}.
+
+% %In the following sections, we discuss our proposed solutions on how to deal with those trade-offs.
+% \begin{table}
+%     \centering
+%     \begin{tabular} {L{8em} C{6em} C{5em}}
+%         \toprule
+%         \textbf{Challenge} & \textbf{Dense Graph} & \textbf{Tree}\\
+%         \midrule
+%     %    Uniqueness & - - & ++\\
+%         Compatibility & - & ++\\
+%         Modularity & ++ & -\\
+%         Comprehensibility & + & -\\
+%         Evolvability & - & +\\
+%         \bottomrule
+%     \end{tabular}
+%     \caption{Challenge fulfillment by transformation topology}
+%     \label{tab:classification:topology_impact}
+%     \vspace{-1.5em}
+% \end{table}
+
+% A tree topology has the drawback that it is not always applicable.
+% It requires that the transformation developers
+% %\todoErik{whom?}
+% find a subset of all consistency relations between the metamodels that induces a tree and whose transitive closure contains all other relations.
+% %This is necessary, because the transitive relations in the tree must also cover the direct relations between the metamodels that are omitted.
+% In general, such a subset cannot be found.
+% Of three metamodels, there must always be one containing the overlapping information of the two others, as only then the transitive closure of two consistency relations subsumes the third. 
+% In the example in \autoref{fig:classification:tree_generation}, it is necessary that two relations are contained in the transitive closure of the others to get a tree that covers all relations.
+% %An example for such a relation is given in the graphic.
+
+% \begin{figure}[b]
+%     \centering
+%     \input{figures/quality/properties/tree_generation.tex}
+%     \caption{Reducing a consistency relation graph to a tree}
+%     \label{fig:classification:tree_generation}
+% \end{figure}
+
+% In practice, the used topology will potentially be a mixture between those extremes.
+% The natural way to foster the independent development of transformations %to specify consistency preservation 
+% would be to define one transformation for each consistency relation, resulting in a dense graph with a high potential for incompatible transformations.
+% To deal with that, mechanisms that analyze compatibility between transformations could be researched.
+% Nevertheless, high expressiveness of transformation languages allows only conservative approximations. % without reducing the expressiveness of transformation languages, this easily leads to problems similar to those in static code analysis, which rely on approximations, due to the Halting problem.
+% In our thesis, we will therefore investigate approaches that result in tree-like specifications that directly imply compatibility between the transformations, but with increased \emph{applicability} and \emph{modularity}. %of  try to achieve a tree of transformations, as this directly implies consistency between the transformations, but with increased modularity and with applicability.
+
+% \end{copiedFrom} % DocSym
+
