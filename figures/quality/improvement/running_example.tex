@@ -1,0 +1,53 @@
+\newcommand{\vdistance}{7.8em}
+\newcommand{\hdistance}{17em}
+\newcommand{\classwidth}{5.5em}
+\newcommand{\labeldistance}{0.3em}
+\newcommand{\mmborder}{1.7em}
+
+
+\begin{tikzpicture}
+
+\pgfdeclarelayer{bg}
+\pgfsetlayers{bg,main}
+
+
+% METACLASSES
+
+\umlclassvarwidth{java_class}{}{Class}{
+name\\
+}{\classwidth}  
+
+\umlclassvarwidth[, below=\vdistance of java_class.center, anchor=center]{uml_class}{}{Class}{
+name\\
+}{\classwidth} 
+
+\umlclassvarwidth[, below right=0.5*\vdistance and \hdistance of java_class.center, anchor=center]{pcm_component}{}{Component}{
+name\\
+}{\classwidth} 
+
+
+% METAMODELS
+
+\coordinate (java_label_coordinate) at ([yshift=\labeldistance]java_class.north);
+\node[mmlabel, anchor=south] (java_label) at (java_label_coordinate) {Java};
+
+\coordinate (uml_label_coordinate) at ([yshift=-\labeldistance]uml_class.south);
+\node[mmlabel, anchor=north] (java_label) at (uml_label_coordinate) {UML};
+
+\coordinate (pcm_label_coordinate) at ([xshift=7*\labeldistance]pcm_component.east);
+\node[mmlabel, left=6*\labeldistance of pcm_label_coordinate, anchor=west] (pcm_label) {PCM};
+
+\begin{pgfonlayer}{bg}
+    \node[mmbg, fit=(java_class)(java_label_coordinate), inner sep=\mmborder] (java) {};
+    \node[mmbg, fit=(uml_class)(uml_label_coordinate), inner sep=\mmborder] (uml) {};
+    \node[mmbg, fit=(pcm_component)(pcm_label_coordinate), inner sep=\mmborder] (pcm) {};
+\end{pgfonlayer}
+
+
+% CONSISTENCY RELATIONS
+
+\draw[consistency relation] (java_class) -| node[pos=0, above right] {$cl$} node[above, pos=0.3, align=center] {$cl.name = co.name + \text{\enquote{Impl}}$} node[pos=1, above right] {$co$} (pcm_component);
+\draw[consistency relation] (java_class) -- node[pos=0, below left] {$jcl$} node[right] {$jcl.name = ucl.name$} node[pos=1, above left] {$ucl$} (uml_class);
+\draw[consistency relation] (uml_class) -| node[pos=0, above right] {$cl$} node[below, pos=0.3, align=center] {$cl.name = co.name + \text{\enquote{Impl}}$} node[pos=1, below right] {$co$} (pcm_component);
+
+\end{tikzpicture}
