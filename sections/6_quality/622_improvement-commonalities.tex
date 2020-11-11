@@ -1,0 +1,132 @@
+\section{The Commonalities Approach}
+
+\subsection{Concept Metamodels}
+
+\subsection{Composition of Concepts}
+
+\subsection{Operationalization}
+
+
+\section*{The Commonalities Approach}
+\label{chap:commonalities:approach}
+
+\begin{copiedFrom}{VoSE}
+
+The state-of-the-art approach to keep models consistent automatically is the application of transformation languages.
+If instances of multiple (i.e., more than two) metamodels are to be kept consistent, one can either use multidirectional transformation approaches, or compose bidirectional transformations to a network of transformations~\cite{cleve2019dagstuhl}.
+% Following sentence moved to introduction
+%Such a network can be regarded as a graph, formed by metamodels as its nodes and transformations as its edges.
+When an instance of one metamodel is changed in such a network, the transformations are executed successively to propagate the change transitively across all models.
+There are strategies to find one ordering of transformations to apply~\cite{stevens2020BidirectionalTransformationLarge-SoSym} and strategies to perform a fixpoint iteration until no further changes are conducted~\cite{klare2019icmt}.
+
+%Short introduction of transformation network, what nodes and edges are and so on.
+In this section, we propose a different approach for keeping two or more models consistent by specifying their common concepts rather than their direct consistency relations.
+This forms our contribution~\autoref{contrib:quality:improvement}.
+% \subsection{Defining Consistency Relations}
+% Different metamodels provide
+
+% Consistency relations are usually defined declaratively (what constraints have to hold) or imperatively (how are constraints enforced) between two (or sometimes more) metamodels.
+% This is a definition of when instances of that metamodels are considered consistent.
+% Consistency constraints can be either \emph{declarative} or \emph{normative}. Declarative constraints exist (e.g. because they are somehow \enquote{natural} and have to be formalized to be checked or preserved by a tools. Normative constraints do not have to adhere to an existing notion of consistency and thus implicitly define what is considered consistent.
+% In our running example, the constraints between UML and Java exist and only have to be specified in a declarative manner.
+% On the other hand, the constraints between architecture and OO design (i.e. PCM and UML/Java) were normatively defined by \textcite{langhammerconstraints}. There is no single correct mapping between architecture and OO design but several possible.
+
+
+
+
+
+\subsection*{Composing \commonalities}
+
+We have explained how multiple metamodels can be kept consistent using one \conceptmetamodel.
+This allows, theoretically, the definition of one large \conceptmetamodel that contains all \commonalities for all \concretemetamodels.
+It would at first sight be similar to a \gls{SUMM}, as introduced by \textcite{atkinson2010a}.
+However, it would be less complex than a \gls{SUMM}, which is able to express all information about the software system and thus contains the union of all \concretemetamodels.
+%In fact, the resulting \conceptmetamodel would be comparable to a \summ according to \textcite{atkinson2010a}, which is able to express all information about the software system, whereas the instances of the \concretemetamodels would only serve as projectional views that do not provide further information.
+Nevertheless, one large \conceptmetamodel would still become unmanageably large due to the fact that it had to contain the union of all pairwise intersections of the \concretemetamodels, as mentioned before.
+
+\begin{figure}
+    \centering
+    \input{figures/quality/composed_commonalities_example.tex}
+    \caption[Concept metamodels for the running example]{\Conceptmetamodels (dark) and their relations to \concretemetamodels (light) for the running example.}
+    \label{fig:quality:composed_commonalities_example}
+\end{figure}
+
+To avoid the specification of such a monolithic \conceptmetamodel, we propose to compose \commonalities from different \conceptmetamodels.
+Instead of having only \commonalities that relate to \metaclasses in \concretemetamodels, \commonalities may also have relations to other \commonalities.
+Consider the \conceptmetamodel for component-based design in \autoref{fig:quality:composed_commonalities_example}.
+It contains the \commonality \texttt{Component}, which is represented by an equally named \metaclass in \gls{PCM},
+as well as in the \commonality \texttt{Class} in the \conceptmetamodel for object-oriented design, conforming to the relations proposed by \textcite{langhammer2015a}.
+This induces a tree structure with \commonalities as inner nodes and \metaclasses of \concretemetamodels as leaves.
+With such a composition structure, a \emph{«manifests»} relation may not only exist between a %concrete and a concept metamodel but also between two \conceptmetamodels.
+\commonality of a \conceptmetamodel and a \metaclass in a \concretemetamodel but also between two \commonalities.
+However, a concrete or \conceptmetamodel that is lower in the hierarchy is supposed to represent how a \metaclass or \commonality in the higher one manifests, which is why we call it a \emph{manifestation}.
+%Due to that, we call concrete and \conceptmetamodels that contain \metaclasses or \commonalities with a \emph{«manifests»} relation to another \conceptmetamodel a \emph{manifestation} of that \conceptmetamodel.
+For example, the object-oriented design \conceptmetamodel is a manifestation of the component-based design \conceptmetamodel.
+
+\begin{figure}
+    \centering
+    \input{figures/quality/extended_composed_commonalities_example.tex}
+    \caption[Concept metamodels in the running example]{\Conceptmetamodels (dark) and \concretemetamodels (light) of the running example, extended by UML components, with their relations.}
+    \label{fig:quality:extended_composed_commonalities_example}
+\end{figure}
+
+Our goal is to achieve a tree structure of commonalities. In the extended example in \autoref{fig:quality:extended_composed_commonalities_example}, a \texttt{Component} in the \conceptmetamodel for component-based design does not only manifest in a \gls{PCM} \texttt{Component} as well as a \texttt{Class} in object-oriented design, but also in \gls{UML}.
+Since a \texttt{Class} in object-oriented design manifests both in Java and \gls{UML}, we do not have a tree structure of the induced relations between the metamodels anymore, due to \texttt{Class} and \texttt{Component} both being represented in \gls{UML}.
+However, This still induces a tree structure between \metaclasses and \commonalities, with the \commonalities being inner nodes and \metaclasses of \concretemetamodels being leaves.
+
+%
+% How are Commonalities composed to keep multiple models consistent? What about overlaps?
+% Apply to OO and PCM case
+%
+% \begin{figure}
+%     \centering
+% %    \includegraphics[width=\columnwidth]{figures/dag_example.pdf}\\
+%     \input{figures/quality/dag_example.tex} %\\[1em]
+%     %\input{figures/dag_example_alternative.tex}
+%     \caption{\Concretemetamodels (light) and \conceptmetamodels (dark) of the running example forming a \acs{DAG}}
+%     \label{fig:quality:dag_example}
+% \end{figure}
+
+%Since we only assume a tree of \commonalities,  rather than a tree of \conceptmetamodels, 
+A metamodel may have several \commonalities in different \conceptmetamodels with different other metamodels.
+For example, in \autoref{fig:quality:composed_commonalities_example}, the UML metamodel contains a \texttt{Class} and a \texttt{Component} \metaclass, which have two different \commonalities in two different \conceptmetamodels.
+
+%We currently assume that all concept metamodels and relations to their manifestations can be represented as a tree.
+% In general, %, this will not be possible, 
+% the assumption of having a tree of \conceptmetamodels may not be satisfiable if
+% metamodels have several \commonalities with different metamodels.
+% In fact, we can relax that assumption: 
+% The essential requirement is that each change is only propagated across one path between two models, which is inherently given in a tree.
+% If the \commonalities of two \conceptmetamodels manifest in disjoint sets of elements of the same manifestation, that manifestation can be---virtually---separated into two metamodels, for which the network forms a tree again.
+% In consequence, if we consider the transformations as directed edges from a \conceptmetamodel to its manifestations, we only have to require a \ac{DAG}, % induced by these edges, 
+% as long as the manifestations of all \commonalities are disjoint.
+% %If we consider the transformations as directed edges from a \conceptmetamodel to its manifestations, we only have to require a \ac{DAG} induced by these edges, as long as the \conceptmetamodels represent disjoint sets of elements of their manifestations.
+% %This relaxation is possible due to the fact that the essential requirement is to have only one path between two models across which a change can be propagated.
+% %If different \conceptmetamodels relate to disjoint parts of their manifestations, these manifestations can be virtually separated into different metamodels, which then form a tree again.
+% \autoref{fig:dag_example} exemplifies this relaxation: % on our running example:
+% If the UML is also considered a manifestation of component-based design by providing the \texttt{Component} \metaclass, the network does not constitute a tree because of the relations between the UML and the \conceptmetamodels for component-based design and object-oriented design.
+% However, it forms a \ac{DAG} and the redundant paths to the UML metamodel are unproblematic, because the relation to object-oriented design affects the part of the UML metamodel considering classes (\emph{Class}), whereas the relation to component-based design affects the part of the UML metamodel considering components (\emph{Comp}). 
+% The elements in these parts of the UML metamodel are disjoint.
+
+\subsection*{Transformation Operationalization}
+\label{chap:commonalities:approach:operationalization}
+
+To actually keep models consistent, the specification of a hierarchy of \conceptmetamodels has to be operationalized.
+Two options for operationalization can be distinguished:
+
+\begin{description}[leftmargin=\parindent]
+    \item[\Conceptmetamodels as additional metamodels:] The \conceptmetamodels are actually instantiated and the transformations are executed as they are defined between the \conceptmetamodels and their manifestations. In consequence, instances of the \conceptmetamodels have to be maintained.
+    \item[Transformations between \concretemetamodels:] The \conceptmetamodels and the relations between them and their manifestations are used to derive bidirectional transformations between the \concretemetamodels. For example, from the \conceptmetamodel for object-oriented design in \autoref{fig:quality:commonalities_example}, a bidirectional transformation between Java and UML is derived.
+\end{description}
+
+A drawback of the first option is that additional models have to be managed and persisted. 
+In consequence, the user has to version these models although they should be transparent to him or her, as long as no appropriate framework abstracts from such tasks.
+%Additionally, it is not easily possible to derive the direct relations between two concrete metamodels from such a specification. For example, the direct relation between classes in UML and Java is not accessible but only implicitly expressed by the transitive relation across the concept metamodel for object-oriented design.
+A drawback of the second option is that the types of supported relations that can be described in the transformations are limited.
+First, only relations may be defined that can be composed with any other relation, such that a direct transformation between two metamodels can be derived.
+Second, it is possible to define $n$-ary relations between more than two metamodels that cannot be decomposed into binary relations between them, but only into $n$ binary relations between those metamodels and an additional one~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
+In consequence, the first option provides higher expressiveness.
+
+While the first option can be realized without an additional language by just defining the \conceptmetamodels and the transformations with existing languages, the second option requires a mechanism that generates the transformations between the \concretemetamodels from those between the \conceptmetamodels and their manifestations.
+
+\end{copiedFrom} % VoSE

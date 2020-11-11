@@ -1,0 +1,106 @@
+\section{Expected Benefits}
+
+\subsection{Improving Correctness and Reusability}
+\todo{Instead of only discussion compatibility (which for sure is also true), discuss that in Commonalities there is always a consistent orchestration and that the shortest orchestration has an upper bound depending on the number of transformations. Discuss why this is not a drawback regarding such a bound in ordinary networks (especially discuss the previous example, where ping-pong was required, whereas here the required information is automatically added within the Commonalities and then only needs to be propagated back). However, there can still be scenarios that cannot be handled (due to the same reasons as for ordinary networks), but we already questioned there, although theoretically possible, whether they are practically relevant. In contrast to ordinary networks, Commonalities encode the limitation into the approach strategy and thus make it explicit for the developer rather then defining individual transformation without knowing how often they are executed later on.}
+
+
+\subsection{Reducing Specification Effort}
+
+\subsection{Improving Comprehensibility}
+
+
+
+
+\begin{copiedFrom}{VoSE}
+
+% BENEFITS
+We expect several benefits from our approach, i.e. specifying \commonalities, in comparison to direct transformation specifications between metamodels.
+First, we claim to achieve \emph{better understandability} of relations between metamodels, because common concepts are made explicit. % rather than encoding them implicitly in transformations.
+Second, the approach \emph{reduces errors} when more than two metamodels are to be kept consistent.
+Transformations usually relate two metamodels, especially because multidirectional relations are hard to express~\cite{stevens2020BidirectionalTransformationLarge-SoSym},
+%\modified{either because the developer does not know about multidirectional relations or due to cognitive limitations~\cite{stevens2020BidirectionalTransformationLarge-SoSym},} %keep instances of two metamodels consistent 
+and therefore have to be combined to a network of transformations to keep instances of more than two metamodels consistent.
+% Following sentence moved from approach section
+Such a network can be regarded as a graph, formed by metamodels as its nodes and transformations as its edges.
+However, such a network can easily raise compatibility problems if there exists more than one path of transformations between two metamodels.
+A hierarchy of \commonality specifications is, by design, not prone to such problems.
+Finally, we \emph{improve reusability} in comparison to a network of transformations, %regarding a network of transformations, 
+because an arbitrary subset of metamodels, between which \commonalities are defined, can be selected to keep their instances consistent.
+In contrast, removing metamodels from a transformation network can easily lead to missing transformation paths between two metamodels.
+
+% Benefits:
+% \begin{itemize}
+%     \item \emph{Better understandability} of relations, as common concepts are explicitly defined rather than implicitly encoding them in transformations
+%     \item \emph{Improved reusability / partial usability} (regarding networks of binary transformations), because an arbitrary selection of concrete metamodels can be used and kept consistent
+%     \item \emph{High expressiveness}, because no restriction due to predefined sets of statements, as expression can be added dynamically. This can be also improve analyzability of transformations, as additional metadata could be defined for each of the extensions.
+% \end{itemize}
+
+\subsection*{Benefits of \commonalities}
+\label{chap:commonalities:approach:benefits}
+
+We suppose the \commonalities approach to provide two kinds of benefits:
+First, we expect that it improves understandability of relations between metamodels, because common concepts are not encoded in transformations implicitly but modelled explicitly.
+This is even a benefit if instances of only two metamodels shall be kept consistent.
+Second, it reduces problems that can occur if several bidirectional transformations are combined into a network of transformations to keep multiple models consistent.
+
+% Two types of benefits:
+% \begin{itemize}
+%     \item Independent from network size: Understandability (explicit commonalities rather than implicit encoding in constraints)
+%     \item Benefits for transformation networks (in the following)
+% \end{itemize}
+
+\begin{figure}
+    \centering
+    \begin{minipage}[b]{0.49\columnwidth}
+        \centering
+        \input{figures/quality/commonalities/topologies_full.tex}
+        \subcaption{Dense Graph}
+        \label{fig:quality:topologies:full}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[b]{0.49\columnwidth}
+        \centering
+        \input{figures/quality/commonalities/topologies_tree.tex}
+        \vspace{1em}
+        \subcaption{Tree}
+        \label{fig:quality:topologies:tree}
+    \end{minipage}
+    \caption[Extremes of transformation network topologies]{Extremes of transformation network topologies: nodes represent metamodels, edges represent transformations (\conceptmetamodels in a tree of \commonalities in dark gray). Adapted from~\owncite[Fig. 4]{klare2019models}.}
+    \label{fig:quality:topologies}
+\end{figure}
+
+Networks of transformations can have two extremes of topologies, as depicted in \autoref{fig:quality:topologies}.
+If transformations between all metamodels are defined, the network forms a dense graph (see \autoref{fig:quality:topologies:full}).
+In contrast, if there exists exactly one path of transformations between each pair of metamodels, the network forms a tree (see \autoref{fig:quality:topologies:tree}).
+Several properties for such %transformation 
+networks have been identified by \textcite{gleitze2017a} and \textcite{klare2018docsym}.
+Two essential properties %, defined in \cite{klare2018docsym}, 
+are \emph{compatibility} and \emph{modularity}~\cite{klare2018docsym}, which, unfortunately, contradict each other.
+The \commonalities approach, however, improves both of them. %, which is an essential benefit that we discuss in the following. %We discuss the benefits of the \commonalities approach regarding those properties.
+\emph{Compatibility} means that transformations do not define contradictory constraints.
+Consider the relations introduced for the running example in \autoref{fig:quality:running_example}.
+The names of the same class in Java and UML are defined to be equal.
+If a class in Java and UML realizes a \gls{PCM} component, it shall have the same name appended with an \enquote{Impl} suffix.
+If transformations realize the three relations between \gls{PCM}, UML and Java, and the one between \gls{PCM} and Java adds that suffix whereas the one between \gls{PCM} and UML omits it, the constraints can never be fulfilled.
+%If the three relations between Java, UML and \ac{PCM} are defined in transformations and the one between \ac{PCM} and Java adds that suffix whereas the one between \ac{PCM} and UML omits it, the constraints can never be fulfilled.
+In that case, the transformations are considered incompatible.
+Incompatibility may arise whenever more than one transformation path between two metamodels exists.
+In consequence, compatibility cannot be guaranteed in dense network, whereas it is inherently high if the network forms a tree.
+\emph{Modularity} means that any subset of the metamodels can be used without loosing consistency because of missing transformations.
+Modularity is high if any metamodel can be removed from the network and the remaining transformations still define consistency between all remaining metamodels.
+In consequence, modularity is high in a dense network, because all metamodels are directly related, while it is low if the network is a tree, because inner nodes cannot be removed without their children not being related by a transformation anymore.
+Since redundant paths between metamodels improve modularity but reduce compatibility, these properties are inherently contradicting.
+
+The \commonalities approach improves both these properties due to the fact that additional metamodels are introduced in the specification.
+The transformations between \metaclasses in \concretemetamodels and \commonalities in \conceptmetamodels induce a tree, thus compatibility is high.
+Additionally, only the leaves of the tree are \concretemetamodels, which are actually used to describe a system and whose instances are modified, whereas the inner nodes only represent auxiliary metamodels, exemplarily marked in \autoref{fig:quality:topologies:tree}. 
+In consequence, taking an arbitrary subset of \concretemetamodels removes only leaves and can thus be done without removing any transformations that are necessary to keep instances of the remaining metamodels consistent.
+This constitutes a major benefit of the \commonalities approach as compared to ordinary networks of transformations.
+
+
+% \subsection{Limitations of \commonalities}
+% \label{sec:approach:limitations}
+% ONE PART MOVED TO COMPOSITION (DAG INSTEAD OF TREES), ONE MOVED TO LIMITATIONS IN EVALUATION SECTION
+
+\end{copiedFrom} % VoSE
+
