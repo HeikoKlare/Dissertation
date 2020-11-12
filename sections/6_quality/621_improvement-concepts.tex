@@ -1,91 +1,148 @@
-\section{Consistency Relations as Common Concepts}
+\section{Consistency of Common Concepts}
 
-Modern %software and 
-software-intensive systems are usually described by different \emph{models}, also considered as \emph{views}, such as code, architecture, deployment specifications and other role- or concern-specific models.
-%\modified{Those models can also be considered as views of the system, which synthetically form the complete description of a system.}
-Since all these models describe the same system, but focus on specific properties or use different levels of abstraction, they typically share information that is represented in the models redundantly, or at least induces dependencies between them.
-Such redundancies have to be kept consistent to achieve a contradiction-free specification of the %software 
-system.
-
-But no matter how a transformation is defined, it specifies a \emph{relation} between two (or more) metamodels.
-However, redundant elements are representations of a \emph{common concept} rather than independent elements that have to be directly related.
-In consequence, we think that it is natural to make the common concept, which the redundant elements are supposed to describe, explicit. 
-We can then specify how this concept manifests itself in the different metamodels, instead of defining directly how the redundant elements are related.
-For example, %we assume that it is 
-it appears to be more natural to say that classes in UML and Java are different manifestations of the concept of a class in object-oriented design, rather than saying that a UML class should be related to a corresponding Java class.
-Such a common concept is what we call a \emph{\commonality}.
-
-
+\mnote{Alternative for consistency relations}
+In our introduction in \autoref{chap:introduction}, we have motivated that models describing the same system share an overlap of information that leads to dependencies or in particular redundancies between the models.
+Such dependencies need to be kept consistent to preserve a contradiction-free specification of the system.
+We have made these dependencies explicit by means of consistency relations.
+In the following, we discuss the alternative consideration of redundantes, as a special case of dependencies, by means of common concepts.
+We therefore introduce a running example, explain the idea of \emph{\commonalities} and discuss in which cases it can reasonably be applied.
 
 
 \subsection{Running Example}
 
+\mnote{Example metamodels}
+We employ a running example from the scenario introduced in \autoref{chap:introduction} involving \gls{PCM}~\cite{reussner2016a}, \gls{UML} and Java.
+Consistency relations, as already introduced in the preceding chapters, comprise the common and mostly one-to-one mappings between \gls{UML} and Java, as well as the ones proposed by \textcite{langhammer2015a} to represent \gls{PCM} architecture models in Java code and als in \gls{UML} class models.
+
+\begin{figure}
+	\centering
+	\input{figures/quality/improvement/running_example.tex}
+	\caption[Consistency relations for extracts of Java, UML and PCM]{Simple metamodel extracts for Java, UML and \gls{PCM} and consistency relations between them.}
+	\label{fig:improvement:running_example}
+\end{figure}
+
+\mnote{Example relations}
+In the following, we focus on limited subsets of the metamodels, namely the one-to-one mapping between components in \gls{PCM} and classes in Java, whereby each component is mapped to a class but not vice versa, as depicted in \autoref{fig:improvement:running_example}.
+Consistency relations require the existence of a class in \gls{UML} and Java for each \gls{PCM} component with the same name appended by an \enquote{Impl} suffix (cf.~\cite{langhammer2015a}) by an according unidirectional consistency relation, and a \gls{UML} class for each Java class with the same name and vice versa.
+
+
 \subsection{Explicit Commonalities}
+
+\mnote{Common concepts}
+In the given example, classes are redundantly represented in Java and \gls{UML}.
+This requires them to be kept consistent, for example, by means of an according consistency relation.
+As an alternative, redundant classes in a Java and a \gls{UML} model can also be considered representations of a \emph{common concept}, more precisely the common concept of a class in general object-oriented design.
+Thus, rather than expressing this redundancy implicitly by means of a consistency relation and transformation that preserves consistency to it, we propose to make the common concept explicit in an according metamodel and descriptions of how this concept \emph{manifests} in Java and \gls{UML}.
+Then, instead of saying that each \gls{UML} class should corresponding to a Java class and vice versa, we would say that classes in \gls{UML} and Java are both representations of the same concept of a class in object-oriented design.
+
+\begin{figure}
+    \centering
+    \input{figures/quality/improvement/one_commonality_example.tex}
+    \caption[Concept metamodel for object-oriented design]{\Conceptmetamodel for object-oriented design with a \texttt{Class} \commonality and its relations to the \concretemetamodels \gls{UML} and Java.}
+    \label{fig:improvement:commonalities_example}
+\end{figure}
+
+\mnote{Concepts and their relations}
+We denote the actual metamodels that developers instantiate and want to keep consistent as \emph{\concretemetamodels}, whereas we denote metamodels that describe the concepts such \concretemetamodels have in common as \emph{\conceptmetamodels}.
+\autoref{fig:improvement:commonalities_example} depicts the \concretemetamodels \gls{UML} and Java with their representations of classes.
+In addition, it contains a \conceptmetamodel for object-oriented design, which contains the common concept of a class, shared by \gls{UML} and Java.
+We denote a single common concept, such as a class, as a \emph{\commonality}.
+Further \commonalities in object-oriented design would be interfaces or methods.
+In general, a \commonality can be considered a \metaclass with the specific semantics of describing the commonalities between elements of \concretemetamodels.
+We say that an element in a \concretemetamodel such as classes in \gls{UML} and Java are a \emph{manifestation} of a common concept.
+The relation of a \commonality to these manifestations is denoted by a manifestation (\emph{«manifests»}) relation.
+In the given example, the relations would especially define that each class manifestation conforms to a common class concept having the same name and vice versa.
+
+\mnote{Specification effort}
+In fact, these manifestation relations can be considered transformations again.
+Thus, in a first place the representation of common concepts in terms of explicit \commonalities introduces further effort, because it requires the definition of one metamodel and two transformations instead of a single transformation relating the \metaclasses directly.
+This drawback is, however, reduced by several benefits, which we discuss in \autoref{chap:improvement:benefits}, in particular mitigating trade-offs between correctness and reusability and improving comprehensibility.
+Finally, this way of specifying consistency can even reduce specification effort due to better scalability when adding further \concretemetamodels to keep consistent.
+For example, if another object-oriented language such as \cplusplus shall be kept consistent, no matter whether only with \gls{UML} or indeed even with Java, only the manifestation relation from \commonalities in the object-oriented \conceptmetamodel to \cplusplus has to be added, potentially along with some extensions of the \conceptmetamodel for information shared between \cplusplus and \gls{UML} that was not already shared between Java and \gls{UML}.
+This already reduces the effort in comparison to defining both relations between \cplusplus and \gls{UML}, as well as between \cplusplus and Java.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/quality/improvement/commonalities_and_sums.png}
+    \caption[Commonalities compared to \acrlongpl{SUM}]{Sketch for the scope of contents of \conceptmetamodels in comparison to those of \glspl{SUM}.}
+    \label{fig:improvement:commonalities_and_sums}
+\end{figure}
+
+\mnote{Size of concept metamodels}
+In general, a \conceptmetamodel has to contain \commonalities for all redundancies between the \concretemetamodels to keep consistent.
+In a mathematical sense, this can be considered as the union of all pairwise intersections of the \concretemetamodels.
+It can, however, not be precisely expressed as such, because elements may be similarly represented in the \concretemetamodels, but they are not the same.
+One manifestation of the same \commonality may contain more or different information than the others, or it may encode information differently, such as using different units.
+This already illustrates the essential difference to approaches in which one central model unifies all information about a system, called a \gls{SUM}~\cite{atkinson2010a}, from which the information represented in models used by different tools is derived by projection.
+Such a \gls{SUM} can be seen as the union of all \concretemetamodels, in contrast to the union of the pairwise intersections represented by \concretemetamodels.
+We illustrate these relations in \autoref{fig:improvement:commonalities_and_sums}.
+
 
 \subsection{Descriptive Consistency Specifications}
 
 
 
-\begin{copiedFrom}{VoSE}
 
-\section*{Running Example}
+% \begin{copiedFrom}{VoSE}
 
-We use a running example throughout the paper to explain the \commonalities idea.
-It relies on three metamodels: UML class models, Java code, whose grammar definition can be treated as a metamodel~\cite{heidenreich2010a}, and the \gls{PCM}~\cite{reussner2016a}, a component-based architecture description language.
-The consistency relations between Java and UML class models are mostly one-to-one mappings, as they provide the same concepts of object-oriented design. %provide redundant representations of the same concepts, so the consistency relations between them define mostly one-to-one mappings.
-Consistency relations between \gls{PCM} and Java were proposed by \textcite{langhammer2015a}.
-For this paper, only the one-to-one mapping between components in \gls{PCM} and classes in Java---or generally all object-oriented languages---are relevant, whereby each component is mapped to a class but not vice versa.
+% \section*{Running Example}
 
-For the examples in this paper, a minimalist subset of those metamodels, depicted in \autoref{fig:improvement:running_example}, is sufficient.
-It only comprises classes in UML and Java and components in \gls{PCM}, which all have a name.
-The name shall be equal between corresponding classes in UML and Java, whereas the classes realizing a component shall have the same name as the component, complemented by an \enquote{Impl} suffix (cf.~\cite{langhammer2015a}).
-With state-of-the-art techniques, those constraints could be implemented as relations in declarative or as enforcing routines in imperative transformation languages.
+% We use a running example throughout the paper to explain the \commonalities idea.
+% It relies on three metamodels: UML class models, Java code, whose grammar definition can be treated as a metamodel~\cite{heidenreich2010a}, and the \gls{PCM}~\cite{reussner2016a}, a component-based architecture description language.
+% The consistency relations between Java and UML class models are mostly one-to-one mappings, as they provide the same concepts of object-oriented design. %provide redundant representations of the same concepts, so the consistency relations between them define mostly one-to-one mappings.
+% Consistency relations between \gls{PCM} and Java were proposed by \textcite{langhammer2015a}.
+% For this paper, only the one-to-one mapping between components in \gls{PCM} and classes in Java---or generally all object-oriented languages---are relevant, whereby each component is mapped to a class but not vice versa.
 
-\begin{figure}
-	\centering
-	\input{figures/quality/running_example.tex}
-	\caption[Consistency relations for extracts of Java, UML and PCM]{Metamodel extracts for Java, UML and \gls{PCM} and consistency relations ({\protect\tikz[baseline=-0.5ex] \protect\draw[latex-latex, consistency related element] (0,0) -- (1.5em,0);}) between them}
-	\label{fig:quality:running_example}
-\end{figure}
+% For the examples in this paper, a minimalist subset of those metamodels, depicted in \autoref{fig:improvement:running_example}, is sufficient.
+% It only comprises classes in UML and Java and components in \gls{PCM}, which all have a name.
+% The name shall be equal between corresponding classes in UML and Java, whereas the classes realizing a component shall have the same name as the component, complemented by an \enquote{Impl} suffix (cf.~\cite{langhammer2015a}).
+% With state-of-the-art techniques, those constraints could be implemented as relations in declarative or as enforcing routines in imperative transformation languages.
 
-In this paper, we consider metamodels that conform to the \gls{EMOF} standard~\cite{mof}.
-Such metamodels consist of classes, which we denote as \emph{\metaclasses} to avoid confusion with classes in exemplary metamodels such as Java and UML.
-\Metaclasses can in turn contain attributes and associations to other classes, which may be containments.
+% \begin{figure}
+% 	\centering
+% 	\input{figures/quality/improvement/running_example.tex}
+% 	\caption[Consistency relations for extracts of Java, UML and PCM]{Simple metamodel extracts for Java, UML and \gls{PCM} and consistency relations between them.}
+% 	\label{fig:improvement:running_example}
+% \end{figure}
+
+% In this paper, we consider metamodels that conform to the \gls{EMOF} standard~\cite{mof}.
+% Such metamodels consist of classes, which we denote as \emph{\metaclasses} to avoid confusion with classes in exemplary metamodels such as Java and UML.
+% \Metaclasses can in turn contain attributes and associations to other classes, which may be containments.
 
 
-\subsection*{Making Common Concepts Explicit}
+% \subsection*{Making Common Concepts Explicit}
 
-The redundancies between different metamodels are an expression of common concepts that are represented redundantly.
-We already gave the example of a class in UML and Java, which are different representations of the common concept of a class in general object-oriented design.
-We propose to make common concepts explicit rather than encoding them into the rules of a transformation.
-This can be achieved by creating a \emph{\conceptmetamodel}, which defines those common concepts, and specifying the relations between the \conceptmetamodel and the existing metamodels.
-We refer to the existing metamodels as \emph{\concretemetamodels}.
-The relation specifications can be used to derive transformations between the \concretemetamodels and the \conceptmetamodel.
+% The redundancies between different metamodels are an expression of common concepts that are represented redundantly.
+% We already gave the example of a class in UML and Java, which are different representations of the common concept of a class in general object-oriented design.
+% We propose to make common concepts explicit rather than encoding them into the rules of a transformation.
+% This can be achieved by creating a \emph{\conceptmetamodel}, which defines those common concepts, and specifying the relations between the \conceptmetamodel and the existing metamodels.
+% We refer to the existing metamodels as \emph{\concretemetamodels}.
+% The relation specifications can be used to derive transformations between the \concretemetamodels and the \conceptmetamodel.
 
-\autoref{fig:quality:commonalities_example} shows the \metaclasses for a \texttt{Class} as extracts of the \concretemetamodels for UML and Java and the \metaclass for the common concept of a \texttt{Class} in the \conceptmetamodel for object-oriented design.
-We denote a single common concept as a \emph{\commonality}.
-Further \commonalities in object-oriented design could, for example, be interfaces or methods.
-The relation between the \texttt{Class} \commonality and its realizations in the \concretemetamodels are shown by a \emph{«manifests»} relation.
-%Such a relation can be defined in a transformation.
-In our simplified example, the relation would especially define that the names of the classes have to be equal. %an equality relationship.
+% \autoref{fig:quality:commonalities_example} shows the \metaclasses for a \texttt{Class} as extracts of the \concretemetamodels for UML and Java and the \metaclass for the common concept of a \texttt{Class} in the \conceptmetamodel for object-oriented design.
+% We denote a single common concept as a \emph{\commonality}.
+% Further \commonalities in object-oriented design could, for example, be interfaces or methods.
+% The relation between the \texttt{Class} \commonality and its realizations in the \concretemetamodels are shown by a \emph{«manifests»} relation.
+% %Such a relation can be defined in a transformation.
+% In our simplified example, the relation would especially define that the names of the classes have to be equal. %an equality relationship.
 
-\begin{figure}
-    \centering
-    \input{figures/quality/one_commonality_example.tex}
-    \caption[Concept metamodel for object-oriented design]{\Conceptmetamodel for object-oriented design with a \texttt{Class} \commonality and its relations to UML and Java.}
-    \label{fig:quality:commonalities_example}
-\end{figure}
+% \begin{figure}
+%     \centering
+%     \input{figures/quality/one_commonality_example.tex}
+%     \caption[Concept metamodel for object-oriented design]{\Conceptmetamodel for object-oriented design with a \texttt{Class} \commonality and its relations to UML and Java.}
+%     \label{fig:quality:commonalities_example}
+% \end{figure}
 
-When another \concretemetamodel that represents the same concepts shall be added, it is only necessary to define its relation to the \conceptmetamodel.
-For example, adding \cplusplus as another metamodel representing object-oriented design would require the definition of the relation between the \texttt{Class} \commonality in object-oriented design and its representation in \cplusplus.
-Adding an additional metamodel may require the \conceptmetamodel to be extended by \commonalities that were not relevant for the already considered metamodels.
-In general, a \conceptmetamodel has to contain \commonalities for redundancies in all \concretemetamodels, which---mathematically speaking---can be expressed as the union of all pairwise intersections of the \concretemetamodels.
+% When another \concretemetamodel that represents the same concepts shall be added, it is only necessary to define its relation to the \conceptmetamodel.
+% For example, adding \cplusplus as another metamodel representing object-oriented design would require the definition of the relation between the \texttt{Class} \commonality in object-oriented design and its representation in \cplusplus.
+% Adding an additional metamodel may require the \conceptmetamodel to be extended by \commonalities that were not relevant for the already considered metamodels.
+% In general, a \conceptmetamodel has to contain \commonalities for redundancies in all \concretemetamodels, which---mathematically speaking---can be expressed as the union of all pairwise intersections of the \concretemetamodels.
 
 % Short description of the Commonalities concept and application to example (UML and Java classes, could e.g. be extended by C++)
 % Necessary artifacts: the Commonalities metamodel and the transformations.
 % But: one can define a language to specify the Commonalities metamodel together with a specification of how the elements and properties manifest in the concrete metamodels, which we will explain in more detail in \autoref{sec:language}.
 % Introduce terms: \emph{Commonality} (metamodel with common concepts), concrete metamodel (a metamodel that is accessed by a user) and \emph{Manifestation} (the concrete metamodels that realize a Commonality).
-\end{copiedFrom} % VoSE
+% \end{copiedFrom} % VoSE
 
 
 \begin{copiedFrom}{DocSym}
