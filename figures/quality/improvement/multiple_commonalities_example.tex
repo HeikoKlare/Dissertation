@@ -1,0 +1,88 @@
+\newcommand{\vdistance}{12em}
+\newcommand{\hdistance}{23em}
+\newcommand{\innerhdistance}{7.6em}
+\newcommand{\classwidth}{4.7em}
+\newcommand{\labeldistance}{0.9em}
+\newcommand{\mmborder}{0.9em}
+\newcommand{\referenceshift}{0.9em}
+
+\begin{tikzpicture}
+
+\pgfdeclarelayer{bg}
+\pgfsetlayers{bg,main}
+
+
+% METACLASSES
+
+\umlclassvarwidth{java_class}{}{Class}{
+name\\
+packageName
+}{\classwidth}  
+
+\umlclassvarwidth[, right=\innerhdistance of java_class.north, anchor=north]{java_field}{}{Field}{
+name\\
+}{\classwidth} 
+
+\umlassociationfromto{([yshift=\referenceshift]java_field.west-|java_class.east) -- node[uml cardinality start, pos=0, above right] {$1$} node[uml cardinality end, pos=1, above left] {$*$} ([yshift=\referenceshift]java_field.west)}
+\umlassociationfromto{([yshift=-\referenceshift]java_field.west) -- node[uml cardinality start, pos=0, above left] {$*$} node[uml role end, pos=1, below right] {type} node[uml cardinality end, pos=1, above right] {$1$} ([yshift=-\referenceshift]java_field.west-|java_class.east)}
+
+\umlclassvarwidth[, below right=5em and \hdistance of java_class.north, anchor=north]{uml_class}{}{Class}{
+name\\
+}{\classwidth} 
+
+\umlclassvarwidth[, left=\innerhdistance of uml_class.north, anchor=north]{uml_association}{}{Association}{
+name\\
+}{\classwidth}
+
+\umlclassvarwidth[, above=5em of uml_class.north, anchor=north]{uml_package}{}{Package}{
+name\\
+}{\classwidth}
+
+\umlassociationfromto{([yshift=\referenceshift]uml_association.east) -- node[uml cardinality start, pos=0, above right] {$*$} node[uml role end, pos=1, below left] {from} node[uml cardinality end, pos=1, above left] {$1$} ([yshift=\referenceshift]uml_class.west)}
+\umlassociationfromto{([yshift=-\referenceshift]uml_association.east) -- node[uml cardinality start, pos=0, above right] {$*$} node[uml role end, pos=1, below left] {to} node[uml cardinality end, pos=1, above left] {$1$} ([yshift=-\referenceshift]uml_class.west)}
+\umlassociationfromto{(uml_package.south) -- node[uml cardinality start, pos=0, below left] {$1$} node[uml role end, pos=1, above right] {classes} node[uml cardinality end, pos=1, above left] {$*$} (uml_class.north)}
+
+\umlclassvarwidth[, above right=\vdistance and 0.5*\hdistance-0.5*\innerhdistance of java_class.north, anchor=north]{oo_class}{}{Class\vphantom{p}}{
+name\\
+}{\classwidth} 
+
+\umlclassvarwidth[, below=5em of oo_class.north, anchor=north]{oo_association}{}{Association}{
+name\\
+}{\classwidth}
+
+\umlclassvarwidth[, right=1.2*\innerhdistance of oo_class.north, anchor=north]{oo_package}{}{Package}{
+name\\
+}{\classwidth}
+
+\umlassociationfromto{([xshift=-0.8*\referenceshift]oo_class.south) -- node[uml cardinality start, pos=0, below right] {$1$} node[uml role end, pos=0, below left] {from} node[uml cardinality end, pos=0, above right] {$*$} ([xshift=-0.8*\referenceshift]oo_association.north)}
+\umlassociationfromto{([xshift=1.2*\referenceshift]oo_association.north) -- node[uml cardinality start, pos=0, above left] {$*$} node[uml role end, pos=1, below right] {to} node[uml cardinality end, pos=1, below left] {$1$} ([xshift=1.2*\referenceshift]oo_class.south)}
+\umlassociationfromto{(oo_package.west) -- node[uml cardinality start, pos=0, below left] {$1$} node[uml role end, pos=1, above right] {classes} node[uml cardinality end, pos=1, below right] {$*$} (oo_class.east)}
+
+
+% METAMODELS
+
+\coordinate (java_label_coordinate) at ([yshift=\labeldistance]java_class.north west);
+\node[mmlabel, anchor=west] (java_label) at (java_label_coordinate) {Java};
+
+\coordinate (uml_label_coordinate) at ([yshift=\labeldistance]uml_package.north east);
+\node[mmlabel, anchor=east] (java_label) at (uml_label_coordinate) {UML};
+
+\coordinate (oo_label_coordinate) at ([yshift=\labeldistance]$(oo_class.north)!0.5!(oo_package.north)$);
+\node[mmlabel, anchor=center] (oo_label) at (oo_label_coordinate) {Object-oriented Design};
+
+\begin{pgfonlayer}{bg}
+    \node[mmbg, fit=(java_class)(java_field)(java_label_coordinate), inner sep=\mmborder] (java) {};
+    \node[mmbg, fit=(uml_class)(uml_package)(uml_association)(uml_label_coordinate), inner sep=\mmborder] (uml) {};
+    \node[conceptmmbg, minimum width=11.5em, fit=(oo_class)(oo_association)(oo_package)(oo_label_coordinate), inner sep=\mmborder] (oo) {};
+\end{pgfonlayer}
+
+
+% CONSISTENCY RELATIONS
+
+\draw[manifests relation] ([xshift=-0.48*\classwidth]oo_class.south) -- node[manifests relation, above, sloped] {\manifestslabel} (java_class);
+\draw[manifests relation] ([xshift=0.48*\classwidth]oo_class.south) -- node[manifests relation, above, sloped] {\manifestslabel} (uml_class);
+\draw[manifests relation] (oo_association) -- node[manifests relation, above, sloped] {\manifestslabel} (java_field);
+\draw[manifests relation] (oo_association) -- node[manifests relation, above, sloped] {\manifestslabel} (uml_association);
+\draw[manifests relation] (oo_package) -- node[manifests relation, above, sloped] {\manifestslabel} (uml_package);
+
+\end{tikzpicture}
