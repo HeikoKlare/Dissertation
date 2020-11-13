@@ -134,16 +134,17 @@ Thus, even for this relaxed notion in comparison to trees at the level of metamo
 
 \mnote{Practicality of relaxed notion}
 Still, this relaxed notion represents a requirement for the \commonalities approach to provide specific benefits.
-We show at a case study in our evaluation in \autoref{chap:commonalities_evaluation} that it is actually possible to achieve such a structure in practical scenarios, which serves as an indicator its general achievability and thus the possibility to have inherent correctness guarantees when applying the \commonalities approach for preserving consistency of multiple models.
+We show at a case study in our evaluation in \autoref{chap:commonalities_evaluation} that it is actually possible to achieve such a structure in practical scenarios, which serves as an indicator for its general achievability and thus the possibility to have inherent correctness guarantees when applying the \commonalities approach for preserving consistency of multiple models.
+
+% NOTE: Hierarchy of commonalities still relevant, because only between concept metamodels manifestation relations are allowed
 
 
 \subsection{Operationalization}
+\label{chap:improvement:commonalities:operationalization}
 
-Multiple executions of same transformations!
-
-Artifact generation options:
-Benefits additional metamodels: easy to achieve, high expressiveness (n-ary relations)
-Drawbacks additional metamodels: management of additional artifacts
+\mnote{Deriving executable transformations}
+Up to now, we have discussed how to express consistency by means of \conceptmetamodels with \commonalities and manifestation relations in the \commonalities approach.
+To actually preserve consistency of instances of the \concretemetamodels, such a specification must also be operationalized, such that executable transformations that can be applied after changes to these models are present or derived.
 
 \begin{figure}
     \centering
@@ -151,6 +152,35 @@ Drawbacks additional metamodels: management of additional artifacts
     \caption[Alternatives for \commonalities operationalization]{Exemplification of alternatives to operationalize \commonalities specifications by using \conceptmetamodels as ordinary metamodels or by deriving direct transformations from them.}
     \label{fig:improvement:operationalization_alternatives}
 \end{figure}
+
+\mnote{Operationalization options}
+We can distinguish two basic options how to operationalize a specification of \commonalities, which are also depicted in \autoref{fig:improvement:operationalization_alternatives}:
+\begin{properdescription}
+    \item[\Conceptmetamodels as additional metamodels:] \Conceptmetamodels are considered as ordinary metamodels and manifestation relations are considered as ordinary transformations, thus we consider a transformation network of \concretemetamodels and \conceptmetamodels, whose instances are kept consistent by transformations realizing their manifestation relations. In consequence, instances of the \conceptmetamodels have to be maintained.
+    \item[Transformations between \concretemetamodels:] \Conceptmetamodels and the manifestation relations are only used as auxiliary specification artifacts, from which direct transformations between the \concretemetamodels are derived. For example, from the \conceptmetamodel for object-oriented design in \autoref{fig:improvement:one_commonality_example}, a transformation between Java and \gls{UML} is derived.
+\end{properdescription}
+
+\mnote{\Conceptmetamodels as ordinary metamodels}
+The benefits of treating \conceptmetamodels as ordinary, additional metamodels and the manifestation relations as transformations is easy achievability.
+No specific languages or generators are required to derive the required artifacts, but existing tools for defining metamodels and transformations can be used to define \conceptmetamodels and manifestation relations that can be readily used to preserve consistency of their instances.
+A drawback of this approach is that it requires the management and persistence of additional artifacts, namely the instances of the \conceptmetamodels, which are only auxiliary artifacts that should be transparent to the user.
+This can, however, be hidden by an according framework that abstracts from these additional artifacts, such that developers are still only confronted with the models of the tools they use.
+Such functionality is provided by tools like \vitruv~\cite{klare2020Vitruv-JSS}.
+
+\mnote{Deriving direct transformations}
+Deriving transformations between \concretemetamodels from a specification of \conceptmetamodels and manifestation relations benefits from not introducing further artifacts, such that a developer still only has to deal with instances of the \concretemetamodels he or she is concerned with.
+This approach, however, suffers from reduced expressiveness, because not all multiary relations as expressed across additional \conceptmetamodels (cf.~\cite{diskin2018MultiModelSynchronization-FASE}) can be expressed by sets of binary relations and transformations preserving them (cf.~\cite{stevens2020BidirectionalTransformationLarge-SoSym}).
+In addition, it requires the implementation of generators that derive transformations from specification of \conceptmetamodels and manifestation relations.
+
+\mnote{Correctness of derived transformation network}
+Although with the second approach of deriving ordinary transformations the resulting transformation network contains cycles and does thus not provide the benefit of correctness guarantees due to its topology, it still provides this guarantee, because the transformations were generated from a specification that ensures correctness.
+For example, since the specification with \commonalities cannot contains any incompatibilities, the transformations derived from them cannot contain them either, as long as the generator produces transformations that actually preserve consistency conforming to the defined manifestation relations.
+
+\mnote{Multiple transformation executions}
+For the orchestration of the generated transformations, no matter whether they are defined to \conceptmetamodels or derived between the \concretemetamodels, it is still necessary to allow the execution of each transformation multiple times.
+Due to the situations identified in \autoref{chap:orchestration}, in which it is necessary to execute transformations multiple times to \enquote{negotiate} a result and repeatedly react to the changes of other transformations, such a behavior is still relevant for the \commonalities approach.
+For example, propagating a class from Java across the object-oriented design \conceptmetamodels and the component-based design \conceptmetamodel to a component in \gls{PCM} can lead to further additions to the class as soon as its identified as representation of component, which then needs to be propagated back to the class representation in Java.
+Transformations are still synchronizing and thus allowed to modify both involved models to support such situations, which can make this backpropagation of changes necessary.
 
 
 % \begin{copiedFrom}{DocSym} % ABOUT TREES
@@ -164,7 +194,7 @@ Drawbacks additional metamodels: management of additional artifacts
 
 % \end{copiedFrom} % DocSym
 
-\begin{copiedFrom}{VoSE}
+% \begin{copiedFrom}{VoSE}
 
 % The state-of-the-art approach to keep models consistent automatically is the application of transformation languages.
 % If instances of multiple (i.e., more than two) metamodels are to be kept consistent, one can either use multidirectional transformation approaches, or compose bidirectional transformations to a network of transformations~\cite{cleve2019dagstuhl}.
@@ -258,25 +288,25 @@ Drawbacks additional metamodels: management of additional artifacts
 % However, it forms a \ac{DAG} and the redundant paths to the UML metamodel are unproblematic, because the relation to object-oriented design affects the part of the UML metamodel considering classes (\emph{Class}), whereas the relation to component-based design affects the part of the UML metamodel considering components (\emph{Comp}). 
 % The elements in these parts of the UML metamodel are disjoint.
 
-\subsection*{Transformation Operationalization}
-\label{chap:commonalities:approach:operationalization}
+% \subsection*{Transformation Operationalization}
+% \label{chap:commonalities:approach:operationalization}
 
-To actually keep models consistent, the specification of a hierarchy of \conceptmetamodels has to be operationalized.
-Two options for operationalization can be distinguished:
+% To actually keep models consistent, the specification of a hierarchy of \conceptmetamodels has to be operationalized.
+% Two options for operationalization can be distinguished:
 
-\begin{description}[leftmargin=\parindent]
-    \item[\Conceptmetamodels as additional metamodels:] The \conceptmetamodels are actually instantiated and the transformations are executed as they are defined between the \conceptmetamodels and their manifestations. In consequence, instances of the \conceptmetamodels have to be maintained.
-    \item[Transformations between \concretemetamodels:] The \conceptmetamodels and the relations between them and their manifestations are used to derive bidirectional transformations between the \concretemetamodels. For example, from the \conceptmetamodel for object-oriented design in \autoref{fig:improvement:one_commonality_example}, a bidirectional transformation between Java and UML is derived.
-\end{description}
+% \begin{description}[leftmargin=\parindent]
+%     \item[\Conceptmetamodels as additional metamodels:] The \conceptmetamodels are actually instantiated and the transformations are executed as they are defined between the \conceptmetamodels and their manifestations. In consequence, instances of the \conceptmetamodels have to be maintained.
+%     \item[Transformations between \concretemetamodels:] The \conceptmetamodels and the relations between them and their manifestations are used to derive bidirectional transformations between the \concretemetamodels. For example, from the \conceptmetamodel for object-oriented design in \autoref{fig:improvement:one_commonality_example}, a bidirectional transformation between Java and UML is derived.
+% \end{description}
 
-A drawback of the first option is that additional models have to be managed and persisted. 
-In consequence, the user has to version these models although they should be transparent to him or her, as long as no appropriate framework abstracts from such tasks.
-%Additionally, it is not easily possible to derive the direct relations between two concrete metamodels from such a specification. For example, the direct relation between classes in UML and Java is not accessible but only implicitly expressed by the transitive relation across the concept metamodel for object-oriented design.
-A drawback of the second option is that the types of supported relations that can be described in the transformations are limited.
-First, only relations may be defined that can be composed with any other relation, such that a direct transformation between two metamodels can be derived.
-Second, it is possible to define $n$-ary relations between more than two metamodels that cannot be decomposed into binary relations between them, but only into $n$ binary relations between those metamodels and an additional one~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
-In consequence, the first option provides higher expressiveness.
+% A drawback of the first option is that additional models have to be managed and persisted. 
+% In consequence, the user has to version these models although they should be transparent to him or her, as long as no appropriate framework abstracts from such tasks.
+% %Additionally, it is not easily possible to derive the direct relations between two concrete metamodels from such a specification. For example, the direct relation between classes in UML and Java is not accessible but only implicitly expressed by the transitive relation across the concept metamodel for object-oriented design.
+% A drawback of the second option is that the types of supported relations that can be described in the transformations are limited.
+% First, only relations may be defined that can be composed with any other relation, such that a direct transformation between two metamodels can be derived.
+% Second, it is possible to define $n$-ary relations between more than two metamodels that cannot be decomposed into binary relations between them, but only into $n$ binary relations between those metamodels and an additional one~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
+% In consequence, the first option provides higher expressiveness.
 
-While the first option can be realized without an additional language by just defining the \conceptmetamodels and the transformations with existing languages, the second option requires a mechanism that generates the transformations between the \concretemetamodels from those between the \conceptmetamodels and their manifestations.
+% While the first option can be realized without an additional language by just defining the \conceptmetamodels and the transformations with existing languages, the second option requires a mechanism that generates the transformations between the \concretemetamodels from those between the \conceptmetamodels and their manifestations.
 
-\end{copiedFrom} % VoSE
+% \end{copiedFrom} % VoSE
