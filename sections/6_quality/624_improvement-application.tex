@@ -1,18 +1,124 @@
 \section{Application Processes}
 \label{chap:improvement:application}
 
+\mnote{Definition process}
+The application of the \commonalities approach requires a process for defining them as well a concept for combining them with other specifications of transformations.
+In a specification using the \commonalities approach, the \conceptmetamodels and manifestation relations are not as independent as they are supposed to be in the definition of an ordinary transformation network forming a dense or even complete graph.
+Due to the necessity to relate all elements only via one transformation path, even if \commonalities are separated into \conceptmetamodels by concerns and composed hierarchically, the developers must ensure that such a structure is achieved.
+We thus discuss in following different options of \commonalities can be defined.
+
+\mnote{Combination concept}
+As discussed in \autoref{chap:improvement:concepts:specification}, we have identified why the \commonalities approach is well-suited for \enquote{natural} consistency relations, where the metamodels actually share some kind of commonalities instead of arbitrarily complex dependencies.
+This especially involves structural rather than behavioral consistency relations.
+In the following, we discuss options to combine a specification of \commonalities especially with other specifications of ordinary transformations.
+
+
 \subsection{Defining \commonalities}
 
-Discuss how commonalities can be defined. Which roles are involved, especially how different domain experts can communicate. E.g. bottom-up approach: Take the most related metamodels and define their commonalities. Then define higher-level commonalities relating these concept metamodels or even the concrete metamodels. 
-The problem is that combining two concept metamodels requires them to contain all necessary information, thus a concept metamodel design is not only driven by the metamodels to keep directly consistent, but also by the information that is needed to preserve consistency to other commonalities. This refers to the same scenario as if multiple commonality structures are encapsulated into projective view environments which are combined by BX. They require the exposed views to provide all information necessary to preserve consistency.
+\mnote{Hierarchic composition}
+We have discussed in \autoref{chap:improvement:commonalities:composition} how \commonalities and the \conceptmetamodels encapsulating them can be composed hierarchically.
+This allows to separate \commonalities by concerns, i.e., by the concepts they belong to.
+In addition, it fosters the independent development and reuse of different \conceptmetamodels.
 
+\mnote{Independent development vs. tree structure}
+The \commonalities approach does, however, only provide an essential benefit regarding guaranteed correctness of the resulting transformation network if the manifestation relations specify consistency relations that form a consistency relation tree (see \autoref{chap:improvement:commonalities:tree}).
+Thus, \commonalities and their \conceptmetamodels must be composed in a way that such a structure is achieved.
+This can, in the worst case, require all \concretemetamodels to define consistency between and the according relations to be elicited a priori and thus conflict with our independent development assumption.
 
-Prozess zur Erzeugung von Commonalities beschreiben:
-- Optimalerweise kennt man alle MM vorher und kann sinnvolle Commonalities bauen (immer das am wenigstens redundante Konstrukt, z.B. eher Person in Familie als Persons mit Familiennamen (redundante Darstellung des Familiennamens)
-- Bei Erweiterung um zusätzliche Metamodelle sind ggf. Anpassungen an Commonalities notwendig. Hier ist wieder die Lokalität bei den Commonalities vorteilhaft (interne Spezifikation), weil man dann eine Commonality insgesamt ersetzen kann statt in jeder Transformation deren Manifestierung anzupassen.
+\mnote{Bottom-up specification}
+An intuitive process to define \commonalities is a bottom-up approach.
+Developers select \concretemetamodels that share common concepts and are, by custom definition, most related among the \concretemetamodels to define consistency between and define a \conceptmetamodel of \commonalities between them.
+Then, they iteratively chose \conceptmetamodels, and potentially also \concretemetamodels, that share further higher-level commonalities and define an according \conceptmetamodel for them.
+This ends up in a hierarchy of \conceptmetamodels.
 
-Evolutionsprozess:
-- Wie eignet sich welcher Ansatz zur Erweiterung mit MM. I.d.R. reicht es nicht eine Verbindung zu ergänzen, sondern die Konzeptmetamodelle für angepasst werden für ein neuen zu koppelndes Metamodell
+\mnote{Driven by \concretemetamodels}
+Since finally instances of the \concretemetamodels are to be kept consistent, it is important to always consider the information represented in the \concretemetamodels, even if consistency is defined between \conceptmetamodels, i.e., at a higher level in the hierarchy of \conceptmetamodels.
+Consider the running example of classes in \gls{UML} and Java, as well as components in \gls{UML}.
+We may define an object-oriented design \conceptmetamodel to define \commonalities between \gls{UML} and Java, as well as a component-based design \conceptmetamodel to define \commonalities between object-oriented design and \gls{PCM}, as sketched in \autoref{chap:improvement:commonalities:tree} and depicted in \autoref{fig:improvement:composed_commonalities_example}.
+If these \conceptmetamodels are defined in a bottom-up manner, i.e., first defining the object-oriented design \conceptmetamodel and afterwards the component-based design \conceptmetamodels, it is not sufficient to only consider the information represented in the object-oriented design \conceptmetamodels for defining their \commonalities.
+That metamodel does only contain the \commonalities relevant for object-oriented design, but for the relation to component-based design, further information that is only present one of the \concretemetamodels may be relevant.
+For example, Java contains a definition of behavior in terms of method bodies, which is not represented in the purely structural \gls{UML} class models.
+Thus, the object-oriented design \conceptmetamodel does not represent these behavioral information, as it does represent a \commonality.
+\gls{PCM}, however, also has an abstract representation of behavior used for predicting the system's performance, which needs to be kept consistent with the precise behavior specification in Java.
+Thus, the component-based design \conceptmetamodel must either have an additional manifestation relation to Java for the behavioral information, or the object-oriented design \conceptmetamodel must also contain behavioral information, although not being a \commonality between the \concretemetamodels it represents.
+
+\mnote{Union of all information}
+In general, this problem occurs because \conceptmetamodels are supposed to represent the unions of all pairwise intersections of their \concretemetamodels, as those represent the \commonalities that have to be kept consistent.
+Information that is unique to one of the \concretemetamodels is not represented in the \conceptmetamodel, but may be relevant for further concepts and thus the relations to define to them.
+A first, general solution would require a \conceptmetamodel to contain the union of all information in the \concretemetamodels rather than the union of their pairwise intersections.
+This does, however, not conform to the purpose of \conceptmetamodels to only describe \commonalities, leads to large and complex \conceptmetamodels and thus also to high effort, because for each \concretemetamodel a transformation, in terms of a manifestation relation, of all its information into a \conceptmetamodel would have to be defined.
+In addition, the topmost \conceptmetamodel of the hierarchy would inherently contain the union of information defined in all \conceptmetamodels, thus representing a \gls{SUMM}, i.e., a single metamodel that is capable of representing all information to define one system (cf.~\cite[Def. 2]{klare2020Vitruv-JSS}), as introduced in \autoref{chap:improvement:concepts:explicit}.
+In consequence, it would be sufficient to only manage an instance of that topmost \conceptmetamodel, representing the \gls{SUMM}, and to consider the instances of all other \conceptmetamodels and \concretemetamodels as projections from the instance of that central metamodel, according to \textcite{atkinson2010a}.
+
+\begin{figure}
+    \centering
+    \input{figures/quality/improvement/definition_option_sum.tex}
+    \caption[\Commonalities with union of all information]{Example for a hierarchy of \conceptmetamodels and their \commonalities in which \conceptmetamodels represent the union of information in their manifestations. Behavior of classes and components is considered any, not further specified kind of behavioral information.}
+    \label{fig:improvement:definition_option_sum}
+\end{figure}
+
+\mnote{Example for union}
+For the example from \autoref{fig:improvement:composed_commonalities_example} depicting hierarchic \conceptmetamodels for classes and components, we derive an extension according to the discussed scheme in \autoref{fig:improvement:definition_option_sum}.
+It additionally contains visibilities for classes and any kind of not further specified behavior description in Java classes and \gls{PCM} components.
+Both \conceptmetamodels contain the union information in their manifestations, such that the component-based design \conceptmetamodel contains all information represented in all metamodels.
+In consequence, the component-based design \conceptmetamodel represents the visibility of classes in object-oriented design, although it is not relevant for components and is not kept consistent via that \conceptmetamodel.
+
+\mnote{Non-strict manifestations}
+The previous considerations assume a kind of strict layered architecture (cf.~\cite{buschmann1996PatternsArchitecture-Book}) in which the manifestation relation induce a tree between the metamodels, thus no manifestation relation bypasses a \conceptmetamodel to whose \commonalities additional manifestation relations are defined.
+Referring to a non-strict layered architecture, another solution would be to allow manifestation relations to the manifestations of \conceptmetamodels to which further manifestation relations are defined, e.g., the component-based design \commonalities may have manifestation relations to elements in Java and \gls{UML} in addition to manifestation relations to the object-oriented design \conceptmetamodels, which in turn has manifestation relations to those \concretemetamodels.
+A drawback of this solution is that is can likely violate the goal of achieving a tree structure.
+Considering a class in Java as a manifestation of a component in component-based design, as well as a class in object-oriented design, which in turn is a manifestation of a component in component-based design, would already violate the definition of a consistency relation tree, thus not giving guarantees regarding compatibility.
+
+\begin{figure}
+    \centering
+    \input{figures/quality/improvement/definition_option_bypass.tex}
+    \caption[\Commonalities with multiple manifestation]{Example for a hierarchy of \conceptmetamodels and their \commonalities in which \commonalities may have several manifestations inducing consistency relations that do not form a tree structure. Behavior of classes and components is considered any, not further specified kind of behavioral information.}
+    \label{fig:improvement:definition_option_bypass}
+\end{figure}
+
+\mnote{Example for non-strict manifestations}
+\autoref{fig:improvement:definition_option_bypass} depicts this solution for the already discussed example.
+The \conceptmetamodels contain only the information relevant for the \commonalities they represent.
+The additional manifestation relation between components of the component-based design \conceptmetamodel and classes in Java induce the violation of a tree structure as sketched before.
+Although behavior may actually be represented in terms of method bodies represented as separate \metaclasses in Java, still consistency relations defined by the manifestation relations between Java and the object-oriented design \conceptmetamodel would include both classes and methods, as methods do not share an isolated consistency relation between Java and \gls{UML} but only in the context of the class they belong to.
+
+\mnote{Union including concepts}
+A third option is to construct a \conceptmetamodel not only driven by the \commonalities shared between its manifestations, but also by its \commonalities with other metamodels.
+Thus, whenever a \conceptmetamodel is used a manifestation of another \conceptmetamodel, it may be extended by the information from its manifestation required for the \commonalities in another concept with other metamodels.
+For example, as soon as the object-oriented design \conceptmetamodel is considered as a manifestation of component-based design, its manifestations, namely Java and \gls{UML}, are checked for \commonalities with component-based design that are not yet considered \commonalities regarding object-oriented design.
+This could be a description of method bodies in Java to keep consistent with the behavioral specification \gls{PCM}.
+If consequently followed, such an approach would result in \conceptmetamodels not only representing the union of the pairwise intersections of the manifestations, but the union of the pairwise intersections of their manifestations with all other \concretemetamodels to be kept consistent.
+This still promises to lead to \conceptmetamodels that are significantly smaller and more precise than the union of all metamodels as in the first option.
+This approach is comparable to the situation in which a further manifestation shall be added, like we exemplarily discussed for adding \cplusplus as a manifestation of the object-oriented design \conceptmetamodel in \autoref{chap:improvement:benefits:specification_effort}.
+
+\begin{figure}
+    \centering
+    \input{figures/quality/improvement/definition_option_super_union.tex}
+    \caption[\Commonalities including information of their concepts]{Example for a hierarchy of \conceptmetamodels and their \commonalities in which \commonalities represent information necessary for the concepts they are manifestations of in addition to the information shared by their manifestations. Behavior of classes and components is considered any, not further specified kind of behavioral information.}
+    \label{fig:improvement:definition_option_super_union}
+\end{figure}
+
+\mnote{Example for union including concepts}
+The application of this option to the already discussed example is depicted in \autoref{fig:improvement:definition_option_super_union}.
+In this solution, still a tree structure between the \metaclasses and \commonalities is given and the \conceptmetamodel are still restricted to the information in the manifestations and, in addition, the information of the manifestations necessary for the \conceptmetamodels of which they are manifestations.
+This is why the object-oriented design \conceptmetamodel contains information about the behavior of classes and components, although \gls{UML} and Java do not share behavioral concepts, but the component \commonality for component-based design does not contain the visibilities of classes as in the first option of representing the union of all information in the manifestations.
+
+\mnote{Problem mitigation by cliques}
+Finally, it is still an open question how problematic the actual dependencies in practical scenarios are.
+Potentially, only subsets of few metamodels are highly related and share large parts of one or more concepts, and the relation to other such subsets is only given across one metamodel or one concept.
+This could be seen as a graph of cliques, in which some metamodels are highly related whereas the relation to others is rather loose.
+It that case, it can be reasonable to define relations in these cliques by means of \commonalities and then define the loose relations to other cliques by means of an ordinary transformation, as we discuss in the subsequent section.
+We derive first insights on the achievability of the requires tree structure for \commonalities in our evaluation in \autoref{chap:commonalities_evaluation}, but further evidence if one the previously discussed strategies can be reasonably applies has to be gained in larger studies in practical scenarios with more tools with their metamodels to be related.
+
+% Discuss how commonalities can be defined. Which roles are involved, especially how different domain experts can communicate. E.g. bottom-up approach: Take the most related metamodels and define their commonalities. Then define higher-level commonalities relating these concept metamodels or even the concrete metamodels. 
+% The problem is that combining two concept metamodels requires them to contain all necessary information, thus a concept metamodel design is not only driven by the metamodels to keep directly consistent, but also by the information that is needed to preserve consistency to other commonalities. This refers to the same scenario as if multiple commonality structures are encapsulated into projective view environments which are combined by BX. They require the exposed views to provide all information necessary to preserve consistency.
+
+% Prozess zur Erzeugung von Commonalities beschreiben:
+% - Optimalerweise kennt man alle MM vorher und kann sinnvolle Commonalities bauen (immer das am wenigstens redundante Konstrukt, z.B. eher Person in Familie als Persons mit Familiennamen (redundante Darstellung des Familiennamens)
+% - Bei Erweiterung um zusätzliche Metamodelle sind ggf. Anpassungen an Commonalities notwendig. Hier ist wieder die Lokalität bei den Commonalities vorteilhaft (interne Spezifikation), weil man dann eine Commonality insgesamt ersetzen kann statt in jeder Transformation deren Manifestierung anzupassen.
+
+% Evolutionsprozess:
+% - Wie eignet sich welcher Ansatz zur Erweiterung mit MM. I.d.R. reicht es nicht eine Verbindung zu ergänzen, sondern die Konzeptmetamodelle für angepasst werden für ein neuen zu koppelndes Metamodell
 
 
 
