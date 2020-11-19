@@ -1,0 +1,140 @@
+\newcommand{\hdistance}{7.6em}
+\newcommand{\classwidth}{5.5em}
+\newcommand{\vdistance}{5em}
+
+\begin{tikzpicture}[
+    existing/.style={fill=lightgray!20}
+]
+
+\umlclassvarwidth[, existing]{metamodel}{}{Metamodel}{
+name : String\\
+}{\classwidth} 
+
+\umlclassvarwidth[, existing, right=\hdistance of metamodel.north, anchor=north]{class}{}{Class}{
+name : String\\
+}{\classwidth}  
+
+\umlclassvarwidth[, existing, right=\hdistance of class.north, anchor=north]{reference}{}{Reference}{
+name : String\\
+}{\classwidth}
+
+\umlclassvarwidth[, existing, right=\hdistance of reference.north, anchor=north]{attribute}{}{Attribute}{
+name : String\\
+}{\classwidth}
+
+\umlclassvarwidth[, below=\vdistance of metamodel.north, anchor=north]{concept}{}{Concept}{
+}{\classwidth}  
+
+\umlclassvarwidth[, right=\hdistance of concept.north, anchor=north]{commonality}{}{Commonality}{
+root : Boolean\\
+}{\classwidth}
+
+\umlclassvarwidth[, below=\vdistance of commonality.north, anchor=north]{manifestation}{}{Manifestation}{
+}{\classwidth} 
+
+\umlclassvarwidth[, right=\hdistance of manifestation.north, anchor=north]{commonality_reference}{}{Commonality\\Reference}{
+}{\classwidth}
+
+\umlclassvarwidth[, right=\hdistance of commonality_reference.north, anchor=north]{commonality_attribute}{}{Commonality\\Attribute}{
+}{\classwidth}
+
+
+\umlclassvarwidth[, below left=\vdistance and \hdistance of manifestation.north, anchor=north]{manifestation_class}{}{Manifestation\\Class}{
+alias : String\\
+single : Boolean\\
+}{\classwidth}
+
+\umlclassvarwidth[, below=\vdistance of manifestation.north, anchor=north]{manifestation_condition}{}{Manifestation\\Condition}{
+dir : Direction\\
+}{\classwidth}
+
+\umlclassvarwidth[, below=\vdistance of commonality_attribute.north, anchor=north]{attribute_relation}{}{Attribute\\Relation}{
+dir : Direction\\
+}{\classwidth} 
+
+\umlclassvarwidth[, below=\vdistance of commonality_reference.north, anchor=north]{reference_relation}{}{Reference\\Relation}{
+dir : Direction\\
+}{\classwidth} 
+
+\umlclassvarwidth[, below=\vdistance of manifestation_condition.north, anchor=north]{manifestation_operator}{}{Manifestation\\Operator}{
+}{\classwidth}
+
+\umlclassvarwidth[, below=\vdistance of attribute_relation.north, anchor=north]{attribute_operator}{}{Attribute\\Operator}{
+}{\classwidth} 
+
+\umlclassvarwidth[, below=\vdistance of reference_relation.north, anchor=north]{reference_operator}{}{Reference\\Operator}{
+}{\classwidth} 
+
+\umlclassvarwidth[, below=\vdistance of reference_operator.north, anchor=north]{operand}{}{\textit{Operand}}{
+}{\classwidth}
+
+\umlclassvarwidth[, below left=\vdistance and \hdistance of operand.north, anchor=north]{manifestation_operand}{}{\textit{Manifestation}\\\textit{Operand}}{
+}{\classwidth}
+
+\umlclassvarwidth[, below right=\vdistance and 0em of operand.north, anchor=north]{literal_operand}{}{Literal\\Operand}{
+}{\classwidth}
+
+\umlclassvarwidth[, right=\hdistance of literal_operand.center, anchor=center]{direction}{}{\umlenumlabel\\Direction}{
+\itshape
+Bidirectional\\
+Checkonly\\
+Enforce\\
+}{\classwidth}
+
+\umlclassvarwidth[, below left=\vdistance and \hdistance of manifestation_operand.north, anchor=north]{manifestation_class_operand}{}{Manifestation\\Class\\Operand}{
+}{\classwidth}
+
+\umlclassvarwidth[, below left=\vdistance and 0em of manifestation_operand.north, anchor=north]{manifestation_attribute_operand}{}{Manifestation\\Attribute\\Operand}{
+}{\classwidth}
+
+\umlclassvarwidth[, below right=\vdistance and \hdistance of manifestation_operand.north, anchor=north]{manifestation_reference_operand}{}{Manifestation\\Reference\\Operand}{
+}{\classwidth}
+
+
+% INHERITANCE
+\umlsubclassof{concept}{--}{metamodel}
+\umlsubclassof{commonality}{--}{class}
+\umlsubclassof{commonality_attribute}{--}{attribute}
+\umlsubclassof{commonality_reference}{--}{reference}
+
+\umlsubclassof{manifestation_operand}{|- ([yshift=-1.5em]operand.south) --}{operand}
+\draw (literal_operand) |- ([yshift=-1.5em]operand.south);
+
+\umlsubclassof{manifestation_class_operand}{|- ($(manifestation_attribute_operand.north)!0.5!(manifestation_operand.south)$) --}{manifestation_operand}
+\draw (manifestation_attribute_operand) -- ($(manifestation_attribute_operand.north)!0.5!(manifestation_operand.south)$);
+\draw (manifestation_reference_operand) |- ($(manifestation_attribute_operand.north)!0.5!(manifestation_operand.south)$);
+
+% REFERENCES
+%\umlassociationfromto{(class) -- node[uml cardinality end, pos=1, above right] {1} (metamodel)}
+\umlcomposition{(metamodel.east) -- node[uml cardinality end, pos=1, above left] {*} (class.west|-metamodel.west)}
+\umlcomposition{(concept.east) -- node[uml cardinality end, pos=1, above left] {*} (commonality.west|-concept.west)}
+\umlcomposition{(class.east) -- node[uml cardinality end, pos=1, above left] {*} (reference.west|-class.east)}
+\umlcomposition{([xshift=1em]class.north) -- ++(0,1em) -| node[uml cardinality end, pos=1, above right] {*} (attribute.north)}
+
+\umlcomposition{(commonality) -- node[uml cardinality end, pos=1, above right] {*} (manifestation)}
+\umlcomposition{([xshift=-1em]commonality.south east) -- ++(0,-1em) -|node[uml cardinality end, pos=1, above right] {*} ([xshift=1em]commonality_reference.north west)}
+\umlcomposition{([yshift=0.5em]commonality.east) -| node[uml cardinality end, pos=1, above left] {*} ([xshift=-1.5em]commonality_attribute.north)}
+
+\umlassociationfromto{([xshift=-1em]commonality_reference.north) |- node[uml cardinality end, pos=1, above right] {1} node[uml role end, pos=1, below right] {type} ([yshift=-1em]commonality.east)}
+
+\umlcomposition{([xshift=1em]manifestation.south west) -- ++(0,-1.5em) -| node[uml cardinality end, pos=1, above left] {*} ([xshift=-1em]manifestation_class.north east)}
+\umlcomposition{(manifestation) -- node[uml cardinality end, pos=1, above left] {*} (manifestation_condition)}
+\umlcomposition{(commonality_attribute) -- node[uml cardinality end, pos=1, above left] {*} (attribute_relation)}
+\umlcomposition{(commonality_reference) -- node[uml cardinality end, pos=1, above left] {*} (reference_relation)}
+
+\umlaggregation{(manifestation_condition) -- node[uml cardinality end, pos=1, above left] {*} (manifestation_operator)}
+\umlaggregation{(attribute_relation) -- node[uml cardinality end, pos=1, above left] {*} (attribute_operator)}
+\umlaggregation{(reference_relation) -- node[uml cardinality end, pos=1, above left] {*} (reference_operator)}
+
+\umlaggregation{([xshift=1em]manifestation_class.north west) |- node[uml cardinality start, pos=0, above right] {*} ++(-1.5em,\vdistance) |- ([xshift=-1em,yshift=1em]class.north) -- node[uml cardinality end, pos=1, above left] {1} ([xshift=-1em]class.north)}
+
+\umlcomposition{(commonality_attribute.west) -- ++(-0.8em,0) |- node[uml cardinality end, pos=1, below right] {*} (operand.east)}
+\umlcomposition{(commonality_reference.west) -- ++(-0.8em,0) |- node[uml cardinality end, pos=1, above left] {*} ([yshift=0.8em]operand.west)}
+\umlcomposition{([yshift=-0.5em]manifestation_condition.west) -- ++(-0.8em,0) |- node[uml cardinality end, pos=1, above left] {*} node[uml cardinality end, pos=1, below left] {rightOperand} ([yshift=-0.8em]operand.west)}
+\umlcomposition{([yshift=0.5em]manifestation_condition.west) -- ++(-1.1em,0) |- node[uml cardinality end, pos=1, above left] {*} node[uml cardinality end, pos=1, below left] {leftOperand} ([yshift=0.8em]manifestation_operand.west)}
+
+\umlassociationfromto{([yshift=-0.8em]manifestation_operand.west) -| node[uml cardinality end, pos=1, below right] {1} ([xshift=-1em]manifestation_class.south)}
+\umlassociationfromto{(manifestation_attribute_operand.south) -- ++(0,-0.8em) -| ([xshift=0.8em, yshift=-1.2em]attribute.south east) -| node[uml cardinality end, pos=1, below right] {1} ([xshift=1.5em]attribute.south)}
+\umlassociationfromto{(manifestation_reference_operand.east) -| ([xshift=0.4em, yshift=-2em]attribute.south east) -| node[uml cardinality end, pos=1, below right] {1} ([xshift=1.5em]reference.south)}
+
+\end{tikzpicture}
