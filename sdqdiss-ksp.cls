@@ -101,7 +101,7 @@
     headinclude=true,
     footinclude=false,
     bibliography=totoc,	
-    listof=totoc,
+    %listof=totoc,
     headings=optiontoheadandtoc,
     toc=chapterentrywithdots,
 }
