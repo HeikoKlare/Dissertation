@@ -1,7 +1,62 @@
 \section{The \Commonalities Language}
 
+\mnote{Section overview}
+In this section, we present an overview of the \commonalities language.
+It constitutes one possible realization of a language for the \commonalities approach with the conceptual design choices that we have discussed in the previous section.
+This especially includes an internal specification of concepts.
+To give an impression of the language, we first introduce two examples for specifications in a prototypical realization of the language with a textual syntax, which we have already proposed in previous work~\owncite{klare2019models} and which was originally developed in the bachelor's thesis of \textowncite{gleitze2017a} and extended in the master's thesis of \textowncite{hennig2020ma}.
+We then give an overview of the language elements before explaining the different categories of them in more detail at the given examples.
+Since we focus on the concepts of the language rather than its detailed realization with a textual syntax, we refer for details of that realization to the theses of \textowncite{gleitze2017a} and \textowncite{hennig2020ma}.
+
+
+\subsection{Examples in Textual Syntax}
+
+\lstinputlisting[language=commonalities, float,
+    caption={[Exemplary \commonality for clases]An exemplary specification for an extract of the \texttt{Class} \commonality between \gls{UML} and Java in the \commonalities language},
+    captionpos=b,
+    label=lst:language:class_example,
+]{listings/quality/language/class_example.lst}
+
+\lstinputlisting[language=commonalities, float,
+    caption={[Exemplary \commonality for components]An exemplary specification for an extract of the \texttt{Component} \commonality between \gls{PCM}, UML and the object-oriented design \conceptmetamodel in the \commonalities language},
+    captionpos=b,
+    label=lst:language:component_example,
+]{listings/quality/language/component_example.lst}
+
+\mnote{Examples overview}
+We depict two examples for specifications in our prototype of the \commonalities language with a textual syntax in \autoref{lst:language:class_example} and \autoref{lst:language:component_example}.
+The specifications depict extracts of a \commonality for classes in \gls{UML} and Java, as well as extracts of a \commonality for components in \gls{PCM}, \gls{UML} and classes with their containing packages in the object-oriented design \conceptmetamodel.
+The extracts are selected to reflect the different elements of the \commonalities language without introducing unnecessary complexity.
+We sketch the meaning of the examples in the following and clarify them along with the subsequent introduction of the language elements more precisely.
+
+\mnote{Class \commonality example}
+The class \commonality, depicted in \autoref{lst:language:class_example}, is restricted to their names and methods.
+In \gls{UML}, a class is represented by a class that is contained in a unique instance of a \gls{UML} model.
+In Java, a class is also represented by class that is contained in a compilation unit, which depicts one file consisting of imports and class specifications as a single unit of compilation~\cite{heidenreich2009a}.
+Names are represented equally in \gls{UML} and Java classes.
+The name of the compilation unit is defined by the fully qualified name of the class, i.e., the concatenation of its namespace and the class name separated by a dot.
+The specification expresses this as the class name to be the suffix of the compilation unit name after the namespace followed by a dot.
+Methods are specified in a dedicated \commonality in the object-oriented design \conceptmetamodel, such that they are only referenced in the class \commonality, but without any specification of the relations of their contents.
+
+\mnote{Component \commonality example}
+The component \commonality, depicted in \autoref{lst:language:component_example}, is restricted to their names.
+In \gls{PCM} and \gls{UML}, components are realized by explicit component or basic component classes, respectively, which share the same name.
+In object-oriented design, components are defined to be represented by classes contained in a package.
+Classes are only considered to represent components when their name has an \enquote{Impl} suffix and their name is then defined to be the component name with an \enquote{Impl} suffix.
+The specification defines this as a prefix, analogous to the suffix for the name of a compilation unit, as it denotes that the component name is the prefix of the class name before \enquote{Impl}.
+Finally, the package name is defined to be the component name but starting with a lowercase letter whereas the component name is start with an uppercase letter.
+Analogous to the prefix definition for the class name, the specification defines a \texttt{firstUpper} operation as the component name shall be the package name with the first letter in uppercase.
+
+
 \subsection{Elements Overview}
-UML diagram or the like
+
+\mnote{Categories of elements}
+The \commonalities language essentially consists of three categories of elements.
+First, at a top level the structure of \commonalities needs to be defined in terms of defining for each of them the \conceptmetamodels they belong to, as well as the features in terms of attributes and references it described.
+Second, each \commonality needs to define its manifestations, i.e., the \metaclasses of \concretemetamodels or other \conceptmetamodels being its manifestation, along with conditions defining when instances of \metaclasses are to be considered a manifestation.
+This defines when a manifestation relation between a \commonality and \metaclasses of another \conceptmetamodel or \concretemetamodel exist.
+Third, each \commonality needs to define the relations of its features to those of its manifestations.
+This defines the manifestation relations, i.e., the conditions that have to hold for considering a manifestation consistent to a \commonality.
 
 \begin{figure}
     \centering
@@ -10,14 +65,45 @@ UML diagram or the like
     \label{fig:language:elements}
 \end{figure}
 
-Additional consolidation of Relations (manifestation Condition, Reference/Attribute Relation), of Operator and of Named elements possible
+\mnote{Structural elements}
+\autoref{fig:language:elements} depicts the essential elements of the \commonalities language.
+At the top, it depicts metamodels, classes, references and attributes as already existing in the notion of a general modeling formalism and as specified in \concretemetamodels.
+The language introduces concepts, which represent the \conceptmetamodels, and \commonalities, of which such a concept consists.
+In our realization, they can be considered specializations of metamodels and classes, as they can be considered as such but with the special semantics of being only auxiliary artifacts for the \commonalities approach.
+A commonality consists of commonality references and attributes, which, again, can be considered specializations of ordinary references attributes.
+In the given examples, we have name attributes and a reference to methods.
+Additionally, a commonality contains manifestations.
+Each manifestation represents the realization of the concept represented by the \commonality in another metamodel by one or more classes and potentially further conditions for these classes.
+Such manifestation are, for example, a class and a compilation unit in Java for the class \commonality depicted in \autoref{lst:language:class_example}.
+Each commonality reference and attribute is complemented by reference and attribute relations that define how these features are related to information in the manifestations.
 
-\subsection{Concept Metamodels}
+\mnote{Relational elements}
+In consequence, the manifestation conditions together with the attribute and reference relations define the consistency relations between the \commonality and its manifestations, which we have introduced as manifestation relations.
+All these relations consists of operators, which define how elements are related, and operands, which define the involved elements to be considered by the operator. 
+The operators can be considered specifications of transformation rules.
+They have a direction, as they may enforce the defined relation either in both directions or only in one of them.
+For example, the name of a class in \autoref{lst:language:class_example} is related to the Java class name bidirectionally (denoted by \enquote{=}), such that a change of the Java class name leads to the change of the name of the class \commonality, which then in consequence changes the \gls{UML} class name, but also a change of the class \commonality name, e.g., because of a change of the \gls{UML} class name, leads to a change of the Java class name.
+The name of a compilation unit, however, is only enforced, because it is only derived from the Java class name, such that a change is propagated because of the changed Java class name anyway.
+
+\mnote{Simplifications}
+For reasons of simplicity, we omitted several elements of the actual language realization, which concerns generalizations as well as specializations of the depicted elements.
+For example, manifestation conditions, reference relations and attribute relations all represent relations between the \commonality and its manifestations, especially comprising a direction, which an be represented in a common supertype \texttt{Relation}.
+Likewise, the three operator types for manifestations, references and attributes can be derived from a common \texttt{Operator} supertype.
+
 
 \subsection{Commonalities and Manifestations}
 
+Concept metamodel it belongs to ...
+
+Each manifestation represents the realization of the concept represented by the \commonality in another metamodel by one or more classes.
+Such a manifestation class only references an ordinary class, but it may additionally have an alias for referencing it and it may be declared as \emph{single} to denote that there may only be a single instance of it, such as the model root containing all other elements.
+The classes of a manifestation may either be ordinary classes of a \concretemetamodel, or they may be \commonalities of a \conceptmetamodel.
+
+
 Participations and participation conditions
 call them participations or manifestation?
+
+conditions restrict at model level rather than type level
 
 \subsection{Properties and Operators}
 Implemented operators:
@@ -31,57 +117,55 @@ Reuse mechanisms, libraries of operators
 
 Discuss that in fact this is comparable to declarative transformation languages, esp. Mappings, but also QVT-R, so no deeper discussion.
 
-
-\subsection{Textual Syntax}
-
-Grammar or maybe only examples, due to not focusing on concrete language and complexity of the actual language.
+Bidirectionalization -> Max' Diss
 
 
 
-\begin{copiedFrom}{VoSE}
 
-\section*{Language Description}
+% \begin{copiedFrom}{VoSE}
 
-As introduced before, our realization of the \commonalities language
-%for the previously explained \commonalities approach
-provides an internal concept definition and uses the \conceptmetamodels as additional metamodels in the operationalization.
-An example for the syntax of the \commonalities language is depicted in \autoref{lst:quality:commonalities_language_example}.
+% \section*{Language Description}
 
-% \begin{figure}
-%     \centering
-%     \todo{Potentially extend running example so that references are covered. At least, we do not have the package in the example}
-%     \includegraphics[width=\columnwidth]{figures/commonalities_language_example.PNG}
-%     \caption{An example for defining the common concept of components}
-%     \label{fig:commonalities_language_example}
-% \end{figure}
+% As introduced before, our realization of the \commonalities language
+% %for the previously explained \commonalities approach
+% provides an internal concept definition and uses the \conceptmetamodels as additional metamodels in the operationalization.
+% An example for the syntax of the \commonalities language is depicted in \autoref{lst:quality:commonalities_language_example}.
 
-\lstinputlisting[language=commonalities, float, belowskip=-0.8 \baselineskip,
-    caption={[Exemplary commonality for components]An exemplary specification of the \texttt{Component} \commonality between \gls{PCM}, UML and the object-oriented design concept in the \commonalities language},
-    captionpos=b,
-    label=lst:quality:commonalities_language_example,
-]{listings/quality/commonalities_language_example.lst}
+% % \begin{figure}
+% %     \centering
+% %     \todo{Potentially extend running example so that references are covered. At least, we do not have the package in the example}
+% %     \includegraphics[width=\columnwidth]{figures/commonalities_language_example.PNG}
+% %     \caption{An example for defining the common concept of components}
+% %     \label{fig:commonalities_language_example}
+% % \end{figure}
 
-The language allows to define \conceptmetamodels by declaring \commonalities, each representing one commonality between different manifestations, such as the \texttt{Component} \commonality in our example.
-Relations between the \conceptmetamodels and their manifestations are supposed to be specified \emph{declaratively}.
-%, which is realized as a \metaclass in the \conceptmetamodel.
-For every \commonality, the \metaclasses in the manifestations that realize them are specified.
-In the example, the \texttt{Component} in \gls{PCM} and the \texttt{Class} in the object-oriented design \conceptmetamodel are %defined as representations of
-related to the \texttt{Component} \commonality.
-In our language, a \commonality is realized by a \metaclass in the metamodel that is generated for a concept, so the \texttt{Component} \commonality is realized by a \texttt{Component} \metaclass.
+% % \lstinputlisting[language=commonalities, float, belowskip=-0.8 \baselineskip,
+% %     caption={[Exemplary commonality for components]An exemplary specification of the \texttt{Component} \commonality between \gls{PCM}, UML and the object-oriented design concept in the \commonalities language},
+% %     captionpos=b,
+% %     label=lst:quality:commonalities_language_example,
+% % ]{listings/quality/commonalities_language_example.lst}
 
-Within a \commonality, attributes and references can be defined, similar to an ordinary \metaclass.
-The relations of an attribute to the manifestation are declared directly at the attribute.
-In the example, a \texttt{name} attribute is specified, which maps to the name of the component in \gls{PCM} and the name appended with an \enquote{Impl} suffix in Java.
-The language %defined by \textcite{gleitze2017a} 
-provides several operators for attribute relations, apart from equality relations.
-The example depicts a prefix operator that allows to compose a String attribute.
-Such operators can be defined independently and added to the language dynamically.
-References can be defined comparably to attributes but can be enriched with a definition of containment relations.
+% The language allows to define \conceptmetamodels by declaring \commonalities, each representing one commonality between different manifestations, such as the \texttt{Component} \commonality in our example.
+% Relations between the \conceptmetamodels and their manifestations are supposed to be specified \emph{declaratively}.
+% %, which is realized as a \metaclass in the \conceptmetamodel.
+% For every \commonality, the \metaclasses in the manifestations that realize them are specified.
+% In the example, the \texttt{Component} in \gls{PCM} and the \texttt{Class} in the object-oriented design \conceptmetamodel are %defined as representations of
+% related to the \texttt{Component} \commonality.
+% In our language, a \commonality is realized by a \metaclass in the metamodel that is generated for a concept, so the \texttt{Component} \commonality is realized by a \texttt{Component} \metaclass.
 
-% Introduce the idea of \enquote{Concepts} and \enquote{Commonalities}, explain how attributes and references are mapped.
-% \todo{We have to align the definition of Concept, Commonality etc. in the paper with the implementation}
+% Within a \commonality, attributes and references can be defined, similar to an ordinary \metaclass.
+% The relations of an attribute to the manifestation are declared directly at the attribute.
+% In the example, a \texttt{name} attribute is specified, which maps to the name of the component in \gls{PCM} and the name appended with an \enquote{Impl} suffix in Java.
+% The language %defined by \textcite{gleitze2017a} 
+% provides several operators for attribute relations, apart from equality relations.
+% The example depicts a prefix operator that allows to compose a String attribute.
+% Such operators can be defined independently and added to the language dynamically.
+% References can be defined comparably to attributes but can be enriched with a definition of containment relations.
 
-The actually conceptualized and implemented language by \textcite{gleitze2017a} is far more sophisticated than the simple overview we provide here. 
-It supports different kinds of bidirectional operators for attribute mappings, containment specifications (so-called \emph{participations}), attribute checks as preconditions for \commonality instantiation, and more.
+% % Introduce the idea of \enquote{Concepts} and \enquote{Commonalities}, explain how attributes and references are mapped.
+% % \todo{We have to align the definition of Concept, Commonality etc. in the paper with the implementation}
 
-\end{copiedFrom} % VoSE
+% The actually conceptualized and implemented language by \textcite{gleitze2017a} is far more sophisticated than the simple overview we provide here. 
+% It supports different kinds of bidirectional operators for attribute mappings, containment specifications (so-called \emph{participations}), attribute checks as preconditions for \commonality instantiation, and more.
+
+% \end{copiedFrom} % VoSE
