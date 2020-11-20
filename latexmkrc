@@ -17,4 +17,4 @@ sub makeglossaries {
 }
 
 # Further cleanup
-$clean_ext .= " bbl bcf blg fdb_latexmk gls ist loa loe lof log lot out run.xml synctex.gz"
+$clean_ext .= " bbl bcf blg fdb_latexmk gls ist loa loe lof log lol lot out run.xml synctex.gz"
