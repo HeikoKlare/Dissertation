@@ -58,6 +58,7 @@ Furthermore, we derive an overview of the resulting process for specifying and e
 
 
 \subsection{Internal and External Specification}
+\label{chap:language:design:internal_external}
 
 \begin{figure}
     \centering
@@ -120,15 +121,34 @@ Then, modeling \concretemetamodels with existing modeling framework and the mani
 
 \subsection{Artifacts and Process}
 
-We chose using \conceptmetamodels as ordinary metamodels and generate actual instances of them, which are kept consistent. This does especially not restrict expressiveness of the relations and this the generation of additional artifacts can be hidden from the user by appropriate tools, it does not induce any drawbacks.
+\mnote{Selected design options}
+Regarding the design option in \autoref{chap:improvement:commonalities:operationalization} and \autoref{chap:language:design:internal_external}, we have made the following, already argued decisions.
+First, we chose to operationalize a specification by treating \conceptmetamodels as ordinary metamodels, such that instances of them are created and kept consistent.
+This option does especially not restrict expressiveness of the relations and the generation of additional models can be hidden from the user by appropriate tooling.
+Second, we chose to provide a language that supports an internal specification of concepts to improve locality of the information regarding each \commonality.
+We expect this specification to be more concise and to better support the initial specification process for \commonalities.
 
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{figures/quality/language/overall_process.png}
-    \caption[Process and artifacts using the \commonalities language]{Depiction of the process for developing, compiling and executing specifications in the \commonalities language. From \concretemetamodels and \commonalities specifications additional \conceptmetamodels and transformations are generated, which are executed at runtime for preserving consistency of models.}
+    \caption[Process and artifacts using a language for \commonalities]{The process for developing, compiling and executing specifications in a language for \commonalities. From \concretemetamodels and \commonalities specifications, additional \conceptmetamodels and transformations are generated, which are executed at runtime for preserving consistency of models.
+    \Commonalities specifications by domain experts are marked green, the generated artifacts (\conceptmetamodels and transformations forming a network) are marked orange, and runtime artifacts including concrete systems and changes are marked blue.}
     \label{fig:language:process}
 \end{figure}
-\todo{Grafik für die Zusammenhänge: Ansatz/Sprache bekommt konkrete Metamodelle + Commonalities-Spezifikation als Eingabe, erzeugt daraus Konzeptmetamodelle und Transformationen, die dann zur Laufzeit ausgeführt werden und Konzeptmodelle und konkrete Modelle erzeugen.}
+
+\mnote{Specification and compilation}
+The process of specifying, compiling and executing artifacts in such a language is depicted in \autoref{fig:language:process}.
+It is a specialization of the general process already depicted in \autoref{fig:introduction:process_overview}.
+A domain expert or transformation developer defines \commonalities specifications using the language, which refers to \concretemetamodels that are to be kept consistent by the transformations derived from that specification.
+The compiler of the language takes the \concretemetamodels together with the specifications to generate a set of \conceptmetamodels in addition to the existing \concretemetamodels, as well as a set of bidirectional transformations, which implement consistency preservation for the manifestation relations between the \conceptmetamodels and \concretemetamodels.
+These artifacts together form a transformation network, as introduced in \autoref{def:transformationnetwork}.
+
+\mnote{Execution}
+A system developer specifies a system by models that instantiate the \concretemetamodels of the \commonalities specification.
+The complete system description consists of instances of these \concretemetamodels, but also, in the best case hidden from developer, of instances of the \conceptmetamodels for means of consistency preservation.
+Whenever the system developer produces changes to the instances of the \concretemetamodels, the transformation network can be applied to the changes together with the models.
+It then returns a new set of instances of the \concretemetamodel and \conceptmetamodels that are consistent again, according to the proposed correctness notion of transformation networks in \autoref{def:transformationnetworkcorrectness}.
+
 
 
 \section{The \Commonalities Language}
@@ -229,37 +249,37 @@ Further benefit: Specification effort, adding concrete metamodel, adapting commo
 % In this paper, we focus on the presentation of fundamental concepts  and therefore only outline the language to give an impression of what our proof-of-concept evaluation is based on.
 
 
-\section*{Design Options}
+% \section*{Design Options}
 
-The development of a language for realizing the \commonalities approach provides at least two areas of design options.
-First, there are different possibilities to operationalize the approach, which covers decisions that are not visible to the user of the language.
-Second, different options regarding how to specify \conceptmetamodels and their relations to their manifestations exist, which are decisions that are visible to the user of the language.
+% The development of a language for realizing the \commonalities approach provides at least two areas of design options.
+% First, there are different possibilities to operationalize the approach, which covers decisions that are not visible to the user of the language.
+% Second, different options regarding how to specify \conceptmetamodels and their relations to their manifestations exist, which are decisions that are visible to the user of the language.
 
-We already discussed in \autoref{chap:improvement:commonalities:operationalization} that there are two different options for operationalizing a specification of \commonalities: one that uses instances of the concept metamodels and defined transformations at runtime, and one that generates direct transformations between the \concretemetamodels from the specification.
-Since the way a specification is operationalized does not affect the user of the approach, it is up to the language and its designer to choose one of the options.
-We chose to build a language following the former approach, because it does not limit the possible relations that can be expressed.
-%We chose to build a language following the former approach, because it produces less initial effort to achieve a proof-of-concept that can be used to validate whether the approach is promising at all.
+% We already discussed in \autoref{chap:improvement:commonalities:operationalization} that there are two different options for operationalizing a specification of \commonalities: one that uses instances of the concept metamodels and defined transformations at runtime, and one that generates direct transformations between the \concretemetamodels from the specification.
+% Since the way a specification is operationalized does not affect the user of the approach, it is up to the language and its designer to choose one of the options.
+% We chose to build a language following the former approach, because it does not limit the possible relations that can be expressed.
+% %We chose to build a language following the former approach, because it produces less initial effort to achieve a proof-of-concept that can be used to validate whether the approach is promising at all.
 
-Regarding the specification of \conceptmetamodels and the transformations, there are two options:
-\begin{description}[leftmargin=\parindent]
-    \item[External concept definition:] \Conceptmetamodels are defined as ordinary metamodels and the relations to their manifestation are defined in an individual transformation specification %, or even specifications in ordinary transformation languages, 
-    for each manifestation. %$\Rightarrow$ Benefit: Each Mapping independently specifiable
-    \item[Internal concept definition:] A specialized language allows to define the \conceptmetamodel and the \commonalities it consists of together with relations of all \commonalities to their manifestations. %$\Rightarrow$ Benefit: No elements accidentally missed \todoAll{Really or is there another benefit?}
-\end{description}
+% Regarding the specification of \conceptmetamodels and the transformations, there are two options:
+% \begin{description}[leftmargin=\parindent]
+%     \item[External concept definition:] \Conceptmetamodels are defined as ordinary metamodels and the relations to their manifestation are defined in an individual transformation specification %, or even specifications in ordinary transformation languages, 
+%     for each manifestation. %$\Rightarrow$ Benefit: Each Mapping independently specifiable
+%     \item[Internal concept definition:] A specialized language allows to define the \conceptmetamodel and the \commonalities it consists of together with relations of all \commonalities to their manifestations. %$\Rightarrow$ Benefit: No elements accidentally missed \todoAll{Really or is there another benefit?}
+% \end{description}
 
-A benefit of the first option is that the relation to each manifestation can be specified independently, which reduces dependencies between the different manifestations of one \conceptmetamodel.
-Additionally, it could be realized without developing a new language. The \conceptmetamodels can be described just like any other ordinary metamodel and one can use any existing transformation language, such as QVT, for the transformation definitions.
-The second option, in contrast, requires a dedicated language that enables an integrated specification of the \conceptmetamodel and its relations to manifestations.
-We chose to build a language following the second option because we expect its benefits to outweigh the mentioned disadvantages.
-First, it improves locality: all information about one \commonality is represented in one place.
-%instead of separating the \commonality definition from the transformation specifications.
-Because of that, we expect that it is easier for developers to understand the combined transformation logic concerning one \commonality.
-Additionally, the \conceptmetamodel can be easily extended with this solution whenever adding a manifestation requires defining a new \commonality.
-Finally, we expect that, compared to other options, grouping transformations by their \commonality reduces the possibility for developers to forget defining one or more relevant manifestations for a \commonality.
-%Finally, it is easier to ensure that for all \commonalities a relation to the manifestation is defined than in the first option, where \commonality specification and relation specification are separated.
-%Nevertheless, an obvious drawback of the second option in contrast to the first is that the mappings to the concrete metamodels cannot be specified independently but are tied to the Commonality definition.
-%Additionally, we expect that it makes it easier to understand the semantics of a \commonality and how it relates to its manifestations.}
-%and ensure that no elements are specified in the \conceptmetamodel that do have no manifestation in all relevant \concretemetamodels.
+% A benefit of the first option is that the relation to each manifestation can be specified independently, which reduces dependencies between the different manifestations of one \conceptmetamodel.
+% Additionally, it could be realized without developing a new language. The \conceptmetamodels can be described just like any other ordinary metamodel and one can use any existing transformation language, such as QVT, for the transformation definitions.
+% The second option, in contrast, requires a dedicated language that enables an integrated specification of the \conceptmetamodel and its relations to manifestations.
+% We chose to build a language following the second option because we expect its benefits to outweigh the mentioned disadvantages.
+% First, it improves locality: all information about one \commonality is represented in one place.
+% %instead of separating the \commonality definition from the transformation specifications.
+% Because of that, we expect that it is easier for developers to understand the combined transformation logic concerning one \commonality.
+% Additionally, the \conceptmetamodel can be easily extended with this solution whenever adding a manifestation requires defining a new \commonality.
+% Finally, we expect that, compared to other options, grouping transformations by their \commonality reduces the possibility for developers to forget defining one or more relevant manifestations for a \commonality.
+% %Finally, it is easier to ensure that for all \commonalities a relation to the manifestation is defined than in the first option, where \commonality specification and relation specification are separated.
+% %Nevertheless, an obvious drawback of the second option in contrast to the first is that the mappings to the concrete metamodels cannot be specified independently but are tied to the Commonality definition.
+% %Additionally, we expect that it makes it easier to understand the semantics of a \commonality and how it relates to its manifestations.}
+% %and ensure that no elements are specified in the \conceptmetamodel that do have no manifestation in all relevant \concretemetamodels.
 
 
 \section*{Language Description}
