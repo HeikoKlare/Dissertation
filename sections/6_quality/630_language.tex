@@ -41,24 +41,86 @@ Since we focus on the concepts and design options for such a language in this th
 
 \section{Design Options}
 
-\subsection{Internal and External Specification}
+\mnote{Space of design options}
+The development of a language for realizing the \commonalities approach offers several degrees of freedom.
+They range from conceptual degrees of freedom, e.g., regarding the operationalization alternatives discussed in \autoref{chap:improvement:commonalities:operationalization}, over language types, such as textual or graphical representations, to the specific syntax to use or even reuse from existing languages.
+We in particular consider the conceptual degrees of freedom and give an overview of how an according textual syntax can look like.
 
-Design Options: Commonalities specification
+\mnote{Operationalization options}
+The conceptual degrees of freedom include options for operationalizing a specification in terms of using the \conceptmetamodels as additional metamodels with the manifestation relations constituting ordinary transformation, or in terms of generating direct transformations between the \concretemetamodels from the \commonalities specification, as both discussed in \autoref{chap:improvement:commonalities:operationalization}.
+The selection between these options is transparent to the developer of a transformation network, as it only affects its operationalization.
+
+\mnote{Specification options}
+In addition, we can distinguish \emph{internal} and \emph{external} specifications, depending on whether the specification is decomposed by the \commonalities or by the defined manifestation relations.
+This decision affects the developer of a transformation network, as he or she is directly concerned with the way in which \commonalities are specified.
+We discuss the these two specification options in the following in more detail.
+Furthermore, we derive an overview of the resulting process for specifying and executing artifacts in such a language.
+
+
+\subsection{Internal and External Specification}
 
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{figures/quality/language/design_options.png}
-    \caption[Design options for \commonalities specification]{Exemplification of alternatives to specify \commonalities by means of an integrate definition of \conceptmetamodels and manifestation relations or their separate specification.}
+    \caption[Design options for \commonalities specification]{Exemplification of alternatives to specify \commonalities by means of an integrated definition of \commonalities with their manifestation relations or the separate specification of complete \conceptmetamodels and manifestation relations.}
     \label{fig:language:design_options}
 \end{figure}
 
-Benefits of internal: easy to add commonalities + improved locality / conciseness
-Drawbacks of internal: more difficult to add metamodels, new language required
+\mnote{Decomposition dimensions}
+We can distinguished two ways in which \conceptmetamodels and manifestation relations can be specified according to the \commonalities approach.
+They depend on the dimension along which the specification is decomposed.
+More precisely, the specification can either be decomposed along the \commonalities, such that each \commonalities together with all its manifestations is defined at one place, or it can be decomposed along the manifestation relations, such that all manifestation relations between a \conceptmetamodel and its manifestation are defined at one place.
+We refer to these specifications as \emph{internal} and \emph{external} specification.
+\begin{properdescription}
+    \item[External concept definition:] \Conceptmetamodels are defined as ordinary metamodels and each manifestation relation is defined as an individual transformation, i.e., manifestation relations are defined externally to the \conceptmetamodels and their \commonalities.
+    \item[Internal concept definition:] Each \commonality of each \conceptmetamodel is defined together with all its relations to its manifestations, i.e., manifestation relations are defined internally with the \commonalities they belong to.
+\end{properdescription}
+%We call the former way an \emph{internal} specification and the latter an \emph{external} specification, related to whether relations are defined internally with the \commonalities they belong to or as an external artifact.
+We have proposed this distinction in previous work~\cite{klare2019models} and depict it in \autoref{fig:language:design_options}.
 
-We develop a language for internal specifications
+\mnote{External specification}
+Without developing an additional language, the \commonalities approach can be realized by developing \conceptmetamodels as if they are ordinary metamodels with appropriate modeling tools.
+The manifestation relations can then be defined with any existing transformation language that is able to generate incremental transformations, i.e., consistency preservation rules.
+This conforms to an \emph{external} specification, in which \conceptmetamodels and manifestation relations are defined separately.
+It decomposes the specification along the relations, thus there are many separate specification as there are \conceptmetamodels and manifestation relations to be defined, as depicted in the left of \autoref{fig:language:design_options}.
+For example, for Java and \gls{UML} an object-oriented design \conceptmetamodel as well as two manifestation relations to each of the \concretemetamodels would be defined separately.
+
+\mnote{Internal specification}
+Developing a specific language allows to integrate the definition of \commonalities with their manifestation relations.
+The relations to manifestation of a \commonality are then defined at one place with the declaration of the \commonality, improving locality of this related information.
+This conforms to an \emph{internal} specification.
+It decomposes the specification along the \commonalities, thus as many separate specification as \commonalities are defined exist, as depicted in the right of \autoref{fig:language:design_options}.
+For example, for Java and \gls{UML} a class \commonality together with its manifestation as classes in both Java and \gls{UML} with the according relations of attribute values and references would be defined at one place.
+
+\mnote{Tyranny of dominant decomposition}
+Selecting one of these types of specification suffers from the \enquote{tyranny of the dominant decomposition}~\cite{tarr1999Tyranny-ICSE}.
+This means, decomposition is only possible along one dimension of concerns, i.e., either the structural specification of \commonalities or the relational specification of manifestation relations, such that either one suffers from lacking separation of concerns in the other dimension.
+Thus, while one approach improves locality when adding \commonalities, the other improves locality adding manifestation relations.
+
+\mnote{External specification benefits}
+External specifications benefit from the separation of each manifestation relation into its own specification.
+This reduces dependencies between the manifestations and especially allows each developer who is responsible for a specific \concretemetamodel to define the relation to each related \conceptmetamodel as a whole instead of spreading his or her specification among all \commonalities specifications describing a concept represented in the \concretemetamodel.
+In consequence, adding a new \concretemetamodel only requires the addition of manifestation relations to \conceptmetamodels and potentially updates to them.
+This scenario is well supported by these kinds of specification, because locality of all information regarding a manifestation relation is high and the manifestation relations represent the largest part of the addition.
+Additionally, this approach can be realized without developing a new language, as already discussed before.
+
+\mnote{Internal specification benefits}
+Internal specification require a dedicated language enabling the integrated specification of \commonalities and their manifestations.
+This improves locality regarding the information about each \commonality, as each \commonality is represented along with all its manifestations.
+In consequence, when initially developing \commonalities for a set of \concretemetamodels, it is easier to add each single \commonality, because all information about the \commonality and its relation to the manifestation can be defined at one place.
+This can make it easier to understand the overall relation of that common concept among all \concretemetamodels.
+In addition, it makes it more unlikely for a developer to miss the definition of one or more manifestations of a \commonality, as they are obviously missing in the specification of the \commonality, whereas in an external specification it is missing somewhere in the complete manifestation relation between the \conceptmetamodel and its manifestation.
+Finally, the approach promises to be more concise, because the manifestation relations can be defined within the \commonality they belong to instead of referencing the \commonality within a transformation again.
+
+\mnote{Proposal of internal specification language}
+To benefit from locality regarding each \commonality and a more concise specification, we have decided to design a language that supports internal specifications.
+Depending on the usage context and the more likely change scenarios, an external specification may, however, be more appropriate.
+Then, modeling \concretemetamodels with existing modeling framework and the manifestation relations with existing transformation languages is sufficient.
 
 
 \subsection{Artifacts and Process}
+
+We chose using \conceptmetamodels as ordinary metamodels and generate actual instances of them, which are kept consistent. This does especially not restrict expressiveness of the relations and this the generation of additional artifacts can be hidden from the user by appropriate tools, it does not induce any drawbacks.
 
 \begin{figure}
     \centering
