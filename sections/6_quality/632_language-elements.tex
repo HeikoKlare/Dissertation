@@ -83,6 +83,7 @@ In consequence, the manifestation conditions together with the attribute and ref
 All these relations consists of operators, which define how elements are related, and operands, which define the involved elements to be considered by the operator. 
 The operators can be considered specifications of transformation rules, which take operands providing the information necessary to check or preserve consistency.
 In our language realization, operators can be specified by implementing according interfaces and thus dynamically extending the language with arbitrary operators.
+In consequence, these operators can be treated as reusable libraries containing operators at different levels of abstraction.
 They can, however, also be defined as a static part of the language and thus without the possibility to extend them.
 Operators have a direction, as they may enforce the defined relation either in both directions or only in one of them.
 For example, the name of a class in \autoref{lst:language:class_example} is related to the Java class name bidirectionally (denoted by \enquote{=}), such that a change of the Java class name leads to the change of the name of the class \commonality, which then in consequence changes the \gls{UML} class name, but also a change of the class \commonality name, e.g., because of a change of the \gls{UML} class name, leads to a change of the Java class name.
@@ -232,6 +233,106 @@ Finally, operators should only employ information provided by its operands.
 They should especially not use further feature of given elements or even traverse the model to retrieve further elements.
 If this is the case, the graph induced by the relations between features of \commonalities and their manifestations defined through the operands represents the graph of consistency relations, which we have employed in \autoref{chap:compatibility} to define and analyze compatibility of consistency relations.
 Thus, if this induced graph forms a tree, according to \autoref{def:relationtree}, the consistency relations are inherently compatible according to \autoref{theorem:treecompatibility}, as we have aimed to achieve with the construction approach of \commonalities, as proposed in \autoref{chap:improvement:commonalities:tree}.
+
+
+\subsection{Operationalization to Transformations}
+
+\mnote{Operationalization according to \mappings language}
+In \autoref{chap:language:design:artifacts_process}, we have already depicted that a \commonalities specification needs to be compiled to \conceptmetamodels and transformations between them and existing \concretemetamodels to be used as an ordinary transformation network.
+Since the semantics of relations defined between a \commonality and its manifestations is analogous to the semantics of bidirectional relations defined in the \mappings language~\cite[Chap. 7]{kramer2017a}, we refer to that detailed discussion for the operationalization of \commonalities specifications to transformations.
+We still discuss essential responsibilities of the compiler process.
+
+% \mnote{Essential compiler responsibilities}
+% First, we consider the compilation to the \reactionslanguage, which is part of the \vitruv framework, implements delta-based consistency preservation rules according to our formalism in \autoref{chap:correctness} and is the same language to which artifacts of the \mappings language compile.
+% Then, we discuss how the scenarios of \commonality instantiation and deletion by means of matching manifestations, and of updates by means of operator execution are realized.
+
+% \subsection{Compiling to \reactions}
+
+\mnote{Suitability of \reactions}
+The operationalization of \commonalities specifications requires the derivation of transformations and, in particular, their consistency preservation rules according to \autoref{def:consistencypreservationrule}.
+Thus, we need to derive rules that instantiate, delete or update \commonalities after changes to a manifestation, such that they are again consistent to the consistency relations implied by the manifestation relations defined in the \commonalities specification, and vice versa.
+The \reactionslanguage (see \autoref{chap:foundations:transformations:reactions}) allows the definition of \reactions and routines that restore consistency after changes.
+Each \reaction defines the type of change it reacts to and executes routines, which identify whether the consistency relation to which they preserve consistency is violated by that change and then execute actions to restore it.
+Since that kind of specification fits to our formalization of consistency preservation rules in \autoref{chap:correcntess} and thus fits to the goals of the operationalization of \commonalities specifications, we describe the operationalization to \reactions and have also implemented it in our prototype.
+An analogous operationalization has been developed for the \mappings language by \textcite[Sec. 7.7]{kramer2017a}, which also compiles to \reactions.
+
+\mnote{\Reactions for each change type}
+The operationalization of \commonalities to \reactions requires that a \reaction is created for each change that may require the instantiation, deletion or update of a \commonality.
+Thus, for each \metaclass and each feature referenced within a \commonality, as well as for each \metaclass realizing a \commonality and each of its features, a \reaction for their changes has to be created.
+
+\mnote{\Reactions for instantiation}
+The creation of an instance of each of the \metaclasses in a manifestation, as well as each modification of a feature that is used within the manifestation conditions can lead to a set of elements within the models that match the manifestation.
+Thus, for each of these changes a \reaction needs to be derived that instantiates the \commonality.
+In addition, for the creation of \commonality, a \reaction that creates all its manifestations has to be created.
+\citeauthor{kramer2017a} proposes an analogous algorithm for the \mappings language~\cite[Alg. 1]{kramer2017a}.
+
+\mnote{\Reactions for deletion}
+Likewise, a deletion of an instance of any of the \metaclasses in a manifestation, as well as any modification of a feature that is used within the manifestation conditions can lead to the situation that elements that previously matched a manifestation do not match it anymore.
+Thus, for each of these changes a \reaction needs to be derives that deletes the \commonality, and for the deletion of a \commonality a \reaction that removes all its manifestation has to be created.
+For the \mappings language, this has been defined in an analogous algorithm~\cite[Alg. 2]{kramer2017a}.
+
+Finally, all changes to features used within the attribute and reference relations of a \commonality can require updates of the \commonality attributes and references, and, in consequence, of the features of the other manifestations.
+Thus, for each attribute and reference of both the \commonality and its manifestations, \reactions have to be created that update the related elements accordingly.
+The definition how to update the related elements is given by the implementation of the operators, such as the \emph{prefix} operator depicted in \autoref{lst:language:prefix_operator}.
+An algorithm for updating features that are put into relation has also been proposed for the \mappings language by \textcite[Alg. 3]{kramer2017a}.
+
+\mnote{Benefits of \reactions}
+A benefit of compiling to \reactions is that they have well-defined semantics~\cite[Sec. 6.7]{kramer2017a} and that they are proven complete and correct~\cite[Sec. 9.2.4 and 9.3]{kramer2017a}.
+This means that they are able to preserve consistency according to any possible consistency relation and that their execution actually actually preserves consistency to the consistency relation that is implied by the specified consistency preservation rule.
+Thus, the transformation language with which the manifestation relations of \commonalities are operationalized does especially not restrict expressiveness in any way.
+
+%% OLD STRUCTURE WITH OPERATIONALIZATION IN OWN SECTION
+% \section{Operationalization of Transformations}
+% \label{chap:language:operationalization}
+
+% \mnote{Operationalization according to \mappings language}
+% In the previous section, we have discussed relevant elements for the \commonalities language and their semantics.
+% We have also sketched an exemplary textual syntax, we which have also used for the prototypical implementation of the language.
+% In \autoref{chap:language:design:artifacts_process}, we have already depicted that such a specification needs to be compiled to \conceptmetamodels and transformations between them an existing \concretemetamodels to be used as an ordinary transformation network.
+% Since the semantics of relations defined between a \commonality and its manifestations is analogous to the semantics of bidirectional relations defined in the \mappings language~\cite[Chap. 7]{kramer2017a}, we refer to that detailed discussion for the operationalization of \commonalities specifications to transformations.
+
+% \mnote{Essential compiler responsibilities}
+% We still discuss essential responsibilities of the compiler process.
+% First, we consider the compilation to the \reactionslanguage, which is part of the \vitruv framework, implements delta-based consistency preservation rules according to our formalism in \autoref{chap:correctness} and is the same language to which artifacts of the \mappings language compile.
+% Then, we discuss how the scenarios of \commonality instantiation and deletion by means of matching manifestations, and of updates by means of operator execution are realized.
+
+% \subsection{Compiling to \reactions}
+
+% \mnote{Suitability of \reactions}
+% The operationalization of \commonalities specifications requires the derivation of transformations and, in particular, their consistency preservation rules according to \autoref{def:consistencypreservationrule}.
+% Thus, we need to derive rules that instantiate, delete or update \commonalities after changes to a manifestation, such that they are again consistent to the consistency relations implied by the manifestation relations defined in the \commonalities specification, and vice versa.
+% The \reactionslanguage (see \autoref{chap:foundations:transformations:reactions}) allows the definition of \reactions and routines that restore consistency after changes.
+% Each \reaction defines the type of change it reacts to and executes routines, which identify whether the consistency relation to which they preserve consistency is violated by that change and then execute actions to restore it.
+% Since that kind of specification fits to the goals of the operationalization of \commonalities specifications, we described the operationalization to \reactions and have also implemented it in our prototype.
+% An analogous operationalization has been developed for the \mapping language by \textcite[Sec. 7.7]{kramer2017a}.
+
+% \mnote{\Reactions for each change type}
+% The operationalization of \commonalities to \reactions requires that a \reaction is created for each change that may require the instantiation, deletion or update of a \commonality.
+% Thus, for each \metaclass and each feature references within a \commonality, a \reaction for their changes has to be created.
+% We discuss the details for the different scenarios of instantiation, deletion and update in the subsequent subsections.
+
+% \mnote{Benefits of \reactions}
+% A benefit of compiling to \reactions is that they have well-defined semantics~\cite[Sec. 6.7]{kramer2017a} and that they are proven complete and correct~\cite[Sec. 9.2.4 and 9.3]{kramer2017a}.
+% This means that they are able to preserve consistency according to any possible consistency relation and that their execution actually actually preserves consistency to the consistency relation that is implied by the specified consistency preservation rule.
+% Thus, the transformation language with which the manifestation relations of \commonalities are operationalized does especially not restrict expressiveness in any way.
+
+
+% \subsection{Matching Manifestations}
+
+% Conforms to instantiation (/deletion)
+
+% \cite[Sec. 7.7.4]{kramer2017a}.
+% Instantiation: \cite[Alg. 1]{kramer2017a}
+% Deletion: \cite[Alg. 2]{kramer2017a}
+% Feature update: \cite[Alg. 3]{kramer2017a}
+
+
+% \subsection{Executing Operators}
+
+% Conforms to update
+% Operators are executed as soon as one of the used values (parameters) is changed
+% Reuse mechanisms, libraries of operators
+
 
 
 % Implemented operators:
