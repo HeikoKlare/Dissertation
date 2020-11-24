@@ -1,4 +1,5 @@
 \section{The \Commonalities Language}
+\label{chap:language:commonalities}
 
 \mnote{Section overview}
 In this section, we present an overview of the \commonalities language.
@@ -105,7 +106,7 @@ In theory, from such a specification consistency relations, according to \autore
 
 \mnote{Consistency preservation}
 We especially want to preserve consistency rather than only checking it, and thus derive consistency preservation rules from such a specification.
-In \autoref{chap:language:operationalization}, we discuss such an operationalization in more detail.
+In \autoref{chap:language:commonalities:operationalization}, we discuss such an operationalization in more detail.
 In general, we distinguish the instantiation, update and deletion of a \commonality, according to the scenarios depicted for \mappings the in the bidirectional \mappings language~\cite[Sec. 7.2.1]{klare2020Vitruv-JSS}.
 The \commonalities language specifies a bidirectional transformation between a \commonality and each of its manifestations.
 Thus the behavior of each such transformation conforms to the behavior of the \mappings language, in which we could define the transformation between a \commonality and its manifestation.
@@ -236,24 +237,19 @@ Thus, if this induced graph forms a tree, according to \autoref{def:relationtree
 
 
 \subsection{Operationalization to Transformations}
+\label{chap:language:commonalities:operationalization}
 
 \mnote{Operationalization according to \mappings language}
 In \autoref{chap:language:design:artifacts_process}, we have already depicted that a \commonalities specification needs to be compiled to \conceptmetamodels and transformations between them and existing \concretemetamodels to be used as an ordinary transformation network.
 Since the semantics of relations defined between a \commonality and its manifestations is analogous to the semantics of bidirectional relations defined in the \mappings language~\cite[Chap. 7]{kramer2017a}, we refer to that detailed discussion for the operationalization of \commonalities specifications to transformations.
 We still discuss essential responsibilities of the compiler process.
 
-% \mnote{Essential compiler responsibilities}
-% First, we consider the compilation to the \reactionslanguage, which is part of the \vitruv framework, implements delta-based consistency preservation rules according to our formalism in \autoref{chap:correctness} and is the same language to which artifacts of the \mappings language compile.
-% Then, we discuss how the scenarios of \commonality instantiation and deletion by means of matching manifestations, and of updates by means of operator execution are realized.
-
-% \subsection{Compiling to \reactions}
-
 \mnote{Suitability of \reactions}
 The operationalization of \commonalities specifications requires the derivation of transformations and, in particular, their consistency preservation rules according to \autoref{def:consistencypreservationrule}.
 Thus, we need to derive rules that instantiate, delete or update \commonalities after changes to a manifestation, such that they are again consistent to the consistency relations implied by the manifestation relations defined in the \commonalities specification, and vice versa.
 The \reactionslanguage (see \autoref{chap:foundations:transformations:reactions}) allows the definition of \reactions and routines that restore consistency after changes.
 Each \reaction defines the type of change it reacts to and executes routines, which identify whether the consistency relation to which they preserve consistency is violated by that change and then execute actions to restore it.
-Since that kind of specification fits to our formalization of consistency preservation rules in \autoref{chap:correcntess} and thus fits to the goals of the operationalization of \commonalities specifications, we describe the operationalization to \reactions and have also implemented it in our prototype.
+Since that kind of specification fits to our formalization of consistency preservation rules in \autoref{chap:correctness} and thus fits to the goals of the operationalization of \commonalities specifications, we describe the operationalization to \reactions and have also implemented it in our prototype.
 An analogous operationalization has been developed for the \mappings language by \textcite[Sec. 7.7]{kramer2017a}, which also compiles to \reactions.
 
 \mnote{\Reactions for each change type}
@@ -281,7 +277,56 @@ A benefit of compiling to \reactions is that they have well-defined semantics~\c
 This means that they are able to preserve consistency according to any possible consistency relation and that their execution actually actually preserves consistency to the consistency relation that is implied by the specified consistency preservation rule.
 Thus, the transformation language with which the manifestation relations of \commonalities are operationalized does especially not restrict expressiveness in any way.
 
-%% OLD STRUCTURE WITH OPERATIONALIZATION IN OWN SECTION
+
+\subsection{Expected Benefits}
+\label{chap:language:commonalities:benefits}
+
+The \commonalities approached proposed in \autoref{chap:improvement} can provide several benefits compared to an ordinary network of transformations, especially in terms of mitigating the trade-off between correctness and reusability of the transformations.
+While that is a conceptual benefit that is given by construction of the approach and not only a claim that has to be validated, the expected benefits of a dedicated \commonalities language especially concern usability and applicability of the approach, which can be argued but also have to be empirically evaluated to provide further evidence.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/quality/language/benefit_comprehensibility.png}
+    \caption[Conciseness of \commonalities in comparison to \acrshort{QVTR}]{Example for consistency relations between classes and components expressed with \qvtr and the \commonalities approach.}
+    \label{fig:language:conciseness_example}
+\end{figure}
+
+In \autoref{fig:language:conciseness_example}, we depict simplified consistency relations between components in \gls{PCM} and \gls{UML}, as well as classes in Java, together with a specification of these consistency relations in \qvtr and the \commonalities language.
+In contrast to our previous examples in \autoref{lst:language:component_example} and \autoref{lst:language:class_example}, the \commonalities specification does not define a hierarchy of \commonalities with two \conceptmetamodels for component-based and object-oriented design, but defines the Java manifestation within the component \commonality.
+The example is supposed to give an impression of the expected conciseness of \commonalities specifications in comparison to ordinary, bidirectional specifications, due to which we expect benefits regarding comprehensibility and specification effort.
+
+\mnote{Improving comprehensibility}
+As a first benefit, we expect the \commonalities language to improve comprehensibility.
+The language decomposes the specification of consistency along the \commonalities rather than along the transformations as with ordinary transformation languages.
+In consequence, the information how a single common concept is represented in different metamodels is necessarily spread across several transformations if each transformation only related two metamodels.
+With \commonalities, this information is located at a single place, which is the specification of the according \commonality.
+We expect this to improve the overall comprehensibility of how different elements in different metamodels sharing a common concept are related.
+While a \commonalities specification improves compatibility anyway due to its likeliness of leading to a consistency relation tree, it can also make it easier for developers to get a global understanding of consistency, which would be necessary to avoid incompatibilities.
+This is due to the reason that incompatibilities occur when different transformations relate the same elements in different ways, which becomes more unlikely if these different transformations are defined at one place, within the \commonality, such that developers responsible for other metamodels and thus further manifestation of that \commonality can easily understand the notion of consistency the other developers have.
+\autoref{fig:language:conciseness_example} demonstrates how information about a component \commonality is represented at one place with the \commonalities language, whereas it is spread across three \qvtr transformations relating al pairs of metamodels.
+As discussed in \autoref{chap:improvement:benefits:specification_effort}, the number of transformations increases even quadratically with the number of manifestations to keep consistent.
+Finally, this is only a benefit of the \commonalities language, which realizes an internal specification of concepts (cf.\ \autoref{chap:language:design:internal_external}), because only such a realization decomposes the specification along the \commonalities.
+
+%\subsection{Reducing Specification Effort}
+\mnote{Reducing specification effort by \commonalities approach}
+In \autoref{chap:improvement:benefits:specification_effort}, we have discussed the reduced specification effort of the \commonalities approach in general, when considering the scenario that a further metamodel shall be kept consistent.
+Especially if the information this metamodel shares with other \concretemetamodels of an existing \commonalities specification is already represented by \commonalities, only the manifestation relations of the elements of the metamodel to be added to the existing \commonalities have to be defined.
+In an ordinary transformation network, all pairwise relations of the metamodel to be added and the existing metamodels, with whom it shares common concepts, have to be defined, potentially leading to duplications and thus higher effort.
+
+\mnote{Reducing specification effort by \commonalities language}
+We have, however, also discussed that the effort for keeping instances of two metamodels consistent or, analogously, the initial effort for defining \commonalities for multiple metamodels by specifying the \commonalities for the first two of them can be high and, in particular, higher than defining ordinary transformations.
+Two metamodels can be kept consistent by a single transformation, whereas a \commonalities specification requires an additional \conceptmetamodel and two transformations, one between each \concretemetamodel and that \conceptmetamodels, to keep them consistent.
+The \commonalities language reduces the effort for specifying these three artifacts by the choice of an internal specification of concepts.
+A single transformation rule for a consistency relation of a common concept is expressed by a \commonality, its manifestations and the specification of relevant features and their relation to the manifestations.
+But instead of three places to define this information at, it is defined at the one place of the \commonality specification.
+Although \autoref{fig:language:conciseness_example} only represents a single, simple example, it gives an impression of that a \commonalities specification, even concerning three rather than two manifestations to keep consistent, is not less concise than the expression of the according consistency relation in \qvtr.
+This comparison implicitly assumes an intuitive comparison of conciseness in terms of lines of code.
+It is, of course, an open question whether the specification effort actually correlates with such a metric and whether conciseness according to that metric is even given in further cases than the single one depicted here.
+Nevertheless, we have argued indicators for expecting the benefit of reducing specification effort by the proposed language, but emphasize that its validation requires empirical studies in terms of controlled experiments with developers applying both approaches and measuring their effort in terms of necessary time to achieve an error-free solution.
+
+
+
+%% OLD STRUCTURE WITH OPERATIONALIZATION AND BENEFITS IN OWN SECTIONS
 % \section{Operationalization of Transformations}
 % \label{chap:language:operationalization}
 
@@ -332,6 +377,26 @@ Thus, the transformation language with which the manifestation relations of \com
 % Conforms to update
 % Operators are executed as soon as one of the used values (parameters) is changed
 % Reuse mechanisms, libraries of operators
+
+
+% \section{Expected Benefits}
+
+% The \commonalities approached proposed in \autoref{chap:improvement} can provide several benefits compared to an ordinary network of transformations, especially in terms of mitigating the trade-off between correctness and reusability of the transformations.
+% While that is a conceptual benefit that is given by construction of the approach and not only a claim that has to be validated, the expected benefits of a dedicated \commonalities language especially concern usability and applicability of the approach, which can be argued but also have to be empirically evaluated to provide further evidence.
+
+
+% \subsection{Improving Comprehensibility}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=\textwidth]{figures/quality/language/benefit_comprehensibility.png}
+%     \caption[Benefit of \commonalities regarding comprehensibility]{Example for consistency relations between classes and components expressed with \qvtr and the \commonalities approach.}
+%     \label{fig:language:benefit_comprehensibility}
+% \end{figure}
+
+% \subsection{Reducing Specification Effort}
+
+% Further benefit: Specification effort, adding concrete metamodel, adapting commonality, easier with internal specification
 
 
 
