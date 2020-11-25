@@ -3,13 +3,33 @@
 }
 \label{chap:commonalities_evaluation}
 
-\todo{Draw tree structure of case study PCM-UML-Java (best from thesis Lukas)}
+\mnote{Summary of contributions}
+In the preceding chapters \ref{chap:classification}--\ref{chap:language}, we have discussed quality property of transformation networks and how they can be systematically improved.
+We have discussed the effect of the network topology on properties, and we have derived the \commonalities approach for constructing transformation networks, which uses the effects of topologies to optimize specific quality properties.
+Finally, we have proposed the \commonalities language and discussed central aspects of it, which supports the process of applying the \commonalities approach to define a transformation network.
 
-\todo{Aus MA Lukas aufgreifen: Was mir insgesamt sehr stark fehlt ist eine Erklärung der Idee der Baumstruktur. Letztendlich dreht sich die ganze Zeitlsetzung des Ansatzes und der Validierung in deiner Arbeit darum festzustellen, ob so etwas erreichbar ist. Du erklärst aber nirgendwo genauer, was du mit so einer Baumstruktur meinst. Das ist aber natürlich essentiell um da sinnvoll evaluieren zu können. Wenn du das genauer erklärst, werden auch die zugrundeliegenden Problemstellungen wie Inkompatibilitäten für den Zuhörer nachvollziehbar.
-Du musst also mindestens noch eine Folie ergänzen, auf der du mal im Detail erklärst, was man unter so einer Baumstruktur versteht, zwischen welchen Elementen die bestehen muss usw.
-Außerdem musst du dann später reflektieren, wer für das Einhalten der Baumstruktur zuständig ist, also ob das durch Ansatz/Sprache inhärent gegeben ist, ob das ein Entwickler selbst sicherstellen muss, ob man das analysieren kann usw.}
+\mnote{Trade-off mitigation by construction}
+The central benefit of the developed \commonalities approach and the supporting \commonalities language is given by construction.
+The way in which the transformation network is defined inherently improves correctness, especially in terms of compatibility (cf.\ \autoref{chap:compatibility}), and reusability, which are contradicting quality properties in a network of transformations that are directly defined between the metamodels whose instances are to be kept consistent.
+We have argued this trade-off mitigation in more detail in \autoref{chap:improvement:benefits:properties}.
+In addition to this central benefit, we discussed some further benefits that we expect from both the \commonalities approach as well as the \commonalities language in \autoref{chap:improvement:benefits} and \autoref{chap:language:commonalities:benefits}.
+We empirically evaluate these benefits with a case study presented in this chapter.
+
+\mnote{Empirical evaluation of \commonalities approach}
+In the discussions of \autoref{chap:improvement} and \autoref{chap:language}, two general issues affecting the \commonalities approach remained that may only be solved by empirical investigations.
+First, although consistency relations and their preservation are only described in a different way by means of auxiliary models, it may be possible that the approach restricts the possible consistency relations that can be described in any way, especially under the goal of achieving a consistency relation tree.
+Second, the achievement of a consistency relation tree with the approach is important to maximize the compatibility guarantee while ensuring maximal reusability (see \autoref{chap:improvement:commonalities:tree}), but it is unclear how far or under which conditions this tree can be achieved in practice.
+
+\mnote{Empirical evaluation of \commonalities language}
+The \commonalities language provides the benefits of the \commonalities approach, but, as discussed in \autoref{chap:language:commonalities:benefits}, we also expect it to reduce the specification effort, which would actually increase with the \commonalities approach in comparison to an ordinary transformation network when employing existing tools for defining the auxiliary metamodels and transformations to them.
+We have thus developed a prototype of that language and evaluate its correctness, as well as the goal of reducing specification effort in a case study.
+
 
 \section{Goals and Methodology}
+
+\mnote{Completeness, applicability and benefits}
+In this evaluation, we aim to validate relevant properties of the \commonalities approach and the \commonalities language that are not given by their construction but have to be analyzed empirically.
+This especially concerns the applicability of the approach and specific benefits provided by the language, but also the general completeness of the approach, i.e., the ability to express every required set of consistency relations.
 
 \begin{table}
     \renewcommand{\arraystretch}{1.4}%
@@ -18,66 +38,127 @@ Außerdem musst du dann später reflektieren, wer für das Einhalten der Baumstr
         \toprule
         \rowcolor{\headinglinecolor}
         \goal{Approach} & 
-            Show that concept and language can achieve consistency between several models. \\
-        \question[eq:commonalities:correctness]{Correctness} & 
-            \questiontext{How many model changes in a case study can be properly kept consistent?} \\
+            Show that transformation developers can use the \commonalities approach to specify consistency and its preservation between multiple models. \\
+        \question[eq:commonalities:completeness]{Completeness} & 
+			\questiontext{How far are the \commonalities approach and the \commonalities language capable of defining arbitrary conistency relations?} \\
         \metric & 
-            \metrictext{Ratio of successfull test cases} \\
-        \question[eq:commonalities:practicality]{Practicality} & 
-            \questiontext{How far is the assumption of defining a tree of \commonalities is achievable in practice?} \\
+			\metrictext{Definition ratio: Ratio of consistency relations for which consistency can successfully be defined} \\
+		\question[eq:commonalities:practicality]{Practicality} & 
+            \questiontext{How far is the goal of achieving a consistency relation tree with \commonalities achievable in practice?} \\
         \metric & 
-            \metrictext{Number of cross-tree relations in a case study compared to number of relations} \\
+            \metrictext{Cross-tree ratio: Number of cross-tree relations compared to the number of relations} \\
             \midrule
-        %
     \end{tabular}
     \rowcolors{1}{\secondlinecolor}{\firstlinecolor}
     \begin{tabular}{L{8.2em} L{20em}}
         \rowcolor{\headinglinecolor}
         \goal{Language} & 
-            Show that a specialized language improves conciseness of consistency specifications \\
-        \question[eq:language:benefit]{Benefit} & 
-            \questiontext{How much more concise is the specification for a case study compared to a definition with direct transformations?} \\
+			Show that transformation developers can define consistency in a concise way with the \commonalities language. \\
+		\question[eq:language:correctness]{Correctness} & 
+			\questiontext{Do transformations generated by specifications in the \commonalities language preserve consistency according to the defined relations?} \\
         \metric & 
-            \metrictext{Number of SLOC with \commonalities compared to number of SLOC with \reactions for same case study} \\
+            \metrictext{Preservation ratio: Ratio of scenarios in which consistency can successfully be preserved} \\
+        \question[eq:language:benefit]{Benefit} & 
+            \questiontext{How much more concise is a specification in the \commonalities language to a specification in the \reactionslanguage?} \\
+        \metric & 
+            \metrictext{Code ratio: Ratio between the number of \acrshort{SLOC} in a \commonalities specification compared to the number of \acrshort{SLOC} with a \reactions specification for the same transformations} \\
         \bottomrule
     \end{tabular}
-    \caption[Goals, questions, metrics for commonalities]{Goals, questions and metrics for commonalities approach and language.}
+    \caption[Goals, questions, metrics for \commonalities]{Goals, questions and metrics for \commonalities approach and language.}
     \label{tab:commonalities_evaluation:gqm}
 \end{table}
 
-TODO: Also evaluate completeness and correctness of \commonalities language! Test cases for expressibility, correctness of compiler etc.
-% \gqm{Functionality}{Concept and language can achieve consistency between several models}{How many model changes in a case study can be properly kept consistent?}{Ratio of successfull test cases}
+\mnote{Empirical evaluation in case study}
+In the following, we present an empirical evaluation based on a case study, in which we apply a prototypical realization of the \commonalities language to consistency relations and their preservation in the domain of component-based software engineering, which we have already employed for the evaluation of our contributions regarding the construction of correct transformation networks in \autoref{chap:correctness_evaluation:categorization}.
+We summarize the general goals of the evaluation along with according questions and metrics as quantitative measures for answering them in \autoref{tab:commonalities_evaluation:gqm}.
 
-% \gqm{Practicality}{The assumption of defining a tree of \commonalities is achievable in practice}{Is the definition of cross-tree relations necessary in a case study?}{Number of cross-tree relations in a case study compared to number of relations}
+\mnote{Completeness evaluation}
+Regarding the \commonalities approach as such, we are interested in the possibility to be used by transformation developers to define consistency preservation.
+In a first place, this comprises the validation of completeness according to \autoref{chap:classification:properties}.
+We want to find out whether it is possible to define arbitrary consistency relations with the \commonalities approach. 
+In fact, \citeauthor{stevens2020BidirectionalTransformationLarge-SoSym} shows that a multiary relation can be expressed by an auxiliary metamodel with binary relations between this auxiliary metamodels and the metamodels to describe consistency between.
+This means that also any set of binary relations, which induce a multiary relation as discussed in \autoref{chap:correctness:notions_consistency:monolithic_modular}, can be expressed by an auxiliary metamodel and binary relation between it and the metamodels to define consistency between.
+This conforms to general idea of the \commonalities approach and, if recursively applied, even to the hierarchic composition of \commonalities.
+Despite this theoretical insight, we investigate whether such a specification is actually achievable in practice, especially under the specific goal of achieving a consistency relation tree in a specification of \commonalities.
+Even if the \commonalities approach itself may not be restricted in expressiveness, the proposed \commonalities language may be because of the selected way in which \commonalities and their relations are defined.
+This leads to \autoref{eq:commonalities:completeness}, which we aim to answer by measuring how many consistency relations of our case study we are able to implement:
+\begin{align*}
+    &
+    \mathvariable{definition\ ratio} = \frac{\mathtextspacearound{\# of defined consistency relations}}{\mathtextspacearound{\# of total consistency relations}}
+\end{align*}
+The more consistency relations we are able to express, the higher it is an indicator for the completeness of the approach and the language. 
+It does, however, especially indicate completeness of the \commonalities language, such that we derive by argumentation whether restrictions in expressiveness exist only because of the language or already because of restrictions of the \commonalities approach.
+The language especially serves as a means to draw conclusions about completeness of the approach.
 
-% \gqm{Practicality/Benefit}{A specific language improves conciseness of consistency specifications}{How much more concise is the specification for a case study compared to a definition with direct transformations?}{Number of SLOC with \commonalities compared to number of SLOC with \reactions for same case study}
+\mnote{Practicality evaluation}
+For the \commonalities approach to provide the benefit of inherently guaranteeing compatibility, it must be possible to define a consistency relation tree by means of the additional \conceptmetamodels and their \commonalities.
+In this first place, we aim to identify whether such a tree can be defined at all.
+We do not aim to systematically find conditions under which this is possible or even how the \commonalities approach and the \commonalities language can systematically support this.
+Knowing whether the specification of such a tree is achievable at all is a preliminary for these further investigations, which we refer to as future work.
+It identifies practicality of the approach, as considered in \autoref{eq:commonalities:practicality}.
+To this end, we measure in our case study how many of the defined relations are cross-tree relations, i.e., violate the definition of a consistency relation tree:
+\begin{align*}
+    &
+    \mathvariable{cross\mbox{-}tree\ ratio} = \frac{\mathtextspacearound{\# of cross-tree consistency relations}}{\mathtextspacearound{\# of defined consistency relations}}
+\end{align*}
+In the best case, this ratio is $0$, such that the relations actually form a consistency relation tree.
+Referring to \autoref{def:relationtree} for consistency relation trees, we consider the graph induced by the relations defined by the manifestation relations of a \commonalities specification between \metaclasses of the \concretemetamodels and \conceptmetamodels, in which they are called \commonalities.
+We only consider the actually defined consistency relations, as we cannot make statements about the relations that we do not express by \commonalities in the case study.
 
-Diskussion: Erreichen der Modularität auch evaluieren? Ist per Konstruktion gegeben, könnte man aber natürlich auch noch auswerten (bringt aber nichts).
+\mnote{Correctness evaluation}
+Regarding the \commonalities language, we are most interested in finding indicators for improving usability of the \commonalities approach by providing a concise way of specification.
+First of all, this requires that language operates correctly, i.e., that is actually delivers transformations that preserve consistency according to the defined consistency relations, as defined in \autoref{eq:language:correctness}.
+This actually evaluates two correctness notions. 
+First, it identifies whether the language implementation is correct at a technical level.
+Second, it identifies whether the concepts for operationalizing \commonalities into transformations defined with the \reactionslanguage, as proposed in \autoref{chap:language:commonalities:operationalization}, are correct.
+We measure this by executing several change scenarios and identifying whether the results are consistent to the specified relations:
+\begin{align*}
+    &
+    \mathvariable{preservation\ ratio} = \frac{\mathtextspacearound{\# of successfull scenarios}}{\mathtextspacearound{\# of total scenarios}}
+\end{align*}
+In the best case, this metric evaluates to $1$, such that in all scenarios consistency can successfully be preserved.
+In failure cases, we manually investigate the cause, especially distinguishing between conceptual issues in the operationalization of the \commonalities language and technical faults in the compiler implementation.
+
+\mnote{Benefit evaluation}
+As an essential benefit of the \commonalities language, we motivated the reduction of specification effort (see \autoref{chap:language:commonalities:benefits}).
+This is of particular importance, because developing a \commonalities specification for consistency between two metamodels by means of existing tools for metamodel and transformation definition requires the definition of three artifacts compared to a single artifacts when defining an ordinary transformation.
+The \commonalities language aims to resolve this issue.
+We consider the specification effort by means of conciseness, i.e., the size of a specification with \commonalities in comparison to a specification of ordinary transformations between the metamodels, as defined in \autoref{eq:language:benefit}.
+Since the \commonalities language compiles to \reactions and a comparable implementation of the case study already exists for them (see \autoref{chap:correctness_evaluation:categorization:case_studies}), we compare the size of a \commonalities specification with the size of a specification in the \reactionslanguage in terms of the \gls{SLOC} and measure the following metric:
+\begin{align*}
+    &
+    \mathvariable{code\ ratio} = \frac{\mathtextspacearound{\# of \acrshort{SLOC} with \commonalities}}{\mathtextspacearound{\# of \acrshort{SLOC} with \reactions}}
+\end{align*}
+The lower the value of this metric, the more concise a specification in the \commonalities language can be expected to be compared to a specification in the \reactionslanguage.
+We expect this insight in conciseness to correlate with the required specification effort.
 
 
 \section{Prototypical Implementation}
 
+
 \section{Case Study}
 
 * 15 Commonalities, 8 in OO, 7 in CBS, overview in A.2 of Hennig
-\begin{table}[htb]
+\begin{table}
+	\small
 	\centering
-	%\resizebox{\textwidth}{!}{
-		\begin{tabular}{lrrrrr}
-			\toprule
-			\multicolumn{1}{l}{\bfseries Element Type} & \multicolumn{1}{r}{\bfseries PCM} & \multicolumn{1}{r}{\bfseries Direct} & \multicolumn{1}{r}{\bfseries Internal} & \multicolumn{1}{r}{\bfseries Total} & \multicolumn{1}{r}{\bfseries \%}\\
-			\midrule
-			Metaclasses 				& 16 & 7  & 2 		& 9 & 0.59  \\
-			Attributes 					& 15 & 7  & 1 		& 8 & 0.53 \\
-			Containment References 		& 18 & 6  & 0 		& 6 & 0.33  \\
-			Non-containment References 	& 8  & 3  & 1  		& 4 & 0.50  \\
-			Enums 						& 1  & 0  & 1  		& 1 & 1.00  \\
-			\midrule
-			Total 						& 58  & 23  & 5  	& 28 & 0.48  \\
-			\bottomrule
-		\end{tabular}
-	%}
-	\caption{Number of directly, internally, and total covered element types of PCM. Adapted from~\cite[Table 10.3]{hennig2020ma}.}
+	\rowcolors{1}{\firstlinecolor}{\secondlinecolor}
+	\begin{tabular}{l S[table-format=2] S[table-format=2] S[table-format=1] S[table-format=2, table-column-width=2.5em] r}
+		\toprule
+		\multirow{2}{*}{\bfseries Element Type} & {\multirow{2}{*}{\bfseries Total}} & \multicolumn{4}{c}{\bfseries Covered} \\
+		\cmidrule(lr){3-6}
+		& & \multicolumn{1}{c}{Direct} & \multicolumn{1}{c}{Implicit} & \multicolumn{2}{c}{Overall} \\
+		\midrule
+		\Metaclasses 				& 16 & 7  & 2 		& 9 & \SI{56}{\percent}  \\
+		Attributes 					& 15 & 7  & 1 		& 8 & \SI{53}{\percent} \\
+		Containment References 		& 18 & 6  & 0 		& 6 & \SI{33}{\percent}  \\
+		Non-containment References 	& 8  & 3  & 1  		& 4 & \SI{50}{\percent}  \\
+		Enumerations 				& 1  & 0  & 1  		& 1 & \SI{100}{\percent}  \\
+		\midrule
+		Total 						& 58  & 23  & 5  	& 28 & \SI{48}{\percent}  \\
+		\bottomrule
+	\end{tabular}
+	\caption[Number of case study elements of \gls{PCM}]{Numbers of elements from the \gls{PCM} metamodel used in the case study. Adapted from~\cite[Table 10.3]{hennig2020ma}.}
 	\label{tab:commonalities_evaluation:coverage_pcm}
 \end{table}
 
@@ -86,46 +167,50 @@ Those internal elements are primitive data types, enums etc., but also UML inter
 
 Many Java elements internally covered, because primitive types, type references and modifiers are represented as metaclasses, which are not mapped on their own but only in context of an operator
 
-\begin{table}[htb]
+\begin{table}
+	\small
 	\centering
-	%\resizebox{\textwidth}{!}{
-		\begin{tabular}{lrrrrr}
-			\toprule
-			\multicolumn{1}{l}{\bfseries Element Type} & \multicolumn{1}{r}{\bfseries UML} & \multicolumn{1}{r}{\bfseries Direct} & \multicolumn{1}{r}{\bfseries Internal} & \multicolumn{1}{r}{\bfseries Total} & \multicolumn{1}{r}{\bfseries \%}\\
-			\midrule
-			Metaclasses 				& 13	& 7		& 3	& 10	& 0.77	\\
-			Attributes 					& 27	& 19	& 1	& 20	& 0.74	\\
-			Containment References 		& 13	& 9		& 0	& 9		& 0.69	\\
-			Non-containment References 	& 4		& 2		& 2	& 4		& 1.00	\\
-			Enums 						& 2		& 0		& 2	& 2		& 1.00	\\
-			\midrule
-			Total 						& 59	& 37	& 8	& 45	& 0.76	\\
-			\bottomrule
-		\end{tabular}
-	%}
-	\caption{Number of directly, internally, and total covered element types of UML. Adapted from~\cite[Table 10.4]{hennig2020ma}.}
+	\rowcolors{1}{\firstlinecolor}{\secondlinecolor}
+	\begin{tabular}{l S[table-format=2] S[table-format=2] S[table-format=1] S[table-format=2, table-column-width=2.5em] r}
+		\toprule
+		\multirow{2}{*}{\bfseries Element Type} & {\multirow{2}{*}{\bfseries Total}} & \multicolumn{4}{c}{\bfseries Covered} \\
+		\cmidrule(lr){3-6}
+		& & \multicolumn{1}{c}{Direct} & \multicolumn{1}{c}{Implicit} & \multicolumn{2}{c}{Overall} \\
+		\midrule
+		\Metaclasses 				& 13	& 7		& 3	& 10	& \SI{77}{\percent}	\\
+		Attributes 					& 27	& 19	& 1	& 20	& \SI{74}{\percent}	\\
+		Containment References 		& 13	& 9		& 0	& 9		& \SI{69}{\percent}	\\
+		Non-containment References 	& 4		& 2		& 2	& 4		& \SI{100}{\percent}	\\
+		Enumerations				& 2		& 0		& 2	& 2		& \SI{100}{\percent}	\\
+		\midrule
+		Total 						& 59	& 37	& 8	& 45	& \SI{76}{\percent}	\\
+		\bottomrule
+	\end{tabular}
+	\caption[Number of case study elements of \gls{UML}]{Numbers of elements from the \gls{UML} metamodel used in the case study. Adapted from~\cite[Table 10.4]{hennig2020ma}.}
 	\label{tab:commonalities_evaluation:coverage_uml}
 \end{table}
 
 
-\begin{table}[htb]
+\begin{table}
+	\small
 	\centering
-	%\resizebox{\textwidth}{!}{
-		\begin{tabular}{lrrrrr}
-			\toprule
-			\multicolumn{1}{l}{\bfseries Element Type} & \multicolumn{1}{r}{\bfseries Java} & \multicolumn{1}{r}{\bfseries Direct} & \multicolumn{1}{r}{\bfseries Internal} & \multicolumn{1}{r}{\bfseries Total} & \multicolumn{1}{r}{\bfseries \%}\\
-			\midrule
-			Metaclasses 				& 30	& 9		& 11	& 20	& 0.67	\\
-			Attributes 					& 13	& 11	& 0		& 11	& 0.85	\\
-			Containment References 		& 32	& 19	& 1		& 20	& 0.63	\\
-			Non-containment References 	& 1		& 0		& 0		& 0		& 0.00	\\
-			Enums 						& 0		& 0		& 0		& 0		& 1.00	\\
-			\midrule
-			Total 						& 76	& 39	& 12	& 51	& 0.67	\\
-			\bottomrule
-		\end{tabular}
-	%}
-	\caption{Number of directly, internally, and total covered element types of Java. Adapted from~\cite[Table 10.5]{hennig2020ma}.}
+	\rowcolors{1}{\firstlinecolor}{\secondlinecolor}
+	\begin{tabular}{l S[table-format=2] S[table-format=2] S[table-format=2] S[table-format=2, table-column-width=2.5em] r}
+		\toprule
+		\multirow{2}{*}{\bfseries Element Type} & {\multirow{2}{*}{\bfseries Total}} & \multicolumn{4}{c}{\bfseries Covered} \\
+		\cmidrule(lr){3-6}
+		& & \multicolumn{1}{c}{Direct} & \multicolumn{1}{c}{Implicit} & \multicolumn{2}{c}{Overall} \\
+		\midrule
+		\Metaclasses 				& 30	& 9		& 11	& 20	& \SI{67}{\percent}	\\
+		Attributes 					& 13	& 11	& 0		& 11	& \SI{85}{\percent}	\\
+		Containment References 		& 32	& 19	& 1		& 20	& \SI{63}{\percent}	\\
+		Non-containment References 	& 1		& 0		& 0		& 0		& \SI{0}{\percent}	\\
+		Enumerations				& 0		& 0		& 0		& 0		& \SI{100}{\percent}	\\
+		\midrule
+		Total 						& 76	& 39	& 12	& 51	& \SI{67}{\percent}	\\
+		\bottomrule
+	\end{tabular}
+	\caption[Number of case study elements of Java]{Numbers of elements from the Java metamodel used in the case study. Adapted from~\cite[Table 10.5]{hennig2020ma}.}
 	\label{tab:commonalities_evaluation:coverage_java}
 \end{table}
 
@@ -142,25 +227,27 @@ NOT COVERED:
 
 \section{Results and Interpretation}
 
-\begin{table}[htb]
+Test cases always multiple of 6 (CBS) and multiple of 2 (OO) because each test scenario covered by six/two cases for each direction (?)
+
+\begin{table}
+	\small
 	\centering
-	%\resizebox{\textwidth}{!}{
-		\begin{tabular}{lrrr}
-			\toprule
-			\multicolumn{1}{l}{\bfseries Test Group} & \multicolumn{1}{r}{\bfseries \# Test Scenarios} & \multicolumn{1}{r}{\bfseries \# Test Cases} & \multicolumn{1}{r}{\bfseries \# Failing Test Cases} \\
-			\midrule
-			Repository 				& 1	& 6		& 0		 \\
-			ComponentInterface 		& 1 & 6		& 0		 \\
-			Component 				& 1	& 6		& 0		 \\
-			CompositeDataType 		& 8	& 48	& 0		 \\
-			Operation 				& 8	& 48	& 0		 \\
-			% PCM/UML -> Java
-			ProvidedRole 			& 2	& 12	& 10		 \\
-			\midrule
-			Total 					& 21& 126	& 12		 \\
-			\bottomrule
-		\end{tabular}
-	%}
+	\rowcolors{1}{\firstlinecolor}{\secondlinecolor}
+	\begin{tabular}{L{10em} S[table-format=3, table-column-width=6em] S[table-format=3, table-column-width=5em] r}
+		\toprule
+		\multicolumn{1}{l}{\bfseries Test Group} & \multicolumn{1}{c}{\bfseries Test Cases} & \multicolumn{2}{c}{\bfseries Successful Test Cases} \\
+		\midrule
+		Repository 				& 6		& 6		& \SI{100}{\percent} \\
+		ComponentInterface 		& 6		& 6		& \SI{100}{\percent} \\
+		Component 				& 6		& 6		& \SI{100}{\percent} \\
+		CompositeDataType 		& 48	& 48	& \SI{100}{\percent} \\
+		Operation 				& 48	& 48	& \SI{100}{\percent} \\
+		% PCM/UML -> Java
+		ProvidedRole 			& 12	& 2		& \SI{17}{\percent} \\
+		\midrule
+		Total 					& 126	& 116	& \SI{92}{\percent} \\
+		\bottomrule
+	\end{tabular}
 	\caption{Test groups for CBS. Adapted from~\cite[Table 10.1]{hennig2020ma}.}
 	\label{tab:commonalities_evaluation:tests_cbs}
 \end{table}
@@ -168,26 +255,26 @@ NOT COVERED:
 Provided role failures: Faulty definition of operator - provided interface of a role is only used in operator but not defined as parameter/participation, such that no reaction for its change is created
 Limited expressiveness: Language cannot express mapping between non-containment reference (in Java) to containment reference with object (role) + non-containment reference (interface) (in PCM).
 
-\begin{table}[htb]
+\begin{table}
+	\small
 	\centering
-	%\resizebox{\textwidth}{!}{
-		\begin{tabular}{lrrr}
-			\toprule
-			\multicolumn{1}{l}{\bfseries Test Group} & \multicolumn{1}{r}{\bfseries \# Test Scenarios} & \multicolumn{1}{r}{\bfseries \# Test Cases} & \multicolumn{1}{r}{\bfseries \# Failing Test Cases} \\
-			\midrule
-			Package 			& 3		& 6		& 0		 \\
-			Interface 			& 5 	& 10	& 0		 \\
-			InterfaceMethod 	& 14	& 28	& 0		 \\
-			Class 				& 13	& 26	& 0		 \\
-			Property 			& 10	& 20	& 0		 \\
-			ClassMethod 		& 20	& 40	& 0		 \\
-			% 1 scenario disabled: multi constructor
-			Constructor 		& 12	& 24	& 1		 \\
-			\midrule
-			Total 				& 77	& 154	& 1		 \\
-			\bottomrule
-		\end{tabular}
-	%}
+	\rowcolors{1}{\firstlinecolor}{\secondlinecolor}
+	\begin{tabular}{L{10em} S[table-format=3, table-column-width=6em] S[table-format=3, table-column-width=5em] r}
+		\toprule
+		\multicolumn{1}{l}{\bfseries Test Group} & \multicolumn{1}{l}{\bfseries Test Cases} & \multicolumn{2}{c}{\bfseries Successful Test Cases} \\
+		\midrule
+		Package 			& 6		& 6		& \SI{100}{\percent} \\
+		Interface 			& 10	& 10	& \SI{100}{\percent} \\
+		InterfaceMethod 	& 28	& 28	& \SI{100}{\percent} \\
+		Class 				& 26	& 26	& \SI{100}{\percent} \\
+		Property 			& 20	& 20	& \SI{100}{\percent} \\
+		ClassMethod 		& 40	& 40	& \SI{100}{\percent} \\
+		% 1 scenario disabled: multi constructor
+		Constructor 		& 24	& 23	& \SI{96}{\percent} \\
+		\midrule
+		Total 				& 154	& 153	& \SI{99}{\percent} \\
+		\bottomrule
+	\end{tabular}
 	\caption{Test groups for OO. Adapted from~\cite[Table 10.2]{hennig2020ma}.}
 	\label{tab:commonalities_evaluation:tests_oo}
 \end{table}
@@ -203,20 +290,19 @@ MEDIA STORE
 * Missing: provided and required roles
 
 
-\begin{table}[htb]
+\begin{table}
+	\small
 	\centering
-	%\resizebox{\textwidth}{!}{
-		\begin{tabular}{lrrrr}
-			\toprule
-			\multicolumn{1}{l}{\bfseries } & \multicolumn{1}{r}{$CS_{{UML}\leftrightarrow{Java}}$ (omitted)} & \multicolumn{1}{r}{$CS_{{UML}\leftrightarrow{Java}}$ (covered)} & \multicolumn{1}{r}{OO} & \multicolumn{1}{r}{$\Delta$}\\
-			\midrule
-			Specifications 			& 302	& 2390 	& 514 	& -1876 \\
-			Utilities				& 445	& 2250	& 2523 	& 273 \\
-			\midrule
-			Total					& 747	& 4640 	& 3037 	& -1603\\
-			\bottomrule
-		\end{tabular}
-	%}
+	\begin{tabular}{lrrrr}
+		\toprule
+		\multicolumn{1}{l}{\bfseries } & \multicolumn{1}{r}{$CS_{{UML}\leftrightarrow{Java}}$ (omitted)} & \multicolumn{1}{r}{$CS_{{UML}\leftrightarrow{Java}}$ (covered)} & \multicolumn{1}{r}{OO} & \multicolumn{1}{r}{$\Delta$}\\
+		\midrule
+		Specifications 			& 302	& 2390 	& 514 	& -1876 \\
+		Utilities				& 445	& 2250	& 2523 	& 273 \\
+		\midrule
+		Total					& 747	& 4640 	& 3037 	& -1603\\
+		\bottomrule
+	\end{tabular}
 	\caption[Lines of code in the consistency specifications for UML and Java]{Lines of code in the consistency specifications for UML and Java ($\Delta$ is the difference from $CS_{{UML}\leftrightarrow{Java}}$ (covered) to OO)}
 	\label{tab:commonalities_evaluation:reactions_comparison}
 \end{table}
@@ -224,6 +310,16 @@ MEDIA STORE
 
 
 \section{Discussion and Validity}
+
+Tree only considered for defined relations: potentially further relations would have violated tree structure. However, if relations cannot be defined by the approach at all, which would violate the tree structure, that would at least prevent the definition of tree violations.
+Same for correctness: only considered for the relations that we were able to express (completeness)
+
+Tree is what we want to achieve, but it is not necessary. Violations of the tree structure only introduce potential incompatibility and potential cycles of propagation, requiring synchronization. This must, however, not be problematic, first, because a cycle in the relations tree must not necessarily lead to a cycle between the elements in an instance, as the transformation may always select other elements that do not lead to a cycle, and second, because even if there is a cycle, it can be implemented properly (compatible and with synchronization, see chapter), such that it properly works as an ordinary transformation network built according to what we discussed in \autoref{part:correctness}.
+
+Benefit: reactions are imperative, more declarative languages exist -> no fair comparison. But reactions already compared to ordinary code (refer to paper) and show reduction there, so they are verbose but not arbitrarily verbose
+Only one case study: high bias
+Correlation between conciseness and specification effort unclear
+
 
 \section{Limitations and Future Work}
 Limited to descriptive specification
@@ -238,7 +334,7 @@ Movement of objects treated as removal and insertion leading to deletion of cont
 Granularity of operators: open research question how to define a reusable set with appropriate degree of abstraction, such that only for few cases custom operators need to be defined. Especially necessary to define a metrics for that (what are "few cases"?). Currently left open in language design (see diagram with arbitrary operators) and implemented specific for case-study (as focus on structure of language, not on realization of manifestation relations).
 
 Tree: Developer has to ensure that a tree is achieved. Can be improved by the language. Integrate compatibility approach from \autoref{chap:compatibility} into the language. Due to rather declarative specification, graph of consistency relations can be derived and analyzed. Assumptions have to be made on operators, which can do arbitrary stuff, e.g. that only the elements explicitly given to the operator are used, and no further navigation through the model is done within the operator. With that assumption, we can construct the graph from the commonalities specifications and operator arguments and apply the analysis.
-
+Who is responsible for the tree structure? How does the language support its achievement?
 
 \section{Summary}
 
