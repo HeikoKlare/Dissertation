@@ -1,5 +1,5 @@
 \chapter{Evaluation and Discussion 
-    \pgsize{15 p.}
+    \pgsize{25 p.}
 }
 \label{chap:commonalities_evaluation}
 
@@ -621,21 +621,65 @@ At least, we were able to use an independently developed baseline that we have u
 
 
 \section{Limitations and Future Work}
-Limited to descriptive specification
 
-Language does not provide inheritance for commonalities, repeated definition of names, repeated definition of shared information, e.g., between basic and composite components etc.
+\mnote{Assumptions and evaluation results}
+The \commonalities approach as well as the \commonalities language have been developed particularly for the specification of descriptive specifications of consistency (see \autoref{chap:improvement:concepts:specification}) and with specific goals of quality improvement that require a tree topology of the specified relations.
+These assumptions as well as the discussed evaluation results yield limitations of the proposed approach and language.
+We discuss them in the following and derive opportunities for future work.
 
-Limited set of operators, e.g., no generic operator for mapping attributes to references (e.g. visibility is EnumLiteral in UML, whereas it is a reference to a type instance in Java), complex pattern mappings, e.g., type reference in UML is direct reference, whereas in Java a reference contains a reference object, which then references a further object that references the type; or primitive types in Java represented as types and in UML as predefined instances of a generic primitive type type.
+\paragraph{Tree Achievement}
+\mnote{Proving compatibility}
+The essential benefits of the \commonalities approach regarding correctness guarantees arise from the likeliness of defining a tree of consistency relations.
+Although the evaluation indicates that such a tree is achievable or even if it is not achieved, it may ease the achievement of a correct transformation network, it is finally still up to the developer to ensure correctness.
+The language supports him or her in achieving it, but it would be beneficial to finally make the language ensure correctness.
+We have sketched in \autoref{chap:language:commonalities:features} how the graph of consistency relations can be derived from the operands of relation operators in the \commonalities language.
+It only requires that operators only use model elements that were explicitly passed to them as operands.
+The approach for proving compatibility, which we have presented in \autoref{chap:compatibility}, can then be applied to these relations.
+Since the relations are not expressed as \gls{OCL} constraints but as arbitrarily complex operators written in Java, redundancy of relations cannot easily be determined.
+Thus, the approach may only be used to validate if the relations represent a consistency relation tree, but this is sufficient as achieving a tree is the goal anyway.
+Performing such an integration in future work would further improve the benefit of the language but giving the developer explicit feedback whether he or she defined a topology that actually guarantees the benefits provided by the \commonalities approach.
+% Tree: Developer has to ensure that a tree is achieved. Can be improved by the language. Integrate compatibility approach from \autoref{chap:compatibility} into the language. Due to rather declarative specification, graph of consistency relations can be derived and analyzed. Assumptions have to be made on operators, which can do arbitrary stuff, e.g. that only the elements explicitly given to the operator are used, and no further navigation through the model is done within the operator. With that assumption, we can construct the graph from the commonalities specifications and operator arguments and apply the analysis.
+% Who is responsible for the tree structure? How does the language support its achievement?
 
-Movement of objects treated as removal and insertion leading to deletion of contained elements and values
+\paragraph{Declarative Specification}
+\mnote{Applicability to prescriptive relations}
+We have motivated the \commonalities approach as a reasonable way of thinking about and specifying common concepts of different metamodels.
+In \autoref{chap:improvement:concepts:specification}, we have discussed that this especially fits for descriptive specifications of consistency, i.e., those where metamodels actually share common concepts, often in terms of redundancies.
+Other consistency specifications, which may prescriptively define more complex dependencies, may not fit into such a notion of common concepts, which can make it difficult to apply the \commonalities approach to them or which may lead to specification to do not that inherently induce a tree topology of the defined transformation network.
+We have already considered in \autoref{chap:improvement:application} how \commonalities specification can be combined with other transformation networks, be they defined with \commonalities or ordinary transformations, which allows to combine different kinds of specifications for different purpose and to apply \commonalities only where the properly fit.
+In future work, it would thus be of particular interest to apply these ideas of combining specifications and evaluate the feasibility of these ideas.
+In addition, the further application of the approach to different case studies can reveal whether the restriction to declarative specifications is actually relevant or whether the approach can also be applied well to other specifications, despite our motivation.
 
+% Intended for descriptive specification: finally does not matter, but prescriptive specification may not have that dedicated common concepts, but more arbitrary relations than common concept which usually represent redundancies. Then the kind of specification may not fit that well and may be more unlikely to achieve a tree structure.
+% Future work: evaluate
 
-Granularity of operators: open research question how to define a reusable set with appropriate degree of abstraction, such that only for few cases custom operators need to be defined. Especially necessary to define a metrics for that (what are "few cases"?). Currently left open in language design (see diagram with arbitrary operators) and implemented specific for case-study (as focus on structure of language, not on realization of manifestation relations).
+\paragraph{Language Extensions}
+\mnote{Capabilities and abstraction of operators}
+The limitations we have found in the evaluation were mostly caused by limitations of the current implementation of the \commonalities language.
+Even in the master's thesis, in which the case study was conducted, several language extensions had to be made to support the parts of the case study that we have presented before~\owncite[Sec. 9]{hennig2020ma}.
+The current limitations concern the availability and complexity of operators, such as missing operators for relating attributes to references, or complex pattern matching for indirect references that led to the test failures, and reusability, e.g., in terms of inheritance, which currently leads to repetitions of the same information for similar concepts.
+While these limitations should be addressed in future work by conceptual and technical extensions of the \commonalities language, it also induces a further research question regarding the operators.
+Currently, the operators are suited for the implemented case study, but it is an open question how a reusable set of operators at an appropriate level of abstraction can or should be defined, such that relevant, recurring cases can be realized with a predefined set of operators.
+This is currently left open in the language design, as we did not make any restrictions regarding the operators (see \autoref{fig:language:elements}), but should be considered as a general research question in future work.
 
-Tree: Developer has to ensure that a tree is achieved. Can be improved by the language. Integrate compatibility approach from \autoref{chap:compatibility} into the language. Due to rather declarative specification, graph of consistency relations can be derived and analyzed. Assumptions have to be made on operators, which can do arbitrary stuff, e.g. that only the elements explicitly given to the operator are used, and no further navigation through the model is done within the operator. With that assumption, we can construct the graph from the commonalities specifications and operator arguments and apply the analysis.
-Who is responsible for the tree structure? How does the language support its achievement?
+% Several limitations in case study due to limitations of language expressiveness. Even in previous thesis multiple extensions for this case study necessary~\cite{hennig2020ma}.
+% Language does not provide inheritance for commonalities, repeated definition of names, repeated definition of shared information, e.g., between basic and composite components etc.
 
-Evaluation of specification effort, generalization
+% Limited set of operators, e.g., no generic operator for mapping attributes to references (e.g. visibility is EnumLiteral in UML, whereas it is a reference to a type instance in Java), complex pattern mappings, e.g., type reference in UML is direct reference, whereas in Java a reference contains a reference object, which then references a further object that references the type; or primitive types in Java represented as types and in UML as predefined instances of a generic primitive type type.
+
+% Granularity of operators: open research question how to define a reusable set with appropriate degree of abstraction, such that only for few cases custom operators need to be defined. Especially necessary to define a metrics for that (what are "few cases"?). Currently left open in language design (see diagram with arbitrary operators) and implemented specific for case-study (as focus on structure of language, not on realization of manifestation relations).
+
+% Movement of objects treated as removal and insertion leading to deletion of contained elements and values
+
+\paragraph{Evidence Improvement}
+\mnote{External validity by case studies}
+A central drawback of the presented evaluation is the limited evidence due to the restriction to a single case study affecting generalizability of the results.
+Although we have intensively argued why the results are still valuable indicators for the properties that we have evaluated, it still remains a threat in external validity.
+Thus, it is important to provide further evidence on the results by applying the approach and the language to further case studies.
+This can also be used to evaluate the assumptions we have made for the language, as we discussed before.
+Finally, since the evaluation presented in \autoref{chap:correctness_evaluation:categorization} lacks similar drawbacks in external validity, case studies in future work can be combined for both, such that consistency relations are elicited and validated by test cases only once.
+This also allows to compare the results, for example, to further validate the specification effort of the \commonalities language.
+
 
 \section{Summary}
 
