@@ -512,22 +512,112 @@ Whether or not the actual value of around \SI{50}{\percent} in code size reducti
 
 \section{Discussion and Validity}
 
-Tree only considered for defined relations: potentially further relations would have violated tree structure. However, if relations cannot be defined by the approach at all, which would violate the tree structure, that would at least prevent the definition of tree violations.
-Same for correctness: only considered for the relations that we were able to express (completeness)
+\mnote{Insights and validity threats}
+From the discussed case study and its results, we can derive several important insights.
+They are even given, although a single case study only gives indicators for specific properties, as it suffer from potential limitations especially in external validity.
+We discuss threats to the validity of our results after a summary of important insights.
 
-Tree is what we want to achieve, but it is not necessary. Violations of the tree structure only introduce potential incompatibility and potential cycles of propagation, requiring synchronization. This must, however, not be problematic, first, because a cycle in the relations tree must not necessarily lead to a cycle between the elements in an instance, as the transformation may always select other elements that do not lead to a cycle, and second, because even if there is a cycle, it can be implemented properly (compatible and with synchronization, see chapter), such that it properly works as an ordinary transformation network built according to what we discussed in \autoref{part:correctness}.
+\subsection*{Insights}
 
-Benefit: reactions are imperative, more declarative languages exist -> no fair comparison. But reactions already compared to ordinary code (refer to paper) and show reduction there, so they are verbose but not arbitrarily verbose
-Only one case study: high bias
-Correlation between conciseness and specification effort unclear
+\mnote{Practicality and specification effort}
+With the empirical evaluation, we especially aimed to validate two properties.
+First, we wanted to investigate practicality of the \commonalities approach in terms of being able to express arbitrary consistency relations and especially to achieve a tree structure which inherently guarantees certain quality properties.
+Second, we aimed to validate the reduction of specification effort with the \commonalities language to ensure that in the simple case of defining consistency between two metamodels specification effort does increase in comparison to a direct transformation between them.
 
-Many operator logic in utility code -> maybe this is the hard-to-develop part, so may not be beneficial to have less commonalities code if more complex logic is needed in operators/Utilities
-However: Even no reduction or only slight increase would be fine, because we Commonalities give more guarantees (correctness, reusability) than ordinary networks with reactions. So the goal was only to mitigate the effort increase through the language, not to even reduce it.
+\mnote{Practicality insights}
+In the case study, we found by manual analysis of the define \commonalities that a tree structure inherently guaranteeing compatibility was achieved.
+There are several threats to the validity of generalizing this result to achievability of a tree structure in any case, which we discuss in the following subsection.
+Although a tree is what we want to achieve to have definite guarantees for compatibility, the actual goal is to achieve correctness, which can also be achieved without a specification inducing such a tree topology.
+Violations of a tree structure only introduce potential incompatibility which can lead to potential execution cycles.
+This must, however, not be problematic, because a cycle in the relations but not necessarily lead to a cycle between corresponding elements in an instance, and because even if there is such a cycle, it can be implemented properly so that execution terminates consistently, like we aimed to achieve for ordinary transformation networks in \autoref{part:correctness}.
+Thus, even if the results of our analysis of relations in the case study was erroneous, the execution of the transformations derived from the \commonalities specification still worked properly, i.e., it always terminated and led to consistent results in the executed test scenarios.
+Thus, independent from whether a consistency relations tree was actually achieved or not, the approach led to a correct specification, which also provides optimal reusability by construction of the \commonalities approach, and thus mitigated the trade-off between these properties as intended.
 
-Hard to develop case studies, even harder to find other implementations of case studies for transformation networks to compare with.
-Already discussed for transformation network study, so we even profit from having the transformation network implementation used for our other evaluations.
+\mnote{Benefit insights}
+Regarding the \commonalities language, we were able to show a reduction in code size of about \SI{50}{\percent} for the consistency relations between \gls{UML} and Java in comparison to a specification with the \reactionslanguage.
+Although this evaluation also suffers from several threats to validity, which we discuss in the following, it at least indicates that we must not expect a significant improvement in code size.
+For two metamodels, a specification according to the \commonalities approach by means of the \reactionslanguage would require twice as many \reactions code plus the definition of the \conceptmetamodel in comparison to a direct \reactions specification between the metamodels.
+Thus, a specification that requires at most two times the code lines required for a \reactions specification between the metamodels provides a benefit with respect to average realizations of the \commonalities approach.
+Thus, even if specification effort and code lines are not linearly correlated, the reduction of code lines by \SI{50}{\percent} in comparison to an improvement by factor two will likely lead to less specification effort.
 
-Tree: Manually performed, thus easy to oversee something, make mistakes. But: Also runtime analysis
+
+\subsection*{Threats to Validity}
+
+\mnote{Results indicate statement}
+In the following, we discuss different possible threats to the validity of the discussed results.
+The restriction to one case study especially limits external validity, thus all results can only be seen as indicators for the statements that we make.
+We will, however, discuss, for which reasons validity of the statements may be actually restricted, distinguished by construct, internal, conclusion and external validity~\cite{wohlin2012validity-Book}.
+
+\paragraph{Construct Validity}
+\mnote{Manual analysis conduction}
+There are especially two threats regarding construct validity, which arise from the manual analysis of achieving a tree structure with \commonalities, as well as from the selection of consistency relations to implement.
+The manual conduction of the analysis of the consistency relation graph induced by the \commonalities specification is prone to faults, as it lacks an explicit graph representation that can automatically analyzed.
+Violations of the tree structure would, however, likely have led to failures during execution.
+The \reactions generated from \commonalities are not synchronizing, as discussed as a preliminary for transformations in networks (see \autoref{chap:synchronization}), thus in case there are cycles of consistency relations and thus transformations across which changes are propagated, the execution would likely lead to failures as missing synchronization and also potential incompatibilities prevent the transformations from finding consistent results.
+In particular, in \autoref{chap:correctness_evaluation:categorization} we found that missing synchronization is the most several issue that, in the case studies, led to a failure of every test case.
+
+\mnote{Non-representative relations}
+The selection of consistency relations that we have realized with the \commonalities language may be non-representative.
+A different choice might have led to different results regarding all evaluation questions, including completeness of the approach and the language, the achievability of a tree structure, as well as correctness of the language compiler.
+We did, however, argue why we performed that specific selection of consistency relations and why we do not expect the addition of other consistency relations to yield other results.
+In addition, even if the actually realized relations may not be representative, at least to the complete case study with all relations represents a sophisticated scenario.
+It especially especially requires the usage of all elements provided by the \commonalities language, in comparison to preliminary studies in which only specific elements of the language were required and used to achieved feasibility results~\owncite{klare2019models}.
+
+% While the complete relations present a realistic scenarios, which can thus be considered representative, the selection of relations we performed may be not.
+
+% Tree only considered for defined relations: potentially further relations would have violated tree structure. However, if relations cannot be defined by the approach at all, which would violate the tree structure, that would at least prevent the definition of tree violations.
+% Same for correctness: only considered for the relations that we were able to express (completeness)
+
+% relations representative? may be bad choice and other would have led to different results, no completeness for other scenarios, maybe no correctness for other kinds of relations
+% But: case study is even more sophisticated than many other studies (e.g. ATL transformation zoo) and all kinds of elements provided by commonalities language are used, thus likely to cover all relevant aspects
+
+\paragraph{Internal Validity}
+\mnote{Optimization for case study}
+Internal validity may especially be affected regarding the results for properties of the \commonalities language.
+First, the language was only a proof-of-concept before implementing the case study and was improved along with the case study realization.
+Thus, there is the risk of optimizing the language for the case study.
+This especially affects the operators, as several of them are specific for the case study, whereas the overall structure of the language is generic.
+Even if this reduces validity, it does not affect the results for the evaluation of the \commonalities approach and the conciseness of the language, but only its completeness and correctness.
+
+\mnote{Baseline for conciseness}
+A second threat is given by the comparison of \commonalities with \reactions for evaluating conciseness of the language.
+The \reactionslanguage allows imperative, unidirectional specifications of transformations and provides high expressiveness by being rather verbose and providing only few abstractions in comparison to a general-purpose programming language.
+A language at a higher abstraction language, such as the \mappings language, from which we have reused large parts of the compiler, or \qvtr, may provide a better baseline for comparison.
+We have used the \reactionslanguage as a baseline, because the case study was already implemented and, in particular, evaluated with that language.
+The case study implementation has already been compared with an implementation in ordinary Java code~\owncite{klare2020Vitruv-JSS}, which has shown a reduction in code size.
+This shows that specifications in the \reactionslanguage are not arbitrarily verbose and for other languages, such an evaluation does even not exist.
+Since the goal of the evaluation was especially to show that \commonalities specification do not drastically increase the specification effort, these results indicating that we do not have to expect an increase in code size by several times also indicate that such an increase in specification effort cannot be expected.
+
+% Language improved during the case study so may partially (esp. regarding operators) be optimized for the study.
+% This does however not affect results for the approach and conciseness, but may affect completeness and correctness of language
+% Comparison of commonalities with reactions but they are rather verbose, so may be better to compare with declarative language such as mappings.
+% Benefit: reactions are imperative, more declarative languages exist -> no fair comparison. But reactions already compared to ordinary code (refer to paper) and show reduction there, so they are verbose but not arbitrarily verbose
+
+\paragraph{Conclusion Validity}
+\mnote{Correlation between code lines and effort}
+The correlations of evaluated metrics and performed statements are straightforward for completeness, correctness and the achievement of a tree topology.
+The assumed correlation between conciseness of the code and specification effort is, however, a threat to conclusion validity.
+Code that is more concise may even be harder to specify, because it can require more knowledge about language constructs and experience with using them.
+In particular, much logic of the \commonalities language is defined in operators.
+We especially observed a significant improvement in concise in the specification code, but not in the utilities code, to which the operators belong.
+Thus, if the operators are the part that is hard to specify, the effort may even increase.
+As discussed before, we do, however, not require a significant reduction in specification effort to gain any benefit from the \commonalities language, as the central benefit is already given by its guarantees regarding correctness and reusability.
+In consequence, the language is only supposed to mitigate the increase in effort induced by the \commonalities approach as such, which is at least two times the effort, measured in terms of code lines, for a direct transformation between two metamodels, whereas in the case study the language reduced it by the same factor.
+So even if there is a large bias in the relation of conciseness and specification effort, the results still indicate that effort does increase with the \commonalities language.
+
+\paragraph{External Validity}
+\mnote{Restriction to one case study}
+The central threat regarding external validity is the limitation to a single case study.
+This may affect generalizability, if other case studies produce other results regarding completeness, correctness and conciseness.
+We did, however, mitigate this threat by not using a toy example but a sophisticated case study, including multiple realistic consistency relations and a hierarchic definition of them with \commonalities.
+In addition, we do not expect practicality in terms of achieving a tree topology to depend on the actual case studies, but only on the kinds of relations, which we expect to representative in the study as discussed for construct validity.
+Finally, the effort for setting up a case study and, for the comparison with ordinary transformations, to set up the baseline as well, is rather high.
+At least, we were able to use an independently developed baseline that we have used for our evaluations in \autoref{chap:correctness_evaluation:categorization} to evaluate conciseness of the \commonalities language.
+
+% Only one case study, generalization unclear
+% But: no toy example, hierarchic relations, practicality does not so much depend on domains but kind of relations
+% Hard to develop case studies, even harder to find other implementations of case studies for transformation networks to compare with.
+% Already discussed for transformation network study, so we even profit from having the transformation network implementation used for our other evaluations.
 
 
 \section{Limitations and Future Work}
@@ -544,6 +634,8 @@ Granularity of operators: open research question how to define a reusable set wi
 
 Tree: Developer has to ensure that a tree is achieved. Can be improved by the language. Integrate compatibility approach from \autoref{chap:compatibility} into the language. Due to rather declarative specification, graph of consistency relations can be derived and analyzed. Assumptions have to be made on operators, which can do arbitrary stuff, e.g. that only the elements explicitly given to the operator are used, and no further navigation through the model is done within the operator. With that assumption, we can construct the graph from the commonalities specifications and operator arguments and apply the analysis.
 Who is responsible for the tree structure? How does the language support its achievement?
+
+Evaluation of specification effort, generalization
 
 \section{Summary}
 
