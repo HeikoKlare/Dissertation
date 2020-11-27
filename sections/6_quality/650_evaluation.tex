@@ -261,7 +261,8 @@ Most of the missing consistency relations are due to intended restrictions of th
 We further discuss the reasons in the subsequent results presentation.
 
 \mnote{Reused test cases}
-We have reused the test cases that we have defined for the case study concerning the same consistency relations with the \reactionslanguage, presented in \autoref{chap:correctness_evaluation:categorization:case_studies}.
+The implementations of all \commonalities are available in a corresponding GitHub repository of the \vitruv project~\cite{vitruvCBSEGithub}.
+It also contains test cases, which we have reused from those that we have defined for the case study concerning the same consistency relations with the \reactionslanguage, presented in \autoref{chap:correctness_evaluation:categorization:case_studies}.
 Since we only want to evaluate whether results are correct in regarding those consistency relations for which we have defined consistency preservation with \commonalities, we have reduced the tests to those for the according consistency relations in comparison to the tests summarized in \autoref{tab:correctness_evaluation:errors:test_cases}.
 We have, however, also added further test cases such that in total more test cases for the case study implementation with the \commonalities language exist than for the implementation with the \reactionslanguage.
 All these test cases perform changes that lead to the violation of a specific type of consistency relation and require the transformations to change the other models for restoring consistency, which are then validated by the test case.
@@ -300,7 +301,7 @@ All these test cases perform changes that lead to the violation of a specific ty
 		\midrule
 		Repository 				& 6		& 6		& \SI{100}{\percent} \\
 		Interface		 		& 6		& 6		& \SI{100}{\percent} \\
-		Signatures 				& 48	& 48	& \SI{100}{\percent} \\
+		Signature + Parameter	& 48	& 48	& \SI{100}{\percent} \\
 		Composite Data Type		& 48	& 48	& \SI{100}{\percent} \\
 		Repository Component	& 6		& 6		& \SI{100}{\percent} \\
 		% PCM/UML -> Java
@@ -348,50 +349,165 @@ We have defined four additional test cases using this construction simulation, w
 
 \section{Results and Interpretation}
 
-Test cases always multiple of 6 (CBS) and multiple of 2 (OO) because each test scenario covered by six/two cases for each direction (?)
+\mnote{Coverage of complete case study}
+We use the implemented case study and the conducted tests to answer the evaluation questions summarized in \autoref{tab:commonalities_evaluation:gqm}, or to at least find indicators for how their general answer is expected to be based on the data collected from the case study.
+The questions are split into those especially concerning the \commonalities approach itself and those only concerning the \commonalities language.
 
-4 media store tests: all work properly (packages, classes and interfaces, composite data types, operation signatures)
-ADD MEDIA STORE IN CASE STUDY DESCRIPTION
+\subsection*{\Commonalities Approach}
 
-Problem Provided Role: PCM -> Java and UML -> Java: created role initially empty and no reaction to changes of provided interface (internal handling) -> no reaction to contents of role, so interface not added in Java model.
+We have explained that we did not implement all consistency relations with the \commonalities language that we have realized with the \reactionslanguage in the evaluation for transformation network correctness in \autoref{chap:correctness_evaluation:categorization}, but only a sufficiently complex subset.
+We selected consistency relations forming a coherent set that can be realized with reasonable effort, and such that we do not expect further insights regarding applicability, practicality and usability of the \commonalities approach and language.
+To avoid a bias by defining an arbitrary subset of the consistency relations, which, by accident, can completely or almost completely realized with the \commonalities language, we consider the ratio of consistency relations realized with the \commonalities language in comparison to the complete consistency relations depicted in \autoref{chap:foundations:case_studies:relations}.
+It results in the following metric values, derived from the values in \autoref{tab:commonalities_evaluation:coverage_uml}, \autoref{tab:commonalities_evaluation:coverage_java} and \autoref{tab:commonalities_evaluation:coverage_pcm}:
+\begin{alignat*}{3}
+    &
+	\mathvariable{definition\ ratio}_{\mathvariable{sums}} &&= \SI{64}{\percent} \quad  &&\bigl(= \tfrac{45 + 51 + 28}{59 + 76 + 58}\bigr)\\
+	& 
+	\mathvariable{definition\ ratio}_{\mathvariable{average}} &&= \SI{64}{\percent} \quad &&\bigl(= \tfrac{\SI{76}{\percent} + \SI{67}{\percent} + \SI{48}{\percent}}{3} \bigr) \\
+	&
+	\mathvariable{definition\ ratio}_{\mathvariable{UML-Java}} &&= \SI{71}{\percent}
+\end{alignat*}
+We counted the elements of the metamodels affects by the consistency relations.
+To avoid a bias by having different numbers of elements in the different metamodels, we have calculated the ratio both based on the sums of the elements across all metamodels ($\mathvariable{definition\ ratio}_{\mathvariable{sums}}$), as well as the equally weighted average of the coverage of all metamodels ($\mathvariable{definition\ ratio}_{\mathvariable{average}}$).
+They do, however, both sum up to the same value of \SI{64}{\percent}.
+Since \gls{UML} and Java represent those metamodels that are kept consistent by a single \conceptmetamodel for object-oriented design and can thus be considered a minimal application of the \commonalities approach for only two metamodels, we explicitly  calculated the ratio only for these two metamodels as well.
+Since both ways of calculated introduced above yield the same value, we have only depicted the single result of \SI{71}{\percent}.
 
-Provided role failures: Faulty definition of operator - provided interface of a role is only used in operator but not defined as parameter/participation, such that no reaction for its change is created
-Limited expressiveness: Language cannot express mapping between non-containment reference (in Java) to containment reference with object (role) + non-containment reference (interface) (in PCM).
+\mnote{Unrealizable relations}
+The coverage ratios especially give an impression of how comprehensive the realized consistency relations are.
+To evaluate completeness of the \commonalities approach and the language, it is of particular importance to identify how many of the consistency relations that we intended to implemented could not be realized.
+In summary, we found that most consistency relations that we aimed to realize could actually be achieved, except for multi-valued types in \gls{PCM} and Java, which is due to current limitations of the language.
+Multi-valued types are fields and parameters of a type with an upper bound in its multiplicity higher than one.
+This can be expressed with explicit multiplicities in \gls{UML} and with collection data types in \gls{PCM}, whereas they have to be rolled out as explicit implementations of collections in Java.
+The current implementation of the \commonalities language lacks an operator for that situation, which is, however, no conceptual limitation but can be added with some additional effort.
+In addition, provided and required roles in \gls{PCM} as well as generalizations in \gls{UML} are currently not fully supported and in parts only covered implicitly, because the current implementation of the \commonalities language only supports explicit relations to containment references, but roles and generalizations contain ordinary references to the provided, required or implemented interfaces, which can up to now only be accessed implicitly within operators of the \commonalities language.
+This is a technical limitation, which the current case study implementation avoids by implementing complex operators to support these situations, which is why the according test cases are actually successful, but the language lacks sufficient support for such relations.
+
+\mnote{Omitted relations}
+The remaining consistency relations were omitted on purpose, and are summarized in more detail in the master's thesis of \textcite[Sec. 3]{hennig2020ma}.
+They comprise composite components in \gls{PCM}, which are comparable to basic components and only need to be distinguished by an according naming schema or the containment of assemblies of other components, of which at least the latter requires some effort to implement, but is not expected to be a conceptual issue.
+In addition, systems and subsystems in \gls{PCM} are not considered, because they are almost equal to composite components with slightly different semantics.
+
+\mnote{Approach and language completeness}
+In summary, the case study results indicate that in answer to \autoref{eq:commonalities:completeness} the \commonalities approach itself is complete, as we have already expected because of the theoretical considerations by \textcite{stevens2020BidirectionalTransformationLarge-SoSym}.
+The \commonalities language, however, currently has some limitations that prevent the realization of some consistency relation or at least made it more difficult than it should be.
+We found these to be only technical limitations that can be solved by extending the language, such that they do not hide actual limitations of the underlying \commonalities approach.
+The results emphasize the status of the \commonalities language implementation as a prototype, but still indicate possible completeness of such a language according to the concepts for such a language proposed in \autoref{chap:language}.
+
+% NOT COVERED:
+% For details on elements omitted from the case study, see \cite[Sec. 3]{hennig2020ma}
+% Java: no multi-valued types (collections of elements in fields and parameters)
+% PCM:
+% * Composite Components: Same as basic ones, need to be distinguished (e.g. by naming schema, user interaction or containment of other components), but then are comparable to basic ones, so no further insights
+% * Provided/Require Role, Generalization internally use non-containment references (discussed above)
+% * System: no covered intentionally, is basically only a composite component
+% * CollectionDataType: complicated to map between multiplicities in Java and Collection data types in Java and PCM. Other data types are already mapped. Since each type can only be related to one kind of data type, there are not further problems to be expected regarding a tree structure. It is basically doing and potentially limitations of existing operators of the language, but no conceptual problems.
+
+\mnote{Practicality of \commonalities}
+The central question to evaluate for the \commonalities approach concerns its practicality in terms of achieving a consistency relation tree with a \commonalities specification to benefits from the discussed guarantees in quality improvement.
+We have discussed in \autoref{chap:improvement:commonalities:tree} that the defined consistency relations have to form a consistency relation tree and in \autoref{chap:language:commonalities:features} we found the graph induced by the operands of the operators putting \commonalities and their manifestations into relations is the one to consider for identifying a consistency relation tree.
+Since in several \commonalities of our case study, elements have to be considered implicitly within the operators and not all of them are explicitly defined as operands, these elements have to be considered as well.
+For that reason, we conducted the investigation of the defined relations to identify the graph as a consistency relation tree manually.
+In this manual analysis, we found that none of the define relations leads to the violation of the definition of a consistency relation tree according to \autoref{def:relationtree}:
+\begin{align*}
+    &
+    \mathvariable{cross\mbox{-}tree\ ratio} = 0
+\end{align*}
+Although restricted to a single case study, this at least serves as a first indicator for the practicality of the approach as asked in \autoref{eq:commonalities:practicality}, i.e., that it actually supports or at least enabled the specification of a consistency relation tree.
+To mitigate the risk of mistakes performed in the manual analysis of consistency relations, the test results also serve as a further indicator that the relations form a tree.
+Violations of such a tree structure can easily lead to incompatibilities, as discussed in \autoref{chap:compatibility}, which can then lead to non-termination, as discussed in \autoref{chap:errors}, especially with the simple orchestration strategy that we employed for the case study.
+We have, however, not observed any non-termination in the test case.
+The failing tests were due to other reasons, which we discuss in the following.
+Although even without a tree structure the consistency relation can be compatible or even if they are incompatible it may not lead to failures during transformation execution, it still serves as an indicator for the consistency relations form a tree.
+Even if this is not the case, the evaluation at least shows that the transformations behave correctly, thus no matter whether this actually achieved by defining a consistency relation tree or any other reason that makes the operationalization of \commonalities specifications likely to be correct, at the end it is only important that correctness is achieved.
+
+% Regarding tree: Violations would easily lead to incompatibility and thus potentially non-termination with the selected simply orchestration strategy, which is not guaranteed to terminate. We have, however, not observed any non-termination -> potentially no incompatibilities -> potentially tree (but not necessarily!)
 
 
-OO Constructor: Problem in \vitruv framework -- after two constructor creations, first both constructors are propagated before propagating the insertion of parameters. This results in two indistinguishable constructors (with empty parameter lists) in Java, which results in problems of the subsequent parameter propagation for one of them.
-Adding one constructor after another (either in the test, i.e., by the user, or as propagation of the framework) would solve the problem.
+\subsection*{\Commonalities Language}
 
+\mnote{Correctness of \commonalities language}
+As a preliminary for any further insights on the \commonalities language, we first have to validate its correctness.
+This covers the correct implementation of the language and its compilers, as well as correctness of concepts how to compile \commonalities into \reactions.
+While the former can be seen as simple bug testing, the latter gives us insights in whether the operationalization concept is correct, which especially means that the language can be seen as an derivation of the \mappings language, from which we have reused most of the operationalization concepts (see \autoref{chap:language:commonalities:operationalization}).
+To validate correctness, we consider the results of the test cases for those consistency relations of the case study that we have implemented with the \commonalities language.
+According to \autoref{tab:commonalities_evaluation:tests_oo} and \autoref{tab:commonalities_evaluation:tests_cbs}, more than \SI{97}{\percent} of the test cases are successful:
+\begin{align*}
+    &
+    \mathvariable{preservation\ ratio} \ge \SI{97}{\percent}
+\end{align*}
+In addition, the four test cases for the Media Store case study system also produce the expected results.
+Regarding \autoref{eq:language:correctness}, this is a high indicator for correctness of the operationalization concept of the \commonalities language as well as its implementation, especially because the failures of the remaining test cases are caused by the used \vitruv framework and by incompleteness of the \commonalities language.
+
+\mnote{Reasons for failing test cases}
+In total, six test cases fail.
+This concerns two tests cases for constructors in object-oriented design, which both implement the same scenario but once from Java to \gls{UML} and once vice versa.
+In this test scenario, multiple constructors with different parameter lists are created.
+The \vitruv framework first executed transformations for the insertion of both constructors and afterwards for the addition of parameters.
+This leads to two undistinguishable constructors with empty parameter lists when first execution the transformation, such that when adding the parameters the two constructors cannot be distinguished anymore.
+Processing the constructor additions one after another in the framework would solve the problem.
+Anyway, the same problem would occur when using the \reactionslanguage.
+Regarding provided roles in component-based design, four test cases fail because of the references to provided interfaces only being implicitly covered in operators.
+We have already discussed before that the \commonalities language currently only supports relations for containment references, such that other references have to be processed with operators.
+Provided roles are contained in components, which in turn reference the provided interface.
+When a provided role is added to a component, this is processed by a relation in the component \commonality.
+The operator for that relation also implicitly considers the reference to the interface within the role, but this may not yet be set.
+When the interface of the role is set or changed later, this change is not propagated as no relation for it is defined in a \commonality, such that the according test cases fail.
+In consequence, this is a result of technical incompleteness of the \commonalities language as discussed before, but not a matter of incorrectness of its operationalization.
+
+% Depending on how we measure: Average of both categories, summ of all tests among both categories, but always higher than 97 percent, so does not matter. Interesting why the remining tests did not work.
+
+% 4 media store tests: all work properly (packages, classes and interfaces, composite data types, operation signatures)
+% ADD MEDIA STORE IN CASE STUDY DESCRIPTION
+
+% Problem Provided Role: PCM -> Java and UML -> Java: created role initially empty and no reaction to changes of provided interface (internal handling) -> no reaction to contents of role, so interface not added in Java model.
+
+% Provided role failures: Faulty definition of operator - provided interface of a role is only used in operator but not defined as parameter/participation, such that no reaction for its change is created
+% Limited expressiveness: Language cannot express mapping between non-containment reference (in Java) to containment reference with object (role) + non-containment reference (interface) (in PCM).
+
+% OO Constructor: Problem in \vitruv framework -- after two constructor creations, first both constructors are propagated before propagating the insertion of parameters. This results in two indistinguishable constructors (with empty parameter lists) in Java, which results in problems of the subsequent parameter propagation for one of them.
+% Adding one constructor after another (either in the test, i.e., by the user, or as propagation of the framework) would solve the problem.
 
 \begin{table}
 	\small
 	\centering
 	%\rowcolors{1}{\firstlinecolor}{\secondlinecolor}
-	\begin{tabular}{L{6.5em} S[table-format=4, table-column-width=7em] C{9.5em} S[table-format=5, table-column-width=5.5em]}
+	\begin{tabular}{L{6em} C{9em} S[table-format=4, table-column-width=7em] S[table-format=5, table-column-width=3em] r}
 		\toprule
-		\multicolumn{1}{l}{\bfseries } & \multicolumn{1}{c}{\bfseries \commonalities} & \multicolumn{1}{c}{\bfseries \reactions \textit{(omitted)}} & \multicolumn{1}{c}{\bfseries Difference}\\
+		\multicolumn{1}{l}{\bfseries } & \multicolumn{1}{c}{\bfseries \reactions \textit{(omitted)}} & \multicolumn{1}{c}{\bfseries \commonalities} & \multicolumn{2}{c}{\bfseries Difference}\\
 		\midrule
-		Specifications 			& 514	& 2390 \textit{(302)} 	& -1876 \\
-		Utilities				& 2523	& 2250 \textit{(445)} 	& 273 \\
+		Specifications 			& 2390 \textit{(302)}	& 514	& -1876 	& -\SI{78}{\percent}\\
+		Utilities				& 2250 \textit{(445)}	& 2523	& 273 		& \SI{11}{\percent}\\
 		\midrule
 		\rowcolor{\firstlinecolor}
-		Total					& 3037	& 4640 \textit{(747)} 	& -1603 \\
+		Total					& 4640 \textit{(747)}	& 3037	& -1603 	& -\SI{53}{\percent}\\
 		\bottomrule
 	\end{tabular}
 	\caption[Lines of code for a \commonalities and \reactions specification]{\acrshort{SLOC} in the \commonalities and \reactions specification for the consistency relations between \gls{UML} and Java. For \reactions, the numbers only cover the lines for consistency relations covered by the \commonalities specification, whereas those in parenthesis denote the lines for relations not covered by the \commonalities specification. Adapted from~\owncite[Table 10.9]{hennig2020ma}.}
 	\label{tab:commonalities_evaluation:reactions_comparison}
 \end{table}
 
+\mnote{Benefit of \commonalities language}
+The \commonalities language is supposed to support the construction of a transformation network according to the \commonalities approach.
+In comparison to applying the construction approach with ordinary modelling and transformation tools, it is supposed to reduce the specification effort, especially in the simple or initial case in which consistency between only two metamodels shall be specified.
+The case study implementation contains a specification for two metamodels in terms of the object-oriented design \commonalities between \gls{UML} and Java.
+We had already defined their consistency with a direct transformation by means of the \reactionslanguage in previous case studies for the \vitruv framework~\owncite{klare2020Vitruv-JSS}, which we have also employed for the evaluation in \autoref{chap:correctness_evaluation:categorization}.
+\autoref{tab:commonalities_evaluation:reactions_comparison} compares the realization of consistency relations between \gls{UML} and Java by means of the \reactionslanguage and the \commonalities language in terms of \glspl{SLOC}.
+Since there is no unique measure for \glspl{SLOC} for these languages, we have decided to format the code such that each statement for every grammar rule starts in a new line, according to the formatting used for \reactions~\owncite{klare2020Vitruv-JSS}.
+Since not the complete specification is defined within the language artifacts itself but also within utilities written in Java or Java-like code, we also counted the \glspl{SLOC} in that code.
+Since the \reactionslanguage allows to define arbitrary code within the \reactions, only few utility code is necessary, whereas the \commonalities language requires utility code already for all use case-specific operators.
+Considering all codes together leads to a reduction in \glspl{SLOC} between \reactions and \commonalities of more than \SI{50}{\percent}:
+\begin{align*}
+    &
+    \mathvariable{code\ ratio} = \SI{47}{\percent}
+\end{align*}
+Drawing conclusions of this metrics to the actual specification effort suffers from several biases.
+First, the counted \glspl{SLOC} can only be considered an approximation, as, for example, the utilities are shared with other projects and thus they are not tailored to consistency between \gls{UML} and Java.
+Second, whether conciseness in terms of \glspl{SLOC} actually leads to less specification effort is not evaluated but only assumed as an hypothesis.
+In response to \autoref{eq:language:benefit}, the case study provides an indicator for achieving conciseness in comparison to the \reactionslanguage.
+It is, however, not even necessary to actually improve conciseness, but to avoid an increase in specification effort, conciseness should at least not decrease.
+Whether or not the actual value of around \SI{50}{\percent} in code size reduction is accurate and representative, it at least shows that we may not expect a drastic increase in code size, which improves the specification effort.
 
-NOT COVERED:
-* Composite Components: Same as basic ones, need to be distinguished (e.g. by naming schema, user interaction or containment of other components), but then are comparable to basic ones, so no further insights
-* Provided/Require Role, Generalization internally use non-containment references (discussed above)
-* System: no covered intentionally, is basically only a composite component
-* CollectionDataType: complicated to map between multiplicities in Java and Collection data types in Java and PCM. Other data types are already mapped. Since each type can only be related to one kind of data type, there are not further problems to be expected regarding a tree structure. It is basically doing and potentially limitations of existing operators of the language, but no conceptual problems.
-
-
-
-Regarding tree: Violations would easily lead to incompatibility and thus potentially non-termination with the selected simply orchestration strategy, which is not guaranteed to terminate. We have, however, not observed any non-termination -> potentially no incompatibilities -> potentially tree (but not necessarily!)
 
 
 \section{Discussion and Validity}
@@ -404,6 +520,14 @@ Tree is what we want to achieve, but it is not necessary. Violations of the tree
 Benefit: reactions are imperative, more declarative languages exist -> no fair comparison. But reactions already compared to ordinary code (refer to paper) and show reduction there, so they are verbose but not arbitrarily verbose
 Only one case study: high bias
 Correlation between conciseness and specification effort unclear
+
+Many operator logic in utility code -> maybe this is the hard-to-develop part, so may not be beneficial to have less commonalities code if more complex logic is needed in operators/Utilities
+However: Even no reduction or only slight increase would be fine, because we Commonalities give more guarantees (correctness, reusability) than ordinary networks with reactions. So the goal was only to mitigate the effort increase through the language, not to even reduce it.
+
+Hard to develop case studies, even harder to find other implementations of case studies for transformation networks to compare with.
+Already discussed for transformation network study, so we even profit from having the transformation network implementation used for our other evaluations.
+
+Tree: Manually performed, thus easy to oversee something, make mistakes. But: Also runtime analysis
 
 
 \section{Limitations and Future Work}
