@@ -3,24 +3,101 @@
 }
 \label{chap:foundations}
 
+\mnote{Foundations overview}
+In this chapter, we introduce fundamental concepts and notations that we use throughout this thesis.
+We introduce modeling in terms of a notion of models and methods in which they are used, and depict important formalisms and frameworks for modeling. % namely the \gls{MOF} standard and its realization in \gls{EMF}.
+We introduce the idea of multi-view modeling and in particular the \vitruv approach, which we employ for evaluations in this thesis, as well as the approach it was inspired by.
+Finally, we introduce model transformations, in particular bidirectional transformations and languages to describe them. % and one specific language we use for the realization of our contributions.
+After introducing the case studies used for our evaluations and, partly, for explanations of our contributions, we depict the mathematical notations that we use in this thesis.
+
+
 \section{Modeling}
+\label{chap:foundations:modeling}
+
+\mnote{Models and their usage}
+This thesis researches the employment of transformations to keep multiple models that are used to describe a single software systems consistent.
+Therefore, we first introduce a notion of models and how to use them.
+
 
 \subsection{Models and Model Theory}
 \label{chap:foundations:modeling:models}
+
+\cite{stachowiak1973modelltheorie-Book}
 What are models? -> Stachowiak
 
-Definition of metamodels and other ingredients:
-esp. static/execution semantics~\cite[p. 26]{voelter2013DslEngineering}:
+mapping \cite[p.~131]{stachowiak1973modelltheorie-Book}
+abstraction \cite[p.~132]{stachowiak1973modelltheorie-Book}
+pragmatics \cite[p.~131]{stachowiak1973modelltheorie-Book}
+
+\enquote{A model is an abstraction of something for the purpose of understanding it before building it.}~\cite[p.~15]{rumbaugh2005objectoriented-Book}
+
+Can be just static representation of structure to understand how modular parts fit together or also predictions of properties of the system to build, like Palladio.
+
+should answer questions in place of the actual system.
+E.g., predict performance rather than measure it in productive system
+Depict the architecture without reconstructing it from code
+
+
+\subsection{Metamodels and Languages}
+\label{chap:foundations:modeling:metamodels}
+
+Metamodel describes how a valid model looks like. There is an instance-of relationship between models and their metamodel.
+This conforms to the type and instance level relationship knowing from object-oriented programming, in which objects instantiate classes.
+The programming language grammar, such as the Java language specification~\cite{gosling2018jls-specification}, can be considered a metamodel for programs of that language.
+
+In the most simple case, a metamodel can be seen as a set of models, and a model is an instance of that metamodel when it is contained in that set. This is sometimes also referred to as \emph{model sets}~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
+Usually, metamodels will be described with a formalism, which we discuss in more detail in \autoref{chap:foundations:formalisms}, which define of which elements a metamodel consists and how these elements instantiate in the models, along with constraints that define when a model is considered a valid instance.
+
+Models are often understood, for example, as a UML class diagram, or at least depicted as such.
+Models are however not only elements and relations between them, but these elements must also have a meaning, i.e., a semantics~\cite{harel2004semantics-Computer}, in the specific context they are used for, as aimed by the abstraction and pragmatics characteristics of Stachowiak's classification.
+
+Analogous to programming languages, we usually consider modeling languages, which are the tools to specify models.
+They also define the semantics of elements, often in terms of defining how they are transformed into another representation, such as code which has an execution semantics.
+According to \textcite[p. 26]{voelter2013DslEngineering}, modeling languages consists of a specification of abstract and concrete syntax, as well as static and dynamic semantics.
 static: set of constraints, type system rules language has to conform in addition to structure regarding abstract syntax
 execution: meaning of the program/model when it is executed, for DSL realized by execution engine
-
-Still Völter:
 Abstract syntax: data structure holding the semantically relevant information of the model (not layout information), typically a tree or graph
 Concrete syntax: notations with which user can express models, e.g. textural, graphical, tabular
 
+Instead of modeling languages, \textcite{voelter2013DslEngineering} use the term \emph{\gls{DSL}}.
+Introduce the term "DSL" used in introduction. Refer to XML, as its used in introduction.
+\Glspl{DSL} in comparison to \glspl{GPL} are supposed to increase productivity and conciseness for specifying models in a specific domain~\cite[p.~30]{voelter2013DslEngineering}.
+A language is, however, not either domain-specific or general-purpose, but domain-specificity of a language is a gradual notion~\cite[p.~30]{voelter2013DslEngineering}.
+\Glspl{DSL} are usually assumed to have restricted expressiveness~\cite[Chap.~2]{fowler2010dsls-Book}.
 
-\subsection{Model-Driven Software Engineering}
+Say that "domain" can mean really different things.
+DSL for software developers:
+- Generic domain: e.g. software design (UML), performance properties (PCM)
+- Application domain: e.g. automotive (ASEM/ASCET, Amalthea)
+DSL for software tool developers:
+- Language for specifying transformations, editors etc.
+- For us especially transformation languages as we introduce later
+
+In our work, two kinds of DSLs are relevant: the ones used by software developers, whose artifacts have to be kept consistent, and the transformation languages used by developers of transformation networks.
+\citeauthor{voelter2013DslEngineering} distinguishes these kinds of DSLs as \emph{technical} and \emph{application domain} DLSs, although emphasizing that there is no clear border between them~\cite[p.~26]{voelter2013DslEngineering}.
+Since we do not consider how far a language is domain-specific, we only use the general term \emph{modeling language}.
+
+Metamodels are often only referred to as the abstract syntax of models~\cite[p.~27]{voelter2013DslEngineering}, whose semantics is defined by the modeling language it is used in.
+In this thesis, we use a notion of models and metamodels that we will define more precisely in \autoref{chap:networks:models}, which does also not reflect the semantics of the models explicitly.
+Some semantics of models is, however, represented implicitly when using transformations to define consistency, because defining that elements are to be transformed into each other actually gives them a semantics.
+
+
+\subsection{Model-Driven Software Development}
+\label{chap:foundations:modeling:mdsd}
 Describe what MDSD is supposed to be
+
+Coined in early 2000s.
+Seen as natural continuation of improving abstraction, like before achieved by more powerful compilers and higher abstraction in programming languages.
+Now further abstraction by MDSD (or MDD) by automating repetitive tasks such support for persistence or interoperability~\cite{atkinson2003mdd-Software}.
+
+notion of \citeauthor{bezivin2005sosym} that \enquote{everything is a model}~\cite{bezivin2005sosym}
+so even code can be considered a model and is considered a model in mdsd.
+For example, metamodel for Java, which we use in this thesis~\cite{heidenreich2010jamopp-SLE}.
+
+The \gls{MDA}~\cite{mda} proposed a \gls{MDSD} process using models at different levels of abstraction, namely computation-independent models, platform-independent models and platform-specific models.
+It was supposed to enable one of the central goal of portability and platform-independence, by deriving the more specific models from the abstract ones as far as possible.
+
+We do not assume such a restricted process, but consider \gls{MDSD} simply as the usage of multiple models to describe a system under construction, which do not only serve documentation purposes but which all or of which most contain at least some information that is not represented in the other models, while still sharing common information that, as a central part of the motivation of this thesis, need to be kept consistent.
 
 
 \section{Modeling Formalisms and Frameworks}
@@ -36,12 +113,25 @@ Many relevant tools use MOF-compliant models, such as AUTOSAR or SysML.
 
 Modeling Levels M1--M3
 
+Elements of metamodels: types of objects, types of relations and attributes
+Metaclass (also class, type of an object)
+Reference (also association in UML, multiplicities, directionality)
+Attribute (properties of an element, in general both metaclass as well as reference!, have data type with value range)
+
 \begin{figure}
     \centering
     \input{figures/prologue/foundations/emof.tex}
     \caption[Simplified EMOF metamodelling language]{Simplified class diagram showing central \metaclasses of the EMOF metamodelling language~\cite[p. 27]{mof} (dotted lines denote indirect inheritance). Adapted from \cite[Fig. 2.2]{kramer2017a}.}
     \label{fig:foundations:emof}
 \end{figure}
+
+
+Other formalisms such as multi-level or deep modeling, which precisely separates ontological and linguistic modelling and, in the extreme case, allows in arbitrary number of levels. Idea already presented in early 2000s~\cite{atkinson2003mdd-Software}.
+Goal is also to reduce accidental complexity introduced by artifical boundary to two modeling levels~\cite{atkinson2008reducingAccidentalComplexity-SoSym}.
+This is complementary to the accidental complexity introduced by replicating information across different models, which we aim to manage with consistency preservation mechanism, as it concerns the accidental complexity within the single models due to restricted modeling capabilities.
+Still, we focus on the modeling levels defined by UML as they are still state-of-practice in programming (single type and instance level) as well as in modeling at least considering mature tools like EMF (explained in following), whereas multi-level modeling has gained attention in the last years~\cite{atkinso2014multilevel-MLM} and tools are not as mature or at least not that widely adopted and sophisticated.
+
+
 
 \subsection{EMF and Ecore}
 \label{chap:foundations:formalisms:ecore}
@@ -83,68 +173,103 @@ Finally, we briefly explain how we made all this information available in practi
 Discuss how far we simplify the modeling concepts (or maybe do that later in the notation / formalization discussion at the end of foundations or in networks chapter)
 
 
-\subsection{Domain-specific Languages}
+TOOLING:
+Many tools for EMF, such as editor frameworks, transformation languages, language workbenches etc.
+Transformation languages discussed in following.
+Language workbenches, e.g., Xtext~\cite{efftinge2006xtext-MSES,bettini2016Xtext-Book} for languages with textual syntax defined in terms of a grammar, from which the metamodel, parser etc. are derived and a compiler can be defined.
+We use Xtext for implementing a prototype for the language that we proposed in this thesis and it is also used for language that we reuse, such as the \reactionslanguage introduced in one of the subsequent sections.
 
-Introduce the term "DSL" used in introduction. Refer to XML, as its used in introduction.
-Say that we always talk about metamodels, which are the constructs on which languages rely.
-
-Use terms "modeling-language" and "DSL"
-Say that "domain" can mean really different things.
-DSL for software developers:
-- Generic domain: e.g. software design (UML), performance properties (PCM)
-- Application domain: e.g. automotive (ASEM/ASCET, Amalthea)
-DSL for software tool developers:
-- Language for specifying transformations, editors etc.
-- For us especially transformation languages as we introduce later
-
-In our work, two kinds of DSLs are relevant: the ones used by software developers, whose artifacts have to be kept consistent, and the transformation languages used by developers of transformation networks.
+JaMoPP for treating Java code a model, as already introduced in \autoref{chap:foundations:modeling:mdsd}.
+Capabilities for parsing and printing Java code to be represented as an Ecore model~\cite{heidenreich2010jamopp-SLE, heidenreich2009jamopp-report}.
 
 
-\section{Multi-View Modeling}
+\section{Multi-view Modeling}
 \label{chap:foundations:multiview}
 
-Refer to multi-paradigm modeling, discuss essential idea of using multiple views, mainly refer to introduction
+Multi-view modeling covers the general topic of describing a system by means of multiple views or, in general, models~\cite{reineke2017ProblemMultiView-SoSym}.
+A key challenge in multi-view modeling is consistency, as we have motivated in \autoref{chap:introduction}~\cite{reineke2017ProblemMultiView-SoSym}.
+Preserving consistency between multiple views is referred to as \emph{model repair}~\cite{macedo2017ModelRepairClassification-TSE}, \emph{consistency restoration}~\cite{stevens2010sosym, kramer2017a} or \emph{model synchronization}~\cite{diskin2016Taxonomy-JSS}, with slightly different meanings.
+We, in general, refer to this as \emph{consistency preservation}.
 
-\subsection{Consistency Preservation}
+Views have been defined in an ISO standard: \emph{architecture view} defined as expressing the system architecture regarding specific concerns \cite[p.~2]{iso42010}.
+synthetic vs. projective~\cite[p.~22]{iso42010}
+While synthetic composes system description of views, such that each of them represents some information not contained in the others, projective views derive the information completely from an underlying source and are thus only projections.
+In projective approaches, the underlying source can, again, be seen as a model, such that views in projective approaches are projections of that model~\cite[Fig.~5]{klare2020Vitruv-JSS}.
+This underlying model is called a \gls{SUM}~\cite[p.~210]{atkinson2010a}, which, like any model, conform to a metamodel, the \gls{SUMM}~\owncite[Def.~2]{klare2020Vitruv-JSS}.
 
-Consistency vs. its preservation
+In a projective approach, the problem of preserving consistency is transferred to ensuring consistency within the \gls{SUM}, from which the views are projected.
+Consistency of this \gls{SUM} can be achieved in different ways~\owncite{meier2019modelsward,meier2020ccis}, especially depending on whether a \gls{SUM} is \emph{essential} or \emph{pragmatic}~\cite{atkinson2015realizationMultiView-EDOC}.
+An essential \gls{SUM} is free of any redundancies or implicit dependencies, such that every instance of its \gls{SUMM} is inherently consistent, whereas a pragmatic \gls{SUM} can contain allow arbitrary redundancies and dependencies, which then have to be kept consistent by explicit mechanisms for consistency preservation, such a transformations.
+While the former approach is followed by the \gls{OSM} approach, the latter is used in the \vitruv approach, which we depict in more detail in the following.
 
-Terminology: model repair~\cite{macedo2017ModelRepairClassification-TSE}, consistency restoration~\cite{stevens2010sosym, kramer2017a}, model synchronization~\cite{diskin2016Taxonomy-JSS}
 
-Synchronization vs. incremental vs. concurrent
+% \subsection{Consistency Preservation}
+% \label{chap:foundations:multiview:consistency}
+
+% Consistency vs. its preservation
+
+% Terminology: model repair~\cite{macedo2017ModelRepairClassification-TSE}, consistency restoration~\cite{stevens2010sosym, kramer2017a}, model synchronization~\cite{diskin2016Taxonomy-JSS}
+
+% Synchronization vs. incremental vs. concurrent
+
 
 \subsection{Orthographic Software Modeling}
 \label{chap:foundations:multiview:osm}
-Focus on views, how to create and manage them. SUM idea
+
 \gls{OSM}
+Projective multi-view approach, based on essential SUMs~\cite{atkinson2010a}.
+Focus actually on views, how to create and manage them, structured along dimensions and dynamically created on-demand from the SUM.
+Consistency achieved through the SUM, which is inherently consistent.
 
 
 \subsection{The \vitruv Framework}
 \label{chap:foundations:multiview:vitruv}
-Focus on construction approach for SUM why sticking to projective view idea of \gls{OSM}. 
-Combine models by consistency mechanisms rather than having inherent consistency.
+Copies the idea of a SUM and projective views from \gls{OSM}.
+Instead of an essential SUM, is uses a pragmatic SUM, which can contain redundancies and dependencies that are kept consistent.
+The SUM internally consists of models, which are kept consistent by model transformations, denoted as a \vsum~\cite{klare2020Vitruv-JSS}.
+It is motivated by the insight that constructing an essential, redundancy-free SUM is hard to achieve and that for compatibility with existing tools it may be easier to combine their metamodels with a synthetic approach, such that the view used by each tool is a projection of a single models within the V-SUM, whereas further projective views can be derived from the information of the models in the V-SUM, but ensuring their consistency with transformations.
 
-Discuss that \vitruv is the underlying motivation for this thesis. Consistency is needed to build a SUM, especially consistency between multiple models.
-\vitruv puts an abstraction layers of views onto the contributions of this thesis and defines a process of using and applying it. 
-\todo{Reflect this later in the Commonalities chapter by referring to the idea and saying how composition of Commonalities can even improve the approach.}
+Within a V-SUM, multiple models need to be kept consistent, which is one application area for the contributions of this thesis.
+%\vitruv puts an abstraction layers of views onto the contributions of this thesis and defines a process of using and applying it. 
+%\todo{Reflect this later in the Commonalities chapter by referring to the idea and saying how composition of Commonalities can even improve the approach.}
+\vitruv serves both as a motivation for the contributions of this thesis, but its implementation in the \vitruv framework~\cite{vitruvFrameworkGithub} and especially its languages for consistency preservation serves as a basis for our prototypical implementation and validation purposes.
+Additionally, we will see that the abstraction provided by a layer of projective views onto the models that are kept consistent in a V-SUM provides benefits of our approach for improving quality properties rather than using it standalone.
+%Additionally, at some points (Commonalities), the usage of developed concepts provides even more benefits when not only used standalone but in combination with further ideas of \vitruv.
 
-That that in this thesis the main connection to \vitruv is the motivation and that implementation work for validation purposes was done with the \vitruv framework.
-Additionally, at some points (Commonalities), the usage of developed concepts provides even more benefits when not only used standalone but in combination with further ideas of \vitruv.
+For \vitruv, we have provided a simple but sufficient formalism defining consistency~\cite{klare2020Vitruv-JSS}, on which the formalism in this thesis bases.
+However, the formalism in this thesis will be more detailed and fine-grained.
 
-For \vitruv, we have a simple formalism defining consistency on which the formalism in this thesis bases.
-\todo{Add cite to Journal paper}
-However, the formalism in this thesis will be much more fine-grained.
-
-\gls{VSUM} \vsum
 
 
 \section{Model Transformations}
+\label{chap:foundations:transformations}
+
+Heart and soul of \gls{MDSD}~\cite{sendall2003modelTransformation-Software}.
+
+According to \textcite{kleppe2003mdaExplained-Book}, transformation defines how to generate target model from a source model by a transformation definition.
+Transformation definition consists of transformation rules, which in turn define how one or more constructs of the source language or metamodel are transformed into constructs of the target language or metamodel.
+
+\begin{figure}
+    \centering
+    \input{figures/prologue/foundations/transformation_schema.tex}
+    \caption[Transformation artifacts and their relations]{Artifacts of a transformation and transformation language, as well as their relations. Adapted from \cite[Fig.~9-5]{kleppe2003mdaExplained-Book}.}
+    \label{fig:foundations:transformation}
+\end{figure}
+
+While \textcite{kleppe2003mdaExplained-Book} is specific to \gls{MDA} thus deriving more specific artifacts from abstract artifacts, this can be generalized to transformations between any languages.
+Graphics as an abstraction and schematic representation of the process \cite[Fig.~9-5]{kleppe2003mdaExplained-Book}.
+TODO: Adapt graphics such that transformation definition consists of transformation rules.
+Transformation definitions and their rules need to fulfill some format expected by the transformation engine.
+Often supported by a \emph{transformation definition language}~\cite[Sec. 9.2]{kleppe2003mdaExplained-Book}, or short \emph{transformation language} that generates appropriate artifacts.
+
+
+Synchronization vs. incremental vs. concurrent -- cite something?
 
 %\subsection{Properties}
 \textcite{czarnecki2006a}: Feature models for transformations regarding many aspects
 
 Important for us:
-Directionality: Unidirectional vs. multidirectional
+Directionality: Unidirectional vs. multidirectional (specifically bidirectional)
 Incrementality: Source- and target-incrementality (latter is ordinary incrementality, former is kind of change-driven)
 
 Also on language structure:
@@ -157,13 +282,17 @@ Intermediate structure: additional models often temporary for execution, especia
 
 
 \subsection{Bidirectional Transformations}
-
+\label{chap:foundations:transformations:bidirectional}
 \todo{Introduce Transformations}
 
 Compare multidirectional transformations with networks of transformations.
 Refer for other consistency approaches to related work.
 
+Correctness, hippocraticness!
+
+
 \subsection{Transformation Languages}
+\label{chap:foundations:transformations:languages}
 
 \gls{QVT}, \gls{QVTR} with \gls{OCL}, \gls{VIATRA} etc.
 
@@ -171,11 +300,18 @@ Refer for other consistency approaches to related work.
 \todo{Introduce TGGs shortly}
 \todo{Only refer to \gls{VIATRA}, but do not explain it in detail}
 
+imperative vs. deklarative
+
+transformation language can be seen as \glspl{DSL} (see \autoref{chap:foundations:modeling:metamodels}).
+
 
 \subsection{The \reactionslanguage}
 \label{chap:foundations:transformations:reactions}
 
 Maybe move something from prototypical implementation in \autoref{chap:correctness_evaluation:categorization} here.
+
+\vitruv framework defines transformation engines, executes rules according to some change propagation format.
+\reactionslanguage generated rules according to that format.
 
 
 \section{Case Studies}
