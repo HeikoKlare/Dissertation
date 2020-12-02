@@ -11,6 +11,9 @@ Finally, we introduce model transformations, in particular bidirectional transfo
 After introducing the case studies used for our evaluations and, partly, for explanations of our contributions, we depict the mathematical notations that we use in this thesis.
 
 
+%%%
+%% MODELING
+%%%
 \section{Modeling}
 \label{chap:foundations:modeling}
 
@@ -22,84 +25,114 @@ Therefore, we first introduce a notion of models and how to use them.
 \subsection{Models and Model Theory}
 \label{chap:foundations:modeling:models}
 
-\cite{stachowiak1973modelltheorie-Book}
-What are models? -> Stachowiak
+\mnote{General model notion}
+Models are a ubiquitous concept, which is used throughout many technical and non-technical domains.
+The term \emph{model} is used differently in various contexts from informal depictions to mathematical formalizations~\cite{stachowiak1973modelltheorie-Book}.
+In his work about general model theory, \citeauthor{stachowiak1973modelltheorie-Book} characterizes models by three criteria: representation, abstraction and pragmatics~\cite[p.~131--133]{stachowiak1973modelltheorie-Book}.
 
-mapping \cite[p.~131]{stachowiak1973modelltheorie-Book}
-abstraction \cite[p.~132]{stachowiak1973modelltheorie-Book}
-pragmatics \cite[p.~131]{stachowiak1973modelltheorie-Book}
+\begin{properdescription}
+\item[Representation:] \mnote{Representation of an original}
+The \emph{representation} characteristic requires a model to be a mapping or representation of some \emph{original}.
+An original must not necessarily be a natural, existing entity, but can also be any kind of concept, which can, again, be a model~\cite[p.~131]{stachowiak1973modelltheorie-Book}.
+We always consider models that are representations of any kind of software or software-intensive technical system under construction.
+This characteristic requires that a model does not contain any information not related to the system, such that, if system and model could be represented by a set of explicit properties, we would be able to define a mapping, or, more precisely, a homomorphism between them.
 
-\enquote{A model is an abstraction of something for the purpose of understanding it before building it.}~\cite[p.~15]{rumbaugh2005objectoriented-Book}
+\item[Abstraction:] \mnote{Subset of properties of an original}
+The \emph{abstraction} characteristic requires a model to, in general, only represent a subset of the properties of its original.
+Properties are limited to those, which seem relevant the creator of the model~\cite[p.~132]{stachowiak1973modelltheorie-Book}.
+This abstraction should be driven by the pragmatics of the model, defined as the third characteristics.
+For example, an architecture model of a software system may only represent properties relevant for some information need at the architectural level, which could, for example, abstract from behavior or implementation details.
 
-Can be just static representation of structure to understand how modular parts fit together or also predictions of properties of the system to build, like Palladio.
+\item[Pragmatics:] \mnote{Defined for specific purpose}
+The \emph{pragmatic} characteristic requires a model to be designed for a specific purpose, such that it can only be related to its original for specific users, for specific points in time and for specific operations~\cite[pp.~132]{stachowiak1973modelltheorie-Book}.
+Models of software systems can, for example, have the purpose of depicting or editing the system structure or its behavior, or of performing some analysis or simulations for specific properties of the system.
+The pragmatics influences the abstraction, as a specific purpose implies a certain information need to be provided by a proper abstraction.
+\end{properdescription}
 
-should answer questions in place of the actual system.
-E.g., predict performance rather than measure it in productive system
-Depict the architecture without reconstructing it from code
+\mnote{Notion in software engineering}
+While this is a rather general notion of a model, it also fits to the one relevant for software engineering, as depicted in the examples.
+One appropriate definition for models in the domain of software design has been given by \citeauthor{rumbaugh2005objectoriented-Book}:
+\enquote{A model is an abstraction of something for the purpose of understanding it before building it}~\cite[p.~15]{rumbaugh2005objectoriented-Book}.
+This fits well to the notion of making predictions about the systems upfront, such as the already mentioned Palladio Simulator making performance predictions about a software systems based on an architectural model of it.
+Models may, however, not only be used to understand the system, but also to build it, especially when considering code as a model as well.
 
 
 \subsection{Metamodels and Languages}
 \label{chap:foundations:modeling:metamodels}
 
-Metamodel describes how a valid model looks like. There is an instance-of relationship between models and their metamodel.
-This conforms to the type and instance level relationship knowing from object-oriented programming, in which objects instantiate classes.
-The programming language grammar, such as the Java language specification~\cite{gosling2018jls-specification}, can be considered a metamodel for programs of that language.
+\mnote{Metamodels and instance-of relations}
+To automatically or semi-automatically process models, such as compiling source code, these models need to follow some specification, which can be considered a model that defines how a valid model for a specific purpose looks like.
+Such a model of a model is often denoted as a \emph{metamodel}.
+Models and their metamodels induce an \emph{instance-of} relationship, such that a metamodel can be considered the type of model, and a model is considered an instance of a metamodel.
+This conforms to the notion of type and instance level known from programming.
+The grammar of a programming language, such as the Java language specification~\cite{gosling2018jls-specification}, can be considered a metamodel for programs of that language.
 
-In the most simple case, a metamodel can be seen as a set of models, and a model is an instance of that metamodel when it is contained in that set. This is sometimes also referred to as \emph{model sets}~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
-Usually, metamodels will be described with a formalism, which we discuss in more detail in \autoref{chap:foundations:formalisms}, which define of which elements a metamodel consists and how these elements instantiate in the models, along with constraints that define when a model is considered a valid instance.
+\mnote{Metamodels as sets of models}
+In a simple notion, a metamodel can be considered a set of models, such that a model is an instance of that metamodel if it is contained in that set. This is sometimes also simply referred to as \emph{model sets}~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
+Usually, metamodels will be described with some formalism, which we discuss in more detail in \autoref{chap:foundations:formalisms}.
+Such a formalism defines the elements of which a metamodel consists and how these elements are instantiated in the models, along with some constraints that a model has to fulfill to be considered a valid instance.
 
-Models are often understood, for example, as a UML class diagram, or at least depicted as such.
-Models are however not only elements and relations between them, but these elements must also have a meaning, i.e., a semantics~\cite{harel2004semantics-Computer}, in the specific context they are used for, as aimed by the abstraction and pragmatics characteristics of Stachowiak's classification.
+\mnote{Modeling languages}
+Models, especially in software engineering, are often understood as structures of objects and relations between them, which can be depicted in \gls{UML} class diagrams.
+Although this notion fits well to how we consider models and how we later define them more precisely, the elements of models must also have a meaning, i.e., a semantics~\cite{harel2004semantics-Computer}, in the specific context they are used for.
+This semantics is given by the pragmatics characteristic of \citeauthor{stachowiak1973modelltheorie-Book}'s classification.
+For models in software engineering, this semantics is usually defined by \emph{modeling languages} and tools defined for that modeling language, in which these models are defined and used.
+These languages and tools, for example, transform models into another representation, i.e., into another model, for which the semantics is known, such as code, whose execution semantics is given by its compilation to machine code for some, potentially virtual, machine whose execution semantics is known.
+This is known as \emph{transformational semantics}~\cite{pepper1987transformationalSemantics-SSPC}.
 
-Analogous to programming languages, we usually consider modeling languages, which are the tools to specify models.
-They also define the semantics of elements, often in terms of defining how they are transformed into another representation, such as code which has an execution semantics.
-According to \textcite[p. 26]{voelter2013DslEngineering}, modeling languages consists of a specification of abstract and concrete syntax, as well as static and dynamic semantics.
-static: set of constraints, type system rules language has to conform in addition to structure regarding abstract syntax
-execution: meaning of the program/model when it is executed, for DSL realized by execution engine
-Abstract syntax: data structure holding the semantically relevant information of the model (not layout information), typically a tree or graph
-Concrete syntax: notations with which user can express models, e.g. textural, graphical, tabular
+\mnote{Parts of modeling languages}
+A modeling language consists of a specification of abstract and concrete syntax, as well as its static and dynamic semantics~\cite[p. 26]{voelter2013DslEngineering}.
+\begin{properdescription}
+    \item[Abstract Syntax:] The abstract syntax defines a data structure containing the relevant information about a system or program, usually in terms of a tree of graph.
+    \item[Concrete Syntax:] A concrete syntax is the notation in which a user can express models, such as a textual or graphical representation.
+    \item[Static Semantics:] The static semantics is a set of constraints that a model has to fulfill, which can, for example, include a type system, in addition to conforming to its syntax specification.
+    \item[Execution semantics:] The execution semantics define the semantics of a program or model when it is executed. This can also be given by a transformation to another model.  
+\end{properdescription}
 
-Instead of modeling languages, \textcite{voelter2013DslEngineering} use the term \emph{\gls{DSL}}.
-Introduce the term "DSL" used in introduction. Refer to XML, as its used in introduction.
-\Glspl{DSL} in comparison to \glspl{GPL} are supposed to increase productivity and conciseness for specifying models in a specific domain~\cite[p.~30]{voelter2013DslEngineering}.
+\mnote{Domain-specific languages}
+\textcite{voelter2013DslEngineering} use the term \emph{\gls{DSL}} instead of modeling language, which we have already referred to in \autoref{chap:introduction} at the example of \gls{XML}.
+\Glspl{DSL} are supposed to increase productivity and conciseness for specifying models in a specific domain~\cite[p.~30]{voelter2013DslEngineering} in comparison to using a \emph{\glspl{GPL}}.
 A language is, however, not either domain-specific or general-purpose, but domain-specificity of a language is a gradual notion~\cite[p.~30]{voelter2013DslEngineering}.
-\Glspl{DSL} are usually assumed to have restricted expressiveness~\cite[Chap.~2]{fowler2010dsls-Book}.
+\Glspl{DSL} being designed for a specific domain are usually assumed to have restricted expressiveness~\cite[Chap.~2]{fowler2010dsls-Book}.
+The term \emph{domain} can have different meanings.
+\citeauthor{voelter2013DslEngineering} distinguish between \emph{technical} and \emph{application domain} \glspl{DSL}, although emphasizing that there is no clear border between them~\cite[p.~26]{voelter2013DslEngineering}.
+In the context of this work, we can distinguish \glspl{DSL} used by software developers and \glspl{DSL} used by developers of software development tools.
+\glspl{DSL} for software developers can again be separated into rather generic \glspl{DSL}, such as \gls{UML} for general software design and \gls{PCM} for general performance prediction, and rather application specific \glspl{DSL}, such as MATLAB/Simulink~\cite{simulink} or AUTOSAR~\cite{scheid2015autosar} in automotive software development.
+\glspl{DSL} for software development tool developers cover languages for specifying transformations and editors to be used for developing software and keeping software models consistent.
+Thus, in this work, especially transformation languages used by developers of transformation networks to support software development are relevant, whereas languages of software developers are used to define the models which the transformation then have to kept consistent.
 
-Say that "domain" can mean really different things.
-DSL for software developers:
-- Generic domain: e.g. software design (UML), performance properties (PCM)
-- Application domain: e.g. automotive (ASEM/ASCET, Amalthea)
-DSL for software tool developers:
-- Language for specifying transformations, editors etc.
-- For us especially transformation languages as we introduce later
-
-In our work, two kinds of DSLs are relevant: the ones used by software developers, whose artifacts have to be kept consistent, and the transformation languages used by developers of transformation networks.
-\citeauthor{voelter2013DslEngineering} distinguishes these kinds of DSLs as \emph{technical} and \emph{application domain} DLSs, although emphasizing that there is no clear border between them~\cite[p.~26]{voelter2013DslEngineering}.
-Since we do not consider how far a language is domain-specific, we only use the general term \emph{modeling language}.
-
+\mnote{Metamodels as abstract syntax}
+Since we do not consider domain-specificity of a language, we only use the general term \emph{modeling language}.
 Metamodels are often only referred to as the abstract syntax of models~\cite[p.~27]{voelter2013DslEngineering}, whose semantics is defined by the modeling language it is used in.
-In this thesis, we use a notion of models and metamodels that we will define more precisely in \autoref{chap:networks:models}, which does also not reflect the semantics of the models explicitly.
-Some semantics of models is, however, represented implicitly when using transformations to define consistency, because defining that elements are to be transformed into each other actually gives them a semantics.
+In this thesis, we use a notion of models and metamodels that we define more precisely in \autoref{chap:networks:models}, which does also not reflect the semantics of the models explicitly.
+Some semantics of models is, however, represented implicitly by the transformations preserving consistency.
 
 
 \subsection{Model-Driven Software Development}
 \label{chap:foundations:modeling:mdsd}
-Describe what MDSD is supposed to be
 
-Coined in early 2000s.
-Seen as natural continuation of improving abstraction, like before achieved by more powerful compilers and higher abstraction in programming languages.
-Now further abstraction by MDSD (or MDD) by automating repetitive tasks such support for persistence or interoperability~\cite{atkinson2003mdd-Software}.
+\mnote{Abstraction in software development}
+\gls{MDSD} is a general term for the idea of increasing abstraction in software development by using models instead of or in addition to program code~\cite{atkinson2003mdd-Software}.
+It also appears as \emph{model-driven software engineering} or simply \emph{model-driven development}~\cite{atkinson2003mdd-Software}.
+It has been seen as the natural continuation of increasing abstraction, like achieved with more powerful compiler and higher abstraction in programming languages before, by automating repetitive tasks such as support for persistence or interoperability~\cite{atkinson2003mdd-Software}.
+This especially includes that models are not only considered additional documentation artifacts, but central entities of the development process, from which even code can be derived.
 
-notion of \citeauthor{bezivin2005sosym} that \enquote{everything is a model}~\cite{bezivin2005sosym}
-so even code can be considered a model and is considered a model in mdsd.
-For example, metamodel for Java, which we use in this thesis~\cite{heidenreich2010jamopp-SLE}.
+\mnote{Development processes}
+The \gls{MDA}~\cite{mda} proposed a standard for an \gls{MDSD} process, in which abstract, platform-independent and thus highly reusable and portable models of a system are used to generate code for different platforms.
+It explicitly distinguishes between computation-independent, platform-independent and platform-specific models.
+\citeauthor{voelter2013mdsd-Book} propose a more sophisticated process for \gls{MDSD}, in which repetitive and generic code is separated from individual code, such that repetitive code can be automatically generated and extended by individual code~\cite[Fig.~2.1]{voelter2013mdsd-Book}.
 
-The \gls{MDA}~\cite{mda} proposed a \gls{MDSD} process using models at different levels of abstraction, namely computation-independent models, platform-independent models and platform-specific models.
-It was supposed to enable one of the central goal of portability and platform-independence, by deriving the more specific models from the abstract ones as far as possible.
+\mnote{Everything is a model}
+We consider \gls{MDSD} with an even more generic process using any models to describe a system under construction, which do not only serve documentation purposes but which all or of which most contain at least some information that is not represented in the other models, while still sharing common information that, as a central part of the motivation of this thesis, need to be kept consistent.
+Thus, we especially do not split the code into repetitive and individual code, as we also treat code as model, which can be changed like the other models.
+In this thesis, for example, we employ a metamodel for java code~\cite{heidenreich2010jamopp-SLE}.
+This follows the notion of \citeauthor{bezivin2005sosym} that \enquote{everything is a model}~\cite{bezivin2005sosym}.
 
-We do not assume such a restricted process, but consider \gls{MDSD} simply as the usage of multiple models to describe a system under construction, which do not only serve documentation purposes but which all or of which most contain at least some information that is not represented in the other models, while still sharing common information that, as a central part of the motivation of this thesis, need to be kept consistent.
 
 
+%%%
+%% MODELING FORMALISMS / FRAMEWORKS
+%%%
 \section{Modeling Formalisms and Frameworks}
 \label{chap:foundations:formalisms}
 
