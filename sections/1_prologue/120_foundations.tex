@@ -330,10 +330,10 @@ Additionally, we will see that the abstraction provided by a layer of projective
 \section{Model Transformations}
 \label{chap:foundations:transformations}
 
-Heart and soul of \gls{MDSD}~\cite{sendall2003modelTransformation-Software}.
-
-According to \textcite{kleppe2003mdaExplained-Book}, transformation defines how to generate target model from a source model by a transformation definition.
-Transformation definition consists of transformation rules, which in turn define how one or more constructs of the source language or metamodel are transformed into constructs of the target language or metamodel.
+\mnote{Model transformation central to MDSD}
+In addition to models and formalism to define them, model transformations are another central element of \gls{MDSD} processes.
+They are sometimes considered the \enquote{heart and soul}~\cite{sendall2003modelTransformation-Software} of \gls{MDSD}.
+Model transformations, which we also simply denote as \emph{transformations} throughout this thesis, generate one model or even code from another model.
 
 \begin{figure}
     \centering
@@ -342,37 +342,58 @@ Transformation definition consists of transformation rules, which in turn define
     \label{fig:foundations:transformation}
 \end{figure}
 
-While \textcite{kleppe2003mdaExplained-Book} is specific to \gls{MDA} thus deriving more specific artifacts from abstract artifacts, this can be generalized to transformations between any languages.
-Graphics as an abstraction and schematic representation of the process \cite[Fig.~9-5]{kleppe2003mdaExplained-Book}.
-TODO: Adapt graphics such that transformation definition consists of transformation rules.
+\mnote{Relevant terms for model transformations}
+According to \textcite{kleppe2003mdaExplained-Book}, a transformation defines how to generate a \emph{target model} from a \emph{source model} by a \emph{transformation definition}.
+Transformation definition consists of \emph{transformation rules}, which in turn define how one or more constructs of the source language or metamodel are transformed into constructs of the target language or metamodel.
+For example, a transformation definition may define how to transform a \gls{PCM} model into a \gls{UML} model, which consists of transformation rules, of which one could define how a component is transformed into a class.
 Transformation definitions and their rules need to fulfill some format expected by the transformation engine.
 Often supported by a \emph{transformation definition language}~\cite[Sec. 9.2]{kleppe2003mdaExplained-Book}, or short \emph{transformation language} that generates appropriate artifacts.
+These terms and their relations are depicted in \autoref{fig:foundations:transformation}, restricted to the usually considered situation of defining transformations between two metamodels, although they can in general transform between an arbitrary number of metamodels.
+While the notions of \textcite{kleppe2003mdaExplained-Book} are specific to the \gls{MDA}, thus deriving more specific from abstract artifacts, we have generalized them to transformations between any languages.
 
-Transformations provide multiple degrees of freedom for how information from one or more models can be transferred into one or more other models.
-\textcite{czarnecki2006a} provides feature models for transformations regarding many aspects.
-Transformations used for many different purposes, from batch generation of class stubs from UML class models to the update of multiple models after concurrent changes to them for restoring consistency.
 
-Important for us and the goal of consistency are in particular two aspects:
-Directionality \cite[Fig.~19]{czarnecki2006a}: Unidirectional vs. multidirectional (specifically bidirectional)
-Incrementality \cite[Fig.~19]{czarnecki2006a}: Source- and target-incrementality (latter is ordinary incrementality, former is kind of change-driven/state-based)
-Discuss state-based/delta-based!
+\subsection{Properties}
+\label{chap:foundations:transformations:properties}
 
-Intermediate structure: additional models often temporary for execution, especially traceability models
+\mnote{Directionality and incrementality of transformations}
+Transformation do not only support the simple case of taking one model and generating another, known as a \emph{batch transformation} but there are several degrees of freedom how information from one or more models can be transferred into one or more other models by a transformation.
+This also includes the incremental update of multiple models after concurrent changes for restoring consistency.
+\textcite{czarnecki2006a} provides a classification of transformations regarding a variety of features.
+For our use case, in particular two features are important, which are \emph{directionality} and \emph{incrementality}~\cite[p.~14]{czarnecki2006a}.
+\begin{properdescription}
+    \item[Directionality:] Regarding directionality~\cite[Fig.~19]{czarnecki2006a}, transformation can be separated into unidirectional and multidirectional ones, whereas the latter includes the well-researched bidirectional transformations.
+    It describes whether a transformation can be in only one or multiple directions.
+    For consistency preservation purposes, transformations usually need to be executed in multiple directions, depending on which of the models was changes and requires others to be updated.
+    \item[Incrementality:] Incrementality \cite[Fig.~19]{czarnecki2006a} concerns \emph{source incrementality} and \emph{target incrementality}.
+    We use the term incrementality specifically for target incrementality, which describes the ability of a transformation to update an existing target model after changes to the source model. This is essential for consistency preservation, because otherwise changes and additions made to the target models would become overwritten. For example, if Java code is generated from a \gls{UML} class model, then a change to the \gls{UML} model should incrementally update the Java code instead of generating it anew to avoid that additions to the code, such as method implementation, get lost.
+    Target incrementality is also referred to as \emph{change propagation}.
+    Source incrementality is about re-executing only transformation rules for changed parts of the source model.
+    We do not use this term, but later introduce the notion of \emph{delta-based} transformations, which operate on the actual changes, or deltas, performed in the source model.
+\end{properdescription}
+
+\mnote{Traceability models}
+Another feature of transformations that is relevant for some of our contributions are \emph{intermediate structures}~\cite[p.~10]{czarnecki2006a}.
+These structures concern additional models, which are often temporarily used for transformation execution, and especially include traceability models.
+Traceability models represent which elements of source and target model are related to each other by a transformation rule and thus, to enable incremental execution, are usually persisted in contrast to other structures~\cite[p.~10]{czarnecki2006a}.
+These models define which model elements have some kind of dependency and thus serve as information about or even a witness for consistency.
 
 
 \subsection{Bidirectional Transformations}
 \label{chap:foundations:transformations:bidirectional}
-\todo{Introduce Transformations}
 
-Bidirectional transformations define consistency between two models and how to restore it in both directions~\cite{stevens2010sosym}.
-They consist of a relation defining when two models are considered consistent and two consistency restorers, one for each direction.
-A consistency restorer is a function taking two potentially inconsistent models and returning an updated instance of one of the models (depending on the direction), such that the resulting models are consistent again.
-We define these kinds of transformations more precisely later based on the formalism that we introduce.
+\mnote{Relations and consistency restorers}
+Among all options from unidirectional to multidirectional transformations, \emph{bidirectional} transformations are the ones that are most interest for consistency preservation and thus well-researched.
+These transformations relate only two metamodels, which makes them less complex than other multidirectional transformations, but defines how to restore consistency in both directions between these metamodels~\cite{stevens2010sosym}, which is important for consistency preservation if instances of both models may be modified.
+These transformations consist of a \emph{relation} defining when two models are considered consistent and two \emph{consistency restorers}, one for each direction.
+A consistency restorer is a function that accepts two potentially inconsistent models and returns an updated instance of one of the models, depending on the direction.
+There are also derivation that expect two consistent models and explicit changes to one or both of them, as we discuss for our formalism more precisely.
 
-Important properties of such transformations are correctness and hippocraticness, both defined by \textcite{stevens2010sosym}.
-Correctness means that the result models are actually consistent, i.e., they are in the relation of the transformation.
-Hippocraticness means that whenever the input models are consistent, the consistency restorer does not alter them.
-We recapture these properties and define also them precisely later, based on the formalism that we introduce.
+\mnote{Correctness and hippocraticness}
+Important properties of such transformations are \emph{correctness} and \emph{hippocraticness}, both defined by \textcite{stevens2010sosym}.
+A bidirectional transformation is correct if the resulting models are consistent, i.e., if the updated instance of one model and the input instance of the other model are in the relation of the transformation.
+Hippocraticness of a transformation means that whenever the input models are consistent, the consistency restorer does not alter them.
+Thus, consistent models can be considered fixed-points of a hippocratic transformation.
+We recapture the notion of bidirectional transformations and the depicted properties later to define them more precisely for the formalism that we introduced in \autoref{chap:correctness}.
 
 % Compare multidirectional transformations with networks of transformations.
 % Refer for other consistency approaches to related work.
@@ -383,26 +404,33 @@ We recapture these properties and define also them precisely later, based on the
 \subsection{Transformation Languages}
 \label{chap:foundations:transformations:languages}
 
-Discuss what transformation languages are. Refer to initial graphics.
-Transformation language can be seen as \glspl{DSL} (see \autoref{chap:foundations:modeling:metamodels}).
+\mnote{Transformation engines and languages}
+Although transformations can be implemented manually by directly modifying the models~\cite[p.~16]{czarnecki2006a}, they usually rely on some engine that accepts rules implemented for a specific \gls{API} and automatic tasks such as scheduling or orchestrating the execution of transformation rules.
+Such an engine can be defined on its own, but is often provided together with a transformation language, which provides a specific syntax for defining transformation rules and from which implementations of these rules for the specific \gls{API} of the engine are generated.
+Transformation languages can be considered \glspl{DSL} (see \autoref{chap:foundations:modeling:metamodels}).
+We have depicted these artifacts already in \autoref{fig:foundations:transformation}.
 
-We will especially distinguish between rather \emph{imperative} and \emph{declarative} transformation languages.
+\mnote{Imperative and declarative languages}
+Among various degrees of freedom to define a transformation language, just like a transformation itself, we especially distinguish between rather \emph{imperative} and \emph{declarative} transformation languages.
+We say \enquote{rather} because being declarative is actually a gradual and not a total notion.
 Imperative languages allow to define how consistency is restored whenever changes are performed, whereas a declarative language allows to define when models are considered consistent and the language derives how to restore this after changes.
 This distinction is most relevant for us, because it maps to different concepts in our formalization, which we present in \autoref{chap:correctness}.
-Although languages can actually contain imperative and declarative constructs, we make this rather broad distinction, as the basic distinction of whether the developer specifies how to preserve consistency or whether the language has to derive it from a declarative specification applies no matter whether the complete language or only single constructs can be considered declarative.
-In the classification of \textcite{czarnecki2006a}, this is covered by different paradigms of specifying transformations in languages, especially distinguishing procedural and logic paradigms~\cite[Fig.~20]{czarnecki2006a}, depending on whether they describe how to achieve or restore consistency, or whether they only define the constraints, which usually come along with a specific way of specifying values~\cite[Fig.~20]{czarnecki2006a}, in particular imperative assignment and constraints.
+Although languages can actually contain imperative and declarative constructs, we make this rather broad distinction, as the basic distinction of whether the developer specifies how to preserve consistency or whether the language has to derive it from a declarative specification applies no matter whether the complete language or only single constructs of it can be considered declarative.
+In the classification of \textcite{czarnecki2006a}, this is covered by different paradigms of transformation languages, especially distinguishing procedural and logic paradigms~\cite[Fig.~20]{czarnecki2006a}, depending on whether they describe how to achieve or restore consistency, or whether they only define the constraints, which usually come along with a specific way of specifying values~\cite[Fig.~20]{czarnecki2006a}, in particular imperative assignment and constraints.
 
+\mnote{Opreational, relational and graph-based languages}
 \textcite{czarnecki2006a} also distinguish different transformation approaches, such as operational, relational or graph-based approaches.
-Although we usually not consider the actual language and thus the approach for specifying transformations, the languages we explicitly consider or even propose in this thesis follow either an operational approach, which imperatively specifies how to preserve consistency, or a relational approach, which declaratively specifies constraints between two metamodels.
+Although we usually only consider transformations and not the actual languages to define them, the languages we explicitly consider or even propose in this thesis follow either an operational approach, which imperatively specifies how to preserve consistency, or a relational approach, which declaratively specifies constraints between two metamodels.
 
-Examples for transformation languages for the \gls{MOF} are the languages of the \gls{QVT} standard~\cite{qvt}, namely \gls{QVTO}, an imperative, operational and unidirectional language, and \gls{QVTR}, a declarative, relational and bidirectional language.
-\gls{QVTR} is relevant for this thesis, as we propose a practical realization of one of our approaches for \gls{QVTR}.
-\gls{QVTR} uses the \gls{OCL}~\cite{ocl} for specifying the constraints that have to hold between instances of two metamodels.
-In general, \gls{QVTR} is even multidirectional and allows to define relations between multiple metamodels, we however only consider the bidirectional case.
+\mnote{Languages of the QVT standard}
+Examples for transformation languages for the \gls{MOF} (see \autoref{chap:foundations:formalisms:mof}) are the languages of the \gls{QVT} standard~\cite{qvt}, namely \gls{QVTO}, an imperative, operational and unidirectional language, and \gls{QVTR}, a declarative, relational and bidirectional language.
+\gls{QVTR} is relevant for this thesis, as we propose a practical realization of one of our approaches for that language.
+It uses the \gls{OCL}~\cite{ocl} for specifying the constraints that have to hold between instances of two metamodels.
+In general, \gls{QVTR} is even multidirectional and allows to define relations between multiple metamodels, but we only consider the bidirectional case.
 
-For the \gls{QVT} languages, implementations for the \gls{EMF} exist. Further common \gls{EMF}-based languages are \gls{VIATRA}~\cite{bergmann2015viatra}, an imperative and unidirectional transformation language, and \gls{ATL}, which is hybrid language containing both imperative and declarative constructs.
+\mnote{Language for the EMF}
+For the \gls{QVT} languages, implementations for the \gls{EMF} (see \autoref{chap:foundations:formalisms:ecore} exist. Further common \gls{EMF}-based languages are \gls{VIATRA}~\cite{bergmann2015viatra}, an imperative and unidirectional transformation language, and \gls{ATL}, which is a hybrid language containing both imperative and declarative constructs.
 Another well-researched transformation approach are \glspl{TGG}, originally developed by \cite{schuerr1995a} as a graph transformation approach and later applied to \gls{EMF}~\cite{leblebici2014IncrementalTGGSurvey-GTVMT} with tools like eMoflon~\cite{anjorin2014c}.
-
 
 \todo{Need to discuss QVT-R more detailed?}
 
@@ -416,10 +444,30 @@ Another well-researched transformation approach are \glspl{TGG}, originally deve
 \subsection{The \reactions Language}
 \label{chap:foundations:transformations:reactions}
 
-Maybe move something from prototypical implementation in \autoref{chap:correctness_evaluation:categorization} here.
+\mnote{\Reactionslanguage and transformation engine}
+The \vitruv framework (see \autoref{chap:foundations:multiview:vitruv}) provides several languages for defining consistency preservation~\cite{kramer2017a}. 
+One of them is the \reactionslanguage~\cite{klare2016b} for defining imperative, unidirectional transformations.
+It is of specific importance for this thesis, because we use it for prototypical implementations and evaluations.
+The \vitruv framework defines a transformation engine, which processes changes performed to a model and calls given transformation rules that implement an \gls{API}, which accepts the processed changes and updates models that are accessed via a traceability model, which is called \emph{correspondence model}.
+This correspondence model represents between which elements consistency has to be preserved.
+The \reactionslanguage generates implementations of transformation rules according to this \gls{API} provided by the framework.
 
-\vitruv framework defines transformation engines, executes rules according to some change propagation format.
-\reactionslanguage generated rules according to that format.
+\lstinputlisting[%
+float,%
+language=reactions,
+caption={[Reaction for creating classes for components]\reaction creating a \gls{UML} class for a \gls{PCM} component. Adapted from \cite{klare2020Vitruv-JSS}.},
+label={lst:foundations:reaction_example},
+]{listings/prologue/foundations/reaction_example.tex}
+
+\mnote{Example for \reactions}
+A transformation rule defined in that language is called a \emph{\reaction}.
+To give an impression of how such rules look like, an example that transforms a \gls{PCM} component into a class with appropriate naming in \gls{UML} among its creation is depicted in \autoref{lst:foundations:reaction_example}.
+A \reaction specifies after which type of change it should be executed, which, in this case, is the insertion of a component into a repository.
+It may then call one or more reusable \emph{routines}, which are supposed to restore consistency.
+Such a routine consists of a \emph{match} block, which checks whether it is responsible for restoring consistency and retrieves all relevant elements from the models and the correspondence model, and an \emph{action} block, which restores consistency.
+In the example, the routine retrieves an appropriate package in the \gls{UML} model to place the class in.
+It then creates a class, assigns it an appropriate name and adds a correspondence between the elements.
+For the complete explanation of that example, we refer to previous work~\cite{klare2020Vitruv-JSS}.
 
 
 
