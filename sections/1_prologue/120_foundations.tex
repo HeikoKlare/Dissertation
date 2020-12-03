@@ -244,22 +244,26 @@ It defines an Ecore metamodel for the Java language and also provides parsing an
 \section{Multi-view Modeling}
 \label{chap:foundations:multiview}
 
-Multi-view modeling covers the general topic of describing a system by means of multiple views or, in general, models~\cite{reineke2017ProblemMultiView-SoSym}.
-A key challenge in multi-view modeling is consistency, as we have motivated in \autoref{chap:introduction}~\cite{reineke2017ProblemMultiView-SoSym}.
+\mnote{Consistency preservation in multi-view modeling}
+Multi-view modeling covers the general topic of describing a system by means of multiple views or, in general, multiple models~\cite{reineke2017ProblemMultiView-SoSym}.
+A key challenge in multi-view modeling is consistency~\cite{reineke2017ProblemMultiView-SoSym}, as we have motivated in \autoref{chap:introduction}.
 Preserving consistency between multiple views is referred to as \emph{model repair}~\cite{macedo2017ModelRepairClassification-TSE}, \emph{consistency restoration}~\cite{stevens2010sosym, kramer2017a} or \emph{model synchronization}~\cite{diskin2016Taxonomy-JSS}, with slightly different meanings.
 We, in general, refer to this as \emph{consistency preservation}.
 
-Views have been defined in an ISO standard: \emph{architecture view} defined as expressing the system architecture regarding specific concerns \cite[p.~2]{iso42010}.
-synthetic vs. projective~\cite[p.~22]{iso42010}
-While synthetic composes system description of views, such that each of them represents some information not contained in the others, projective views derive the information completely from an underlying source and are thus only projections.
-In projective approaches, the underlying source can, again, be seen as a model, such that views in projective approaches are projections of that model~\cite[Fig.~5]{klare2020Vitruv-JSS}.
-This underlying model is called a \gls{SUM}~\cite[p.~210]{atkinson2010a}, which, like any model, conform to a metamodel, the \gls{SUMM}~\owncite[Def.~2]{klare2020Vitruv-JSS}.
+\mnote{Synthetic and projective views}
+The term \emph{architecture view} has been defined in the context of system architecture as an expression of the architecture regarding specific concerns in an ISO standard~\cite[p.~2]{iso42010}.
+We generalize this to \emph{views} as representation of system extracts or properties regarding specific concerns.
+Approaches for constructing views can be separated into \emph{synthetic} and \emph{projective} ones~\cite[p.~22]{iso42010}.
+A synthetic approach composes a system description of views, such that each of them represents some information not contained in the others.
+Projective approaches derive the information in a view completely from an underlying repository, thus views are only projections from that repository.
+In projective approaches, the underlying repository can, again, be seen as a model, such that views in projective approaches are projections of that model~\cite[Fig.~5]{klare2020Vitruv-JSS}.
+This underlying model is also called a \gls{SUM}~\cite[p.~210]{atkinson2010a}, which, like any model, conforms to a metamodel, the \gls{SUMM}~\owncite[Def.~2]{klare2020Vitruv-JSS}.
 
-In a projective approach, the problem of preserving consistency is transferred to ensuring consistency within the \gls{SUM}, from which the views are projected.
+\mnote{Single underlying models}
+In a projective approach, the problem of preserving consistency between the views, as necessary in an synthetic approach, is transferred to ensuring consistency within the \gls{SUM}, from which the views are projected.
 Consistency of this \gls{SUM} can be achieved in different ways~\owncite{meier2019modelsward,meier2020ccis}, especially depending on whether a \gls{SUM} is \emph{essential} or \emph{pragmatic}~\cite{atkinson2015realizationMultiView-EDOC}.
-An essential \gls{SUM} is free of any redundancies or implicit dependencies, such that every instance of its \gls{SUMM} is inherently consistent, whereas a pragmatic \gls{SUM} can contain allow arbitrary redundancies and dependencies, which then have to be kept consistent by explicit mechanisms for consistency preservation, such a transformations.
-While the former approach is followed by the \gls{OSM} approach, the latter is used in the \vitruv approach, which we depict in more detail in the following.
-
+An essential \gls{SUM} is free of any redundancies or implicit dependencies, such that every instance of its \gls{SUMM} is inherently consistent, whereas a pragmatic \gls{SUM} can contain allow arbitrary redundancies and dependencies, which then have to be kept consistent by explicit mechanisms for consistency preservation, such as transformations.
+While the former approach is followed by the \acrlong{OSM} approach, the latter is used in the \vitruv approach, which we depict in more detail in the following.
 
 % \subsection{Consistency Preservation}
 % \label{chap:foundations:multiview:consistency}
@@ -274,29 +278,53 @@ While the former approach is followed by the \gls{OSM} approach, the latter is u
 \subsection{Orthographic Software Modeling}
 \label{chap:foundations:multiview:osm}
 
-\gls{OSM}
-Projective multi-view approach, based on essential SUMs~\cite{atkinson2010a}.
-Focus actually on views, how to create and manage them, structured along dimensions and dynamically created on-demand from the SUM.
-Consistency achieved through the SUM, which is inherently consistent.
+\mnote{View definition in OSM}
+\gls{OSM} is an approach to multi-view modeling, based on the idea of an essential \gls{SUM}, proposed by \textcite{atkinson2010a}.
+It assumes a \gls{SUM}, which is, in the best case, free of any redundancy and dependencies and thus inherently consistent.
+The approach focuses on the creation and management of projective views from this \gls{SUM}~\cite[p.~211]{atkinson2010a}.
+It proposes to structure these views along their properties spanning different dimensions, inducing a cube in which each cell potentially represents a views, at least if the associated combination of property values makes sense~\cite[p.~212]{atkinson2010a}.
+Dimensions can be static, such as the abstraction level or the notation, or dynamic dynamic, such as the elements to display.
+For example, one might select a graphic view at the architecture level for a specific component, or a textual view at the implementation level for a specific class.
+These views are created dynamically and on-demand from the \gls{SUM}~\cite[p.~211]{atkinson2010a} and views are assumed to be the only possibility to modify information in the \gls{SUM}.
+Views, like models, base on a metamodel that defines how valid views have to look like, which is denoted a \emph{\viewtype}~\cite[p.~133]{goldschmidt2011diss}.
+
+\mnote{Consistency in OSM}
+Consistency in this approach is achieved by proper construction of a \gls{SUMM}, which ensures that instances are always consistent.
+It requires transformations between the views and the \gls{SUM} to first generate a view and later propagate changes in the view back to the \gls{SUM}.
+The approach does, however, not inherently solve the problem of concurrent modifications to different views to be merged.
 
 
-\subsection{The \vitruv Framework}
+\subsection{The \vitruv Approach}
 \label{chap:foundations:multiview:vitruv}
-Copies the idea of a SUM and projective views from \gls{OSM}.
-Instead of an essential SUM, is uses a pragmatic SUM, which can contain redundancies and dependencies that are kept consistent.
-The SUM internally consists of models, which are kept consistent by model transformations, denoted as a \vsum~\cite{klare2020Vitruv-JSS}.
-It is motivated by the insight that constructing an essential, redundancy-free SUM is hard to achieve and that for compatibility with existing tools it may be easier to combine their metamodels with a synthetic approach, such that the view used by each tool is a projection of a single models within the V-SUM, whereas further projective views can be derived from the information of the models in the V-SUM, but ensuring their consistency with transformations.
 
-Within a V-SUM, multiple models need to be kept consistent, which is one application area for the contributions of this thesis.
-%\vitruv puts an abstraction layers of views onto the contributions of this thesis and defines a process of using and applying it. 
-%\todo{Reflect this later in the Commonalities chapter by referring to the idea and saying how composition of Commonalities can even improve the approach.}
-\vitruv serves both as a motivation for the contributions of this thesis, but its implementation in the \vitruv framework~\cite{vitruvFrameworkGithub} and especially its languages for consistency preservation serves as a basis for our prototypical implementation and validation purposes.
-Additionally, we will see that the abstraction provided by a layer of projective views onto the models that are kept consistent in a V-SUM provides benefits of our approach for improving quality properties rather than using it standalone.
-%Additionally, at some points (Commonalities), the usage of developed concepts provides even more benefits when not only used standalone but in combination with further ideas of \vitruv.
+\mnote{Construction of \vsums in \vitruv}
+The \vitruv approach~\cite{klare2020Vitruv-JSS} bases on the \gls{OSM} idea of having a \gls{SUM} from which projective views are derived though which the information in the \gls{SUM} can be modified.
+Instead of essential \glspl{SUM}, is uses pragmatic \glspl{SUM}, which can contain redundancies and dependencies that are kept consistent.
+The \gls{SUM} internally consists of models, which are kept consistent by model transformations, called \emph{consistency preservation rules}, and is denoted as a \vsum~\cite[Def.~9]{klare2020Vitruv-JSS}.
+The metamodel of a \vsum is denoted as a \vsumm~\cite[Def.~10]{klare2020Vitruv-JSS}.
+It is motivated by the insight that constructing an essential, redundancy-free \gls{SUM} is hard to achieve~\cite{meier2020ccis}.
+In addition, to achieve compatibility with existing tools and their modeling languages it may be easier to combine their metamodels with a synthetic approach, because then the view used by each tool is only a projection that is an isomorphism to one of the models within the \vsum~\cite{klare2020Vitruv-JSS}.
+Still, in contrast to a purely synthetic approach, it allows to define further projective views derived from the information of the models in the \vsum.
 
-For \vitruv, we have provided a simple but sufficient formalism defining consistency~\cite{klare2020Vitruv-JSS}, on which the formalism in this thesis bases.
-However, the formalism in this thesis will be more detailed and fine-grained.
+\begin{figure}
+    \centering
+    \input{figures/prologue/foundations/vsum_cbse_example.tex}
+    \caption[Exemplary \acrshort{VSUMM}]{Exemplarily \vsumm consisting of three metamodels for component-based development and exemplarily views derived from them. Adapted from~\cite[Fig.~4.4]{langhammer2017a}.}
+    \label{fig:foundations:vsum_cbse_example}
+\end{figure}
 
+\mnote{Exemplary \vsum for component-based design}
+\autoref{fig:foundations:vsum_cbse_example} depicts an exemplary \vsumm for component-based development, using Java for source code representation, \gls{UML} for depicting object-oriented design, and \gls{PCM} for representing the architecture of the system and potentially performing predications of its performance.
+These three metamodels form the \vsumm and be accessed via views that can be instantiated from four exemplary \viewtypes.
+$\mathvariable{VT}_1$ and $\mathvariable{VT}_3$ depict existing \viewtypes, already used as visualizations of \gls{UML} and \gls{PCM} models, whereas $\mathvariable{VT}_2$ and $\mathvariable{VT}_4$ represent \viewtypes projected from multiple models within a \vsum and potentially further information defined by the consistency preservation rules.
+We will also introduce consistency between these metamodels as a case study used for explanations and evaluations of this thesis in \autoref{chap:foundations:case_studies}.
+
+\mnote{\vitruv as motivation, application area and implementation base}
+Within a \vsum, multiple models need to be kept consistent, which is one application area for the contributions of this thesis.
+\vitruv serves both as a motivation for the contributions of this thesis, but its implementation in the \vitruv framework~\cite{vitruvFrameworkGithub} and especially its languages for consistency preservation also serve as a basis for our prototypical implementation and validation purposes.
+For \vitruv, we have provided a simple but sufficient formalism defining consistency~\cite{klare2020Vitruv-JSS}.
+The formalism in this thesis bases on it, but will be more detailed and fine-grained.
+Additionally, we will see that the abstraction provided by a layer of projective views onto the models that are kept consistent in a \vsum provides additional benefits in our approach for improving quality properties rather than using it standalone.
 
 
 \section{Model Transformations}
@@ -385,7 +413,7 @@ Another well-researched transformation approach are \glspl{TGG}, originally deve
 % Value Specification: Constraint, Imperative Assignment
 
 
-\subsection{The \reactionslanguage}
+\subsection{The \reactions Language}
 \label{chap:foundations:transformations:reactions}
 
 Maybe move something from prototypical implementation in \autoref{chap:correctness_evaluation:categorization} here.
@@ -396,6 +424,7 @@ Maybe move something from prototypical implementation in \autoref{chap:correctne
 
 
 \section{Case Studies}
+\label{chap:foundations:case_studies}
 
 \subsection{Domains: PCM, UML and Java}
 \label{chap:foundations:case_studies:domains}

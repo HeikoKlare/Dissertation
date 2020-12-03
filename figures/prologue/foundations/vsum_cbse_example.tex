@@ -1,0 +1,333 @@
+% requires tikzvitruvius.sty
+\begin{tikzpicture}[
+    vtcaption/.style={font=\small},
+    view/.style={uml box, densely dashed},
+    consarrow/.style={latex-latex, thin, double},
+    mir/.style={draw, fill=white, rectangle, rounded corners=4pt, inner sep=.25em, font=\scriptsize},
+    viewtype/.style={circle, draw, solid, fill=white, inner sep=.1em, font=\scriptsize},
+    polarrow/.style={latex-latex, densely dotted},
+    mininode/.style={inner sep=.4em},
+    %viewtype/.append style={blueshading},
+    %mir/.append style={blueshading},
+    ]
+%% SUM
+\node[uml small box] (pcm) {PCM};
+\node[uml small box] (uml) [below left=2em and 1em of pcm] {UML};
+\node[uml small box] (java) [above left=2em and 1em of uml] {Java};
+
+\node[circle,draw,thick,fit=(pcm)(uml.north)(java),inner sep=2ex] (sum) {};
+
+\draw[consarrow] (java) -- node[mir] (pcmJavaCCR) {CPR} (pcm);
+\draw[consarrow] (pcm) to [bend left] node[mir] (pcmUMLCCR) {CPR} (uml);
+% \draw[consarrow] (uml) to [bend left] node[left, font=\footnotesize] {cons$_2$} (java);
+\draw[consarrow] (uml) to [bend left] node[mir] (umlJavaCCR) {CPR} (java);
+
+%% Klassendiagramm
+
+% Mittelpunkt
+\node (cdmpoint) [below left=6em and -5.5em of sum] {};
+
+\node[uml small box] (c1) [above=.3em of cdmpoint] {C$_1$};
+\node[uml small box] (c2) [below left=1em and -.3em of c1] {C$_2$};
+\node[uml small box] (c3) [right=1em of c2] {C$_3$};
+
+\draw[open triangle 90-] (c1) -- ++ (0,-1.5em) -| (c2);
+\draw[open triangle 90-] (c1) -- ++ (0,-1.5em) -| (c3);
+
+\node[view,fit=(c1)(c2)(c3)] (classview) {};
+\node[vtcaption] (classviewtext) [below=0.3em of classview] 
+{UML Class Diagram View};
+
+\path (classview) -- node [at end,viewtype] (viewtype1) {$\mathvariable{VT}_1$} (sum.290);
+
+\path (classview) edge [-latex] (viewtype1);
+
+\path (viewtype1) edge [polarrow, latex-latex] (uml);
+
+%% Klasse-Komponenten-Diagramm
+
+% Mittelpunkt
+\node (ccmpoint) [above right=7.5em and 9.5em of classview] {};
+
+{
+\tiny
+\pcmcomponentbody{}{comp1ccm}{comp$_1$}{at (ccmpoint.center)}
+\pcmlolliwest{}{lolli1ccm}{(comp1ccm.west)}
+}
+
+\node[uml small box] (c1') [above right=0em and 3em of comp1ccm] {C$_1$};
+\node[uml small box] (c2') [below right=0em and 3em of comp1ccm] {C$_2$};
+
+\draw[open triangle 90-] (c1') -- (c2');
+
+\draw[-latex, dashed] (c1') -- node[above,sloped,font=\tiny] {implements} (comp1ccm);
+\draw[-latex, dashed] (c2') -- node[below,sloped,font=\tiny] {implements} (comp1ccm);
+
+\node[view,fit=(comp1ccm)(lolli1ccm)(c1')(c2')] (classcompview) {};
+\node[vtcaption] (classcompviewtext) [above=.3em of classcompview] 
+{Component-Class Implementation View};
+
+\path (classcompview) -- node [viewtype,at end] (viewtype2) {$\mathvariable{VT}_2$} (sum.335);
+\path ([yshift=1em]classcompview.south west) edge [-latex] (viewtype2);
+\path (viewtype2) edge [polarrow, latex-] (uml);
+\path (viewtype2) edge [polarrow, latex-] (pcm);
+\path (viewtype2) edge [polarrow, latex-] (pcmUMLCCR);
+
+%% PCM-Komponenten-Diagramm
+\node[] (pcmRepView) [above right=3.5em and 10.5em of sum] {};%
+%\node (pcmpoint) [above right=10cm and 4em of sum] {};
+
+{\tiny
+\pcmcomponentbody{}{pcmcomp1}{comp$_1$}{at (pcmRepView)}
+\pcmlolliwest{}{pcmcomp1lolli}{(pcmcomp1.west)}
+\pcmcomponent{}{pcmcomp2}{comp$_2$}{[left=2.5em of pcmcomp1text]}
+}
+
+%\draw[->, dashed] (pcmcomp2arc) -- (pcmcomp1lolli);
+
+\node[view,fit=(pcmcomp1)(pcmcomp2)(pcmcomp2lolli)] (pcmview) {};
+
+\node[vtcaption] (pcmviewtext) 
+[above=0.3em of pcmview] {PCM System View};
+
+\path (pcmRepView) -- node[viewtype,at end] (viewtype3) {$\mathvariable{VT}_3$} (sum.40);
+%\node[viewtype] (viewtype3) at (epoint3) {VT$_3$};
+\path (pcmview) edge [-latex] (viewtype3);
+\path (viewtype3) edge [polarrow, latex-latex] (pcm);
+
+\node[view, font=\tiny\ttfamily] (javasource) [above left=4em and -10em of sum] {%
+\begin{lstlisting}[%
+numbers=none,
+language=java,
+backgroundcolor=\color{white},
+basicstyle=\tiny\ttfamily,
+frame=none,
+aboveskip=0pt,
+belowskip=0pt,
+linewidth=3.7cm,
+breaklines=true]
+@ADLImplements(implements-component comp_1)
+public class C2 extends C1 {
+    public static void main (String[] args) {
+        System.out.println ("Hello World!");
+    }
+}
+\end{lstlisting}
+};
+\node[vtcaption] (javatext) [above=0.3em of javasource] 
+{Annotated Java Source Code View};
+
+\path (javasource) -- node [at end, viewtype] (viewtype4) {$\mathvariable{VT}_4$} (sum.100);
+%\node[viewtype] (viewtype4) at (epoint4) {VT$_4$};
+\draw[-latex] (javasource) -- (viewtype4);
+\draw[polarrow] (viewtype4) -- (java);
+\draw[polarrow] (viewtype4) -- (pcm.north west);
+\draw[polarrow,latex-] (viewtype4) -- (pcmJavaCCR);
+%\draw[polarrow,latex-] (viewtype4) to [bend right=10] (pcmUMLCCR);
+%\draw[polarrow,latex-] (viewtype4) to [bend left=10] (umlJavaCCR);
+
+% Legende
+\node[draw, legendbg, matrix, font=\scriptsize, inner sep=0.6em, nodes=mininode] (legend) at (12.5em,-10em) {%
+\node[uml small box, minimum height=0.1em, inner sep=0.3em, font=\scriptsize, xshift=2em] (legend_mm) {MM}; & \node[anchor=base west, font=\footnotesize] {Metamodel};\\
+\node[viewtype, xshift=2em, font=\tiny] {$\mathvariable{VT}$}; & \node[anchor=base west, font=\footnotesize] {\ViewType};\\
+\draw[-latex] (0,.5ex)--(4em,.5ex); & \node[anchor=base west, font=\footnotesize] {Instance of a \ViewType};\\
+\draw[polarrow] (0,.5ex)--(4em,.5ex); & \node[anchor=base west, font=\footnotesize] {View Transformation};\\
+\draw[consarrow] (0,.5ex) to node[midway,mir] {CPR} (4em,.5ex); & \node[anchor=base west, font=\footnotesize] {Consistency Preservation Rule};\\
+};
+
+\foreach \x in {pcm,uml,java,legend_mm} {
+\draw (\x.north west) ++ (.2pt,0) -- ++ (0,.3em) -- ++ (0.6em,0) -- ++ (0,-.3em);
+}
+
+\node[font=\bfseries\scriptsize] (sumtext) [above right=0em of sum.240, anchor=south west, align=center] {\vsum\\ Metamodel};
+
+\end{tikzpicture}
+
+% %%
+% %% requires: tikzkit.sty, tikzvitruvius.sty
+% %% 
+% \begin{tikzpicture}[
+%     vtcaption/.style={font=\small},
+%     metamodel/.style={draw},
+%     instanceof/.style={dashed},
+%     consarrow/.style={latex-latex, thin, double},
+%     mir/.style={draw, fill=white, rectangle, rounded corners=4pt, inner sep=.25em, font=\scriptsize},
+%     viewtype/.style={circle, draw, solid, fill=white, inner sep=.1em, font=\scriptsize},
+%     polarrow/.style={latex-latex, densely dotted},
+%     mininode/.style={inner sep=.25em},
+%     view/.style={uml box, densely dashed},
+%     %view/.append style={draw=gray},
+%     %viewtype/.append style={blueshading},
+%     %mir/.append style={blueshading},
+% ]
+% %% SUM
+% \node[uml small box] (pcm) {ADL};
+% \node[uml small box] (uml) [below left=2em and .5em of pcm] {UML};
+% \node[uml small box] (java) [above left=2em and .5em of uml] {Java};
+% % \node[metamodel, text width=5em] (omnet) [below left=2.5em and 1em of pcm] {Sensor Model};
+
+% \foreach \x in {pcm,uml,java} {
+% \draw (\x.north west) ++ (.2pt,0) -- ++ (0,.5em) -- ++ (1em,0) -- ++ (0,-.5em);
+% }
+
+% \node[circle,thick,draw,fit=(pcm)(uml.north)(java), inner sep=1.5em] (sum) {};
+
+% \node[font=\bfseries\normalsize] (sumtext) [below=.5em of sum.north, align=center] {\vsum\\ Metamodel};
+
+% \draw[consarrow] (pcm) to [bend left] node[mir] (mir1) {CPR} (uml);
+% \draw[consarrow] (uml) to [bend left] node[mir] (mir2) {CPR} ([xshift=-0.5em]java.south);
+% \draw[consarrow] (java) to node[mir] (mir3) {CPR} (pcm);
+% % \draw[consarrow] (java) to node[mir] (mir3) {CPR} (pcm);
+% % \draw[consarrow] (omnet) to [bend left] node[mir] (mir4) {CPR} (pcm);
+
+% %% Methodologist
+% %\node (user5) [below left=5em and -1em of sum] {\includegraphics[width=2em]{user-blue}};
+% \umlhuman{user5}{[above right=-2em and 8em of sumtext]}{semithick}{}{1};
+% \node (user5text) [below=0em of user5] {methodologist};
+% \draw[-latex,thick] (user5) to [bend left=15] node[above, sloped, pos=0.4] {defines} (sumtext); 
+
+
+% %% Klassendiagramm
+
+% % Mittelpunkt
+% \node (cdmpoint) [below left=2em and 6em of sum] {};
+
+% \node[uml small box] (c1) [above=.3em of cdmpoint] {C\textsubscript{1}};
+% \node[uml small box] (c2) [below left=.3em of cdmpoint] {C\textsubscript{2}};
+% \node[uml small box] (c3) [below right=.3em of cdmpoint] {C\textsubscript{3}};
+
+% \draw[open triangle 90-] (c1.south) -- ++ (0,-.75em) -| (c2);
+% \draw[open triangle 90-] (c1.south) -- ++ (0,-.75em) -| (c3);
+
+% \node[view,fit=(c1)(c2)(c3)] (classview) {};
+% \node[vtcaption] (classviewtext) [below=.3em of classview] {UML class diagram view};
+
+% \path (classview) edge [-latex, instanceof, shorten >=1em] node [viewtype,at end] (viewtype2) {VT\textsubscript{2}} (sum.220);
+% \path (viewtype2) edge [polarrow] (uml);
+
+% %% Klasse-Komponenten-Diagramm
+
+% % Mittelpunkt
+% \node (ccmpoint) [below right=4em and 7em of sum] {};
+
+% {\tiny
+% \pcmcomponentbody{}{comp1ccm}{comp\textsubscript{1}}{at (ccmpoint.center)}
+% \pcmlolliwest{}{lolli1ccm}{(comp1ccm.west)}
+% }
+
+% \node[uml small box] (c1') [above right=-.5em and 3.5em of comp1ccm] {C\textsubscript{1}};
+% \node[uml small box] (c2') [below right=-.5em and 3.5em of comp1ccm] {C\textsubscript{2}};
+
+% \draw[open triangle 90-] (c1') -- (c2');
+
+% \draw[->, dashed] (c1') -- node[above,sloped,font=\tiny] {implements} (comp1ccm);
+% \draw[->, dashed] (c2') -- node[below,sloped,font=\tiny] {implements} (comp1ccm);
+
+% \node[view,fit=(comp1ccm)(lolli1ccm)(c1')(c2')] (classcompview) {};
+% \node[vtcaption] (classcompviewtext) [below=.3em of classcompview] {component-class implementation view};
+
+% \path (classcompview) edge [-latex, instanceof, shorten >=1em] node[viewtype, at end] (viewtype3) {VT\textsubscript{3}} (sum.320);
+% \path (viewtype3) edge [polarrow, latex-] (uml);
+% \path (viewtype3) edge [polarrow] (pcm);
+
+% % OO-Entwickler
+
+% %\node (user1) [above right=2em and 0em of classview] {\includegraphics[width=2em]{user-green}};
+% \umlhuman{user1}{[below=1.7em of sum]}{semithick}{}{1};
+% \node (user1text) [below=0em of user1] {component developer};
+
+
+% \draw[-latex,thick] (user1) to [bend right=15] node[above, sloped] {uses} (classcompview.190); 
+% \draw[-latex,thick] (user1) to [bend left=15] node[above, sloped] {uses} (classview); 
+
+% %% Java-Quelltext
+
+% \node[view] (javasource) [above left=-4em and 6em of sum] {%
+% \begin{lstlisting} [
+% language=java,
+% basicstyle=\tiny\ttfamily,
+% frame=none,
+% aboveskip=0pt,
+% belowskip=0pt
+% linewidth=12em,
+% breaklines,
+% numbers=none,
+% ]
+% /* @implements-component comp_1
+% */
+% public class C2 extends C1 {
+% public static void main (String[] args) {
+% System.out.println ("Hello World!");
+% }
+% }
+% \end{lstlisting}
+% };
+% \node (javasourcetext) [below=0em of javasource] {Java source view};
+
+% \path (javasource) edge [-latex, instanceof, shorten >=1em] node [viewtype,at end] (viewtype1) {VT\textsubscript{1}} (sum);
+% \path (viewtype1) edge [polarrow] (java);
+% \path (viewtype1) edge [polarrow, bend left=35] ([yshift=0.5em]pcm.west);
+
+% %\node (user2) [right=3.5em of javasource] {\includegraphics[width=2em]{user-green}};
+% \umlhuman{user2}{[below left=5em and -3em of javasource]}{semithick}{}{1};
+% \node (user2text) [below=0em of user2] {programmer};
+% \draw[-latex,thick] (user2) to [bend right=15] node[below, sloped] {uses} (javasourcetext); 
+
+% %% Komponentenmodell
+% \node (pcmpoint) [above right=-8em and 14em of sum] {};
+
+% {\tiny
+% \pcmcomponentbody{}{pcmcomp1}{comp\textsubscript{1}}{at (pcmpoint.center)}
+% \pcmlolliwest{}{pcmcomp1lolli}{(pcmcomp1.west)}
+% \pcmcomponent{}{pcmcomp2}{comp\textsubscript{2}}{[left=2.3em of pcmcomp1text]}
+% }
+% %\draw[->, dashed] (pcmcomp2arc) -- (pcmcomp1lolli);
+
+% \node[view,fit=(pcmcomp1)(pcmcomp2)(pcmcomp2lolli)] (pcmview) {};
+% \node[vtcaption] (pcmviewtext) [below=.3em of pcmview] {component diagram view};
+
+% \path (pcmview) edge [-latex, instanceof, shorten >=1em] node [viewtype,at end] (viewtype4) {VT\textsubscript{4}} (sum);
+% \path (viewtype4) edge [polarrow] (pcm);
+
+% \umlhuman{user3}{[below right=0em and 6em of pcmview]}{semithick}{}{1};
+% \node (user3text) [below=0em of user3] {system architect};
+% \draw[-latex,thick] (user3) to [bend left=15] node[above, sloped] {uses} (pcmview.east); 
+% \draw[-latex,thick] (user3text) to [bend left=15] node[above, sloped] {uses} (classcompview); 
+
+% %% Simulation
+% % \node[view] (chart) [above left=5em and -4em of sum] {
+% % \begin{tikzpicture}[solid, minimum width=0em, minimum height=0em]
+% % \draw[step=.4em,ultra thin] (-.1em,-.1em) grid (3.9em,2.9em);
+
+% % \draw[thin,-latex] (0,-.1em) -- node[inner sep=0.1em, above=0em,sloped,font=\tiny] {Probability} (0,3em);
+% % \draw[thin,-latex] (-.1em,0) -- node[inner sep=0.1em, below=0em,font=\tiny] {Time} (4em,0);
+
+% % \foreach \x in {0.2,0.3,...,3.4}
+% % \pgfmathrandominteger{\y}{0}{25}
+% % \draw[line width=.1em] (\x em,0em) -- ++ ($\y *(0,0.1em)$);
+% % \foreach \x in {0.2,0.4,...,3.4}
+% % 	\pgfmathrandominteger{\y}{0}{25}
+% % 	\draw[line width=.2em,gray] (\x em,0em) -- ++ ($\y *(0,0.1em)$);
+% % \end{tikzpicture}
+% %\includegraphics[width=5em]{simulation_chart}
+% % };
+% % \node[vtcaption] (charttext) [below=.3em of chart] {simulation results};
+% % \path (charttext) edge [-latex, shorten >=1em] node [viewtype,at end] (viewtype5) {VT$_5$} (sum);
+% % \path (viewtype5) edge [polarrow] (pcm);
+% % \path (viewtype5) edge [polarrow] (omnet);
+
+% %\node (user4) [above right=5em and -1.5em of chart] {\includegraphics[width=2em]{user-green}};
+% % \umlhuman{user4}{[above right=5em and -1.5em of chart]}{semithick}{};
+% % \node (user4text) [below=0em of user4] {performance engineer};
+% % \draw[-latex,thick] (user4text) to [bend right] node[above, sloped] {uses} (pcmview.west); 
+% % \draw[-latex,thick] (user4text) to [bend right] node[above, sloped] {uses} (chart); 
+
+% %% Ende
+
+% \node[draw, matrix, font=\scriptsize, nodes=mininode, fill=lightgray!30] (legend) at (20em, 3em) {%
+% \draw[-latex, dashed](0,.5ex)--(4em,.5ex); & \node[anchor=base west] {«instance of»};\\
+% \draw[polarrow](0,.5ex)--(4em,.5ex); & \node[anchor=base west] {view transformation};\\
+% \draw[consarrow](0,.5ex) to node[midway,mir] {CPR} (4em,.5ex); & \node[anchor=base west] {consistency preservation rule};\\
+% };
+
+% \end{tikzpicture}

@@ -1,0 +1,203 @@
+%% Tikz-Styles for Palladio Component Model symbols
+%% by Erik Burger
+%%
+%% version 2010-12-13
+%%
+%% Problems, bugs and comments to
+%% burger@kit.edu
+
+%% Reduced and simplified to necessary commands for structural representation by Heiko Klare
+
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usetikzlibrary{arrows}
+\usetikzlibrary{fit}
+\usetikzlibrary{shapes}
+\usetikzlibrary{shadows}
+\usetikzlibrary{calc}
+
+%% Baseline adaptation for PCM symbols
+\tikzstyle{pcm} = [baseline=-.2ex]
+
+%% Ragged left text for boxes
+\tikzoption{text badly
+raggedleft}[]{\def\tikz@text@action{\raggedleft\relax}}
+\tikzoption{text raggedleft}[]%
+{\def\tikz@text@action{\raggedleft\rightskip\z@ plus2em
+\spaceskip.3333em \xspaceskip.5em\relax}}
+
+%% Layers
+\pgfdeclarelayer{lowerlayer}
+\pgfdeclarelayer{upperlayer}
+\pgfsetlayers{main,lowerlayer,upperlayer}
+
+% #1 = Formatierung
+% #2 = Name des Nodes
+% #3 = Position
+\newcommand{\pcmcomponentsymbol}[3]{
+	\node[rectangle, minimum width=0.8em, minimum height=0.8em, #1]	
+		(#2)	#3 {};
+	\filldraw[#1]	
+		($(#2)+(-0.7em,.07em)$)	rectangle	+(.5em,.2em)
+		($(#2)+(-0.7em,-.07em)$)	rectangle	+(.5em,-.2em);
+}
+
+% #1 = Formatierung
+% #2 = Name des Nodes
+% #3 = Text
+% #4 = oberer Layer
+% #5 = unterer Layer
+% #6 = Position
+\newcommand{\pcmcomponentbodyonlayers}[7]{
+	\begin{pgfonlayer}{#4}
+	\node[minimum width=#7,anchor=south,font=\footnotesize] (#2text) #6 {#3};
+	\pcmcomponentsymbol{fill=white, draw=black}{#2componentsymbol}{at ($(#2text.south east)+(-0.5em,2em)$)}
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{#5}
+	\coordinate (#2componentsymbolnortheast) at ($(#2componentsymbol.north east)+(0,0.2em)$);
+	\node[draw=black, rectangle, inner sep = .2em, #1] 	(#2) [fit=(#2text) ($(#2componentsymbolnortheast)$)] {};
+	\end{pgfonlayer}
+}
+
+\newcommand{\pcmcomponentwidth}{5.5em}
+\newcommand{\pcmcomponentwidthsmall}{3.5em}
+
+% #1 = Formatierung 
+% #2 = Name des Nodes
+% #3 = Text
+% #4 = Position
+\newcommand{\pcmcomponentbody}[4]{
+	\pcmcomponentbodyonlayers{#1}{#2}{#3}{upperlayer}{lowerlayer}{#4}{\pcmcomponentwidth}
+}
+
+\newcommand{\pcmarclollisize}{0.5em}
+
+
+%%%% LOLLIES
+
+% #1 = Formatierung
+% #2 = Name des Nodes
+% #3 = Position
+
+\newcommand{\pcmlolliwest}[3]{
+    \pcmlolli{anchor=east, xshift=-\pcmarclollisize, #1}{#2}{#3}
+}
+
+\newcommand{\pcmlollieast}[3]{
+    \pcmlolli{anchor=west, xshift=\pcmarclollisize, #1}{#2}{#3}
+}
+
+\newcommand{\pcmlollinorth}[3]{
+    \pcmlolli{anchor=south, yshift=\pcmarclollisize, #1}{#2}{#3}
+}
+
+\newcommand{\pcmlollisouth}[3]{
+    \pcmlolli{anchor=north, yshift=-\pcmarclollisize, #1}{#2}{#3}
+}
+
+\newcommand{\pcmlolli}[3]{
+	\node[circle, inner sep=0, minimum size=\pcmarclollisize, draw, #1] (#2) at #3 {};
+	\draw[#1] #3 -- (#2);
+}
+
+
+%%%% ARCs
+
+% #1 = Formatierung
+% #2 = Name des Nodes
+% #3 = Position
+
+\newcommand{\pcmarcsouth}[3]{
+    \pcmarc{#1}{#2}{#3}{0}{0}{-1}{north}
+}
+
+\newcommand{\pcmarceast}[3]{
+    \pcmarc{#1}{#2}{#3}{90}{1}{0}{west}
+}
+
+\newcommand{\pcmarcwest}[3]{
+    \pcmarc{#1}{#2}{#3}{270}{-1}{0}{east}
+}
+
+\newcommand{\pcmarcnorth}[3]{
+    \pcmarc{#1}{#2}{#3}{180}{0}{1}{south}
+}
+
+% #1 = Formatierung
+% #2 = Name des Nodes
+% #3 = Position
+% #4 = Rotation
+% #5 = X-sign
+% #6 = Y-sign
+% #7 = Anchor
+\newcommand{\pcmarc}[7]{
+	\node[inner sep=0, minimum size=2*\pcmarclollisize, anchor=#7] (#2) at ($#3+(#5*\pcmarclollisize, #6*\pcmarclollisize)$) {};
+	\draw[#1] #3 -- (#2.#7);
+	\draw[#1, fill opacity=0] ($(#2)+(-#6*\pcmarclollisize,#5*\pcmarclollisize)$) arc (#4:#4+180:\pcmarclollisize);
+}
+
+
+% #1 = Formatierung
+% #2 = Name des Nodes
+% #3 = Text
+% #4 = oberer Layer
+% #5 = unterer Layer
+% #6 = Position
+
+\newcommand{\pcmcomponentonlayers}[6]{
+	\pcmcomponentbodyonlayers{#1}{#2}{#3}{#4}{#5}{#6}{\pcmcomponentwidth}
+
+	\begin{pgfonlayer}{#5}
+	\pcmlolliwest{#1}{#2lolli}{(#2.west)}
+	\pcmarceast{#1}{#2arc}{(#2.east)}
+	\end{pgfonlayer}
+}
+
+% #1 = Formatierung
+% #2 = Name des Nodes
+% #3 = Text
+% #4 = Position
+\newcommand{\pcmcomponent}[4]{
+	\pcmcomponentonlayers{#1}{#2}{#3}{upperlayer}{lowerlayer}{#4}
+}
+
+% Zeichnen eines Interfaces
+%
+% #1 = Name der Interfacename
+% #2 = relative Positionsangabe
+% #3 = OperationSignature
+
+\newcommand{\pcminterface}[3]{
+   \node[draw, rectangle split, rectangle split parts=2] (#1) [#2] {\pcminterfacesignOld{#1}#1 \nodepart{second} \pcmoperation{#1}{#3}{}};
+   %operation signature for #3
+}
+
+\newcommand{\pcminterfacesignOld}[1]{
+{
+    \tiny
+    \begin{tikzpicture}
+                    \pgfsetcornersarced{\pgfpointorigin}
+                    \node[circle, fill=kit-blue100, thick, text=white] (#1interface) {I};
+    \end{tikzpicture}
+    }
+}
+
+%Zeichnen einer provided role
+%
+% #1=Komponente
+% #2=Interface
+% #3=drawoptions
+%
+\newcommand{\pcmprovidedrole}[3]{
+\draw[-latex] (#1) to node[#3] {\scriptsize{<<provides>>}} (#2);
+}
+
+%Zeichnen einer provided role
+%
+% #1=Komponente
+% #2=Interface
+% #3=drawoptions
+%
+\newcommand{\pcmrequirerole}[3]{
+\draw[-latex] (#1) to node[#3] {\scriptsize{<<requires>>}} (#2);
+}
