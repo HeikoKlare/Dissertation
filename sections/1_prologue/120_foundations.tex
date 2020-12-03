@@ -136,86 +136,111 @@ This follows the notion of \citeauthor{bezivin2005sosym} that \enquote{everythin
 \section{Modeling Formalisms and Frameworks}
 \label{chap:foundations:formalisms}
 
+\mnote{Formalisms for metamodels}
+Models are instances of metamodels, as discussed in \autoref{chap:foundations:modeling:metamodels}, which usually rely on some formalism that defines which elements metamodels can contain and how they are instantiated in models.
+Such a \emph{modeling formalism} can, again, be defined as a model of the metamodel, which is then called a \emph{\metametamodel}.
+We call each of the instantiation levels of models and their metamodels as \emph{\metalevels}.
+While, in general, there can be an arbitrary number of \metalevels, for practical reasons there has to be a topmost model in this hierarchy is \emph{self-describing}.
+
+\mnote{Concrete formalisms and a framework to use them}
+We depict two modeling formalisms, the \emph{\acrlong{MOF}} and \emph{Ecore}, which are commonly used in software engineering and on which we base in this thesis.
+Using a common modeling formalism for all models and metamodels enables the application of common tooling to them, which, in our case, especially concerns transformations.
+A \emph{modeling framework} provides the infrastructure for such common tooling of a modeling formalism.
+Ecore belongs to the \emph{\acrlong{EMF}}, which defines an infrastructure for tooling on models and metamodels defined with Ecore, based on a code representation of models with a well-defined \gls{API}.
+
+
 \subsection{Meta-Object Facility}
 \label{chap:foundations:formalisms:mof}
-Discuss \gls{MOF}, especially \gls{EMOF} and how it is used to model things;
-Discuss levels of UML;
-Say why MOF is the relevant formalism for us which we base our considerations on.
 
-Many relevant tools use MOF-compliant models, such as AUTOSAR or SysML.
-
-Modeling Levels M1--M3
-
-Elements of metamodels: types of objects, types of relations and attributes
-Metaclass (also class, type of an object)
-Reference (also association in UML, multiplicities, directionality)
-Attribute (properties of an element, in general both metaclass as well as reference!, have data type with value range)
+\mnote{MOF, EMOF and \metalevels}
+The \gls{MOF}~\cite{mof} is a standardized modeling formalism, i.e., it defines a self-describing \metametamodel which is also called \gls{MOF}.
+It contains the \gls{EMOF}, which is a subset of the \gls{MOF} derived from class models in the \gls{UML}~\cite{uml}.
+The \gls{MOF} standard does not prescribe a specific number of \metalevels~\cite[Sec.~7.3]{mof}.
+We do, however, usually assume four \metalevels, as defined by the \gls{UML} standard~\cite{uml} and as used for Ecore as a realization of the \gls{EMOF}.
+These \metalevels, denoted M3--M0, comprise the \metametamodel at M3, metamodels at M2, models at M1 and, finally, instances of models at M0.
 
 \begin{figure}
     \centering
     \input{figures/prologue/foundations/emof.tex}
-    \caption[Simplified EMOF metamodelling language]{Simplified class diagram showing central \metaclasses of the EMOF metamodelling language~\cite[p. 27]{mof} (dotted lines denote indirect inheritance). Adapted from \cite[Fig. 2.2]{kramer2017a}.}
+    \caption[Relevant subset of \acrshort{EMOF} modeling formalism]{Simplified class diagram with central \metaclasses of the \gls{EMOF} modeling formalism~\cite[p. 27]{mof}. Dotted lines denote indirect inheritance. Adapted from \cite[Fig. 2.2]{kramer2017a}.}
     \label{fig:foundations:emof}
 \end{figure}
 
+\mnote{Elements in the EMOF \metametamodel}
+The modeling formalism used in this work is even more generic than the one proposed by the \gls{EMOF}, but can be considered a generalization of it.
+For a less abstract understanding, the reader may, thus, have the \gls{EMOF} in mind and apply the discussions to it.
+In addition, denote examples and perform our evaluations with \gls{EMOF}-compliant models and metamodels.
+To support this, we depict an important subset of the \gls{EMOF} \metametamodel as a \gls{UML} class diagram in \autoref{fig:foundations:emof}.
+Comparable to class models in the \gls{UML}, the \gls{EMOF} defines classes consisting of properties, which have multiplicities and a type.
+The type of a property can, again, be a class, but also an enumeration or a primitive type.
+Each property has multiplicities that define an upper and lower bound for the number of elements to refer to.
+In addition, a property defines whether it is composite, denoting that the elements referenced in an instances are to be considered contained in an instance of the class containing that property.
+This simple structure of classes and relations between them leads to models and metamodels of the \gls{EMOF} that are mathematically equivalent to attributed, typed graphs with inheritance~\cite[Sec.~2.1.3.1]{kramer2017a}, such that they are widely applicable.
+Even common engineering tools such as AUTOSAR~\cite{scheid2015autosar} and SysML~\cite{sysml} use \gls{MOF}-compliant models.
 
-Other formalisms such as multi-level or deep modeling, which precisely separates ontological and linguistic modelling and, in the extreme case, allows in arbitrary number of levels. Idea already presented in early 2000s~\cite{atkinson2003mdd-Software}.
-Goal is also to reduce accidental complexity introduced by artifical boundary to two modeling levels~\cite{atkinson2008reducingAccidentalComplexity-SoSym}.
-This is complementary to the accidental complexity introduced by replicating information across different models, which we aim to manage with consistency preservation mechanism, as it concerns the accidental complexity within the single models due to restricted modeling capabilities.
-Still, we focus on the modeling levels defined by UML as they are still state-of-practice in programming (single type and instance level) as well as in modeling at least considering mature tools like EMF (explained in following), whereas multi-level modeling has gained attention in the last years~\cite{atkinso2014multilevel-MLM} and tools are not as mature or at least not that widely adopted and sophisticated.
+\mnote{Classes and \metaclasses}
+We usually denote the types of model elements as \emph{\metaclasses} rather than classes, especially to avoid confusion with classes of \gls{UML} class models.
+\gls{UML} class models, defined at M1, contain classes, which are instances of a \modelelement{Class} \metaclass in the \gls{UML} metamodel at M2, which, in turn, is an instances of the \modelelement{Class} \metaclass of the \gls{EMOF}.
+
+% Elements of metamodels: types of objects, types of relations and attributes
+% Metaclass (also class, type of an object)
+% Reference (also association in UML, multiplicities, directionality)
+% Attribute (properties of an element, in general both meta-class as well as reference!, have data type with value range)
+
+\mnote{Multi-level modeling}
+Since the restriction to type and instance level of models and metamodels at M1 and M2 increases accidental complexity in models~\cite{atkinson2008reducingAccidentalComplexity-SoSym}, other formalisms such as \emph{multi-level modeling} support an arbitrary number of \metalevels and precisely separate ontological and linguistic modeling~\cite{atkinson2003mdd-Software}.
+This accidental complexity is complementary to the one introduced by replicating information across different models, which we aim to manage with consistency preservation mechanisms (see \autoref{chap:introduction}), as it concerns the accidental complexity within the single models due to restricted modeling capabilities.
+Although multi-level modeling gained more attention in the last years~\cite{atkinson2014multilevel-MLM}, common modeling frameworks such as \gls{EMF} are still restricted to linguistic instantiation relations between metamodels, models and instances of models, which is why we stick to such formalisms in this thesis.
 
 
-
-\subsection{EMF and Ecore}
+\subsection{Ecore and EMF}
 \label{chap:foundations:formalisms:ecore}
-Discuss \gls{EMF}, Ecore and the relation EMOF
 
-Say that we define an own modelling formalism without precise specifications of the elements models consist of. We therefore rely on EMOF as the most general relevant standard for a modeling formalism.
-
-Add graphics of relevant part of EMOF metamodel here, from Max' Diss
+\mnote{Eclipse Modeling Frameowkr}
+The \gls{EMF}~\cite{steinberg2009emf} is a modeling framework for Eclipse, which a plugin-based, extensible \gls{IDE}.
+It uses the \metametamodel \emph{Ecore} and provides an infrastructure for defining tools on models based on Ecore.
+This bases on a code generator for metamodels~\cite[pp.~237]{steinberg2009emf}, which does not only relieve the developer from manually specifying a metamodel as a data structure in code manually, but also ensures that the code provides a well-defined \gls{API}, on which tools can rely, as it is provided by any metamodel developed with \gls{EMF}.
+This enables the definition of, for example, editor frameworks that only require configuration files for providing a sophisticated graphical editor for a model, or transformation languages that enable the definition of transformations between arbitrary Ecore metamodels.
+Regarding \metalevels, \gls{EMF} provides the Ecore \metametamodels for which it allows the definition of metamodels and which can then be instantiated in models.
 
 \begin{figure}
     \centering
     \input{figures/prologue/foundations/ecore.tex}
-    \caption[Simplified Ecore metamodelling language]{Simplified class diagram showing central \metaclasses of the Ecore metamodelling language~\cite[p. 97]{steinberg2009emf}. Adapted from \cite[Fig. 2.3]{kramer2017a}.}
+    \caption[Relevant subset of the Ecore modeling formalism]{Simplified class diagram with central \metaclasses of the Ecore modeling formalism~\cite[p.~107]{steinberg2009emf}. Adapted from \cite[Fig. 2.3]{kramer2017a}.}
     \label{fig:foundations:ecore}
 \end{figure}
 
+\mnote{Ecore \metametamodel}
+Ecore can be considered a reference implementation of the \gls{EMOF} standard.
+Thus, Ecore and \gls{EMOF} share most concepts, but, apart from minor structural and naming changes, Ecore provides some refinements compared to \gls{EMOF}.
+We depict the relevant subset of the Ecore \metametamodel as a \gls{UML} class diagram in \autoref{fig:foundations:ecore}.
+The most notably difference is that Ecore separates \gls{EMOF} properties, called \emph{features}, into attributes and references, of which attributes refer to enumerations and primitive types, whereas references refer to other classes.
+In contrast to properties being composite in \gls{EMOF}, references in Ecore have an explicit \modelelement{containment} attribute.
 
-%\subsection{Differences}
-\label{chap:foundations:formalisms:differences}
+\mnote{Relation to formalism in this thesis}
+In this thesis, whenever referring to an existing modeling formalism rather than the more general one we propose, we use the terminology of Ecore.
+The distinction of attributes and references in Ecore as a refinement in comparison to \gls{EMOF} eases understanding as it conforms to the notion of class properties and associations in \gls{UML}.
 
-Discuss differences between Ecore and EMOF, especially those relevant for the changes later and how the differences in general manifest in our formal framework
+\mnote{Tools and Xtext}
+For \gls{EMF}, many tools, such as editor frameworks, transformation languages and language workbenches, have been developed.
+We explicitly discuss transformation languages in \autoref{chap:foundations:transformations}.
+Language workbenches allow the specification of modeling languages.
+One such workbench is Xtext~\cite{efftinge2006xtext-MSES,bettini2016Xtext-Book} for defining languages with a textual concrete syntax.
+It allows to define the language grammar from which it derives the metamodel in terms of an abstract syntax, as well as parsers and editors.
+A compiler or generator can be defined to transform models in that language into another representation, such as executable code, giving them their semantics.
+Such a language workbench can be used for languages to define domain models, but also for languages used as tooling in \gls{MDSD} processes.
+We use Xtext for implementation for the prototype of a transformation language that we propose in this thesis and it has also been used to develop the \reactionslanguage, which is a transformation language that we introduced in \autoref{chap:foundations:transformations:reactions} and that we reuse for the evaluation in this thesis.
 
-FROM MAX:
-Different information and case distinctions are necessary to describe all possible model changes for modelling languages that follow the Essential Meta Object Facility (EMOF) standard or the Ecore variant. 
-Both meta-modelling languages and the differences between them are described in \autoref{chap:foundations:modeling:models}.
-Only two differences have a major effect on our change modelling language and the specifications language that use them:
-\begin{longenumerate}%[1.]
-\item In EMOF, properties can be typed using \metaclasses or using other data types, but in Ecore these are distinguished as references and attributes.
-\item Ecore requires that all elements except for a root element are contained in exactly one container and EMOF only requires that all elements have at most one container~\cite[pp.\ 31-32]{mof}.
-\end{longenumerate}
-If we only consider these two differences, then Ecore can be seen as a refinement of EMOF, which only adds a more fine-grained distinction of properties and further containment restrictions.
-Because of this refinement relation, we will first describe which information is necessary to represent model changes of EMOF-based models and then add further information and distinctions for Ecore-based models.
-Finally, we briefly explain how we made all this information available in practice using a change modelling language.
-
-
-%\subsection{Simplification}
-\label{chap:foundations:formalisms:simplification}
-
-Discuss how far we simplify the modeling concepts (or maybe do that later in the notation / formalization discussion at the end of foundations or in networks chapter)
-
-
-TOOLING:
-Many tools for EMF, such as editor frameworks, transformation languages, language workbenches etc.
-Transformation languages discussed in following.
-Language workbenches, e.g., Xtext~\cite{efftinge2006xtext-MSES,bettini2016Xtext-Book} for languages with textual syntax defined in terms of a grammar, from which the metamodel, parser etc. are derived and a compiler can be defined.
-We use Xtext for implementing a prototype for the language that we proposed in this thesis and it is also used for language that we reuse, such as the \reactionslanguage introduced in one of the subsequent sections.
-
-JaMoPP for treating Java code a model, as already introduced in \autoref{chap:foundations:modeling:mdsd}.
-Capabilities for parsing and printing Java code to be represented as an Ecore model~\cite{heidenreich2010jamopp-SLE, heidenreich2009jamopp-report}.
+\mnote{Java code as a model}
+As already introduced in \autoref{chap:foundations:modeling:mdsd}, code can also be considered a model.
+For the representation of Java code as an Ecore model, JaMoPP has been proposed~\cite{heidenreich2010jamopp-SLE, heidenreich2009jamopp-report}.
+It defines an Ecore metamodel for the Java language and also provides parsing and printing capabilities for treating Java source code files as Ecore models.
 
 
+
+%%%
+%% MULTI-VIEW MODEDLING
+%%%
 \section{Multi-view Modeling}
 \label{chap:foundations:multiview}
 

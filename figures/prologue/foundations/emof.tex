@@ -1,84 +1,121 @@
 \begin{tikzpicture}[node distance=5ex and 5ex, every node/.style={font=\footnotesize}]
+
 % BEGIN ROW 1
 \umlclassvarwidth[]{eme}{[]}{\itshape Element}{%
 }{19ex}%21ex
+
 \umlclassvarwidth[]{ene}{[base right=of eme]}{\itshape NamedElement}{%
-name:String
+name : String
 }{15ex}
+
+\umlclassvarwidth[]{ete}{[base right=of ene]}{\itshape TypedElement}{%
+}{16ex}
+
 \umlsuperclassof{eme.east}{
 --
 }{ene.west |- eme.east}
-\umlclassvarwidth[]{ete}{[base right=of ene]}{\itshape TypedElement}{%
 
-}{16ex}
 \umlsuperclassof{ene.east}{
 --
 }{ete.west |- ene.east}
+
 % BEGIN ROW 2
 \umlclassvarwidth[]{t}{[below=of ete]}{\itshape Type}{%
 }{16ex}
+
+\umlclassvarwidth[]{ecf}{[base left=of t]}{\itshape EClassifier}{%
+}{15ex}
+
+\umlclassvarwidth[]{eel}{[base left=of ecf]}{EnumerationLiteral}{%
+}{19ex}
+
 \umlassociationfromto{
 ($(ete.south)+(3ex,0)$)
 --
-node[pos=1,above right] {type}
-node[pos=1,above left] {0..1}
+node[uml role end, pos=1,above right] {type}
+node[uml cardinality end, pos=1,above left] {0..1}
 ($(t.north)+(3ex,0)$)
 }
+
 \draw ($(t.north)+(-3ex,0)$) -- ++(0ex,1.8ex) -- ++(-8ex,0);
 \draw[dotted,thick] ($(t.north)+(-11.1ex,1.8ex)$) -- ++(-5ex,0);
 \draw[-open triangle 90] ($(t.north)+(-16ex,1.8ex)$) -| (ene.south);
-\umlclassvarwidth[]{ecf}{[base left=of t]}{\itshape EClassifier}{%
-}{15ex}
+
 \umlsuperclassof{t.west}{
 --
 }{ecf.east}
-\umlclassvarwidth[]{eel}{[base left=of ecf]}{EnumerationLiteral}{%
-}{19ex}
+
 \draw (eel.north) -- ++(0ex,2ex) -- ++(11ex,0);
 \draw[dotted,thick] ($(eel.north)+(11.1ex,2ex)$) -- ++(5ex,0);
 \draw[-open triangle 90] ($(eel.north)+(16ex,2ex)$) -| (ene.south);
+
 % BEGIN ROW 3
 \umlclassvarwidth[]{ee}{[below=of eel]}{Enumeration}{%
 }{19ex}
+
+\umlclassvarwidth[]{edt}{[base right=of ee]}{DataType}{%
+}{15ex}
+
+\umlclassvarwidth[]{ec}{[base right=of edt]}{Class}{%
+abstract : bool
+}{16ex}
+
 \umlcomposition{%
 ($(ee.north)+(3ex,0)$)
 -- 
-node[pos=1,below left] {ownedLiteral}
-node[pos=1,below right] {0..*}
+node[uml role end, pos=1,below left] {ownedLiteral}
+node[uml cardinality end, pos=1,below right] {0..*}
 ($(eel.south)+(3ex,0)$)
 }
-\umlclassvarwidth[]{edt}{[base right=of ee]}{DataType}{%
-}{15ex}
+
 \umlsuperclassof{edt.west}{
 --
 }{ee.east}
+
 \umlsuperclassof{ecf.south}{
 --
 }{edt.north}
-\umlclassvarwidth[]{ec}{[base right=of edt]}{Class}{%
-abstract:bool
-}{16ex}
-\umlsubclassof{$(ec.north)+(-8ex,0)$}{
--- ++(0,2ex)
--|
-}{ecf.south}
+
+\draw[-] ($(ec.north)+(-8ex,0)$) -- ++(0,2ex) -- ([yshift=2ex]edt.north);
+% \umlsubclassof{$(ec.north)+(-8ex,0)$}{
+% -- ++(0,2ex)
+% -|
+% }{ecf.south}
+
 \umlsuperclassof{edt.east}{
 --
 }{ec.west |- edt.east}
+
 \umlassociationfromto{
 ($(ec.north)+(-6ex,0)$)
 -- ++(0,3ex)
 -- ++(6ex,0)
 -- ++(0,-3ex)
-node[pos=1,above right=-0.2ex and 0.5ex] {/superClass}
-node[pos=1,above left=-.1ex and 0.5ex] {0..*}
+node[uml role end, pos=1,above right=-0.2ex and 0.5ex] {/superClass}
+node[uml cardinality end, pos=1,above left=-.1ex and 0.5ex] {0..*}
 }
+
 % BEGIN ROW 4
 \umlclassvarwidth[]{esf}{[below=of ec]}{AggregationKind}{%
 none\newline
 shared\newline
 composite
 }{16ex}
+
+\umlclassvarwidth[]{pt}{[base left=of esf]}{PrimitiveType}{%
+}{15ex}
+
+\umlclassvarwidth[]{ea}{[base left=of pt]}{\itshape MultiplicityElement}{%
+/lower : int\newline
+/upper : int\newline
+isOrdered : bool
+}{19ex}
+
+\umlclassvarwidth[,yshift=-3ex,anchor=north west]{er}{at (pt.west |- ea.south)}{Property}{%
+aggregation : AggregationKind\newline
+/isComposite : bool
+}{26ex}
+
 % \umlcomposition{%
 % ($(ec.south)+(-3ex,0)$)
 % -- 
@@ -86,16 +123,7 @@ composite
 % node[pos=1,above left] {0..*}
 % ++(0,-6ex)
 % }
-\umlclassvarwidth[]{pt}{[base left=of esf]}{PrimitiveType}{%
-}{15ex}
-\umlsuperclassof{edt.south}{
---
-}{pt.north}
-\umlclassvarwidth[]{ea}{[base left=of pt]}{\itshape MultiplicityElement}{%
-/lower:int\newline
-/upper:int\newline
-isOrdered:bool
-}{19ex}
+
 % \umlassociationfromto{
 % (ea.north)
 % -- ++(0,6ex)
@@ -104,26 +132,30 @@ isOrdered:bool
 % node[pos=.95,below left] {/eAttributeType}
 % node[pos=.95,below right] {1}
 % }
+
+\umlsuperclassof{edt.south}{
+--
+}{pt.north}
+
 \umlsuperclassof{eme.west}{
--- ++(-3ex,0)
+-- ++(-2.5ex,0)
 |-
 }{ea.west}
-\umlclassvarwidth[,yshift=-3ex,anchor=north west]{er}{at (pt.west |- ea.south)}{Property}{%
-aggregation:AggregationKind\newline
-/isComposite:bool
-}{26ex}
+
 \umlcomposedin{
-($(er.north)+(4ex,0)$)
+($(er.north)+(5ex,0)$)
 |-
-node[pos=0,above left] {ownedAttribute}
-node[pos=0,above right] {1}
+node[uml role end, pos=0,above left] {ownedAttribute}
+node[uml cardinality end, pos=0,above right] {1}
 ($(ec.south west)+(0,2ex)$)
 }
+
 \draw[open triangle 90-] (ea.south) -- (ea.south |- er.west) -- ++(6ex,0);
 \draw[dotted,thick] let \p1 = ($(ea.south)+(6.1ex,0)$), \p2 = (er.west) in (\x1,\y2) -- ++(5ex,0);
 \draw let \p1 = ($(ea.south)+(11ex,0)$), \p2 = (er.west) in (\x1,\y2) -- (er.west);
 % 
-\draw[open triangle 90-] let \p1 = ($(ete.east)+(4ex,0)$), \p2 = (er.east) in (ete.east) -- ++(4ex,0) -- (\x1,\y2) -- ++(-7ex,0);
+\draw[open triangle 90-] let \p1 = ($(ete.east)+(3ex,0)$), \p2 = (er.east) in (ete.east) -- ++(3ex,0) -- (\x1,\y2) -- ++(-6ex,0);
 \draw[dotted,thick] let \p1 = ($(ete.east)+(-3.1ex,0)$), \p2 = (er.east) in (\x1,\y2) -- ++(-5ex,0);
 \draw let \p1 = ($(ete.east)+(-8ex,0)$), \p2 = (er.east) in (\x1,\y2) -- (er.east);
+
 \end{tikzpicture}
