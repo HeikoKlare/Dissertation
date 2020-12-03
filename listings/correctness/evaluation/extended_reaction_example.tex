@@ -1,0 +1,24 @@
+reaction {
+   after element pcm::Component inserted in pcm::Repository[components]
+   call {
+      val component = newValue
+      createClass(component)
+   }
+}
+
+routine createClass(pcm::Component component) {
+   match {
+      require absence of uml:Class
+         corresponding to component
+      val componentsPkg = retrieve uml::Package
+         corresponding to component.repository
+         tagged with "componentsPackage"
+   }
+   action {
+      val class = create uml::Class and initialize {
+         class.package = componentsPkg
+         class.name = component.name + "Impl"
+      }
+      add correspondence between component and class
+   }
+}

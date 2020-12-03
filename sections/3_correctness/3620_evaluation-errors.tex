@@ -220,7 +220,7 @@ Although we applied the approach for achieving synchronizing transformations aft
 \subsection{Prototypical Implementation}
 % Context of the implementation, actual implementations
 
-\mnote{\vitruv framework}
+\mnote{The \vitruv framework}
 For the conduction of the case studies presented in the subsequent section, we have used a prototypical implementation in the \vitruv framework (see \autoref{chap:foundations:multiview:vitruv})~\cite{klare2020Vitruv-JSS}.
 It support the view-based development of consistent systems by managing a consistent representation of all information about a software system, from which views can be derived to be modified by the user.
 Internally, the system is represented as a set of models of existing or newly defined languages, which are kept consistent by means of bidirectional model transformations.
@@ -231,14 +231,15 @@ This conforms to what we introduced as a change in our formalism (see \autoref{d
 To achieve this, the framework records atomic changes to the models, i.e., element creations and deletion, as well as attribute and references changes, as discussed in \autoref{chap:synchronization:achieving:changes} and depicted in \autoref{fig:synchronization:change_feature_model}, and passes them to the transformations.
 Currently, it lacks support for the combination of multiple transformation to a network for keeping multiple models consistent, which is why we implemented our approaches in a case study with that framework.
 
-\mnote{\reactionslanguage}
-The \vitruv framework provides several languages for defining consistency preservation~\cite{kramer2017a}. One of them is the \reactionslanguage~\cite{klare2016b} for defining unidirectional consistency preservation rules according to \autoref{def:unidirectionalconsistencypreservationrule}.
+\mnote{The \reactionslanguage}
+In our case studies, we use the \reactionslanguage defined for the \vitruv framework, which we have already introduced in \autoref{chap:foundations:transformations:reactions}.
+%The \vitruv framework provides several languages for defining consistency preservation~\cite{kramer2017a}. One of them is the \reactionslanguage~\cite{klare2016b} for defining unidirectional consistency preservation rules according to \autoref{def:unidirectionalconsistencypreservationrule}.
+It allows to define unidirectional consistency preservation rules according to \autoref{def:unidirectionalconsistencypreservationrule}.
 Defining such unidirectional rules for both directions between two metamodels yields a bidirectional transformation according to \autoref{def:bidirectionaltransformation}.
-These transformations only have an explicit representation of the consistency preservation rules, whereas the consistency relations are only implicitly defined as the fixed points of the application of the consistency preservation rules.
-We use the \reactionslanguage for implementing consistency preservation in our case studies.
+These transformations only have an explicit representation of the consistency preservation rules, whereas the consistency relations are only implicitly defined as the fixed-points of the application of the consistency preservation rules.
 
 \mnote{Correspondence model}
-The \reactionslanguage uses a so called \emph{correspondence model} to identify corresponding elements according to the implicitly defined consistency relations and thus implements a witness structure according to \autoref{def:consistency}.
+The \reactionslanguage uses the so called \emph{correspondence model} of the \vitruv framework to identify corresponding elements according to the implicitly defined consistency relations and thus implements a witness structure according to \autoref{def:consistency}.
 It consists of \emph{correspondences}, of which each contains two sets of one or more elements.
 It enables to trace when elements were changed to update the corresponding elements rather than always deleting and adding a corresponding element.
 We have discussed in \autoref{chap:correctness:finegrained:relations} that this still conforms to our formalism, although we explicitly omitted any kind of trace model there.
@@ -246,20 +247,23 @@ We have discussed in \autoref{chap:correctness:finegrained:relations} that this 
 \lstinputlisting[%
 float,%
 language=reactions,
-caption={[Reaction for creating classes for components]\reaction creating a \gls{UML} class for a \gls{PCM} component. Adapted from \cite{klare2020Vitruv-JSS}.},
-label={lst:correctness_evaluation:errors:reaction_example},
-escapechar=~
-]{listings/correctness/evaluation/reaction_example.tex}
+caption={[Extended Reaction for creating classes for components]\reaction creating a \gls{UML} class for a \gls{PCM} component. Adapted from \cite{klare2020Vitruv-JSS} and extended from \autoref{lst:foundations:reaction_example}.},
+label={lst:correctness_evaluation:reaction_example},
+]{listings/correctness/evaluation/extended_reaction_example.tex}
 
-\mnote{Example for \reactions}
-A transformation rule defined in that language is called a \emph{\reaction}.
-To give an impression of how such rules look like, an example that transforms a \gls{PCM} component into a class with appropriate naming in \gls{UML} among its creation is depicted in \autoref{lst:correctness_evaluation:errors:reaction_example}.
-A \reaction specifies after which type of change it should be executed, which, in this case, is the insertion of a component into a repository.
-It may then call one or more reusable \emph{routines}, which are supposed to restore consistency according to a consistency relation.
-Such a routine consists of a \emph{match} block, which checks whether a consistency relation applies and retrieves all elements involved into that relation, and an \emph{action} block, which restores consistency after the change.
-In this case, the routine checks that no corresponding class already exists to avoid multiple instantiation and afterwards retrieves an appropriate package in the \gls{UML} model to place the class in.
-It then creates a class, assigns it an appropriate name and adds a correspondence between the elements.
-For the complete explanation of that example, we refer to \cite{klare2020Vitruv-JSS}.
+\mnote{Extended example for \reactions}
+In \autoref{lst:correctness_evaluation:reaction_example}, we depict an extension of the example in \autoref{lst:foundations:reaction_example}, which we have explained in \autoref{chap:foundations:transformations:reactions}.
+The extended \reaction is also triggered by the insertion of a \gls{PCM} component and calls a routine that is responsible for restoring consistency for a consistency relation between \gls{PCM} components and \gls{UML} classes.
+It thus checks in the \emph{match} block whether the change affects that consistency relation and in that case, in addition to the original implementation, checks that no corresponding class already exists to avoid multiple instantiation for the synchronization scenario.
+It then creates a corresponding \gls{UML} class in a retrieved package for components.
+%A transformation rule defined in that language is called a \emph{\reaction}.
+%To give an impression of how such rules look like, an example that transforms a \gls{PCM} component into a class with appropriate naming in \gls{UML} among its creation is depicted in \autoref{lst:correctness_evaluation:reaction_example}.
+%A \reaction specifies after which type of change it should be executed, which, in this case, is the insertion of a component into a repository.
+%It may then call one or more reusable \emph{routines}, which are supposed to restore consistency according to a consistency relation.
+%Such a routine consists of a \emph{match} block, which checks whether a consistency relation applies and retrieves all elements involved into that relation, and an \emph{action} block, which restores consistency after the change.
+%In this case, the routine checks that no corresponding class already exists to avoid multiple instantiation and afterwards retrieves an appropriate package in the \gls{UML} model to place the class in.
+%It then creates a class, assigns it an appropriate name and adds a correspondence between the elements.
+%For the complete explanation of that example, we refer to \cite{klare2020Vitruv-JSS}.
 
 \mnote{Simple orchestration strategy}
 In \autoref{chap:orchestration}, we have discussed different options for the orchestration of transformations in an application algorithm.
