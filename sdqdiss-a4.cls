@@ -20,7 +20,7 @@
 	fontsize=12pt,
   headsepline,
   bibliography=totoc,	
-  listof=totoc,
+  %listof=totoc,
   headings=optiontoheadandtoc,
   toc=chapterentrywithdots,
 }
