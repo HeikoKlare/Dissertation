@@ -1,0 +1,102 @@
+\newcommand{\classwidth}{5em}
+\newcommand{\hdistance}{11em}
+\newcommand{\innerhdistance}{10em}
+\newcommand{\labeldistance}{1em}
+\newcommand{\mmborder}{1em}
+
+
+\begin{tikzpicture}[
+    manifests relation label/.style={manifests relation, above, sloped}
+]
+
+\pgfdeclarelayer{bg}
+\pgfsetlayers{bg,main}
+
+\umlclassvarwidth{network_java_class}{}{Class}{
+    name\\
+    packageName
+}{\classwidth}
+
+\umlclassvarwidth[, right=\hdistance of network_java_class.north, anchor=north]{network_uml_class}{}{Class}{
+    name
+}{\classwidth}
+\umlclassvarwidth[, right=\innerhdistance of network_uml_class.north, anchor=north]{network_uml_package}{}{Package}{
+    name
+}{\classwidth}
+
+\umlclassvarwidth[, below right=0.5*\hdistance and \hdistance of network_java_class.north, anchor=north]{network_c_class}{}{Class}{
+    name\\
+    namespace
+}{\classwidth}
+
+\umlcomposition{(network_uml_package) -- node[uml role end, pos=1, above right] {classes} node[uml cardinality end, pos=1, below right] {*} (network_uml_class.east|-network_uml_package.west)}
+
+\node[mmlabel, above=\labeldistance of network_java_class.north, anchor=center] (network_java_label) {Java};
+\node[mmlabel, anchor=center] (network_uml_label) at ([yshift=\labeldistance]$(network_uml_class.north)!0.5!(network_uml_package.north)$) {UML};
+\node[mmlabel, below=\labeldistance of network_c_class.south, anchor=center] (network_c_label) {\cplusplus};
+
+\begin{pgfonlayer}{bg}
+    \node[mmbg, fit=(network_java_class)(network_java_label.center), inner sep=\mmborder] (network_java) {};
+    \node[mmbg, fit=(network_uml_class)(network_uml_package)(network_uml_label.center), inner sep=\mmborder] (network_uml) {};
+    \node[mmbg, fit=(network_c_class)(network_c_label.center), inner sep=\mmborder] (network_c) {};
+\end{pgfonlayer}
+
+\draw[transformation] (network_java_class.east|-network_uml_class.west) -- node[transformation, above] {«transforms»} (network_uml_class);
+\draw[transformation] (network_java_class.south) |- node[transformation, above, pos=0.75] {«transforms»} (network_c_class.west);
+\draw[transformation] (network_uml_class) -- node[transformation, right] {«transforms»} (network_c_class);
+
+
+
+\umlclassvarwidth[, below right=1.45*\hdistance and \hdistance of network_java_class.north, anchor=north]{comm_oo_class}{}{Class}{
+    name
+}{\classwidth}
+
+\umlclassvarwidth[, right=\innerhdistance of comm_oo_class.north, anchor=north]{comm_oo_package}{}{Package}{
+    name
+}{\classwidth}
+
+\umlcomposition{(comm_oo_package) -- node[uml role end, pos=1, above right] {classes} node[uml cardinality end, pos=1, below right] {*} (comm_oo_class.east|-comm_oo_package.west)}
+
+\umlclassvarwidth[, below left=0.65*\hdistance and \hdistance of comm_oo_class.north, anchor=north]{comm_java_class}{}{Class}{
+    name\\
+    packageName
+}{\classwidth}
+
+\umlclassvarwidth[, right=\hdistance of comm_java_class.north, anchor=north]{comm_c_class}{}{Class}{
+    name\\
+    namespace
+}{\classwidth}
+
+\umlclassvarwidth[, right=\hdistance of comm_c_class.north, anchor=north]{comm_uml_package}{}{Package}{
+    name
+}{\classwidth}
+
+\umlclassvarwidth[, below=0.5*\innerhdistance of comm_uml_package.north, anchor=north]{comm_uml_class}{}{Class}{
+    name
+}{\classwidth}
+
+\umlcomposition{(comm_uml_package) -- node[uml role end, pos=1, above right] {classes} node[uml cardinality end, pos=1, above left] {*} (comm_uml_class)}
+
+\coordinate (comm_oo_label_coordinate) at ($(comm_oo_class.north)!0.5!(comm_oo_package.north)$);
+\node[mmlabel, above=\labeldistance of comm_oo_label_coordinate, anchor=center] (comm_oo_label) {Object-oriented Design};
+\node[mmlabel, below=\labeldistance of comm_java_class.south, anchor=center] (comm_java_label) {Java};
+\node[mmlabel, below=\labeldistance of comm_c_class.south, anchor=center] (comm_c_label) {\cplusplus};
+\node[mmlabel, below=\labeldistance of comm_uml_class.south, anchor=center] (comm_uml_label) {UML};
+
+\begin{pgfonlayer}{bg}
+    \node[conceptmmbg, fit=(comm_oo_class)(comm_oo_package)(comm_oo_label.center), inner sep=\mmborder] (comm_java) {};
+    \node[mmbg, fit=(comm_java_class)(comm_java_label.center), inner sep=\mmborder] (comm_java) {};
+    \node[mmbg, fit=(comm_c_class)(comm_c_label.center), inner sep=\mmborder] (comm_c) {};
+    \node[mmbg, fit=(comm_uml_class)(comm_uml_package)(comm_uml_label.center), inner sep=\mmborder] (comm_uml) {};
+\end{pgfonlayer}
+
+\draw[manifests relation] (comm_oo_class) -- node[manifests relation label] {\manifestslabel} (comm_java_class);
+\draw[manifests relation] (comm_oo_class) -- node[manifests relation label] {\manifestslabel} (comm_c_class);
+\draw[manifests relation] (comm_oo_class) -- node[manifests relation label] {\manifestslabel} (comm_uml_class);
+\draw[manifests relation] (comm_oo_package) -- node[manifests relation label] {\manifestslabel} (comm_uml_package);
+
+
+\node[above=3*\labeldistance of network_uml_class.north, anchor=center, font=\small\bfseries] {Transformation Network};
+\node[above=3*\labeldistance of comm_oo_class.north, anchor=center, font=\small\bfseries] {\Commonalities Specification};
+
+\end{tikzpicture}
