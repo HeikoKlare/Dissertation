@@ -1,0 +1,198 @@
+\newcommand{\developstext}{«develops»}
+\newcommand{\instantiatestext}{«instantiates»}
+\newcommand{\referstotext}{«refers to»}
+\newcommand{\modifiestext}{«modifies»}
+\newcommand{\hdistance}{5em}
+
+\newcommand{\tikzsystemborder}[2]{
+    \node[draw, runtime artifact, ellipse, minimum width=0.5*\hdistance, minimum height=0.5*\hdistance, anchor=center, #1] (#2) {};
+}
+
+\newcommand{\tikzconcretemetamodels}[1]{
+    \node[draw, runtime artifact, ellipse, minimum width=0.05*\hdistance, minimum height=0.05*\hdistance, above left=0.02*\hdistance and 0.08*\hdistance of 
+    #1.center, inner sep=0em] (#1model1) {};
+    \node[draw, runtime artifact, ellipse, minimum width=0.05*\hdistance, minimum height=0.05*\hdistance, above right=0.08*\hdistance and 0.04*\hdistance of #1.center, inner sep=0em] (#1model2) {};
+    \node[draw, runtime artifact, ellipse, minimum width=0.05*\hdistance, minimum height=0.05*\hdistance, below right=0.08*\hdistance and 0.04*\hdistance of #1.center, inner sep=0em] (#1model3) {};
+}
+
+\newcommand{\tikzconceptmetamodels}[1]{
+    %\node[draw, orchestration artifact, ellipse, minimum width=0.05*\hdistance, minimum height=0.05*\hdistance, above left=0.08*\hdistance and 0.05*\hdistance of #1.center, inner sep=0em] (#1model1) {};
+    \node[draw, orchestration artifact, ellipse, minimum width=0.05*\hdistance, minimum height=0.05*\hdistance, right=0.08*\hdistance of #1.center, inner sep=0em] (#1model2) {};
+    \node[draw, orchestration artifact, ellipse, minimum width=0.05*\hdistance, minimum height=0.05*\hdistance, below left=0.06*\hdistance and 0.05*\hdistance of #1.center, inner sep=0em] (#1model3) {};
+}
+
+\newcommand{\tikzconceptandconcretemetamodels}[1]{
+    \tikzconcretemetamodels{#1}
+    \tikzconceptmetamodels{#1}
+}
+
+\newcommand{\tikzsystemwithconcepts}[2]{
+    \tikzsystemborder{#1}{#2}
+    \tikzconceptandconcretemetamodels{#2}
+}
+
+\newcommand{\machine}[2]{
+    \draw[#2] ([xshift=-0.5em, yshift=-0.5em]#1) -- ++(0,1em) -- ++(-0.5em, 0.5em) -- ++(2em, 0) -- ++(-0.5em, -0.5em) -- ++(0,-1em) -- ++(-1em,0);
+}
+
+
+\begin{tikzpicture}[
+    every node/.append style={font=\scriptsize},
+    developer artifact/.style={darkgreen},
+    runtime artifact/.style={darkblue},
+    orchestration artifact/.style={darkorange},
+    property/.style={darkred, font=\scriptsize\itshape},
+    stereotype/.style={font=\scriptsize\sffamily},
+    artifact role name/.style={font=\scriptsize\bfseries}
+]
+
+% Commonalities
+\node[draw, developer artifact, fill=white, inner sep=0.15em, align=left] (trans1) {
+    \begin{lstlisting}[language=commonalities, frame=none, numbers=none, backgroundcolor=\color{white}, linewidth=2em, basicstyle=\fontsize{2}{2.4}\selectfont\ttfamily]
+commonality R {
+  with A
+  with B
+    
+  has att {
+    = A.att
+    -> B.att
+  }
+}
+    \end{lstlisting}
+};
+\node[draw, below right=0.2em of trans1.north, anchor=north, developer artifact, fill=white, inner sep=0.15em, align=left] (trans2) {
+    \begin{lstlisting}[language=commonalities, frame=none, numbers=none, backgroundcolor=\color{white}, linewidth=2em, basicstyle=\fontsize{2}{2.4}\selectfont\ttfamily]
+commonality R {
+  with A
+  with B
+    
+  has att {
+    = A.att
+    -> B.att
+  }
+}
+    \end{lstlisting}
+};
+\node[draw, below right=0.2em of trans2.north, anchor=north, developer artifact, fill=white, inner sep=0.15em, align=left] (trans3) {
+    \begin{lstlisting}[language=commonalities, frame=none, numbers=none, backgroundcolor=\color{white}, linewidth=2em, basicstyle=\fontsize{2}{2.4}\selectfont\ttfamily]
+commonality R {
+  with A
+  with B
+    
+  has att {
+    = A.att
+    -> B.att
+  }
+}
+    \end{lstlisting}
+};
+
+% Expert
+\umlhuman{expert1}{}{above left=0.2em and 1.1*\hdistance of trans2.center, anchor=center}{}{0.3}
+\draw[-latex] ([yshift=-0.2em]expert1.east) -- node[above, stereotype] {\developstext} ([xshift=-0.2em]trans2.west);
+
+% Concrete metamodels
+\coordinate (concrete_metamodels) at ([yshift=\hdistance]trans2);
+\tikzconcretemetamodels{concrete_metamodels}
+
+\draw[-latex, densely dashed] ([yshift=0.2em]trans2.north) -- node[left, stereotype] {\referstotext} ([yshift=-1em]concrete_metamodels);
+
+% Compiler
+\coordinate (compiler) at ([xshift=0.8*\hdistance]trans2.center);
+\machine{compiler}{}
+
+\draw[-latex] ([xshift=0.5em]trans2.east) -- ([xshift=-1em]compiler);
+\draw[-latex] ([yshift=-0.5em,xshift=0.8em]concrete_metamodels) -- ([yshift=1.2em,xshift=-0.7em]compiler);
+
+% Generated BX
+\node[draw, right=1.6*\hdistance of trans1.center, anchor=center, orchestration artifact, fill=white, inner sep=0.15em, align=left] (bx1) {
+    \begin{lstlisting}[language=reactions, frame=none, numbers=none, backgroundcolor=\color{white}, linewidth=2em, basicstyle=\fontsize{2}{2.4}\selectfont\ttfamily]
+reaction RAB {
+  after ...
+  call S
+}
+
+routine S {
+  match ... 
+  action ...
+}
+    \end{lstlisting}
+};
+\node[draw, below right=0.2em of bx1.north, anchor=north, orchestration artifact, fill=white, inner sep=0.15em, align=left] (bx2) {
+    \begin{lstlisting}[language=reactions, frame=none, numbers=none, backgroundcolor=\color{white}, linewidth=2em, basicstyle=\fontsize{2}{2.4}\selectfont\ttfamily]
+reaction RAB {
+  after ...
+  call S
+}
+
+routine S {
+  match ... 
+  action ...
+}
+    \end{lstlisting}
+};
+\node[draw, below right=0.2em of bx2.north, anchor=north, orchestration artifact, fill=white, inner sep=0.15em, align=left] (bx3) {
+    \begin{lstlisting}[language=reactions, frame=none, numbers=none, backgroundcolor=\color{white}, linewidth=2em, basicstyle=\fontsize{2}{2.4}\selectfont\ttfamily]
+reaction RAB {
+  after ...
+  call S
+}
+
+routine S {
+  match ...
+  action ...
+}
+    \end{lstlisting}
+};
+
+% All metamodels
+\coordinate (all_metamodels) at ([yshift=\hdistance]bx2);
+\tikzconceptandconcretemetamodels{all_metamodels}
+
+\draw[-latex, orchestration artifact] ([yshift=1.2em,xshift=0.7em]compiler) -- ([yshift=-0.5em,xshift=-0.8em]all_metamodels);
+\draw[-latex] ([xshift=1em]compiler) -- ([xshift=-0.5em]bx2.west);
+
+\coordinate (upperend_all_metamodels) at ([xshift=0.2*\hdistance,yshift=0.2*\hdistance]all_metamodels);
+\draw [orchestration artifact, decorate,decoration={brace,amplitude=10pt},xshift=0pt,yshift=4pt]
+([xshift=0.5em]bx3.south east|-upperend_all_metamodels) -- ([xshift=0.5em]bx3.south east);
+
+% Machine
+\coordinate (machine) at ([yshift=0.2*\hdistance,xshift=2.2*\hdistance]bx2);
+\machine{machine}{orchestration artifact}
+
+\coordinate (output_middle) at ($(bx3.south east)!0.5!(upperend_all_metamodels)$);
+\draw[orchestration artifact, densely dashed, -latex] ([xshift=10pt+0.5em]output_middle) -- node[below=0.2em, stereotype, align=center] {Transformation\\ Network} ([yshift=0.3em, xshift=-0.9em]machine.west);
+
+% Input
+\tikzsystemwithconcepts{above left=0.65*\hdistance and 0.52*\hdistance of machine}{original_system}
+\node[runtime artifact, above=0.6em of original_system.north, anchor=south, align=center, artifact role name] {System\\ (Models)};
+\node[runtime artifact, below right=0em and \hdistance of original_system.center, anchor=north] (original_changes) {$\sequenced{\change{1}, \change{2}, \change{3}, \change{4} \dots}$};
+\node[runtime artifact, above=-0.3em of original_changes.north east, anchor=south east, artifact role name] {Changes};
+
+\umlhuman{developer}{}{above=0.5*\hdistance of original_changes.north, anchor=south}{}{0.3}
+
+\draw[-latex] (developer) -- node[stereotype, sloped, above] (modifies_label) {\modifiestext} (original_system);
+\draw[dashed, -latex] (modifies_label.south) -- (original_changes);
+
+\draw [runtime artifact, decorate,decoration={brace,amplitude=10pt},xshift=0pt,yshift=-4pt]
+(original_changes.south east) -- (original_system.west|-original_system.south);
+
+\draw[gray, densely dashed, -latex] ([xshift=-0.2em]original_system.west) -- node[above, sloped, stereotype, pos=0.45] {\instantiatestext} ([xshift=0.2em+0.25*\hdistance]all_metamodels);
+
+% Output
+\tikzsystemwithconcepts{below=0.5*\hdistance of machine}{final_system}
+\node[runtime artifact, left=0em of final_system.west, anchor=east, align=center, artifact role name] {Consistent\\ System\\ (Models)};
+\draw[runtime artifact, -latex] ([yshift=-0.8em]machine.south) -- ([yshift=0.2em]final_system.north); 
+
+% Labels
+\node[above=1.5em of concrete_metamodels.north, anchor=south, artifact role name, align=center, inner sep=0em] (concrete_metamodels_label) {Concrete\\ Metamodels};
+\node[above=1.5em of all_metamodels.north, anchor=south, artifact role name, align=center, inner sep=0em] (concrete_metamodels_label) {Concrete +\\ {\color{darkorange} Concept}\\ Metamodels};
+\node[above=0.3em of expert1.north, anchor=south, artifact role name, align=center, inner sep=0em] (expert_text) {Domain\\ Expert};
+\node[developer artifact, below=0.5em of trans2.south, anchor=north, artifact role name, align=center] (comm_spec_label) {Commonalities\\ Specifications};
+\node[anchor=north, below=0.8em of compiler, anchor=north, artifact role name, align=center] %at (compiler|-comm_spec_label.north) 
+{Compiler};
+\node[orchestration artifact, below=0.5em of bx2.south, anchor=north, artifact role name, align=center] (bx_spec_label) {Bidirectional\\ Transformations};
+\node[above=0.3em of developer.north, anchor=south, artifact role name, inner sep=0em] {System Developer};
+
+
+\end{tikzpicture}
