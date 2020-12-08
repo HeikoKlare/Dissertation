@@ -333,7 +333,7 @@ Additionally, we will see that the abstraction provided by a layer of projective
 \label{chap:foundations:transformations}
 
 \mnote{Model transformation central to \gls{MDSD}}
-In addition to models and formalism to define them, model transformations are another central element of \gls{MDSD} processes.
+In addition to models and formalisms to define them, model transformations are another central element of \gls{MDSD} processes.
 They are sometimes considered the \enquote{heart and soul}~\cite{sendall2003modelTransformation-Software} of \gls{MDSD}.
 Model transformations, which we also simply denote as \emph{transformations} throughout this thesis, generate one model or even code from another model.
 
@@ -346,11 +346,11 @@ Model transformations, which we also simply denote as \emph{transformations} thr
 
 \mnote{Relevant terms for model transformations}
 According to \textcite{kleppe2003mdaExplained-Book}, a transformation defines how to generate a \emph{target model} from a \emph{source model} by a \emph{transformation definition}.
-Transformation definition consists of \emph{transformation rules}, which in turn define how one or more constructs of the source language or metamodel are transformed into constructs of the target language or metamodel.
+A transformation definition consists of \emph{transformation rules}, which in turn define how one or more constructs of the source language or metamodel are transformed into constructs of the target language or metamodel.
 For example, a transformation definition may define how to transform a \gls{PCM} model into a \gls{UML} model, which consists of transformation rules, of which one could define how a component is transformed into a class.
-Transformation definitions and their rules need to fulfill some format expected by the transformation engine.
-Often supported by a \emph{transformation definition language}~\cite[Sec. 9.2]{kleppe2003mdaExplained-Book}, or short \emph{transformation language} that generates appropriate artifacts.
-These terms and their relations are depicted in \autoref{fig:foundations:transformation}, restricted to the usually considered situation of defining transformations between two metamodels, although they can in general transform between an arbitrary number of metamodels.
+Transformation definitions and their rules need to fulfill some format expected by the transformation engine, which is responsible for applying the transformation rules.
+A transformation engine is often supported by a \emph{transformation definition language}~\cite[Sec. 9.2]{kleppe2003mdaExplained-Book}, or short \emph{transformation language}, in which transformation rules can be defined and from which appropriate artifacts for the transformation engine are generated.
+These terms and their relations are depicted in \autoref{fig:foundations:transformation}, restricted to the usually considered situation of defining transformations between two metamodels, although they can, in general, transform between an arbitrary number of metamodels.
 While the notions of \textcite{kleppe2003mdaExplained-Book} are specific to the \gls{MDA}, thus deriving more specific from abstract artifacts, we have generalized them to transformations between any languages.
 
 
@@ -358,43 +358,43 @@ While the notions of \textcite{kleppe2003mdaExplained-Book} are specific to the 
 \label{chap:foundations:transformations:properties}
 
 \mnote{Directionality and incrementality of transformations}
-Transformation do not only support the simple case of taking one model and generating another, known as a \emph{batch transformation} but there are several degrees of freedom how information from one or more models can be transferred into one or more other models by a transformation.
+Transformations do not only support the simple case of taking one model and generating another, known as a \emph{batch transformation}, but there are several degrees of freedom how information from one or more models can be transferred into one or more other models by a transformation.
 This also includes the incremental update of multiple models after concurrent changes for restoring consistency.
 \textcite{czarnecki2006a} provides a classification of transformations regarding a variety of features.
-For our use case, in particular two features are important, which are \emph{directionality} and \emph{incrementality}~\cite[p.~14]{czarnecki2006a}.
+For our use case, in particular \emph{directionality} and \emph{incrementality}~\cite[p.~14]{czarnecki2006a} are important.
 \begin{properdescription}
-    \item[Directionality:] Regarding directionality~\cite[Fig.~19]{czarnecki2006a}, transformation can be separated into unidirectional and multidirectional ones, whereas the latter includes the well-researched bidirectional transformations.
-    It describes whether a transformation can be in only one or multiple directions.
+    \item[Directionality:] Regarding directionality~\cite[Fig.~19]{czarnecki2006a}, transformations can be separated into unidirectional and multidirectional ones, of which the latter includes the well-researched bidirectional transformations.
+    It describes whether a transformation can be applied in only one or multiple directions.
     For consistency preservation purposes, transformations usually need to be executed in multiple directions, depending on which of the models was changes and requires others to be updated.
     \item[Incrementality:] Incrementality \cite[Fig.~19]{czarnecki2006a} concerns \emph{source incrementality} and \emph{target incrementality}.
-    We use the term incrementality specifically for target incrementality, which describes the ability of a transformation to update an existing target model after changes to the source model. This is essential for consistency preservation, because otherwise changes and additions made to the target models would become overwritten. For example, if Java code is generated from a \gls{UML} class model, then a change to the \gls{UML} model should incrementally update the Java code instead of generating it anew to avoid that additions to the code, such as method implementation, get lost.
+    We use the term incrementality specifically for target incrementality, which describes the ability of a transformation to update an existing target model after changes to the source model. This is essential for consistency preservation, because otherwise changes and additions made to the target models would become overwritten. For example, if Java code is generated from a \gls{UML} class model, then a change to the \gls{UML} model should incrementally update the Java code instead of generating it anew to avoid that additions to the code, such as method implementations, get lost.
     Target incrementality is also referred to as \emph{change propagation}.
     Source incrementality is about re-executing only transformation rules for changed parts of the source model.
-    We do not use this term, but later introduce the notion of \emph{delta-based} transformations, which operate on the actual changes, or deltas, performed in the source model.
+    Instead of using this term, we later later introduce the notion of \emph{delta-based} transformations, which operate on the actual changes, or deltas, performed in the source model.
 \end{properdescription}
 
 \mnote{Traceability models}
 Another feature of transformations that is relevant for some of our contributions are \emph{intermediate structures}~\cite[p.~10]{czarnecki2006a}.
 These structures concern additional models, which are often temporarily used for transformation execution, and especially include traceability models.
-Traceability models represent which elements of source and target model are related to each other by a transformation rule and thus, to enable incremental execution, are usually persisted in contrast to other structures~\cite[p.~10]{czarnecki2006a}.
+Traceability models represent which elements of the source and target model are related to each other by a transformation rule and, to enable incremental execution, are usually persisted in contrast to other structures~\cite[p.~10]{czarnecki2006a}.
 These models define which model elements have some kind of dependency and thus serve as information about or even a witness for consistency.
 
 %\subsection{Bidirectional Transformations}
 %\label{chap:foundations:transformations:bidirectional}
 
 \mnote{Relations and consistency restorers}
-Among all options from unidirectional to multidirectional transformations, \emph{bidirectional} transformations are the ones that are most interest for consistency preservation and thus well-researched.
+Among all options from unidirectional to multidirectional transformations, \emph{bidirectional} transformations are the ones that are of most interest for consistency preservation and thus well-researched.
 These transformations relate only two metamodels, which makes them less complex than other multidirectional transformations, but defines how to restore consistency in both directions between these metamodels~\cite{stevens2010sosym}, which is important for consistency preservation if instances of both models may be modified.
 These transformations consist of a \emph{relation} defining when two models are considered consistent and two \emph{consistency restorers}, one for each direction.
 A consistency restorer is a function that accepts two potentially inconsistent models and returns an updated instance of one of the models, depending on the direction.
-There are also derivation that expect two consistent models and explicit changes to one or both of them, as we discuss for our formalism more precisely.
+There are also derivations that expect two consistent models and explicit changes to one or both of them, as we discuss more precisely when introducing our formalism.
 
 \mnote{Correctness and hippocraticness}
-Important properties of such transformations are \emph{correctness} and \emph{hippocraticness}, both defined by \textcite{stevens2010sosym}.
+Important properties of such transformations are \emph{correctness} and \emph{hippocraticness} as defined by \textcite{stevens2010sosym}.
 A bidirectional transformation is correct if the resulting models are consistent, i.e., if the updated instance of one model and the input instance of the other model are in the relation of the transformation.
 Hippocraticness of a transformation means that whenever the input models are consistent, the consistency restorer does not alter them.
 Thus, consistent models can be considered fixed-points of a hippocratic transformation.
-We recapture the notion of bidirectional transformations and the depicted properties later to define them more precisely for the formalism that we introduced in \autoref{chap:correctness}.
+We recapture the notion of bidirectional transformations and the depicted properties later to define them more precisely for the formalism that we introduce in \autoref{chap:correctness}.
 
 % Compare multidirectional transformations with networks of transformations.
 % Refer for other consistency approaches to related work.
@@ -406,8 +406,8 @@ We recapture the notion of bidirectional transformations and the depicted proper
 \label{chap:foundations:transformations:languages}
 
 \mnote{Transformation engines and languages}
-Although transformations can be implemented manually by directly modifying the models~\cite[p.~16]{czarnecki2006a}, they usually rely on some engine that accepts rules implemented for a specific \gls{API} and automatic tasks such as scheduling or orchestrating the execution of transformation rules.
-Such an engine can be defined on its own, but is often provided together with a transformation language, which provides a specific syntax for defining transformation rules and from which implementations of these rules for the specific \gls{API} of the engine are generated.
+Although transformations can be implemented manually by directly modifying the models~\cite[p.~16]{czarnecki2006a}, they usually rely on some engine that accepts rules implemented for a specific \gls{API} and automate tasks such as scheduling or orchestrating the execution of transformation rules.
+Such an engine can be defined on its own, but is often provided together with a transformation language, which uses a specific syntax for defining transformation rules and from which implementations of these rules for the specific \gls{API} of the engine are generated.
 Transformation languages can be considered \glspl{DSL} (see \autoref{chap:foundations:modeling:metamodels}).
 We have depicted these artifacts already in \autoref{fig:foundations:transformation}.
 
@@ -430,7 +430,7 @@ It uses the \gls{OCL}~\cite{ocl} for specifying the constraints that have to hol
 In general, \gls{QVTR} is even multidirectional and allows to define relations between multiple metamodels, but we only consider the bidirectional case.
 
 \mnote{Language for the \gls{EMF}}
-For the \gls{QVT} languages, implementations for the \gls{EMF} (see \autoref{chap:foundations:formalisms:ecore} exist. Further common \gls{EMF}-based languages are \gls{VIATRA}~\cite{bergmann2015viatra}, an imperative and unidirectional transformation language, and \gls{ATL}, which is a hybrid language containing both imperative and declarative constructs.
+For the \gls{QVT} languages, implementations for the \gls{EMF} (see \autoref{chap:foundations:formalisms:ecore}) exist. Further common \gls{EMF}-based languages are \gls{VIATRA}~\cite{bergmann2015viatra}, an imperative and unidirectional transformation language, and the \gls{ATL}, which is a hybrid language containing both imperative and declarative constructs.
 Another well-researched transformation approach are \glspl{TGG}, originally developed by \cite{schuerr1995a} as a graph transformation approach and later applied to \gls{EMF}~\cite{leblebici2014IncrementalTGGSurvey-GTVMT} with tools like eMoflon~\cite{anjorin2014c}.
 
 \todo{Need to discuss QVT-R more detailed?}
@@ -447,11 +447,12 @@ Another well-researched transformation approach are \glspl{TGG}, originally deve
 
 \mnote{\Reactionslanguage and transformation engine}
 The \vitruv framework (see \autoref{chap:foundations:multiview:vitruv}) provides several languages for defining consistency preservation~\cite{kramer2017a}. 
-One of them is the \reactionslanguage~\cite{klare2016b} for defining imperative, unidirectional transformations.
-It is of specific importance for this thesis, because we use it for prototypical implementations and evaluations.
+This especially comprises the \emph{\mappings language}~\cite{werle2016a}, which is a bidirectional, declarative language comparable to \qvtr, and the \emph{\reactionslanguage}~\cite{klare2016b} for defining imperative, unidirectional transformations.
+While the \mappings language is used as a conceptual basis for the language that we propose in \autoref{chap:language}, the \reactionslanguage is of specific importance for this thesis, because we use it for prototypical implementations and evaluations.
 The \vitruv framework defines a transformation engine, which processes changes performed to a model and calls given transformation rules that implement an \gls{API}, which accepts the processed changes and updates models that are accessed via a traceability model, which is called \emph{correspondence model}.
 This correspondence model represents between which elements consistency has to be preserved.
 The \reactionslanguage generates implementations of transformation rules according to this \gls{API} provided by the framework.
+The \mappings language, in turn, generated specifications in the \reactionslanguage.
 
 \lstinputlisting[%
 float,%
@@ -461,7 +462,7 @@ label={lst:foundations:reaction_example},
 ]{listings/prologue/foundations/reaction_example.tex}
 
 \mnote{Example for \reactions}
-A transformation rule defined in that language is called a \emph{\reaction}.
+A transformation rule defined in the \reactionslanguage is called a \emph{\reaction}.
 To give an impression of how such rules look like, an example that transforms a \gls{PCM} component into a class with appropriate naming in \gls{UML} among its creation is depicted in \autoref{lst:foundations:reaction_example}.
 A \reaction specifies after which type of change it should be executed, which, in this case, is the insertion of a component into a repository.
 It may then call one or more reusable \emph{routines}, which are supposed to restore consistency.
@@ -479,22 +480,22 @@ For the complete explanation of that example, we refer to previous work~\cite{kl
 \label{chap:foundations:case_studies}
 
 \mnote{Metamodels from component-based software engineering}
-We use case studies from component-based software engineering for several examples in this thesis that are more realistic than the ones based on a running example introduced in \autoref{chap:networks:example} and for the evaluation of some of our contributions.
-They cover a scenario already depicted in \autoref{chap:introduction}, which is based three metamodels.
+We use case studies from component-based software engineering for several examples in this thesis that are more realistic than the ones based on a running example introduced in \autoref{chap:networks:example} and for the evaluation of several of our contributions.
+They cover a scenario already depicted in \autoref{chap:introduction}, which is based on three metamodels.
 \gls{PCM}~\cite{reussner2016a} is used for defining the component-based architecture of a software system, \gls{UML}~\cite{uml} is used for depicting the fine-grained object-oriented design in terms of class models and Java~\cite{gosling2018jls-specification} depicts the implementation in code.
-
-\mnote{\gls{EMF} representation of metamodels}
+%\mnote{\gls{EMF} representation of metamodels}
 The \gls{UML} is defined in a standard based on the \gls{MOF} and Java is specified with a grammar-based language specification.
-Nevertheless, in addition to the \gls{PCM}, which is originally defined as an Ecore-based metamodel for \gls{EMF} (see \autoref{chap:foundations:formalisms:ecore}), for \gls{UML} and Java~\cite{heidenreich2010jamopp-SLE} also representations as Ecore-based metamodels exist.
+Nevertheless, for all three languages an Ecore-based metamodel for \gls{EMF} (see \autoref{chap:foundations:formalisms:ecore}) exists.
 
 \mnote{Elements of \gls{PCM}}
 We assume basic concepts of class models of the \gls{UML} and Java, or in general object-oriented programming languages, to be known to the reader.
 The elements of \gls{PCM} that we use in this thesis only require a broad understanding of those component-based architecture descriptions.
 Basic elements are \emph{components}, \emph{interfaces} and \emph{data types}, which are all contained in a \emph{repository}.
-Data types only specific structures for data, including \emph{primitive types}, such as integers or strings, \emph{composite types}, which compose a type of multiple other types, and \emph{collection types}, which can contain multiple elements of a defined other data type.
+Data types specific structures for data, including \emph{primitive types}, such as integers or strings, \emph{composite types}, which compose a type of multiple other types, and \emph{collection types}, which can contain multiple elements of a defined other data type.
 Regarding interfaces we only consider \emph{operation interfaces}, which contain operation signatures consisting of return types and parameters, similar to methods in programming languages.
-\gls{PCM} also provides further types of interface, which we do not consider in this theses.
-Finally, components define the reusable, architectural elements of a software systems, which have \emph{provided} and \emph{required roles} that define on which interfaces a component depends and which interfaces it provides to other components. 
+\gls{PCM} also provides further types of interfaces, which we do not consider in this thesis.
+Finally, components define the reusable, architectural elements of a software systems.
+They have \emph{provided} and \emph{required roles}, which define on which interfaces a component depends and which interfaces it provides to other components.
 Since \gls{PCM} models do not only specify the architecture of a software system but enable predictions of its performance via simulation, they allow to define an abstract behavior specification of services provided by components, called \emph{service effect specifications}.
 We do not explain them in more detail, as we do not consider these behavior specifications in this thesis.
 
@@ -517,12 +518,12 @@ We do not explain them in more detail, as we do not consider these behavior spec
 \mnote{Intuitive notion of consistency}
 In the case studies used in thesis, we consider a specific notion of consistency between \gls{PCM}, \gls{UML} and Java models.
 We explain our notions of consistency and, in particular, of consistency relations in detail in \autoref{chap:networks} and \autoref{chap:correctness}.
-Broadly speaking, consistency relations define under conditions one model is considered consistent to another.
-We depict the consistency relations for the metamodels of the case studies in such a general way that this broad notion of sufficient for comprehending them.
-In the way we introduce the relations, they are supposed to mean that if some elements are present in model, according other elements need to be present in another model, such that for every \gls{UML} class a Java class with the same name has to exist.
+Broadly speaking, consistency relations define under which conditions one model is considered consistent to another.
+We depict the consistency relations for the metamodels of the case studies in such a general way that this broad notion is sufficient for comprehending them.
+In the way we introduce the relations, they are supposed to mean that if some elements are present in a model, according other elements need to be present in another model, such as that for every \gls{UML} class a Java class with the same name has to exist.
 
 \mnote{Two sets of underlying consistency relations}
-The consistency relations between \gls{PCM}, \gls{UML} and Java consists of two parts.
+The consistency relations between \gls{PCM}, \gls{UML} and Java consist of two parts.
 First, the relations between \gls{PCM} and object-oriented design in both \gls{UML} and Java were defined and explained in detail by \citeauthor{langhammer2017a}~\cite{langhammer2015a, langhammer2017a}.
 He, in particular, proposed different options for relations between \gls{PCM} and Java, which can be generalized to object-oriented design.
 We have selected the mapping of architectural components to classes and packages, as that is the one that was studied most intensively and whose implementation is most mature.
@@ -533,7 +534,7 @@ Second, the relations between \gls{UML} and Java reflect the usually implicitly 
 	\centering 
     \small
     \renewcommand{\arraystretch}{1.4}
-    \rowcolors{2}{\secondlinecolor}{\firstlinecolor}
+    \rowcolors{1}{\firstlinecolor}{\secondlinecolor}
 	\begin{tabular}{p{3.2cm} p{6.6cm}}
 		\toprule
         \textbf{\gls{PCM} Element}  & \textbf{Object-oriented Design Element} \\
@@ -542,7 +543,7 @@ Second, the relations between \gls{UML} and Java reflect the usually implicitly 
 		BasicComponent 		    & Package within the main package and a public component realization class within the package \\
 		OperationInterface		& Interface in the contracts package \\
 		Signature \& parameters & Method \& parameters \\
-		CompositeDatatype       & Class with getter and setter (or appropriate read-only property) for inner types\\
+		CompositeDatatype       & Class with getter and setter for inner types\\
 		CollectionDatatypes     & Class that inherits from a collection type (e.g., \texttt{ArrayList} in Java) \\
 		RequiredRole		    & Field typed with required interface in the component realization class and constructor parameter for the field in the component realization class\\
 		ProvidedRole		    & Component realization class of providing component implements the provided interface\\
@@ -562,25 +563,23 @@ Composite data types are represented as a class containing the composed types, a
 %Finally, provided and required roles define that a component provides or requires an interface.
 Provided roles are realized by an implementation of the provided interfaces in the component realization class.
 A required role, on the contrary, is represented as a field in the component realization class, which must be set via a constructor parameter.
-All these relations include further constraints for their features, especially their names, such as the field representing a required role has to have the same name as the role.
+All these relations include further constraints for their features, especially regarding their names. %, such as the field representing a required role has to have the same name as the role.
 
 \mnote{Behavioral consistency of \gls{PCM} and Java}
-We have mentioned that \gls{PCM} models can also contain \emph{service effect specifications} as an abstract behavior specification of components.
-Consistency between these behavior specifications in \gls{PCM} and their implementation in Java code was researched in detail by \textcite{langhammer2017a}.
+We have mentioned that \gls{PCM} models can also contain \emph{service effect specifications} as an abstract behavior specification of components, whose consistency to the implementaiton in Java was researched in detail by \textcite{langhammer2017a}.
 We do, however, not consider such behavioral specifications in our case studies, for which we explain the reasons in \autoref{chap:networks:notions:types}.
 
 \begin{table}
 	\centering 
     \small
     \renewcommand{\arraystretch}{1.4}
-    \rowcolors{2}{\secondlinecolor}{\firstlinecolor}
+    \rowcolors{1}{\firstlinecolor}{\secondlinecolor}
 	\begin{tabular}{p{3cm} p{6.8cm}}
 		\toprule
         \textbf{\gls{UML} Element}  & \textbf{Java Code Element} \\
         \midrule
         Package                         & Package\\
-		Class                           & Class\\
-		Enum		                    & Enum \\
+		Class / Enum                    & Class / Enum \\
 		Interface		   	            & Interface \\
         Method                          & Method \\
         Parameter $[$0-1 .. 1$]$        & Parameter of same type \\
@@ -597,7 +596,7 @@ We do, however, not consider such behavioral specifications in our case studies,
 
 \mnote{Relations between \gls{UML} and Java}
 \autoref{tab:foundations:uml_java_rules} shows the relevant consistency relations between \gls{UML} models and Java code.
-They reflect the intuitive notion of the relation between \gls{UML} and Java of mostly one-to-one mappings, since we do only consider Java elements that are present in the abstraction provided by the \gls{UML}, i.e., we do especially not consider method bodies.
+They reflect the intuitive notion of the relation between \gls{UML} and Java of mostly one-to-one mappings, since we only consider Java elements that are present in the abstraction provided by the \gls{UML}, i.e., we do especially not consider method bodies.
 The only special cases are fields having a type of another class in Java, which can also be expressed as associations in \gls{UML}, as well as parameters, fields and associations, which can have multiplicities in \gls{UML} that have to be expressed as collection types with an appropriate type parameter in Java if the upper bound is higher than $1$.
 
 
@@ -632,43 +631,43 @@ The only special cases are fields having a type of another class in Java, which 
 \end{table}
 
 \mnote{Notations overview}
-For most of our definition, we use standard mathematical notations.
+For most of our definitions, we use standard mathematical notations.
 Whenever we deviate from that within the thesis, we explicitly denote it and define the used constructed.
 We use specific formatting especially for sets, tuples, sequences and functions to ease their distinction.
 We introduce this notation in \autoref{tab:foundations:notation}.
-Additionally, we define some additional shortcut operators for tuples, which we frequently require throughout the thesis.
+Additionally, we define some shortcut operators for tuples, which we frequently require throughout the thesis.
 
 \mnote{Sets, tuples and sequences}
 We usually denote variables representing sets of any kinds of elements in blackboard bold font $\set{S}{}$ and the definition of a set of elements by putting them in curly brackets, e.g., $\setted{a, b, \dots}$.
-Likewise, we denote variables representing tuples of any kinds of elements in gothic font $\tuple{T}{}$ and write elements forming a tuple in angle brackets, e.g., $\tupled{a, b, \dots}$.
-Finally, we denote variables representing sequences of any kinds of elements by subsequent square brackets $\sequence{S}$ and the definition of a sequence of elements by putting them into square brackets, e.g., $\sequenced{a, b, \dots}$.
+Likewise, we denote variables representing tuples of elements in gothic font $\tuple{T}{}$ and write elements forming a tuple in angle brackets, e.g., $\tupled{a, b, \dots}$.
+Finally, we denote variables representing sequences of elements by subsequent square brackets $\sequence{S}$ and the definition of a sequence of elements by putting them into square brackets, e.g., $\sequenced{a, b, \dots}$.
 To access an element at index $i$ of a sequence $\sequence{S}$, we write $\sequenceindex{S}{i}$.
 We denote the addition of an element $e$ to a sequence $\sequence{S} = \sequenced{s_1, \dots, s_n}$ as:
 \begin{align*}
     \sequence{S} + e \equalsperdefinition \sequenced{s_1, \dots, s_n, e}
 \end{align*}
-Sequences are mathematically equal to tuples, but we write them differently to make explicit that they represent an order of potentially equal elements, rather than combining different elements of potentially different types in tuples. This is why we explicitly define an access operator for contained elements of sequences.
-We derive from the described formatting of sets and tuples in specific situations whenever the focus of the semantics of the variable is not that it is a set or a tuple.
-For example, if we consider a relation, which is a set of tuples, we do not denote it in our set syntax, as its semantics is to be a relation and not a set.
-If we consider a set of relations, however, we denote it in the described set syntax.
-In every case, we ensure that the meaning of the variables stay clear from the context.
+Sequences are mathematically equal to tuples, but we make them explicit as representation of an order of potentially equal elements, rather than combining elements of potentially different types in tuples. This is why we define an access operator for contained elements of sequences.
+We deviate from the described formatting of sets and tuples in specific situations whenever the focus of the semantics of the variable is not that it is a set or a tuple.
+For example, if we consider a relation that is a set of tuples, we do not denote it in our set syntax, as its semantics is to be a relation and not a set.
+If we consider a set of relations, however, we denote it in the set syntax.
+We ensure that the meaning of the variables stays clear from the context.
 
 \mnote{Tuple operators}
 We often use tuples to ensure that the elements can be indexed, although they cannot contain duplications and thus behave as sets if not interested in the order of elements.
 Since we need to treat the tuples similar to sets in several situations, especially to describe that a tuple contains an element or that is has a specific relation to another tuple, we define several operators which treat them as sets.
-For a tuple $\tuple{t} = \tupled{t_1, \dots, t_n}$, we say that:
+For tuples $\tuple{t}$ and $\tuple{v}$ with $\tuple{t}{} = \tupled{t_1, \dots, t_n}$, we define:
 \begin{align*}
     &
-    e \in \tuple{t}{} \equivalentperdefinition \exists i \in \setted{1, \dots, n} : e = t_i
-\end{align*}
-For two tuples $\tuple{v}$ and $\tuple{w}$, we define:
-\begin{align*}
+    e \in \tuple{t}{} \equivalentperdefinition \exists i \in \setted{1, \dots, n} : e = t_i \\
+%\end{align*}
+%For two tuples $\tuple{v}$ and $\tuple{w}$, we define:
+%\begin{align*}
     &
-    \tuple{v} \subseteq \tuple{w} \equivalentperdefinition \forall e \in \tuple{v} : e \in \tuple{w} \\
+    \tuple{t} \subseteq \tuple{v} \equivalentperdefinition \forall e \in \tuple{t} : e \in \tuple{v} \\
     &
-    \tuple{v} \cap \tuple{w} := \setted{e \mid e \in \tuple{v} \land e \in \tuple{w}}
+    \tuple{t} \cap \tuple{v} \equalsperdefinition \setted{e \mid e \in \tuple{t} \land e \in \tuple{v}}
 \end{align*}
-Note that the intersection of tuples is not a tuple but a set, because we are only interested in getting the elements contained in both tuples but do not need to match their order.
+Note that the intersection of tuples is not a tuple but a set, because we are not interested in matching their orders. %only interested in getting the elements contained in both tuples but do not need to match their order.
 
 \mnote{Relation concatenation}
 In several situations, we define binary relations, which are sets of pairs, i.e., tuples of two elements.
@@ -678,7 +677,7 @@ For two binary relations $R_1 = \setted{\tupled{a_{l}, a_{r}}, %\tupled{a_{2,l},
 \dots}$, we define their concatenation $R_1 \concat R_2$ as:
 \begin{align*}
     &
-    R_1 \concat R_2 = \setted{\tupled{a,b} \mid \exists z : \tupled{a,z} \in R_1 \land \tupled{z,b} \in R_2}
+    R_1 \concat R_2 \equalsperdefinition \setted{\tupled{a,b} \mid \exists z : \tupled{a,z} \in R_1 \land \tupled{z,b} \in R_2}
 \end{align*}
 This conforms to the composition of relations often denoted as $R_1 ; R_2$.
 
