@@ -62,24 +62,30 @@ Structural consistency can thus be checked without executing the model, comparab
 For example, having the same classes and method signatures in a \gls{UML} model and Java code would be considered a structural relation, whereas the equivalence of a \gls{UML} state machine and its Java implementation would be considered a behavioral relation, as they must have the same execution semantics.
 Thus, the mechanisms for checking these two types of consistency are likely to be different.
 
-\mnote{No strict separation}
-The distinction between structural and behavioral relations is, however, not strict.
-If, for whatever reasons, two Java code artifacts shall be kept consistent, although they share a behavioral relation it can reduce to a structural relation when exactly the same elements have to be contained.
-In consequence, one might argue that structural consistency relations are a special case of behavioral relations, for which we do not need to consider the execution semantics of the model but only its static structure.
-
 \mnote{Decidability as distinction}
-One approach to precisely define a separation between structural and behavioral relations is decidability.
-%From a theoretical perspective, we can distinguish between decidable consistency and undecidable consistency relations.
-It can be reasonable to consider every decidable relation as a structural consistency relation, as it does not consider execution semantics anyway, whereas undecidable relations may be considered behavioral,
-%While structural consistency relations do not consider execution semantics and will thus usually decidable, behavioral consistency relations will usually be undecidable, 
-because as soon as we have Turing-complete descriptions of behavior, we cannot decide semantic equivalence. %\todo{add cite?}
-More precisely, an approach checking consistency can make statements at the following levels: %An approach that checks consistency can be further distinguished regarding the statements it is able to make about consistency relations:
+The execution semantics of models are often defined in a Turing-complete formalism, be it because the model has some semantics itself or because it is transformed into another specification of a Turing-complete formalism, such as executable code.
+Behavioral consistency relations referring to the execution semantics of models thus have to put Turing-complete specifications into relation.
+In consequence, one option for a clear distinction between behavioral and structural consistency relations is their decidability, since behavioral relations between Turing-complete specifications will, in general, be undecidable, while we would intuitively assume structural relations to be decidable.
+This leads to different levels of statements that we can make about the different types of relations, especially including existentially and universally quantified statements:
+% 
+% \mnote{No strict separation}
+% The distinction between structural and behavioral relations is, however, not strict.
+% If, for whatever reasons, two Java code artifacts shall be kept consistent, although they share a behavioral relation it can reduce to a structural relation when exactly the same elements have to be contained.
+% In consequence, one might argue that structural consistency relations are a special case of behavioral relations, for which we do not need to consider the execution semantics of the model but only its static structure.
+% 
+% \mnote{Decidability as distinction}
+% One approach to precisely define a separation between structural and behavioral relations is decidability.
+% %From a theoretical perspective, we can distinguish between decidable consistency and undecidable consistency relations.
+% It can be reasonable to consider every decidable relation as a structural consistency relation, as it does not consider execution semantics anyway, whereas undecidable relations may be considered behavioral,
+% %While structural consistency relations do not consider execution semantics and will thus usually decidable, behavioral consistency relations will usually be undecidable, 
+% because as soon as we have Turing-complete descriptions of behavior, we cannot decide semantic equivalence. %\todo{add cite?}
+% More precisely, an approach checking consistency can make statements at the following levels: %An approach that checks consistency can be further distinguished regarding the statements it is able to make about consistency relations:
 \begin{properdescription}
-    \item[Universally quantified:] The approach can validate that a consistency relation holds for all instances of the modeled system. This can, for example, be achieved with verification techniques, model checking and other analyses. An exemplary application scenario is the equivalence of decidable consistency relations.
-    \item[Existentially quantified:] The approach can validate that a consistency relation holds at least for some instances of the modeled system. This can, for example, be achieved with tests. In the best case, the test cases cover a representative subset of the possible instances. An exemplary application scenario is the equivalence of undecidable behavior descriptions.
-    \item[Statistical:] The approach can make statistical statements about the consistency relations, such as the probability for a relation to be fulfilled in an instance. This can, for example, be achieved by simulation. An exemplary application is consistency between quality requirements and the system realization, such as the fulfillment of a performance requirement in the implementation.
+    \item[Universally Quantified:] The approach can validate that a consistency relation holds for all instances of the modeled system. This can, for example, be achieved with verification techniques, model checking and other analyses. An exemplary application scenario is the equivalence of decidable consistency relations.
+    \item[Existentially Quantified:] The approach can validate that a consistency relation holds at least for some instances of the modeled system. This can, for example, be achieved with tests. In the best case, the test cases cover a representative subset of the possible instances. An exemplary application scenario is the equivalence of undecidable behavior descriptions.
+    \item[Statistical:] The approach can make statistical statements about the consistency relations, such as the probability for a relation to be fulfilled in an instance. This can, for example, be achieved by simulation. An exemplary application is consistency between quality requirements and the system realization, such as the probability that a for a given requirements model and an according implementation of the system the implementation fulfills a performance requirement.
 \end{properdescription}
-While universally quantified statements can only be made about decidable consistency relations, existentially quantified and statistical statements can be made about both of them.
+While universally quantified statements can only be made about decidable consistency relations, i.e., structural consistency relations, existentially quantified and statistical statements can be made about both of them, thus also for behavioral consistency relations.
 %decidable and undecidable consistency relations, although preferably used for undecidable relations.
 
 \mnote{Structural relations supposed to be decomposable}
@@ -114,7 +120,8 @@ Checking behavioral relations may also include long-running analyses or simulati
 This at least applies to relations for which only existentially quantified or statistical statements can be made.
 For example, adding an architectural component to a \gls{PCM} model can and should directly lead to the creation of an implementing class in Java code. %$ or method in \gls{UML} can and should directly lead to the creation of an appropriate class or method in Java.
 %Adding an architectural component can directly lead to the creation of an implementing class.
-But whether a Java method fulfills some behavioral consistency relation to another model, such as the behavioral service specifications in a \gls{PCM} model, usually makes sense less often, as it requires more coarse-grained modifications to achieve consistency, and checking may take more time because of complex analyses or simulations to run.
+But whether a Java method fulfills some behavioral consistency relation to another model, such as the behavioral service specifications in a \gls{PCM} model, usually makes sense less often, as it requires more coarse-grained modifications to achieve consistency, such as rewriting a complete method or multiple of its statements, whereas changes of structural relations often only concern a single element, such as a name or a type of a parameter.
+Checking such behavioral consistency relations may thus take more time because of complex analyses or simulations to run.
 The developer may explicitly indicate when a development state is reached at which behavioral consistency relations can be checked.
 For behavioral relations about which universally quantified statements can be made, such as a security analysis, it may be up to the scenario whether checks should be performed just-in-time or only at specific points in time.
 
@@ -142,9 +149,9 @@ As another consequence, those structural relations that we consider are supposed
 \mnote{No concurrent modifications}
 In addition, in this thesis we restrict ourselves to supporting the case in which only one model is changed at a time and for which consistency with the other models needs to be preserved.
 In general, there may be multiple developers performing changes to one or more models concurrently.
-This scenario is already difficult for the case in which only two models need to be kept consistent by a single transformation, as changes can be conflicting and thus conflicts need to be resolved.
+This scenario is already difficult for the case in which only two models need to be kept consistent by a single transformation, as changes can be conflicting and conflicts need to be resolved.
 It becomes even more complicated when transformations preserve consistency of multiple models and thus conflicts needs to be resolved across multiple models and transformations.
-We refer this this topic as future work and discuss options to overcome the issues in \autoref{chap:conclusions:futurework}.
+We refer this this topic as future work and discuss solution options in \autoref{chap:conclusions:futurework}.
 
 
 %%
