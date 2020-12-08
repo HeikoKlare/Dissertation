@@ -8,9 +8,9 @@ Nevertheless, we want to find an algorithm that is at least correct and does alw
 Thus it operates conservatively.
 
 \mnote{Artificial execution bound drawback}
-\autoref{algo:orchestration:application} may not terminate, because it generates an infinitely long orchestration, thus never leaving the loop in Lines~\ref{algo:orchestration:application:line:startorchestrate}--\ref{algo:orchestration:application:line:endorchestrate}.
-Thus, to ensure termination we need to introduce an upper bound for the number of executed transformations.
-We have shown in \autoref{theorem:orchestration_fixed} that no natural upper bound for the number of necessary executions exists, thus even the shortest consistent orchestration for specific inputs can be arbitrarily long. %(see example in \autoref{fig:orchestration:no_upper_bound}).
+It is possible that \autoref{algo:orchestration:application} does not terminate, because it generates an infinitely long orchestration, thus never leaving the loop in Lines~\ref{algo:orchestration:application:line:startorchestrate}--\ref{algo:orchestration:application:line:endorchestrate}.
+To ensure termination we need to introduce an upper bound for the number of executed transformations.
+We have shown in \autoref{theorem:orchestration_fixed} that no natural upper bound exists, thus even the shortest consistent orchestration for specific inputs can be arbitrarily long. %(see example in \autoref{fig:orchestration:no_upper_bound}).
 Any arbitrary bound can prevent the algorithm from finding consistent orchestrations.
 
 \mnote{High number of executed transformation unwanted}
@@ -69,10 +69,10 @@ This ensures that consistency is preserved after each change in an incremental w
 This approach improves identifying provenance of a failure of the algorithm, because it restricts the potentially causal transformations to consider.
 If the algorithm fails after executing a subset of the transformations $\transformationset{T}_\mathvariable{exec} \subseteq \transformationset{T}$,
 then there is some transformation $\transformation{t} \in \transformationset{T}_\mathvariable{exec}$ that is the last of those transformation that was executed for its first time.
-Thus, the algorithm found an orchestration of $\transformationset{T}_\mathvariable{exec} \setminus \transformation{t}$ such that the models were consistent to all those transformation, but is was not able to execute $\transformation{t}$ and the transformations in $\transformationset{T}_\mathvariable{exec}$ afterwards, such that the models become consistent to all these transformations.
+Thus, the algorithm found an orchestration of $\transformationset{T}_\mathvariable{exec} \setminus \transformation{t}$ such that the models were consistent to all those transformation, but it was not able to execute $\transformation{t}$ and the transformations in $\transformationset{T}_\mathvariable{exec}$ afterwards, such that the models become consistent to all these transformations.
 This helps the transformation developer or user to understand and find the reason for failing in different ways.
 First, he or she can ignore any transformation in $\transformationset{T} \setminus \transformationset{T}_\mathvariable{exec}$, as the algorithm already failed to preserve consistency according to the other transformations, which can significantly reduce the number of transformations to consider.
-Second, the realization of $\transformation{t}$ is somehow conflicting with the other transformations in $\transformationset{T}_\mathvariable{exec}$. This does not necessarily mean that there is something wrong with $\transformation{t}$, but only that also considering that transformation does either induce the situation that no consistent orchestration exists anymore or that it cannot be found.
+Second, the realization of $\transformation{t}$ is somehow conflicting with the other transformations in $\transformationset{T}_\mathvariable{exec}$. This does not necessarily mean that there is something wrong with $\transformation{t}$, but only that also considering this transformation either induces the situation that no consistent orchestration exists anymore or that it cannot be found.
 Third, having a state of the models that is consistent to $\transformationset{T}_\mathvariable{exec} \setminus \transformation{t}$ can be used as a starting point to either identify the occurring problem or to manually restore consistency of the models.
 
 \mnote{Principle not improving optimality}
@@ -220,7 +220,7 @@ Finally, the algorithm shall implement the principle defined in \autoref{chap:or
     \autoref{algo:orchestration:provenance} ensures consistency among the transformations that have already been executed before executing a transformation that has not been executed yet.
 \end{theorem}
 \begin{proof}
-	After the recursive call in Line~\ref{algo:orchestration:provenance:line:recursive_call}, the current model tuple $\modeltuple{m}_{\mathvariable{propagation}}$ is consistent to all executed transformations in $\provalgexecuted$, according to \autoref{theorem:provenance_correctness}. % and
+	After the recursive call in Line~\ref{algo:orchestration:provenance:line:recursive_call}, the current model tuple $\modeltuple{m}_{\mathvariable{propagation}}$ is consistent to all executed transformations in $\provalgexecuted$ according to \autoref{theorem:provenance_correctness}. % and
 %	\Cref{thm:strategy-correct} applies for every recursive execution of the strategy. 
 	%no changes to models involved  to an executed transformations are allowed.% after the recursive call in \cref{line:recursive-call}.
 %	Hence,
@@ -230,8 +230,8 @@ Finally, the algorithm shall implement the principle defined in \autoref{chap:or
 
 \mnote{Algorithm optimality}
 We have given \autoref{def:reactiveconverging} for the property of a transformation set to be reactive converging.
-This property defines that we do not want transformations to be required to react to changes they performed themselves if all other transformation have been executed afterwards, as we assume this to be a reasonable property that induces an upper bound for the number of transformation executions.
-We have used that property as a design goal for the proposed algorithm and can now show that the algorithm actually always returns consistent models when the transformations fulfill that property, which means that the algorithm implements an optimal application function.
+This property defines that we do not want transformations to be required to react to changes they performed themselves if all other transformations have been executed afterwards, as we assume this to be a reasonable property that induces an upper bound for the number of transformation executions.
+We have used that property as a design goal for the proposed algorithm and can now show that the algorithm always returns consistent models when the transformations fulfill that property, which means that the algorithm implements an optimal application function.
 
 \begin{theorem}[Provenance Algorithm Optimality]
     If the transformation set $\transformationset{T}$ passed to \autoref{algo:orchestration:provenance} is reactive converging according to \autoref{def:reactiveconverging} and if the consistency preservation rules of all transformations in $\transformationset{T}$ are total functions, the algorithm implements an optimal application function.
@@ -242,8 +242,8 @@ We have used that property as a design goal for the proposed algorithm and can n
 
     Since optimality allows the algorithm to return $\bot$ when the input models are inconsistent, returning $\bot$ in \autoref{algo:orchestration:provenance:line:bot_input} is valid.
     The algorithm returns $\bot$ in \autoref{algo:orchestration:provenance:line:bot_orchestration} if \function{Propagate} returns $\bot$, thus we show that \function{Propagate} does not return $\bot$.
-    \function{Propagate} returns $\bot$ in \autoref{algo:orchestration:provenance:line:bot_application} if the application of a selected transformation in \autoref{algo:orchestration:provenance:line:first_execution} returns $\bot$. By assumption, all transformations are total, thus the application can never return $\bot$.
-    \function{Propagate} returns $\bot$ in \autoref{algo:orchestration:provenance:line:bot_recursion} if a recursive call returns $\bot$. If the loop in that recursive call is executed, the arguments for not returning $\bot$ apply recursively. If the loop is not executed in the recursion than the input changes are returned, which does not yield $\bot$.
+    \function{Propagate} returns $\bot$ in \autoref{algo:orchestration:provenance:line:bot_application} if the application of a selected transformation in \autoref{algo:orchestration:provenance:line:first_execution} returns $\bot$, which cannot occur because transformation are total by assumption.
+    \function{Propagate} returns $\bot$ in \autoref{algo:orchestration:provenance:line:bot_recursion} if a recursive call returns $\bot$. If the loop in that recursive call is executed, the arguments for not returning $\bot$ apply recursively. If the loop is not executed in the recursion, the input changes are returned, thus not yielding $\bot$.
     
     Finally, \function{Propagate} returns $\bot$ in \autoref{algo:orchestration:provenance:line:bot_nonreactiveconverging} if the models yielded by the recursive call are not consistent with the transformation that is the candidate $\provalgcandidate$ in that loop iteration.
     Since the transformation set is reactive converging, this can only be the case if not all permutations of the transformations currently in $\provalgexecuted$ have been executed yet.
@@ -260,8 +260,8 @@ We have used that property as a design goal for the proposed algorithm and can n
 \end{proof}
 
 \mnote{Optimality assumptions fulfillment}
-Optimality can, however, only be guaranteed under rather specific conditions.
-Apart from the necessary fulfillment of the property to be reactive converging, the transformations need to be able to handle every input, thus every combination of models and changes, as otherwise selecting a transformation may lead to \function{Propagate} returning $\bot$, because the transformation cannot be applied.
+Optimality can, however, only be guaranteed under specific conditions.
+Apart from the necessary to be reactive converging, the transformations need to be able to handle every input, thus every combination of models and changes, as otherwise selecting a transformation may lead to \function{Propagate} returning $\bot$, because the transformation cannot be applied.
 In practice, this assumption will usually not be fulfilled.
 Nevertheless, it is theoretically possible to define such transformations and at least it leads to well-defined conditions for when we can assume the algorithm to realize an optimal orchestration function.
 
@@ -270,7 +270,7 @@ Although this means that under such specific conditions the algorithm is able to
 
 \mnote{Well-defined requirements}
 Finally, it is an open question how far we can assume sets of transformations to be reactive converging in practice.
-We did, however, not introduce this as a property that should be fulfilled by transformations, as it is obviously hard to ensure or even analyze that property.
+We have, however, not introduced this as a property that should be fulfilled by transformations, as it is obviously hard to ensure or even analyze that property.
 In fact, it is only supposed to be a well-defined property that allows us to define a reasonable upper bound for the execution of transformations and thus to allow us to define an algorithm that always terminates without using a completely arbitrary upper bound for determining when to terminate.
 
 
