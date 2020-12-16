@@ -3,6 +3,12 @@
 }
 \label{chap:relatedwork}
 
+\mnote{Work on goal and methodology}
+Collaboration, including consistency preservation, one of the key challenges in software engineering processes, especially model-driven engineering~\cite{franzago2018mdseChallenges-TSE}.
+Separated into two parts: work related to general goal and work related to methodology of achieving that goal.
+First consider the general goal of consistency preservation and topics related to that, which partly have rather loose relation to our work but in fact represent different approaches of how to solve the underlying, overall problem.
+Afterwards, consider the methodology of using transformations and specific topics regarding transformations related to our work.
+
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{figures/epilogue/relatedwork/research_areas.png}
@@ -10,65 +16,88 @@
     \label{fig:relatedwork:areas}
 \end{figure}
 
-Collaboration, including consistency preservation, one of the key challenges in software engineering processes, especially model-driven engineering~\cite{franzago2018mdseChallenges-TSE}.
-
+\mnote{Relations of topics}
+Overview of topics and their relations given in \autoref{fig:relatedwork:areas}. UPDATE!
 Topics are cross-cutting (cf. graphics), so multiple work/approaches fit into several categories. We discuss them where they fit most and are mostly related.
-
 Parts of the discussions in this chapter have been published in previously published work~\owncite{klare2018docsym, klare2019icmt, klare2019models, klare2020compatibility-report, klare2020Vitruv-JSS}.
 
 
+
+%%%%
+%% CONSISTENCY AND ITS PRESERVATION
+%%%%
 \section{Consistency and its Preservation}
 
+\mnote{Genericity of consistency}
 Checking and preserving consistency of software artifacts (i.e., models) has been long researched.
 It covers a broad topic often covered by the view-update problem, especially known from database engineering.
-Considering different development artifacts, i.e., models or views on a system, starting with approaches for specific modeling languages, such as the UML~\cite{dantas2005umlsync}, the relevance of model-driven engineering, accompanied by OMG's Model Driven Architecture~\cite{mda} process specification, rose.
+Considering different development artifacts, i.e., models or views on a system, starting with approaches for specific modeling languages, such as the UML~\cite{dantas2005umlsync-ISPSE}, often considered as roundtrip engineering between UML and code, the relevance of model-driven engineering, accompanied by OMG's Model Driven Architecture~\cite{mda} process specification, rose.
 Several approaches provide domain-specific solutions for consistency problems, such as for consistency between SysML~\cite{sysml} and AUTOSAR~\cite{scheid2015autosar} in the automotive domain~\cite{giese2010a}.
 Modeling frameworks, such as \gls{EMF}~\cite{steinberg2009emf}, enabled the definition of tools that are independent from concrete models, such as transformation languages, model merging tools and so on.
 
+\mnote{Model consistency approaches}
 Based on such modeling framework, different approaches considering model consistency have been developed.
 They can be distinguished into approaches that are only able to check consistency of models~\cite{reder2012incrementalchecking} and those that are able to also enforce consistency.
 Consistency-preserving approaches range from systems providing recommendations for repair~\cite{ohrndorf2018repairRecommendataions-ICSE} over classifications for repair options~\cite{kretschmer2018repairDiscovery-ICSE} to approaches actually performing \emph{model repair}, which have been subject to intensive research and surveyed by \textcite{macedo2017ModelRepairClassification-TSE}.
 The survey also classified approaches regarding their support for the scenario of keeping multiple, i.e., more than two, models consistent, and found that of the considered approaches only one supports multiple models and that this one considers consistency pairwise.
-
-We focus on preservation, as it is part of the thesis and otherwise it will be too much related work.
-
 Kinds of dependencies between multiple models and types of inconsistencies were discussed by \textcite{kolovos2008a}. 
 
-Roundtrip-Engineering as a classical consistency problem, especially for UML models and code~\cite{dantas2005umlsync-ISPSE}.
-
+\mnote{Focus on preservation}
+We focus on preservation, as it is part of the thesis and otherwise it will be too much related work.
 Model consistency approach range from constraint solving, over model merging, to transformations.
+We first depict a general overview of relevant consistency approaches before discussed transformations as the methodologically related topic in more detail.
 
 
-\subsection{The View Update Problem}
+\subsection{The View-Update Problem}
 
-View update problem occurs often in software engineering: a view is supposed to represent information from some structure, in our case from some model, such that modifications to this view can be propagated back to the original structure.
-Was a central topic in database research~\cite{dayal1982viewUpdate-TDS}.
+\mnote{View update in databases}
+View-update problem occurs often in software engineering: a view is supposed to represent information from some structure, in our case from some model, such that modifications to this view can be propagated back to the original structure, such that no information that is not contained in the view is changed.
+Was a central topic in database research~\cite{bancilhon1981viewUpdate-TDS, dayal1982viewUpdate-TDS}, where views are derived from tables in databases.
+Updating database tables with changes in views to them, denoted as \emph{update translation}~\cite{bancilhon1981viewUpdate-TDS}, can be achieved by considering a \emph{complement} view that contains all information of the database not contained in the modified views, i.e., the tupled function for generating a view and its complement must be injective.
+Calculating the update of the database after changes to the view can be achieved by inverting this function.
+Update translation must now ensure that it leaves invariant information in this complement.
+There are many complements to a view, but a view is updatable if it updates can be translated to the database tables with a constant complement~\cite{bancilhon1981viewUpdate-TDS}.
+It is thus inevitable to design views and complements properly to enable automated translation of updates.
+
+\mnote{Lenses framework}
 Lenses framework: application of view-update problem to transformations~\cite{foster2005Combinators-POPL, foster2007combinators-TPLS}
 Defines get and putback operations for deriving a view and putting changes to it back to the original source.
 This defines a transformation between a view and its underlying source.
-Expressiveness and robustness in regards of well-behavedness and completeness, i.e., that get and putback behave together in a sensible way and support all kinds of necessary edits, are contradicting.
-Lenses are a well-researched formal foundation of transformations.
+They especially have to follow specific laws to ensure that they are complete, i.e., reflect all information changed in a view, and do not perform unintended changes, known as a \emph{well-behavedness} condition~\cite[Def. 3.2]{foster2007combinators-TPLS}.
+The proper design of a putback function influences expressiveness and robustness of the view and the changes that can be propagated back to the underlying source~\cite{foster2007combinators-TPLS}.
+Lenses are a well-researched formal foundation to express and study incremental transformations.
 
+\mnote{Delta lenses}
+Delta lenses~\cite{diskin2011StateToDeltaSymmetric-MODELS} consider that transformations are executed on deltas rather than states, like in the original view-update problem from databases and the original lens work, conforming to our notion of changes and consistency preservation defined on the (cf.\ \autoref{def:consistencypreservationrule}).
+They particularly consider the so called \emph{symmetric} case~\cite{diskin2011StateToDeltaSymmetric-MODELS}, in which one model is not a view of the other and thus one fully determines the other, but transformations are defined in both directions.
+
+\mnote{Multiary lenses}
 Lenses also extended to the multiary case, in which more than two models need to be kept consistent~\cite{diskin2018MultiModelSynchronization-FASE}.
 It especially reflects that transformations may need to change the originally modified models as well, which is denoted as \emph{reflective updates} in that work, which we have introduced with the notion of \emph{synchronizing transformations} (see \autoref{chap:synchronization}).
 
+\mnote{Conclusion}
+Despite multiary lenses, work is especially related to bidirectional transformations, which build the basis for our work. There are many important properties and insights for these kinds of transformations, which serve as a requirement to apply our approaches for combining transformations to networks.
 
 
 \subsection{Traceability and Model Merging}
 
+\mnote{Checking consistency}
 Traceability to identify which elements belong together, make change impact analysis, find inconsistencies.
 For example, architecture in~\cite{szabo2013traceabilityConsistency-ASWEC} with a correspondence metamodel to identify elements that belong together and affect each other among changes.
-
 Traceability focused on consistency checking, such as UML/Analyzer~\cite{egyed2006umlanalyzer-ICSE} and the more general Model/Analyzer~\cite{egyed2011modelanalyzer-TSE}.
 But these tools were also extended to repair inconsistencies by repair actions~\cite{reder2012resolvingInconsistencies-ASE}.
 
+\mnote{Merging corresponding elements}
 Beyond this goes merging: Instead of correspondences between related or redundant elements, redundant elements are merged.
-Also denoted as amalgamation~\cite{koenig2017efficientConsistencyChecking-ECMFA}
+Also denoted as amalgamation~\cite{koenig2017efficientConsistencyChecking-ECMFA}.
 Consists of matching elements that represent the same instances and merging them~\cite{koenig2017efficientConsistencyChecking-ECMFA}.
-model merging~\cite{mansoor2015jss,rubin2013fse}
-Comparable to commonalities idea, as also concerned with finding elements that represent the same. However, usually not used for consistency preservation, but for merging models into a single, redundancy-free, thus inherently consistent representation.
+Has also been considered in a framework defined with category theory~\cite{diskin2010overlapsHeterogeneous-MDI}.
+Comparable to commonalities idea, as also concerned with finding elements that represent the same. However, usually not used for consistency preservation, but for merging models into a single, redundancy-free, thus inherently consistent representation, or to check consistency during the merge task.
 
-Another model merging approach based on a framework formally defined with category theory~\cite{diskin2010overlapsHeterogeneous-MDI}.
+\mnote{Conclusion}
+We go beyond consistency checking and use traceability especially as a means to track relations and be able to update them among changes.
+Model merging is related to \commonalities idea, as both approaches are concerned with finding elements that are supposed to represent the same. However, \commonalities relate redundant elements by construction, i.e., as soon as an element is introduced that requires a redundant one in another model, it becomes created, whereas model merging identifies redundant elements after their creation. Thus \commonalities can be seen as an a priori approach whereas model merging is an a posteriori approach for tracing redundancies.
+
 
 \subsection{Multi-View Modeling}
 
@@ -114,16 +143,14 @@ They are comparable to the currently used notion of megamodels, which reflect sy
 Expressing specific relations with collection-based operators known from functional programming have been investigated~\cite{salay2015megamodeling-MODELS, salay2020megamodeling-SoSym}.
 Stevens related transformations, and especially networks of them, to megamodels~\cite{stevens2020BuildingFromMegamodels-SoSym}, which we will discuss in more detail later on transformations.
 
+\mnote{Conclusion}
 Most multi-view modeling approaches, if considering consistency and its preservation especially between multiple models at all, assume that there is a common knowledge about how all involved models shall be related.
 With modular knowledge, like assumed when creating transformation networks, incompatibilities in the way consistency is considered always lead to problems, regardless of the approach chosen, so the finding of our work is relevant for all these approaches. Multi-view modeling, including multi-paradigm modeling and \gls{SUM} approach, are thus an important application area of our contributions.
 
 
-
-\subsection{Constraint Solving and Verification}
+\subsection{Constraint Solving and Model Finding}
 
 While constraint solving is an approach to describe models as logic terms and try to find a consistent result by solving constraints, constraint solving is also important for us in regards to the compatibility approach, which verifies OCL statements, which is also a constraint solving approach.
-
-Model merging and constraint solving are further approaches to achieve consistency preservation between multiple models.
 
 \mnote{ASP}
 Some approaches consider consistency preservation as a constraint solving problem rather than a transformation problem.
@@ -132,96 +159,103 @@ They use constraints to represent consistency relations, like we do for the rela
 Approaches define how consistency can be maintained by means of ASP, finally also leading to model transformation again
 We, however, generally focus on transformation-based techniques to maintain consistency and issues related to that, which is why we point out constraint solving techniques for consistency management another research directions but do not discuss that research area in more detail.
 
-\mnote{Echo and Alloy}
-For QVT-R and Echo, implementations with Alloy were proposed to resolve inconsistencies~\cite{macedo2013a,macedo2013b,macedo2016alloy}, which were also implemented in the transformation tool Echo.
-However, these approaches find consistent models based on the defined constraints rather than checking whether those constraints can be fulfilled under specific conditions, like our definition of compatibility specifies and our presented approach is able to 
-prove.
+\mnote{Echo}
+Echo~\cite{macedo2013echo-ASE} is a model repair tool that checks and resolves inconsistencies by constraints solving an model finding techniques.
+It employs Alloy, which is a formal specification language supporting model finding via constraint solving.
+It transforms Ecore models, as well as \gls{OCL} expressions, \gls{QVTR} transformations~\cite{macedo2013qvtrAlloy-FASE} and \gls{ATL} transformations~\cite{macedo2016qvtAtlAlloy-SoSym} into Alloy descriptions, which applies constraint solving to validate consistency and finds options to restore consistency.
 
-\mnote{Validation and verification of OCL constraints}
-Finally, there are several approaches for the validation of OCL constraints used to define conditions on valid models or to define model transformations.
-To validate the existence of models that fulfill certain OCL constraints, % for valid models, 
-\textcite{kuhlmann2011a} and \textcite{gonzalez2012a} propose an approach using SAT solvers.
-For the validation of model transformations, different approaches have been proposed.
-\textcite{cabot2010VerificationInvariants-JSS} derive invariants from transformations, which they use for verification purposes, such as to find whether a model exists that can fulfill a transformation rule.
-Comparably, \textcite{cuadrado2017tse} analyze ATL transformations to find errors in transformations and to find out whether a source model exists that may trigger a transformation.
-Rather than using constraint logic for verifying a transformation, \textcite{azizi2017ContractVerification-ICCKE} verify correctness of an ETL transformation using the symbolic execution of the transformation.
-Instead of checking a transformation on its own, \textcite{vallecillo2012FormalTesting-FMMDE} propose to define a formal specification of transformations, against which they can be validated.
-Finally, \textcite{buettner2012models} propose an approach for proving correctness of ATL transformations against pre- and postconditions using SMT solvers.
-Most approaches use some kind of constraint logic or theorem proving for validating correctness of transformations, which is comparable to our approach.
-Our defined notion of compatibility is comparable to correctness notions in the approaches of \textcite{cuadrado2017tse} and \textcite{cabot2010VerificationInvariants-JSS}, as they try to figure out if a rule can be triggered by any model.
-However, all these approaches consider correctness of a single transformation.
-In contrast, we consider correctness of a transformation network.
+\mnote{Conclusion}
+Constraint solving is a different approach to model consistency than transformations, as such approaches declaratively specify what is consistent and employ generic solvers to find solution for inconsistent models.
+Transformations provide more means to influence how consistency is actually achieved, which we consider a major benefit of the approach.
+Constraint solving, however, can inherently deal with an arbitrary number of models, as constraints are not restricted to two models, whereas the imperative specification of how to restore consistency between models in transformations becomes difficult for more than two models.
+Thus, constraint solving provides a different approach to solving the underlying problem of model consistency, but is also a foundation of our approach for identifying compatibility, in which constraint validation is used.
 
 
 
+%%%%
+%% CONSISTENCY BY MODEL TRANSFORMATION
+%%%%
+\section{Consistency by Model Transformation}
 
+\mnote{Transformations between multiple models}
+We have focused on model transformations as a means to preserve consistency between multiple interrelated model, as transformations provide a high degree of freedom for how to specify how consistency is preserved.
+Most existing approaches are restricted to the bidirectional case~\cite{weidmann2020ApplyingBidirectionalTransformations-WSRE, cleve2019dagstuhl}.
+Two central approaches for relating multiple, i.e., more than two, metamodels with transformations, are transformation networks and multidirectional transformations, as also discussed in a dedicated Dagstuhl seminar~\cite{cleve2019dagstuhl}.
+Especially the usage of networks of bidirectional transformations and the interaction of several bidirectional transformations, have been discussed in that seminar.
+The focus in related working groups was the investigation of scenarios, in which networks of bidirectional transformations do not suffice and thus validated our assumption in \autoref{chap:correctness:notions_consistency:monolithic_modular}.
 
-
-
-
-
-\section{Model Consistency by Transformation}
-
-Maintaining consistency between more than two models has recently gained more attention, especially in terms of a dedicated Dagstuhl seminar~\cite{cleve2019dagstuhl}.
-Two central approaches were discussed there: multi-ary transformations and networks of binary transformations.
-We discussed that multi-ary transformations are complex to specify, whereas networks of binary transformation theoretically have limited expressiveness~\cite{stevens2020BidirectionalTransformationLarge-SoSym}, which, however, does not seem to be practically relevant~\cite{cleve2019dagstuhl}.
-As a third approach, adding auxiliary models circumvents the limitations of binary relation expressiveness~\cite{diskin2018MultiModelSynchronization-FASE}.
-
-Of the previously presented approaches for consistency preservation, model transformations is the approach that provides the highest degree of freedom to influence the way in which consistency is restored.
+\mnote{Relevant transformation approaches}
+We have discussed that multidirectional transformations are complex to specify, whereas networks of binary transformation theoretically have limited expressiveness~\cite{stevens2020BidirectionalTransformationLarge-SoSym}, which, however, does not seem to be practically relevant~\cite{cleve2019dagstuhl}.
+Adding adding auxiliary models circumvents the limitations of binary relation expressiveness in transformation networks~\cite{stevens2020BidirectionalTransformationLarge-SoSym}, like we do with the \commonalities approach.
+Research on transformations is especially driven by theoretic research especially on bidirectional transformations, and tools that support the specification of transformations.
 The area of incremental, bidirectional transformations is most relevant for consistency preservation purposes.
-%They define how two models can be made consistent if one of them is modified~\cite{stevens2010sosym}.
-The concept of bidirectional transformation can be generalized to multi-directional transformations~\cite{stevens2020BidirectionalTransformationLarge-SoSym, cleve2019dagstuhl}, i.e., specification with relations as well as consistency repair routines between multiple models.
-So consistency preservation between multiple models can be achieved with two transformation approaches, first with multi-directional transformations, and second by combining bidirectional transformations to networks.
-However, those topics have only been considered in research since recently~\cite{cleve2019dagstuhl}.
-
-Several topics of multidirectional transformations, especially the usage of networks of bidirectional transformations and the interaction of several bidirectional transformations, were discussed in a Dagstuhl seminar~\cite{cleve2019dagstuhl}.
-The focus in related working groups was the investigation of scenarios, in which networks of bidirectional transformations do not suffice and thus checked our assumption in \autoref{chap:correctness:notions_consistency:monolithic_modular}.
-
-Lenses already discussed before as a formal basis.
 Taxonomy for different synchronization scenarios, beyond MDA pipeline, depending on in which direction and how many changes between two models need to be propagated~\cite{diskin2016Taxonomy-JSS}.
 Our approaches do not make any restrictions in this regards, so our contributions fit into any of the synchronization needs provided by this classification.
-
-% BINARY TRANSFORMATIONS LANGUAGES AND EXTENSIONS
-As stated by \textcite{stevens2020BidirectionalTransformationLarge-SoSym}, it is reasonable to target multi-model consistency by combining binary transformations.
-%Multi-model consistency can also be achieved by combining mechanisms for consistency preservation between pairs of models. 
-Especially incremental model transformation languages %, which update models after changes to restore consistency, 
-can be applied by executing the transformations transitively.
-They were surveyed by \textcite{etzlstorfer2013SurveyIncrementalTransformation-ME}, including the \gls{ATL}~\cite{jouault2006a,xiong2007a}, VIATRA~\cite{bergmann2015viatra} and \glspl{TGG}~\cite{anjorin2014b,anjorin2014c}. 
-For \glspl{TGG}, initial concepts for supporting multiple models were proposed~\cite{trollmann2015TransformationTGGtoMultiModel-ICMT,trollmann2016SynchronizationTGGtoMultiModel-ICMT}. 
-Another transformation-based tool is \emph{Echo}~\cite{macedo2013b}. 
-It is based on \emph{Alloy}~\cite{macedo2013a}, which uses \mbox{QVT-R}~\cite{qvt} and model finding to repair inconsistencies. 
-For \mbox{QVT-R}, challenges and steps towards supporting transformations between multiple model were discussed~\cite{macedo2014FrameworkMultiDirectional-BX}.
-\citeauthor{kramer2017a} proposed an approach combining a language for declarative mappings between metamodels with a fallback language for imperative consistency repair~\cite{kramer2017a, klare2016b}, developed in the context of the \vitruv framework~\cite{kramer2015a}. %, on which our approach will be based as well.
-Except for the explicitly mentioned works, those approaches do not explicitly deal with challenges introduced by combining binary transformations.
-
-Model transformations are a well-researched option, and many different tools and languages have been developed to support them~\cite{stevens2008LandscapeBidirectionalTransformation-GTTSE, etzlstorfer2013SurveyIncrementalTransformation-ME, samimi-dehkordi2016iccke}.
-
-Most approaches restricted to the bidirectional case~\cite{weidmann2020ApplyingBidirectionalTransformations-WSRE, cleve2019dagstuhl}.
-
-model transformations~\cite{czarnecki2006a, etzlstorfer2013SurveyIncrementalTransformation-ME, samimi-dehkordi2016iccke, macedo2017ModelRepairClassification-TSE}.
 
 
 \subsection{Bidirectional Transformations}
 
 BX not sufficient for consistency of more than two models, but: first, arguments for composing a network out of them to preserve consistency, thus they are a foundations for our work. Second, some of them already implement necessities esp. regarding the synchronization property requires in networks, like QVT-R.
+Bidirectional by direct specification of both directions, such as \gls{QVTO}~\cite{qvt}, specification of one direction and inference of the opposite direction~\cite{hettel2008synchronization-ICMT, semerath2016backwardTransformation-MODELS}, or declarative specification of what has to hold and inference of the way to to preserve it (cite limitations of that)
 
+\mnote{Properties}
+Incremental, bidirectional transformations are a well-researched option for keeping two models consistent.
+They have been formally founded on the lenses framework~\cite{stevens2008bxalgebraic-ICGT}, in which the lens laws are also related to basic requirements to bidirectional transformations, such as correctness, hippocraticness or undoability~\cite{stevens2010sosym}.
+Correctness and hippocraticness have been identified as essential properties for bidirectional transformations, whereas undoability is beneficial, but usually not achievable~\cite{stevens2010sosym}.
+We have reflected correctness and hippocraticness of the individual transformations in our formalization as well (cf.\ \autoref{def:consistencypreservationrulecorrectness} and \autoref{def:hippocratictransformation}).
+Another interesting property is the one of least change, which we have also discussed in \autoref{chap:orchestration} as an improvement for finding orchestrations.
+This property has been considered by actual transformation tools~\cite{macedo2016qvtAtlAlloy-SoSym}, as well as regarding its basic principles~\cite{cheney2017LeastChangeBx-JOT}.
+\textcite{stevens2012equivalences-EASST} also discusses equivalence relations given by the consistency relations of bidirectional transformations, denoting those instances of one metamodel that are consistent to the same instances of another metamodel.
+They can be considered an explicit description of the options for a transformation to select from when restoring consistency, as we have discussed in \autoref{chap:orchestration}.
+
+\mnote{Transformation languages overview}
+Several tools and languages have been developed to support the specification of bidirectional transformations, which have been summarized and classified over the time in several surveys regarding different criteria~\cite{stevens2008LandscapeBidirectionalTransformation-GTTSE, diRuscio2012transformations-SFM, etzlstorfer2013SurveyIncrementalTransformation-ME, jakumeit2014transformationTools-SCP, samimi-dehkordi2015bidirectionalSynchronization-ICCKE, samimi-dehkordi2016iccke,hidaka2016classificationTransformations-SoSym,kahani2019SurveyTransformationTools-SoSym}.
+It is a current question whether specific transformation languages actually provide benefits due to lacking evidence and adoption~\cite{burgueno2019futureTransformationLanguages-ICMT}. 
+However, for us it is not important whether any transformation language or a general-purpose language is used to define a transformations, since we only define the properties a transformation has to fulfill.
+Our approaches are not tied to a specific language.
+
+\mnote{Transformation languages details}
+Popular approaches include imperative and declarative languages, such as the \gls{QVT}~\cite{qvt} language family, the \gls{ATL}~\cite{jouault2006a,xiong2007a} and especially an incremental realization of it~\cite{martinez2017incrementalATL-SCP}, the Epsilon languages~\cite{kolovos2014epsilon-Book} and approaches using them~\cite{samidehkordi2018evlStrace-IST}, and \gls{VIATRA}.
+\gls{VIATRA}~\cite{bergmann2015viatra-ICMT, varro2016viatra-SoSym} is a consistency framework based on an event-driven mechanisms, which conforms to our notion of delta-based consistency preservation (cf.\ \autoref{def:consistencypreservationrule}), which they refer to as \emph{change-driven} transformations~\cite{bergmann2012changeDriven-SoSym}.
+Also graph-based approaches such as \glspl{TGG}, originally developed by \textcite{schuerr1995a},
+which are well-suited for model transformations~\cite{anjorin2014EfficientSynchronizationTGG-ECMFA}.
+Multiple tools for \glspl{TGG} have been developed~\cite{leblebici2014IncrementalTGGSurvey-GTVMT}, especially for the \gls{EMF} such as eMoflon~\cite{anjorin2014diss}.
+Expressiveness~\cite{anjorin2012complexManipulationTGG-BX} and applicability of \glspl{TGG} are continuously extended, e.g., in terms of applying integer linear programming to consider consistency as an optimization problem~\cite{weidmann2019TGGandILP-SLE,weidmann2020TGGsAndILPSchemaCompliance-FASE}.
+\citeauthor{kramer2017a} proposed an approach combining a language for declarative mappings between metamodels with a fallback language for imperative consistency repair~\cite{kramer2017a, klare2016b}, developed in the context of the \vitruv framework~\cite{klare2020Vitruv-JSS}, which we have used for the realization of the \commonalities languages and for evaluation purposes throughout this thesis.
+While all these languages are external \glspl{DSL}, i.e., they specify an own syntax, some languages are internal \glspl{DSL}, thus they reuse existing languages by providing an internal \gls{API}~\cite{buchmann2018bxtend-Modelsward, hinkel2019internalTransformation-SoSym} and are thus more lightweight.
+
+\mnote{Conclusion}
+Only for some of the discussed tools extensions to support consistency preservation between more than two models have been proposed, which we will discuss subsequently.
+In general, our approaches to build transformation networks can be applied to any existing approach or language for bidirectional transformations.
+Depending on which assumptions a language makes and which abstraction it provides, different requirements to fulfill our notion of synchronizing transformation have to be considered.
+First, most languages operate in a state-based manner and thus applying a change to a modified state can be more complex than in a delta-based approach, in which changes can be reapplied to another state of the models. Then approaches for change reconstruction, which are especially difficult for textual languages such as code~\cite{falleri2014codeDifferencing-ASE}, have to be applied.
+Second, most languages do not allow the definition of synchronizing transformations (cf.\ \autoref{def:synchronizingtransformation}), such that our approaches for making transformations synchronizing proposed in \autoref{chap:synchronization} have to be applied, whereas some language, such as \qvtr, already provide a level of abstraction in which the necessities for synchronization are already met, as we discuss subsequently.
+
+
+\subsection{Synchronizing Transformations}
+Concurrency!
+
+EVL+trace~\cite{samimi-dehkordi2015bidirectionalSynchronization-ICCKE} considers concurrent modifications of both models related by a transformation.
+They make a case distinction of several scenarios of concurrent changes to support the developer of transformations in considering these different situations.
+
+However, non-synchronizing transformations can be adapted to become synchronizing~\cite{xiong2013SynchronizingConcurrentUpdates-SoSym}.
+
+\mnote{Design Patterns}
+Design patterns are an established way of defining a common notion for solutions to recurring problems, such as the design patterns for object-oriented software by \textcite{gamma1995designPatterns-Book}.
+We have also defined patterns to achieve synchronization of transformations in \autoref{chap:synchronization} and several other patterns have been researched for the specification of transformations.
+This comprises patterns for specific kinds of consistency relations~\cite{iacob2008a}, improvement of modularization~\cite{lano2014a}.
+They have been surveyed by \textcite{lano2018a} and even ways to semi-formally describe such patterns have been proposed~\cite{huseyin2016patternsTransformations-CLSS}.
+These patterns focus on improving the development of single transformations and mainly unify how specific kinds of consistency relations can be expressed in transformation languages, but they do not aim to achieve interoperability with other transformations like the patterns proposed by us do.
+However, the catalog of \textcite{lano2014a} also comprises patterns for single instantiation of elements, like we have discussed for achieving synchronizing transformations, but covers a more general use case than the specific scenario of ensuring synchronization of a transformation that we depict in this thesis.
+
+
+\subsection{Transformation Networks}
+
+As stated by \textcite{stevens2020BidirectionalTransformationLarge-SoSym}, it is reasonable to target multi-model consistency by combining binary transformations.
 Although they can not express all multi-ary consistency relations, there are arguments in favor of using networks of modular transformations, especially binary ones:
 They are easier to develop when domain knowledge is distributed~\cite{klare2018docsym} and they are easier to comprehend by a single developer~\cite{cleve2019dagstuhl, stevens2020BidirectionalTransformationLarge-SoSym}.
 Additionally, binary transformations are researched well and a variety of tools supporting different kinds of specifying them exist~\cite{stevens2008LandscapeBidirectionalTransformation-GTTSE, etzlstorfer2013SurveyIncrementalTransformation-ME, samimi-dehkordi2016iccke, macedo2017ModelRepairClassification-TSE}.
-Most existing formalisms and tools consider \emph{bidirectional} transformations, which are able to update one of two models if the other was changed.
-We require synchronizing transformations in this paper.
-However, non-synchronizing transformations can be adapted to become synchronizing~\cite{xiong2013SynchronizingConcurrentUpdates-SoSym}.
-
-
-\glspl{TGG}, originally developed by \textcite{schuerr1995a}, are bidirectional specifications that are well-suited for model transformations~\cite{anjorin2014EfficientSynchronizationTGG-ECMFA}. 
-
-Several transformation languages have been proposed in the recent years, surveyed by \textcite{etzlstorfer2013SurveyIncrementalTransformation-ME}.
-
-Among popular languages such as QVT~\cite{qvt}, \gls{ATL}~\cite{jouault2006a,xiong2007a}, VIATRA~\cite{bergmann2015viatra} and \glspl{TGG}~\cite{anjorin2014b,anjorin2014c}, originally developed by \textcite{schuerr1995a}, only the QVT-R standard explicitly considers the case in which more than two models shall be transformed into each other by allowing the definition of multi-directional transformations.
-
-Bidirectional by direct specification of both directions (e.g. QVT-O), specification of one direction an inference of the opposite direction (refer some work), or declarative specification of what has to hold and inference of the way to to preserve it (cite limitations of that)
-
-\subsection{Transformation Networks}
+In transformations, there is also the problem of technical debt~\cite{lano2018technicalDebt-ICMT}, which can be mitigated by modularizing the specification rather than developing a monolithic multidirectional transformation.
 
 \textcite{stevens2020BidirectionalTransformationLarge-SoSym} investigates the ability to split global into binary constraints.
 She gives arguments to stick to networks of bidirectional transformation rather than using multidirectional transformations. % and considers how n-ary relations can be split into sets of binary relations.
@@ -252,98 +286,76 @@ They are only correct if the network is a tree, or if no transformations interfe
 We have presented a simple use case where this is already too limiting.
 We will overcome this limitation by executing transformations more than once and thereby letting transformations \enquote{negotiate} a result even if they interfere with each other.
 
+\textcite{anjorin2019provenance-tapp} identifies provenance to be important for bidirectional transformations.
+Although we do not provide provenance information for changes performed by transformation, we provide such information for the cause of a transformation network to fail.
+This affects the network developers rather than the user of transformations trying to understand what happens.
+
+One motivation for building transformation networks and our assumptions is modular reuse of the individual transformations.
+There has been research regarding reuse of transformations~\cite{bruel2020transformationReuse-SoSym} and variability in transformations, supporting the derivation of different transformations for specific purposes, comparable to product lines.
+An approach for transformation product lines reuses concepts from software product lines~\cite{delara2018transformationProductLines-Models} to derive several transformations with variable parts from one specification.
+Approach for reuse consider that a transformation must not be defined for two metamodels, but only for some requirements that two metamodels have to met to be applied~\cite{delara2019transformationResue-TOSEM}, thus allowing reuse of a transformation for a metamodels fulfilling these requirements.
+Such approaches for reusability support development processes that support the assumptions that we have made in our work.
 
 
-\subsection{Transformation Chains and Composition}
+\subsection{Transformation Composition and Chains}
 
-Approaches regarding the combination of binary transformations are rather focused on composing transformations between the same two metamodels~\cite{wagelaar2008a, wagelaar2010a, wagelaar2011a}.
-Additionally, those approaches do usually not consider transformations as black boxes, but provide intrusive composition operators that require adaptions of the composed transformations~\cite{cuadrado2008a}.
-Some approaches also deal with processes for %transformation
-composition %, especially the specification of composition, 
-and simply assume interoperability~\cite{oldevik2005a}.
-
-Transformation composition and transformation chains deal with specific problems of transformation networks.
-Composition techniques deal with internal composition of transformations~\cite{wagelaar2008a}, which are techniques that are integrated into a language, and external composition of transformations, which work independently from the language.
-Those approaches especially comprise factorization and re-composition of transformations~\cite{cuadrado2008a} and investigations of compatibility of transformations for different versions of the same metamodels.
-Transformation chains deal with specific networks that occur when transformations from metamodels with a high level of abstraction to those with a low level of abstraction are defined.
-Specification languages for transformation chains %, such as FTG+PM,
-allow to combine transformations to chains~\cite{lucio2013FTGPM-SDL} and to treat them as black-boxes%like in UniTI
-~\cite{vanhooff2006a, vanhooff2007UniTI-MODELS}. 
-
-COMPOSITION:
-Transformation composition techniques are a means to build networks of bidirectional transformations.
-They can be separated into internal techniques, which are white-box approaches integrated into the language~\cite{wagelaar2008a, wagelaar2010a, wagelaar2011a}, e.g. inheritance or superimposition techniques, and external techniques.
-External approaches consider the transformations as black-boxes, which makes them related to our work.
-%Transformation chains are a special case of that.
-Most approaches especially focus on factorization and re-composition as a refactoring technique for transformations~\cite{cuadrado2008a} and consider syntactic compatibility on the level of external specifications and matching metamodels rather than investigating techniques to achieve interoperability by construction.
-\textcite{lano2014a} present a catalog of patterns that foster correct composition of transformations.
-This also includes patterns for unique instantiation like we proposed in \autoref{chap:synchronization:achieving:identification}.
-In contrast, our contribution primarily comprises a categorization of mistakes %on different abstraction levels 
-and only uses one specific pattern that is appropriate to avoid mistakes of a certain category. % rather than providing a set of patterns to generally improve correctness.
-TODO: TraCo composition system~\cite{heidenreich2010composition} for composing transformations, specification of transformation components and properties that are analyzed: analytical approach (good for modularization level), not by design
-
+\mnote{Composition techniques}
 Transformation composition has especially been researched in terms of creating chains of transformations, composing larger transformations from smaller ones and finding and extracting common parts in different transformations, known as \emph{factorization}.
+These approaches deal with specific problems of transformation networks.
 
-A transformation chain defines a sequence of transformations, which transforms one abstract, high-level model into one low-level model across one or more others of different abstraction levels.
-Languages like FTG+PM~\cite{lucio2013FTGPM-SDL} and UniTI~\cite{%vanhooff2006a, 
-vanhooff2007UniTI-MODELS}
-%, pilgrim2008a}, 
-allow to specify the combination of transformations to chains.
+\mnote{Transformation chains}
+A transformation chain defines a sequence of transformations to define an \gls{MDSD} process.
+It especially covers the case that an abstract model at a high level of abstraction is to be transformed into a model at low level of abstraction across one or more other models of different abstraction levels, comparable to the idea of the \gls{MDA} introduced in \autoref{chap:foundations:modeling:mdsd}.
+Transformation chains thus deal with specific kinds of transformation networks.
+Specification languages for transformation chains, such as FTG+PM,
+allow to combine transformations to chains~\cite{lucio2013FTGPM-SDL} and to treat them as black-boxes like in UniTI
+~\cite{vanhooff2006a, vanhooff2007UniTI-MODELS, pilgrim2008constructingChains-ECMDA}.
+They are currently also applied to low-code development platforms~\cite{sahay2020TransformationCompositionLowCode-Models}.
 However, tools like UniTI derive compatibility from additional, external specifications of the transformations, for which conformance to the actual transformation is not guaranteed.
-%To improve maintainability, approaches for separating transformation chains into smaller concern-specific ones~\cite{yie2012a} and to support evolution~\cite{yie2009a} have been developed.
 Additionally, transformation chains are only a special case of transformation networks, as each transformation network is also aware of the individual transformation chains between all pairs of models.
-They are, by construction, not that prone to compatibility problems, because there cannot be any cycles in the transformations.
-%However, chaining transformations does only require compatibility of the interfaces between two transformations in the sense that a subsequent transformation must consider changes in a model that is equal (or a subset of) the one which the previous transformation modified.
+They are, by construction, not that prone to correctness issues, because there are no multiple paths of transformations, like was our motivation for the \commonalities approach in \autoref{chap:improvement}.
 
-Transformation composition techniques can be seen as a means to build transformation networks.
-Internal composition techniques can be separated into white-box approaches, which are integrated into languages~\cite{wagelaar2008a, wagelaar2010a, wagelaar2011a}, e.g., inheritance or superimposition techniques, and external techniques, which consider the transformations as black boxes.
-For such transformation compositions, \textcite{lano2014a} present a catalog of patterns that foster correct composition.
-Our approach considers the transformations as white boxes, or at least requires knowledge about the defined consistency relations, but is, in contrast to existing work, not integrated into a transformation language.
-Additionally, existing approaches have the goal of enhancing composition of transformations between the same metamodels, thus providing benefits like improved reusability, whereas we combine transformations between different metamodels.
-However, our findings on compatibility can also be applied to composition of transformations between the same metamodels.
-Finally, factorization approaches identify common parts of transformations and extract them into a base transformation from which the individual parts are extended~\cite{cuadrado2008a}. Such approaches use intrusive operators that adapt the transformations for composition, whereas we only non-intrusively analyze the transformations.
-
-CHAINS:
-Transformation chains
-are sets of transformations executed one after another to transform one (high-level) model into one (low-level) model across one or more others. %an instance of one
-%Transformation chains have the goal to find a chain transformation to transform  from on
-%metamodel into an instance of another across one or more others. 
-%This is especially useful for generating low-level models from high-level models across different abstraction levels.
-It is a special case of networks of bidirectional transformations, in which chains between all pairs of metamodels are realized. %not a chain between two metamodel shall be realized, but between all pairs of metamodels.
-Specification languages for transformation chains, such as FTG+PM~\cite{lucio2013FTGPM-SDL}, allow to combine transformations to chains.
-Another approach is UniTI~\cite{vanhooff2006a, vanhooff2007UniTI-MODELS, pilgrim2008a}, 
-which treats and combines transformations as black-boxes like we do. 
-However, it derives compatibility from external specifications rather than achieving compatibility by construction.
+\mnote{Properties of chains}
 To improve maintainability, approaches for separating transformation chains into smaller concern-specific ones~\cite{yie2012a} and to support evolution~\cite{yie2009a} have been developed.
-
-\paragraph{Transformation Chains:}
-Combining transformations has been researched especially in terms of chaining transformation to derive low-level models from high-level ones across intermediate representations.
-Languages like FTG+PM~\cite{lucio2013FTGPM-SDL} and UniTI~\cite{vanhooff2007UniTI-MODELS} allow to specify such chains.
-However, tools like UniTI derive compatibility from additional, external specifications of the transformations, for which conformance to the actual transformation is not guaranteed.
-Additionally, transformation chains are only a special case of general transformation networks. %, as each transformation network is also aware of the individual transformation chains between all pairs of models.
+Other approaches support the incremental development by automated testing~\cite{kuester2009incremetalChainDevelopment-MODELS}.
 \Citeauthor{etien2010Combining-SAC} consider specific properties of transformation chains.
 They investigate how two transformations with incompatible input and output metamodel can be chained~\cite{etien2010Combining-SAC} and how conflicts in terms of results depending on the execution order can be detected~\cite{etien2012Chaining-AMT}.
-Although they are related to finding an execution strategy for transformations, these results do not aim to relieve developers from the task of finding an execution order manually, unlike we do in this paper.
+A comparable approach validates whether chained transformations fit together in terms of matching contracts and types both during construction and during execution~\cite{heidenreich2010compositionTransformations-ICMT}.
+Although these approaches are related to finding interoperability issues and to finding an orchestration for transformations, they particularly aim at checking syntactic compatibility rather than semantic interoperability leading to termination with consistent results, and they do not aim to relieve developers from the task of finding an execution order manually, like we do in our work.
 
-\paragraph{Transformation Composition:}
-Transformation composition techniques are a means to build networks of binary transformations.
+\mnote{Transformation composition}
+A variety of transformation composition approaches is focused on composing transformations between the same two metamodels.
 They can be separated into internal and external techniques~\cite{wagelaar2008a}.
 Internal techniques are white-box approaches integrated into the language~\cite{wagelaar2011a}, e.g. inheritance or superimposition techniques~\cite{wagelaar2010a}.
-External approaches consider the transformations as black-boxes. %For such transformation compositions, \textcite{lano2014sosym} present a catalogue of patterns that foster correct composition.
-Our contributions can be seen as an external composition technique, considering the transformations as black-boxes.
-However, composition usually considers transformations between the same types of models rather than different transformations between different kinds of models.
-From a theoretical perspective, this could be treated equally by not distinguishing models by their metamodels. Practical approaches, however, consider transformation between specific metamodel rather than arbitrary models.
+External approaches consider the transformations as black-boxes and thus work independently from the language. 
+Our approaches are a combination of white-box and black-box approaches.
+Achieving synchronization is an intrusive concept that needs to be applied to the implementation of a transformation, thus it is a white-box approach to the transformation.
+Analyzing compatibility requires knowledge about the relations encoded in the transformations, thus it is not a white-box approach as it does not consider the consistency preservation rules. Considering the consistency relations as a kind of interface, we may denote the compatibility analysis as a grey-box approach.
+Finally, the orchestration of a transformation network works under the assumption a having synchronizing, compatible transformations, which are then orchestrated without considering their contents, thus using a black-box approach.
+The proposed \commonalities approach defines how to internally define transformations and thus represents a white-box approach.
+
+\mnote{Transformation modularization}
+Finally, factorization approaches identify common parts of transformations and extract them into a base transformation from which the individual parts are extended~\cite{cuadrado2008a}.
+Such approaches use intrusive operators that adapt the transformations for composition, whereas we only provide construction approaches and non-intrusive analyses, but not intrusive modifications to the transformations.
+A recent approach applies higher-order transformations to modularize transformations~\cite{fleck2017transformationModularization-TSE}.
+Some approaches also deal with processes for composition, especially the specification of composition, and simply assume interoperability of the individual transformations~\cite{oldevik2005a}, which is the contribution we make with our work.
+
+\mnote{Interoperability and maintainability}
+Existing composition approaches especially have the goal of enhancing modularization of transformations to improve maintainability and reusability, and thus support composition of transformations between the same metamodels. 
+We, in contrast, combine transformations between different metamodels and with the goal of achieving interoperability rather than maintainability.
+However, our findings on compatibility can also be applied to composition of transformations between the same metamodels, as compatibility is also a reasonable notion for a single transformation, like we have identified in our evaluation in \autoref{chap:correctness_evaluation}.
 
 
 \subsection{Multidirectional Transformations}
 
-Multidirectional transformations 
-are an alternative to networks of bidirectional transformations.
+\mnote{Multidirectional approaches}
+Multidirectional transformations are an alternative to networks of bidirectional transformations.
 Although they benefit from being less prone to interoperability issues, they do not allow for modular definitions of consistency specifications.
 Early ideas include the Multi Document Integration (MDI) approach~\cite{koenigs2006MGGs-SoSym}. They propose \glspl{MGG} as an extension of \glspl{TGG} for defining transformation rules between multiple models.
 Another extension of \glspl{TGG} to multiple models relating multiple models via one multidirectional transformation rather than defining relations between pairs of source and target models, are Graph Diagram Grammars~\cite{trollmann2015TransformationTGGtoMultiModel-ICMT, trollmann2016SynchronizationTGGtoMultiModel-ICMT}.
 The QVT-R standard~\cite{qvt} provides multidirectional transformations by design, but \textcite{macedo2014FrameworkMultiDirectional-BX} reveal ambiguities in the standard leading to several limitations of its applicability  and propose strategies to circumvent them.
 
+\mnote{Relation to assumptions}
 In contrast to our work, these approaches support the specification on multiary relations between multiple, i.e., more than two, metamodels.
 Although this allows to preserve consistency between multiple models and especially a single multidirectional transformation is less prone to our discussed correctness and compatibility issues by construction, it does not do so under the assumptions of distributed knowledge, requiring independent development and modular reuse, that we have made.
 They require a transformation developer to have knowledge about and be able to express all relations between the involved metamodels.
@@ -351,47 +363,52 @@ However, such approaches may be used to define multidirectional transformations 
 We have depicted the extension of our approaches to construct transformation networks of multidirectional rather than bidirectional transformation as future work.
 
 
-
 \subsection{Commonalities Approaches}
 
-OSM, R-SUM, Oldenburg
-
-Bezug zu \enquote{Weaves} in \cite{kolovos2008a}: Additional model for relating models. Originally focused on trace models, but auxiliary models such as commonalities can also be considered as such
+Commonalities approaches consider additional auxiliary models in transformation networks, which can be beneficial for different reasons.
+They can range from expressibility of multiary relations~\cite{stevens2020BidirectionalTransformationLarge-SoSym,stunkel2018MultimodelCorrespondence-ICPS} to engineering methodologies for improving quality properties, like in this work.
+The classification of \textcite{kolovos2008a} covers commonalities models as \enquote{weave models}, which were originally focused on trace models but also apply to commonalities models.
 
 The idea of defining commonalities to express consistency of multiple models was especially researched from a theoretical viewpoint.
-That research is based on the idea of using an additional $n+1$-th metamodel to decompose the $n$-ary consistency relation between $n$ metamodels into $n$ binary relations~\cite{stunkel2018MultimodelCorrespondence-ICPS, diskin2018MultiModelSynchronization-FASE}.
-
-Not all multi-ary relations can be expressed by sets of binary relations.
-From a theoretical perspective, adding one auxiliary model makes it possible to express arbitrary multiary relations by binary ones~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
+Not every multiary relations can be expressed by sets of binary relations~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
+An $n$-ary consistency relation describing consistency between $n$ metamodels can, howver, be decomposed into binary relations to an additional $n+1$-th metamodel~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
 Formal foundations for the construction of commonalities in \cite{stunkel2018MultimodelCorrespondence-ICPS} based on category theory. Considers only one commonalities metamodels, but may also be extended. 
 Also propose a construction approach of commonalities for comprehensive system~\cite{stunkel2020MultipleModelSynchronization-FASE}.
-Formalization of preservation of multiary relations also with lenses framework~\cite{diskin2018MultiModelSynchronization-FASE}, originally proposed by \textcite{foster2005Combinators-POPL} (see above).
-Focused on expressibility of consistency relations rather than engineering aspects such as the improvement of quality properties that we focus on.
+Formalization of preservation of multiary relations also with lenses framework~\cite{diskin2018MultiModelSynchronization-FASE}, originally proposed by \textcite{foster2007combinators-TPLS}, which we have also discussed before.
+All this work is especially focused on expressibility of consistency relations rather than engineering aspects such as the improvement of quality properties that we focus on.
+In addition, if not guaranteeing specific tree structures of commonalities specification, like we have discussed in \autoref{chap:improvement}, a commonalities specification is still a transformation network for which correctness has to be achieved and for which our approaches can be applied.
 
-Existing approaches to practically use commonalities for keeping multiple models consistent are domain-specific, e.g. in the DUALLy approach for architecture description languages~\cite{malavolta2010ADLInteroperability-TSE, eramo2012Dually-SoSym}.
-It requires the specification of relations between concrete \glspl{ADL} to a central, predefined \gls{ADL} metamodel.
-\dually is based on a generic model consistency approach, which uses \gls{ASP} (discussed before) based on logical programming techniques.
-Existing approaches to practically use commonalities for keeping multiple models consistent are domain-specific. 
-The DUALLy approach~\cite{malavolta2010ADLInteroperability-TSE, eramo2012Dually-SoSym} uses a domain-specific concept metamodel for architecture description languages, which is a fixed metamodel to which relations of arbitrary architecture description languages can be defined.
-
-Make comparison to merging above.
-
-Since adding auxiliary models still results in a network of binary transformations, our work on their orchestration is also required and applicable.
-
-An approach to emulate multi-directional transformations in terms of bidirectional transformation networks are commonalities models. 
-They introduce further models that contain the information that is shared between models and thus has to be kept consistent.
-They serve as a hub with bidirectional transformations to the actual models, acting like a multi-directional transformation.
-This concept has been considered on a rather theoretical basis~\cite{stunkel2018MultimodelCorrespondence-ICPS, diskin2018MultiModelSynchronization-FASE}, discussing which kinds of relations can be expressed with such an approach, and from an engineering perspective~\cite{klare2019models}, discussing the modular specification and composition of commonalities.
-However, all these approaches do not allow a combination of independently developed consistency specifications for subsets of the models, which is the goal of our work.
+Existing approaches to practically use commonalities for keeping multiple models consistent are domain-specific.
+The DUALLy approach~\cite{malavolta2010ADLInteroperability-TSE, eramo2012Dually-SoSym} uses a domain-specific \conceptmetamodel for architecture description languages, which is a fixed metamodel to which relations of arbitrary architecture description languages can be defined.
+\dually is based on a generic model consistency approach, which uses \gls{ASP} based on logical programming techniques.
+In contrast to such domain-specific solutions, our \commonalities approach can be applied to arbitrary scenarios.
 
 
-\subsection{Design Patterns}
+\subsection{Validation and Verification}
 
-There has also been research on design patterns for transformations~\cite{iacob2008a, lano2014a}.
-They have been surveyed by \textcite{lano2018a}, but mainly unify how specific kinds of consistency relations can be expressed in transformation languages and not on achieving non-intrusive transformation interoperability.
+Validation and verification is important for transformations to ensure that they do what they are supposed to do.
+Most existing approaches concern correctness of a single transformation, rather than correctness of a network of them that we have considered.
+They either validate constraints defined in the transformations or consider the transformations as a whole.
+Our approach for proving compatibility can be seen as a validation approach for transformation network correctness.
 
+\mnote{Validation and verification of OCL constraints}
+There are several approaches for the validation of OCL constraints used to define conditions on valid models or to define model transformations.
+To validate the existence of models that fulfill certain OCL constraints, % for valid models, 
+\textcite{kuhlmann2011a} and \textcite{gonzalez2012a} propose an approach using SAT solvers.
+For the validation of model transformations, different approaches have been proposed and surveyed~\cite{calegari2013verificationTransformations-ENTCS,rahim2015SurveyTransformationVerification-SoSym}.
+\textcite{cabot2010VerificationInvariants-JSS} derive invariants from transformations, which they use for verification purposes, such as to find whether a model exists that can fulfill a transformation rule.
+Comparably, \textcite{cuadrado2017tse} analyze ATL transformations to find errors in transformations and to find out whether a source model exists that may trigger a transformation.
+Other approaches support testing by model comparison~\cite{kolovos2006transformationTesting-WGIMM}, regression testing by deriving test cases that ensure that changes to the transformation or their incremental execution are correct~\cite{troy2018inferenceTransformations-JSS} or mutation testing~\cite{troya2015imutationTestingTransformations-ICSTW}.
+Rather than using constraint logic for verifying a transformation, \textcite{azizi2017ContractVerification-ICCKE} verify correctness of transformations written with the Epsilon Transformation Language (ETL)~\cite{kolovos2014epsilon-Book} using the symbolic execution of the transformation.
+Instead of checking a transformation on its own, \textcite{vallecillo2012FormalTesting-FMMDE} propose to define a formal specification of transformations, against which they can be validated.
+This is comparable to a validation approach for contracts of transformations, representing contracts as models to be able to apply model validation techniques~\cite{braga2014consistencyTransformations-SCP}
+Finally, \textcite{buettner2012models} propose an approach for proving correctness of \gls{ATL} transformations against pre- and postconditions using \gls{SMT} solvers.
+Most approaches use some kind of constraint logic or theorem proving for validating correctness of transformations, which is comparable to our approach.
 
-\todo{Sequentialisierung vs. Merging diskutieren -> Bisimulation}
+Our defined notion of compatibility is comparable to correctness notions in the approaches of \textcite{cuadrado2017tse} and \textcite{cabot2010VerificationInvariants-JSS}, as they try to figure out if a rule can be triggered by any model.
+However, all these approaches consider correctness of a single transformation, whereas we consider a correctness notion for complete transformation networks.
+Only few work, especially on transformation chains, considers validation of transformation networks by means of tests~\cite{bauer2011combiningCoverageChains-ICMT}.
+
 
 
 % \begin{copiedFrom}{DocSym}
