@@ -196,7 +196,8 @@ Our approaches do not make any restrictions in this regards, so our contribution
 \subsection{Bidirectional Transformations}
 
 BX not sufficient for consistency of more than two models, but: first, arguments for composing a network out of them to preserve consistency, thus they are a foundations for our work. Second, some of them already implement necessities esp. regarding the synchronization property requires in networks, like QVT-R.
-Bidirectional by direct specification of both directions, such as \gls{QVTO}~\cite{qvt}, specification of one direction and inference of the opposite direction~\cite{hettel2008synchronization-ICMT, semerath2016backwardTransformation-MODELS}, or declarative specification of what has to hold and inference of the way to to preserve it (cite limitations of that)
+\textcite{stevens2018bidirectionality-ECMFA} emphasizes importance of bidirectionality for model transformations and software engineering in general.
+Bidirectional by direct specification of both directions, such as \gls{QVTO}~\cite{qvt}, specification of one direction and inference of the opposite direction~\cite{xiong2007backwardTransformation-ASE, hettel2008synchronization-ICMT, semerath2016backwardTransformation-MODELS}, or declarative specification of what has to hold and inference of the way to to preserve it (cite limitations of that)
 
 \mnote{Properties}
 Incremental, bidirectional transformations are a well-researched option for keeping two models consistent.
@@ -233,12 +234,37 @@ Second, most languages do not allow the definition of synchronizing transformati
 
 
 \subsection{Synchronizing Transformations}
-Concurrency!
 
+\mnote{Concurrent synchronization}
+For transformation networks of arbitrary topology, synchronizing transformations as defined in \autoref{def:synchronizingtransformation} are necessary.
+In our definition, this covers transformations that consider changes to both models and are able to update both of them.
+While \emph{concurrent synchronization} always considers this scenarios, the term \emph{model synchronization} is used ambiguously for incremental update only~\cite{giese2009incrementalModelSynchronization-SoSym} as well as for concurrent synchronization~\cite{samimi-dehkordi2015bidirectionalSynchronization-ICCKE}.
+Thus, much work on model synchronization is not related to the concurrent modification scenario that we consider.
+The case of interest is also denoted as \emph{bidirectional synchronization with reconciliation}~\cite{antkiewicz2008synchronizationDesignSpace-GTTSE}.
+Work in this area is especially related to our work on synchronization, as presented in \autoref{chap:synchronization}.
+
+\mnote{EVL+trace}
 EVL+trace~\cite{samimi-dehkordi2015bidirectionalSynchronization-ICCKE} considers concurrent modifications of both models related by a transformation.
-They make a case distinction of several scenarios of concurrent changes to support the developer of transformations in considering these different situations.
+The authors make a case distinction of several scenarios of concurrent changes to support the developer of transformations in considering these different situations of concurrent modifications.
+They do, however, leave it up to the developer to implement them and especially consider the case of conflicting user changes, which we have excluded in this thesis and which is not relevant during the execution of a transformation network if transformations are not conflicting, thus making the necessary solution we have proposed in \autoref{chap:synchronization} simpler.
 
-However, non-synchronizing transformations can be adapted to become synchronizing~\cite{xiong2013SynchronizingConcurrentUpdates-SoSym}.
+\mnote{TGG approaches}
+Approaches for handling concurrent modifications to both models are often concerned with the conflict case, i.e., that changes to both models are conflicting.
+This has, for example, been researched for \glspl{TGG}~\cite{hermann2012concurrentSynchronization-FASE, orejas2020IncrementalConcurrentSynchronization-FASE, weidmann2020ConcurrentSynchronization-SLE}.
+\textcite{orejas2020IncrementalConcurrentSynchronization-FASE} especially provide different solutions to the synchronization of concurrent modifications to leave it up to the developer how conflicts shall be resolved.
+While this may be beneficial behavior for conflicting user changes, having multiple transformation results is not applicable in transformation network as the execution has to proceed with a single one.
+\textcite{weidmann2020ConcurrentSynchronization-SLE} propose an approach based on integer linear programming to find consistent solutions after concurrent updates.
+This approach also handles conflicting changes and could thus be applied in transformation networks to resolve conflicting user inputs.
+It should, however, not replace the approach we have presented for the synchronization case in transformation networks, as performing the matching of existing elements by construction of the transformation makes it successful determistically rather than potentially getting unexpected results when considering the scenario as an optimization problem solved by integer linear programming.
+
+\mnote{Merging unidirectional execution}
+One highly related approach to synchronize concurrent changes with bidirectional transformations is given by \textcite{xiong2009parallelUpdates-ICMT,xiong2013SynchronizingConcurrentUpdates-SoSym}.
+They propose a special process of executing the transformation in both directions and merging the generated changes in between with a special three-way merger.
+While the idea of executing the consistency preservation rules on specific states of the two modified models to reflect concurrent changes is equal to our synchronization approach presented in \autoref{chap:synchronization}, there are two essential differences.
+First, their approach merges the changes rather sequentially applying them.
+Second, their approach does not iteratively apply the preservation rules in both directions to improve partial consistency but assume to achieve consistency after executing both, thus they do not reflect that changes to one model may require both models to be changed.
+Merging the changes rather than sequentially applying them has the benefit of not requiring the transformation developer to ensure that elements are not created multiple times. However, the merger must correctly consider that case, which, in general, can only be a heuristics.
+The differences between our and the discussed approach especially arise from a different approach goal: While we synchronize concurrent changes performed by transformations that should not be conflicting if transformations are not contradictory, their approach merges the user changes as they, of course, can easily be conflicting and these conflicts need to be resolved.
 
 \mnote{Design Patterns}
 Design patterns are an established way of defining a common notion for solutions to recurring problems, such as the design patterns for object-oriented software by \textcite{gamma1995designPatterns-Book}.
@@ -251,57 +277,51 @@ However, the catalog of \textcite{lano2014a} also comprises patterns for single 
 
 \subsection{Transformation Networks}
 
-As stated by \textcite{stevens2020BidirectionalTransformationLarge-SoSym}, it is reasonable to target multi-model consistency by combining binary transformations.
-Although they can not express all multi-ary consistency relations, there are arguments in favor of using networks of modular transformations, especially binary ones:
-They are easier to develop when domain knowledge is distributed~\cite{klare2018docsym} and they are easier to comprehend by a single developer~\cite{cleve2019dagstuhl, stevens2020BidirectionalTransformationLarge-SoSym}.
-Additionally, binary transformations are researched well and a variety of tools supporting different kinds of specifying them exist~\cite{stevens2008LandscapeBidirectionalTransformation-GTTSE, etzlstorfer2013SurveyIncrementalTransformation-ME, samimi-dehkordi2016iccke, macedo2017ModelRepairClassification-TSE}.
-In transformations, there is also the problem of technical debt~\cite{lano2018technicalDebt-ICMT}, which can be mitigated by modularizing the specification rather than developing a monolithic multidirectional transformation.
+\mnote{Combining transformations}
+Combining multiple transformations, in particular bidirectional transformations, to a network is one approach to preserve consistency between multiple models.
+\textcite{laemmel2004coupledTransformations-WSET} has already emphasized the necessity to couple transformation at the beginning of research regarding model transformations in \gls{MDSD}.
+Combining transformations to networks is a task external to the individual transformations and languages to define them, which is why existing transformation languages to not consider the combination of transformations developed with them.
+\textcite{stevens2020BidirectionalTransformationLarge-SoSym} states that it is reasonable to target consistency between multiple models by combining binary transformations, even though multiple binary relations can not express all kinds of relations between multiple models.
+She also derives the relaxed notion of \emph{binary-implemented} relations, which only requires models consistent to the binary relations to also be consistent to the multiary one, but not vice versa.
 
-\textcite{stevens2020BidirectionalTransformationLarge-SoSym} investigates the ability to split global into binary constraints.
-She gives arguments to stick to networks of bidirectional transformation rather than using multidirectional transformations. % and considers how n-ary relations can be split into sets of binary relations.
-Important for such networks is the transformation execution order. 
-While we aim to allow arbitrary execution orders, other approaches focus on finding or defining appropriate orders~\cite{stevens2020BuildingFromMegamodels-SoSym}.
+\mnote{Networks vs. multidirectional transformations}
+Favoring transformation networks over multidirectional transformations is motivated by multiple reasons.
+Networks are easier to develop when domain knowledge is distributed~\cite{klare2018docsym} and they are easier to comprehend by a single developer~\cite{cleve2019dagstuhl, stevens2020BidirectionalTransformationLarge-SoSym} in comparison to multidirectional transformations.
+Additionally, binary transformations are researched well and a variety of tools supporting different kinds of specifying them exist, as discussed in the previous subsection.
+Finally, there is also the problem of technical debt in transformations~\cite{lano2018technicalDebt-ICMT}, which can be mitigated by modularizing the specification rather than developing a monolithic multidirectional transformation.
+Research regarding transformation networks especially concerns the orchestration and execution of them and is thus related to our work on orchestration, presented in \autoref{chap:orchestration}.
 
-We introduced networks of bidirectional transformations as the state-of-the-art for specifying consistency relations between multiple metamodels.
-\textcite{stevens2020BidirectionalTransformationLarge-SoSym} investigates the ability to decompose $n$-ary relations into binary ones and also discusses confluence issues, which arise from incompatibilities of transformations, as discussed in \autoref{chap:compatibility}.
-Such a decomposition of relations is not always possible, thus such approaches are restricted to cases where all $n$-ary relations can be decomposed into binary ones.
-Additionally, such networks are prone to compatibility errors or reduced modularity, as discussed in \autoref{chap:classification:topologies}.
-
-The case that transformations are combined to networks is not considered by any existing transformation language.
-Most of the existing considerations for such networks are rather theoretical.
-For a single bidirectional transformation, several relevant properties, such as correctness, hippocraticness or undoability have been found and researched~\cite{stevens2010sosym}.
-In our work, in contrast, we are interested in further properties that are relevant when combining transformations to networks.
-\textcite{stevens2020BidirectionalTransformationLarge-SoSym} started to discuss problems that arise from the combination of several transformations, such as potential non-termination or the problem of not finding a consistent solution. She defined in which situations it is not possible to express a multiary relation by means of binary relations at all.
-She also discussed orchestration problems for the execution order of transformations~\cite{stevens2020BuildingFromMegamodels-SoSym}.
-However, compatibility of relations %underlying the transformations 
-have not been considered yet.
-
-While the research areas for transformation chains and composition find execution strategies for specific cases, we aim at finding a \emph{universal} execution strategy for arbitrary transformation network topologies.
-\textcite{dirocco2017ConsistencyRecoveryInteractive-MODELS} describe a simple strategy for orchestrating transformation networks, but make strong assumptions in terms of the necessity to apply each transformation only once.
+\mnote{Orchestration approaches}
+Several research papers consider theoretical properties of transformation networks, especially including their resolvability, i.e., the possibility to find a consistent orchestration.
+While we aim at finding a \emph{universal} approach for orchestrating and execution transformations of arbitrary transformation network topologies, most existing approaches restrict the number of assumed and allowed transformations.
+A multi-modeling platform~\cite{denton2008naomi-Models} considers change propagation based on a dependency graph between the models and performs a depth-first search.
+In networks of arbitrary topology, however, no such explicit dependencies exist, and the approach is restricted to executing each transformation only once.
+Likewise, \textcite{dirocco2017ConsistencyRecoveryInteractive-MODELS} describe a simple strategy for orchestrating transformation networks, but also make strong assumptions in terms of the necessity to apply each transformation only once.
 \textcite{stevens2020BidirectionalTransformationLarge-SoSym} proposes a strategy that also executes each transformation only once in one direction. This includes a notion of authoritative models, which are not allowed to be changed, and does not consider synchronizing transformations.
+She also discusses non-termination and resolvability issues, i.e., reasons for not finding a consistent orchestration, which can arise from incompatibilities of the relations, as we have discussed in \autoref{chap:compatibility}, or further problems such as the selection of different options, as we have discussed in \autoref{chap:orchestration}, but that work is restricted to the single execution of each transformation and does not distinguish and discuss the reasons for missing resolvability like we do.
 In the same way, \cite{stevens2020BuildingFromMegamodels-SoSym} proposes to find an \emph{orientation model} that defines in which direction transformations are executed after a change to restore consistency, also considering authoritative models.
 However, if there are several transformations that modify the same model, this work leaves it to the developer to ensure that the transformations are executed in an appropriate order to ensure that all consistency relations hold afterwards.
-It turns out that such strategies are not very potent:
-They are only correct if the network is a tree, or if no transformations interfere with each other.
-We have presented a simple use case where this is already too limiting.
-We will overcome this limitation by executing transformations more than once and thereby letting transformations \enquote{negotiate} a result even if they interfere with each other.
+We have presented use cases in which this is too limiting to be used as a universal approaches for orchestration, which is why our approach for orchestration presented in \autoref{chap:orchestration} explicitly considers that an arbitrary number of transformation executions may be necessary.
 
-\textcite{anjorin2019provenance-tapp} identifies provenance to be important for bidirectional transformations.
-Although we do not provide provenance information for changes performed by transformation, we provide such information for the cause of a transformation network to fail.
-This affects the network developers rather than the user of transformations trying to understand what happens.
+\mnote{Provenance}
+Provenance is also a topic of growing attention and importance in research for bidirectional transformations~\cite{cleve2019dagstuhl,anjorin2019provenance-tapp}.
+While \textcite{anjorin2019provenance-tapp} especially consider provenance information about changes performed by a single transformations, we provide such information for the cause of a transformation network to fail.
+This affects the network developers rather than the user of transformations, who tries to understand what happens.
 
+\mnote{Reuseability}
 One motivation for building transformation networks and our assumptions is modular reuse of the individual transformations.
 There has been research regarding reuse of transformations~\cite{bruel2020transformationReuse-SoSym} and variability in transformations, supporting the derivation of different transformations for specific purposes, comparable to product lines.
 An approach for transformation product lines reuses concepts from software product lines~\cite{delara2018transformationProductLines-Models} to derive several transformations with variable parts from one specification.
 Approach for reuse consider that a transformation must not be defined for two metamodels, but only for some requirements that two metamodels have to met to be applied~\cite{delara2019transformationResue-TOSEM}, thus allowing reuse of a transformation for a metamodels fulfilling these requirements.
 Such approaches for reusability support development processes that support the assumptions that we have made in our work.
+Although these work considers quality properties of transformations such as reuse, which we discuss in \autoref{chap:classification}, they are not concerned with quality properties of a transformation network and especially the reuse of transformations in other network.
 
 
 \subsection{Transformation Composition and Chains}
 
 \mnote{Composition techniques}
 Transformation composition has especially been researched in terms of creating chains of transformations, composing larger transformations from smaller ones and finding and extracting common parts in different transformations, known as \emph{factorization}.
-These approaches deal with specific problems of transformation networks.
+These approaches deal with specific problems of execution of and compatibility in transformation networks and are thus related to our work on compatibility and orchestration, presented in \autoref{chap:compatibility} and \autoref{chap:orchestration}.
 
 \mnote{Transformation chains}
 A transformation chain defines a sequence of transformations to define an \gls{MDSD} process.
@@ -368,10 +388,11 @@ We have depicted the extension of our approaches to construct transformation net
 Commonalities approaches consider additional auxiliary models in transformation networks, which can be beneficial for different reasons.
 They can range from expressibility of multiary relations~\cite{stevens2020BidirectionalTransformationLarge-SoSym,stunkel2018MultimodelCorrespondence-ICPS} to engineering methodologies for improving quality properties, like in this work.
 The classification of \textcite{kolovos2008a} covers commonalities models as \enquote{weave models}, which were originally focused on trace models but also apply to commonalities models.
+Work in this area is especially related to our work on the \commonalities approach for improving quality properties of transformation network, as presented in \autoref{chap:improvement}.
 
 The idea of defining commonalities to express consistency of multiple models was especially researched from a theoretical viewpoint.
 Not every multiary relations can be expressed by sets of binary relations~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
-An $n$-ary consistency relation describing consistency between $n$ metamodels can, howver, be decomposed into binary relations to an additional $n+1$-th metamodel~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
+An $n$-ary consistency relation describing consistency between $n$ metamodels can, however, be decomposed into binary relations to an additional $n+1$-th metamodel~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
 Formal foundations for the construction of commonalities in \cite{stunkel2018MultimodelCorrespondence-ICPS} based on category theory. Considers only one commonalities metamodels, but may also be extended. 
 Also propose a construction approach of commonalities for comprehensive system~\cite{stunkel2020MultipleModelSynchronization-FASE}.
 Formalization of preservation of multiary relations also with lenses framework~\cite{diskin2018MultiModelSynchronization-FASE}, originally proposed by \textcite{foster2007combinators-TPLS}, which we have also discussed before.
