@@ -7,17 +7,17 @@
     viewtype/.style={circle, draw, solid, fill=white, inner sep=.1em, font=\scriptsize},
     polarrow/.style={latex-latex, densely dotted},
     mininode/.style={inner sep=.4em},
+    uniformly sized package/.style={minimum width=2.5em},
 ]
 %% SUM
-\node[uml small box] (pcm) {PCM};
-\node[uml small box] (uml) [below left=2em and 1em of pcm] {UML};
-\node[uml small box] (java) [above left=2em and 1em of uml] {Java};
+\umlpackage[uniformly sized package]{pcm}{}{PCM}
+\umlpackage[uniformly sized package]{uml}{below left=2em and 1em of pcm}{UML}
+\umlpackage[uniformly sized package]{java}{above left=2em and 1em of uml}{Java}
 
 \node[circle,draw,thick,fit=(pcm)(uml.north)(java),inner sep=2ex] (sum) {};
 
 \draw[consarrow] (java) -- node[mir] (pcmJavaCCR) {CPR} (pcm);
 \draw[consarrow] (pcm) to [bend left] node[mir] (pcmUMLCCR) {CPR} (uml);
-% \draw[consarrow] (uml) to [bend left] node[left, font=\footnotesize] {cons$_2$} (java);
 \draw[consarrow] (uml) to [bend left] node[mir] (umlJavaCCR) {CPR} (java);
 
 %% Klassendiagramm
@@ -73,7 +73,6 @@
 
 %% PCM-Komponenten-Diagramm
 \node[] (pcmRepView) [above right=3.5em and 10.5em of sum] {};%
-%\node (pcmpoint) [above right=10cm and 4em of sum] {};
 
 {\tiny
 \pcmcomponentbody{}{pcmcomp1}{comp$_1$}{at (pcmRepView)}
@@ -81,19 +80,16 @@
 \pcmcomponent{}{pcmcomp2}{comp$_2$}{[left=2.5em of pcmcomp1text]}
 }
 
-%\draw[->, dashed] (pcmcomp2arc) -- (pcmcomp1lolli);
-
 \node[view,fit=(pcmcomp1)(pcmcomp2)(pcmcomp2lolli)] (pcmview) {};
 
 \node[vtcaption] (pcmviewtext) 
 [above=0.3em of pcmview] {PCM System View};
 
 \path (pcmRepView) -- node[viewtype,at end] (viewtype3) {$\mathvariable{VT}_3$} (sum.40);
-%\node[viewtype] (viewtype3) at (epoint3) {VT$_3$};
 \path (pcmview) edge [-latex] (viewtype3);
 \path (viewtype3) edge [polarrow, latex-latex] (pcm);
 
-\node[view, font=\tiny\ttfamily] (javasource) [above left=4em and -10em of sum] {%
+\node[view, font=\tiny\ttfamily] (javasource) [above left=3.5em and -10em of sum] {%
 \begin{lstlisting}[%
 numbers=none,
 language=java,
@@ -117,26 +113,19 @@ public class C2 extends C1 {
 {Annotated Java Source Code View};
 
 \path (javasource) -- node [at end, viewtype] (viewtype4) {$\mathvariable{VT}_4$} (sum.100);
-%\node[viewtype] (viewtype4) at (epoint4) {VT$_4$};
 \draw[-latex] (javasource) -- (viewtype4);
 \draw[polarrow] (viewtype4) -- (java);
 \draw[polarrow] (viewtype4) -- (pcm.north west);
 \draw[polarrow,latex-] (viewtype4) -- (pcmJavaCCR);
-%\draw[polarrow,latex-] (viewtype4) to [bend right=10] (pcmUMLCCR);
-%\draw[polarrow,latex-] (viewtype4) to [bend left=10] (umlJavaCCR);
 
 % Legende
-\node[draw, legendbg, matrix, font=\scriptsize, inner sep=0.7em, nodes=mininode] (legend) at (12em,-10em) {%
-\node[uml small box, minimum height=0.1em, inner sep=0.3em, yshift=0.5ex, font=\scriptsize, xshift=2em] (legend_mm) {MM}; & \node[anchor=base west, font=\footnotesize] {Metamodel\sameheight};\\
+\node[draw, legendbg, matrix, font=\scriptsize, inner sep=0.7em, nodes=mininode] (legend) at (12em,-9.7em) {%
+\umlpackage[minimum height=0.1em, inner sep=0.3em, yshift=0.5ex, font=\scriptsize, xshift=2em]{egend_mm}{}{MM} & \node[anchor=base west, font=\footnotesize] {Metamodel\sameheight};\\
 \node[viewtype, xshift=2em, yshift=0.5ex, font=\scriptsize] {$\mathvariable{VT}$}; & \node[anchor=base west, font=\footnotesize] {\ViewType\sameheight};\\
 \draw[-latex] (0,.5ex)--(4em,.5ex); & \node[anchor=base west, font=\footnotesize] {Instance of a \ViewType\sameheight};\\
 \draw[polarrow] (0,.5ex)--(4em,.5ex); & \node[anchor=base west, font=\footnotesize] {View Transformation\sameheight};\\
 \draw[consarrow] (0,.5ex) to node[midway,mir] {CPR} (4em,.5ex); & \node[anchor=base west, font=\footnotesize] {Consistency Preservation Rule\sameheight};\\
 };
-
-\foreach \x in {pcm,uml,java,legend_mm} {
-\draw (\x.north west) ++ (.2pt,0) -- ++ (0,.2em) -- ++ (0.6em,0) -- ++ (0,-.2em);
-}
 
 \node[font=\bfseries\scriptsize] (sumtext) [above right=0em of sum.240, anchor=south west, align=center] {\vsum\\ Metamodel};
 
