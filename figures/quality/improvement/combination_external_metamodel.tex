@@ -1,0 +1,44 @@
+% requires tikzvitruvius.sty
+\begin{tikzpicture}[
+    vtcaption/.style={font=\small},
+    view/.style={uml box, densely dashed},
+    viewtype/.style={circle, draw, solid, fill=white, inner sep=.1em, font=\scriptsize},
+    polarrow/.style={latex-latex, densely dotted},
+    mininode/.style={inner sep=.4em},
+]
+
+% V-SUM
+\node[uml small box] (oo) {OOD};
+\node[uml small box] (uml) [below left=4em and 1em of oo] {UML};
+\node[uml small box] (java) [below right=4em and 1em of oo] {Java};
+
+\node[circle,draw,thick,fit=(oo.center)(uml)(java),inner sep=2ex] (sum) {};
+
+\draw[manifests relation] (oo) -- node[manifests relation, above, sloped] (pcmJavaCCR) {\manifestslabel} (uml.north);
+\draw[manifests relation] (oo) -- node[manifests relation, above, sloped] (pcmJavaCCR) {\manifestslabel} (java.north);
+
+\node[viewtype] (viewtypeOO) at (sum.60) {$\mathvariable{VT}_\mathvariable{OOD}$};
+\node[viewtype] (viewtypeJava) at (sum.5) {$\mathvariable{VT}_\mathvariable{Java}$};
+\draw[polarrow] (oo) -- (viewtypeOO);
+\draw[polarrow] (java) -- (viewtypeJava);
+
+\node[font=\bfseries\footnotesize] (sumtext) [above=0.6em of sum.270, anchor=south, align=center] {\vsum\\ Metamodel};
+
+% Outer transformations
+\node[uml small box] (pcm) [above right=-0.5em and 13em of oo] {PCM};
+\draw[transformation] (viewtypeOO) -- node[transformation, above, sloped] {Structure} (pcm);
+\draw[transformation] (viewtypeJava) -- node[transformation, above, sloped] {Behavior} (pcm);
+
+% Legend
+\node[draw, legendbg, matrix, font=\scriptsize, inner sep=0.7em, nodes=mininode] (legend) at (17em,-6em) {%
+    \node[uml small box, minimum height=0.1em, inner sep=0.3em, yshift=0.5ex, font=\scriptsize, xshift=1.25em] (legend_mm) {MM}; & \node[anchor=base west, font=\footnotesize] {Metamodel\sameheight};\\
+    \node[viewtype, xshift=1.25em, yshift=0.5ex, font=\scriptsize] {$\mathvariable{VT}$}; & \node[anchor=base west, font=\footnotesize] {\ViewType\sameheight};\\
+    \draw[polarrow] (0,.5ex)--(2.5em,.5ex); & \node[anchor=base west, font=\footnotesize] {View Transformation\sameheight};\\
+    \draw[transformation] (0,.5ex)--(2.5em,.5ex); & \node[anchor=base west, font=\footnotesize] {Transformation\sameheight};\\
+};
+
+\foreach \x in {oo,uml,java,pcm,legend_mm} {
+    \draw (\x.north west) ++ (.2pt,0) -- ++ (0,.2em) -- ++ (0.6em,0) -- ++ (0,-.2em);
+}
+
+\end{tikzpicture}
