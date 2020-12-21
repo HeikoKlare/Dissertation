@@ -1,0 +1,134 @@
+\newcommand{\hdistance}{11.2em}
+\newcommand{\classwidth}{5em}
+\newcommand{\labeldistance}{1.0em}
+\newcommand{\mmborder}{1em}
+
+
+\begin{tikzpicture}[
+	code node/.style={draw, inner sep=0.4em, fill=lightlightgray}
+]
+
+\pgfdeclarelayer{bg}
+\pgfsetlayers{bg,main}
+
+\umlclassvarwidth{java_class}{}{Class}{
+    name\\
+    packageName
+}{\classwidth}
+
+\umlclassvarwidth[, right=\hdistance of java_class.north, anchor=north]{uml_component}{}{Component}{
+    name\\
+}{\classwidth}
+
+\umlclassvarwidth[, right=\hdistance of uml_component.north, anchor=north]{pcm_component}{}{Component}{
+    name\\
+}{\classwidth}
+
+\coordinate (java_label_coordinate) at ([yshift=\labeldistance]java_class.north);
+\node[mmlabel, anchor=center] (java_label) at (java_label_coordinate) {Java};
+
+\coordinate (uml_label_coordinate) at ([yshift=\labeldistance]uml_component.north);
+\node[mmlabel, anchor=center] (uml_label) at (uml_label_coordinate) {UML};
+
+\coordinate (pcm_label_coordinate) at ([yshift=\labeldistance]pcm_component.north);
+\node[mmlabel, anchor=center] (pcm_label) at (pcm_label_coordinate) {PCM};
+
+\begin{pgfonlayer}{bg}
+    \node[mmbg, fit=(java_class)(java_label.center), inner sep=\mmborder] (java) {};
+    \node[mmbg, fit=(uml_component)(uml_label.center), inner sep=\mmborder] (uml) {};
+    \node[mmbg, fit=(pcm_component)(pcm_label.center), inner sep=\mmborder] (pcm) {};
+\end{pgfonlayer}
+
+\draw[consistency relation] ([xshift=1.5em]java_class.south) 
+    -- 
+    %node[pos=0, below right] {$jclass$} 
+    ++(0,-2em) 
+    -| 
+    node[pos=0.25, below, align=center] {$\mathvariable{jclass.packageName} = \mathvariable{ucomp.name}$ \\ $\mathvariable{jclass.name} = \mathvariable{ucomp.name} + \text{\enquote{Impl}}$} 
+    %node[pos=1, below left] {$ucomp$} 
+([xshift=-1.5em]uml_component.south);
+\draw[consistency relation] ([xshift=1.5em]uml_component.south) 
+    -- 
+    node[pos=0, below left] {$uclass$} 
+    ++(0,-2em) 
+    -| 
+    node[pos=0.25, below, align=center] {$\mathvariable{ucomp.name} = \mathvariable{pcomp.name}$}
+    %node[pos=1, below left] {$pcomp$} 
+([xshift=-1.6em]pcm_component.south);
+\draw[consistency relation] ([xshift=-1.5em]java_class.south) 
+    -- 
+    node[pos=0, below right] {$jclass$} 
+    ++(0,-5.1em) 
+    -| 
+    node[pos=0.25, below, align=center] {$\mathvariable{jclass.packageName} = \mathvariable{pcomp.name}$ \\ $\mathvariable{jclass.name} = \mathvariable{pcomp.name} + \text{\enquote{Impl}}$} 
+    node[pos=1, below left] {$pcomp$} 
+([xshift=1.6em]pcm_component.south);
+
+\node[code node, below=15.3em of java.north west, anchor=north west] (commonalities_code) {
+    \begin{lstlisting}[language=commonalities, frame=none, numbers=none, linewidth=13.3em, basicstyle=\footnotesize\ttfamily]
+concept ComponentBasedDesign
+
+commonality Component {
+	with uml:Component
+	with pcm:Component
+	with java:Class
+
+	has name {
+		= uml:Component.name
+		= pcm:Component.name
+		= prefix(java:Class.name,
+				"Impl")
+		-> firstUpper(
+				java:Class.packageName)
+	}
+}
+    \end{lstlisting}
+};
+
+\node[code node, below left=15.3em and 2em of pcm.north east, anchor=north east] (qvt_code1) {
+    \begin{lstlisting}[language=QVT, frame=none, numbers=none, linewidth=15.3em, basicstyle=\footnotesize\ttfamily]
+relation UMLComponent2PCMComponent {
+	componentName : String;
+	domain uml ucomp : Component {
+		name = componentName;
+	}
+	domain pcm pcomp : Component {
+		name = componentName;
+	}
+}
+    \end{lstlisting}
+};
+\node[code node, above right=1.3em and 1em of qvt_code1.south west, anchor=north west] (qvt_code2) {
+    \begin{lstlisting}[language=QVT, frame=none, numbers=none, linewidth=14.5em, basicstyle=\footnotesize\ttfamily]
+relation Class2PCMComponent {
+	componentName : String;   
+	domain java jclass : Class {
+		name = componentName + 'Impl';
+		packageName = componentName;
+	}
+	domain pcm pcomp : Component {
+		name = componentName;
+	}
+}
+    \end{lstlisting}
+};
+
+\node[code node, above right=1.3em and 1em of qvt_code2.south west, anchor=north west] (qvt_code3) {
+    \begin{lstlisting}[language=QVT, frame=none, numbers=none, linewidth=14.5em, basicstyle=\footnotesize\ttfamily]
+relation Class2UMLComponent {
+	componentName : String;   
+	domain java jclass : Class {
+		name = componentName + 'Impl';
+		packageName = componentName;
+	}
+	domain uml ucomp : Component {
+		name = componentName;
+	}
+}
+    \end{lstlisting}
+};
+
+\node[above=0.2em of commonalities_code, font=\bfseries\small] {\Commonalities Specification};
+\node[above=0.2em of qvt_code1, font=\bfseries\small] {\gls{QVTR} Specification};
+
+\end{tikzpicture}
