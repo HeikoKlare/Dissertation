@@ -3,82 +3,47 @@
 \newcommand{\hdistance}{20em}
 \newcommand{\vdistance}{5em}
 \newcommand{\classwidth}{5em}
+\newcommand{\labeldistance}{1em}
+\newcommand{\mmborder}{1em}
 
 \begin{tikzpicture}
 
-% Person
+\pgfdeclarelayer{bg}
+\pgfsetlayers{bg,main}
+
 \umlclassvarwidth{component}{}{Component\sameheight}{
 name
 }{\classwidth}
-\node[above=0em of component.north, anchor=south, font=\bfseries] {\gls{PCM}};
 
 % Employee
 \umlclassvarwidth[,right=\hdistance of component.north, anchor=north]{uclass}{}{Class\sameheight}{
 name\
 }{\classwidth}
-\node[above=0em of uclass.north, anchor=south, font=\bfseries] {\gls{UML}};
 
 \umlclassvarwidth[,below right=\vdistance and 0.5*\hdistance of component.north, anchor=north]{jclass}{}{Class\sameheight}{
 name
 }{\classwidth}
-\node[above=0em of jclass.north, anchor=south, font=\bfseries] {Java};
 
 % CONSISTENCY RELATIONS
 \draw[consistency relation] (component) -- node[pos=0, above right] {$comp$} node[below] {$\mathvariable{comp.name} = \mathvariable{uclass.name}$} node[pos=1, above left] {$uclass$} (uclass);
 \draw[consistency relation] (component) |- node[pos=0, below right] {$comp$} node[pos=0.6, below, align=center] {$\mathvariable{jclass.name} =$ \\ $\mathvariable{comp.name} + \text{\enquote{$\mathvariable{Impl}$}}$} node[pos=1, above left] {$jclass$} (jclass);
 \draw[consistency relation] (jclass) -| node[pos=0, above right] {$jclass$} node[pos=0.4, below, align=center] {$\mathvariable{jclass.name} =$\\ $\mathvariable{uclass.name}$} node[pos=1, below right] {$uclass$} (uclass);
-% \draw[consistency relation] (employee.south) -- node[pos=0, below left] {$e$} node[right, align=left] {$\consistencyrelation{CR}{ER}$}% /\\ $R'_{ER}$} 
-% node[pos=1, above left] {$r$} (resident.north);
-% \draw[consistency relation] (resident.west) -| node[pos=0, below left] {$r$} node[pos=0.25, below] {$\consistencyrelation{CR}{PR}$} node[pos=1, below left] {$p$} (person.south);
 
-% \draw[consistency relation 2] (person.east) -- node[pos=0, below right] {$p$} ++(0.35*\hdistance,0) -- node[pos=0, above=0.5em] {$\consistencyrelation{CR}{PER}$} node[pos=1, above left] {$e$} ([yshift=1em]employee.south west);
-% \draw[consistency relation 2, -latex] ([xshift=0.35*\hdistance]person.east) -- node[pos=1, below left] {$r$} ([yshift=-1em]resident.north west);
+% METAMODELS
 
-% \node[consistency related element 2, below left=5em and 2em of person.south west, anchor=north west, inner sep=0em] (relations1) {
-% $\begin{aligned}
-%     \consistencyrelation{CR}{PER} =\; &
-%             \setted{\tupled{p,e,r} \mid 
-%             %& 
-%             \mathvariable{p.firstname} + \text{\enquote{\textvisiblespace}} + \mathvariable{p.lastname} = \mathvariable{e.name} = \mathvariable{r.name} \\
-%             &
-%             \land \mathvariable{p.address} = \mathvariable{r.address}
-%             \land \mathvariable{p.income} = \mathvariable{e.salary} \\
-%             &
-%             \land \mathvariable{e.socsecnumber} = \mathvariable{r.socsecnumber}
-%         }
-% \end{aligned}$
-% };
+\coordinate (java_label_coordinate) at ([yshift=\labeldistance]jclass.north);
+\node[mmlabel, anchor=center] (java_label) at (java_label_coordinate) {Java};
 
-% \node[consistency related element, below=0.5em of relations1.south west, anchor=north west, inner sep=0em] {
-% $\begin{aligned}
-%     \consistencyrelation{CR}{PE} =\; &
-%             \setted{\tupled{p,e} \mid %\\
-%             %& 
-%             \mathvariable{p.firstname} + \text{\enquote{\textvisiblespace}} + \mathvariable{p.lastname} = \mathvariable{e.name}%\\
-%             %& 
-%             \land \mathvariable{p.income} = \mathvariable{e.salary}
-%         }\\[0.3em]
-%         \consistencyrelation{CR}{PR} =\; &
-%             \setted{\tupled{p,r} \mid %\\
-%             %& 
-%             \mathvariable{p.firstname} + \text{\enquote{\textvisiblespace}} + \mathvariable{p.lastname} = \mathvariable{r.name}%\\
-%             %& 
-%             \land \mathvariable{p.address} = \mathvariable{r.address}
-%         }\\[0.3em]
-%         \consistencyrelation{CR}{ER} =\; &
-%             \setted{\tupled{e,r} \mid %\\
-%             %& 
-%             \mathvariable{e.name} = \mathvariable{r.name} %\\
-%             %& 
-%             \land \mathvariable{e.socsecnumber} = \mathvariable{r.socsecnumber}
-%         }%\\
-%     % R'_{ER} =\; &
-%     %         \setted{\tupled{e,r} \mid %\\
-%     %         %& 
-%     %         e.name.toLower = r.name\\
-%     %         & \land e.socsecnumber = r.socsecnumber
-%     %     }
-% \end{aligned}$
-% };
+\coordinate (uml_label_coordinate) at ([yshift=\labeldistance]uclass.north);
+\node[mmlabel, anchor=center] (uml_label) at (uml_label_coordinate) {\gls{UML}};
+
+\coordinate (pcm_label_coordinate) at ([yshift=\labeldistance]component.north);
+\node[mmlabel, anchor=center] (pcm_label) at (pcm_label_coordinate) {\gls{PCM}};
+
+\begin{pgfonlayer}{bg}
+    \node[mmbg, fit=(jclass)(java_label.center), inner sep=\mmborder] (java) {};
+    \node[mmbg, fit=(uclass)(uml_label.center), inner sep=\mmborder] (uml) {};
+    \node[mmbg, fit=(component)(pcm_label.center), inner sep=\mmborder] (pcm) {};
+\end{pgfonlayer}
 
 \end{tikzpicture}
