@@ -273,7 +273,7 @@ Our prototype uses the Z3 theorem prover~\cite{z32008}, which is an \gls{SMT} so
 \end{table}
 
 \mnote{Scenarios of QVT-R transformations}
-We have applied our prototypical implementation in a case study to $19$ scenarios.
+We have applied our prototypical implementation in a case study to $19$~scenarios, which are also available at GitHub~\cite{decompositionGithub}.
 Each of these scenarios consists of three or four metamodels and comprises especially primitive data types and operations.
 They contain pairwise transformations between the metamodels defined in \gls{QVTR}, more specifically its implementation \gls{QVTd}.
 
@@ -286,7 +286,7 @@ The application of the prototypical implementation to these scenarios yields the
 Comparing these results with the ground truth in \autoref{tab:correctness_evaluation:compatibility_scenarios} allows us to identify them as true or false positives or negatives, respectively.
 
 \mnote{Evaluation-specific scenarios}
-The scenarios were specifically developed for the evaluation of the approach, thus reflecting as many kinds of relations that can be expressed with \gls{QVTR} as possible and thus also reflecting edge cases.
+The scenarios were specifically developed for the evaluation of the approach, thus reflecting as many kinds of relations as possible that can be expressed with \gls{QVTR} and thus also reflecting edge cases.
 The implemented \gls{QVTR} relations used for the case study are also available in the GitHub repository containing the prototypical implementation~\cite{decompositionGithub}.
 
 % To empirically evaluate correctness and applicability of our approach, we developed a prototypical implementation and applied it to exemplary case studies.
@@ -352,7 +352,7 @@ This results in a precision value of $1$:
 \mnote{Answer to evaluation question}
 On the one hand, this indicates that the practical approach actually conforms to the formal approach, so that the correctness proof applies as well.
 On the other hand, this indicates that the implementation is correct and does not miss any relevant \gls{QVTR} constructs.
-If this was the case, constraints would have been missed, which could have resulted in identifying consistency relations as compatible although they are not.
+If this were the case, constraints would have been missed, which could have resulted in identifying consistency relations as compatible although they are not.
 Thus, as an answer to \autoref{eq:compatibility:correctness}, the results indicate that we can expect the analysis to operate correctly.
 
 
@@ -362,19 +362,18 @@ Thus, as an answer to \autoref{eq:compatibility:correctness}, the results indica
 We have discussed that applicability of the approach especially depends on how often it fails in terms of not being able to prove compatibility, although the given relations are actually consistent.
 In particular, conservative behavior of the approach can occur for two reasons:
 \begin{properdescription}
-    \item[Redundancy Notion:] Compatibility of consistency relations is proven by identifying relations that follow the definition of left-equal redundancy, according to\autoref{def:leftequalredundancy}. Since this redundancy notion is not the weakest one that is compatibility-preserving, it may be a too strong requirement for identifying compatibility-preserving consistency relations.
+    \item[Redundancy Notion:] Compatibility of consistency relations is proven by identifying relations that follow the definition of left-equal redundancy, according to \autoref{def:leftequalredundancy}. Since this redundancy notion is not the weakest one that is compatibility-preserving, it may be a too strong requirement for identifying compatibility-preserving consistency relations.
     \item[Redundancy Undecidability:] \autoref{def:consistencyrelation} for consistency relations relies on an extensional specification of consistency, which enumerates usually infinite sets of elements.
     Since such sets cannot be compared programmatically, our practical approach relies on intensional specifications in \gls{OCL} as used by \gls{QVTR}, which describe how consistent element pairs can be derived.
-    Consistency relations as defined in \autoref{def:consistencyrelation} are extensional specifications and thus usually enumerate infinite sets of elements, which are impossible to compare programmatically.
-    OCL is, however, in general undecidable, because it can be transformed into first-order logic~\cite{beckert2002ocltranslation}.
+    \gls{OCL} is, however, in general undecidable, because it can be transformed into first-order logic~\cite{beckert2002ocltranslation}.
 \end{properdescription}
 
 \mnote{OCL limitations}
-In particular, the number of quantifiers within a formula influences decidability.
+In particular, the higher the number of quantifiers within a formula, the more likely its satisfiability will be undecidable.
 Since variables in consistency relations are translated to existentially quantified formulae, the number of variables in a consistency relation is crucial for deciding satisfiability.
-Not all available \gls{OCL} constructs may be necessary to describe relevant consistency relations, still constructs involving operations on sets and strings are especially problematic, because operations on collections are transformed into quantified formulae and strings provide problematic \gls{OCL} operations.
-For example, \texttt{toUpper} and \texttt{toLower}, which we have also used in our running example, cannot be easily transformed into formulae for state-of-the-art \gls{SMT} solvers like Z3 and thus cannot be considered for detecting redundancies.
-Additionally, \gls{SMT} solvers use heuristics, which prevents as systematic evaluation of relation kinds that can be analyzed.
+Not all available \gls{OCL} constructs may be necessary to describe relevant consistency relations, still constructs involving operations on collections, which are transformed into quantified formulae, and strings are especially problematic.
+For example, \texttt{toUpper} and \texttt{toLower}, which we have also used in our running example, cannot be transformed into formulae for state-of-the-art \gls{SMT} solvers like Z3 and thus cannot be considered for detecting redundancies.
+Additionally, \gls{SMT} solvers use heuristics, which prevents a systematic evaluation of the kinds of consistency relations that can be analyzed.
 
 % Especially formulae that contain many quantifiers are hard to analyze.
 % For that reason, the number of variables used in a consistency relation is crucial, as these variables are translated to existentially quantified formulae.
@@ -431,7 +430,7 @@ In summary, all observed false negatives were caused by undecidability of satisf
 \mnote{Answer to evaluation question}
 In conclusion, the evaluation has shown that basic operations on primitive data types, even with non-trivial constraints involving integer equations and string operations, were treated correctly.
 This led to a success rate of \SI{80}{\percent}.
-As an answer to \autoref{eq:compatibility:applicability}, the approach was unable to prove compatibility in only \SI{20}{\percent} of the cases, in which more complex operations and structures requiring many quantifiers were involved and led to unprovability by the used \gls{SMT} solver.
+As an answer to \autoref{eq:compatibility:applicability}, the approach was unable to prove compatibility in only \SI{20}{\percent} of the cases, in which more complex operations and structures requiring many quantifiers were involved, for which satisfiability could not be proven by the used \gls{SMT} solver.
 Most importantly, however, this limitation does only concern the chosen \gls{SMT} solver approach, but neither the general concept of the formal framework and approach, nor the practical realization itself.
 In particular, we did not find a scenario in which our redundancy notion was too strict for proving compatibility.
 Using a different \gls{SMT} solver or, more generally, even a different approach to validate redundancy of consistency relations can even improve the applicability results.
@@ -492,7 +491,7 @@ Afterwards, the automated approach can proceed.
 \mnote{Limitations of external validity}
 We have designed the evaluation carefully, such that it gives us appropriate insights regarding correctness and applicability of the approach.
 Still, due to limitations in complexity of the considered scenarios there are threats especially regarding external validity of the results.
-This is why we emphasized that all results only serve as an indicator for the properties to be shown.
+%This is why we emphasized that all results only serve as an indicator for the properties to be shown.
 
 %\paragraph{Internal Validity}
 \mnote{Scenario selection}
