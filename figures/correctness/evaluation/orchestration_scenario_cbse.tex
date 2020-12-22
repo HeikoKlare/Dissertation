@@ -1,10 +1,15 @@
 \newcommand{\hdistance}{19em}
-\newcommand{\vdistance}{9.5em}
+\newcommand{\vdistance}{9em}
 \newcommand{\classwidth}{6.8em}
+\newcommand{\labeldistance}{1.0em}
+\newcommand{\mmborder}{1em}
 
 \begin{tikzpicture}[
     relation/.style={consistency relation, font=\footnotesize}
 ]
+
+\pgfdeclarelayer{bg}
+\pgfsetlayers{bg,main}
 
 \umlclassvarwidth{pcm_component}{}{BasicComponent\sameheight}{
 entityName
@@ -22,10 +27,24 @@ name
 name
 }{\classwidth}
 
-\node[above=0.2em of pcm_component.north, anchor=south, align=center, font=\bfseries] {\gls{PCM}};
-\node[below=0.2em of uml_component.south, anchor=north, align=center, font=\bfseries] {UML Component};
-\node[above=0.2em of uml_class.north, anchor=south, align=center, font=\bfseries] {UML Class};
-\node[below=0.2em of java_class.south, anchor=north, align=center, font=\bfseries] {Java};
+\coordinate (pcm_label_coordinate) at ([yshift=\labeldistance]pcm_component.north);
+\node[mmlabel, anchor=center] (pcm_label) at (pcm_label_coordinate) {\gls{PCM}};
+
+\coordinate (uml_class_label_coordinate) at ([yshift=\labeldistance]uml_class.north);
+\node[mmlabel, anchor=center] (uml_class_label) at (uml_class_label_coordinate) {\gls{UML} Class};
+
+\coordinate (java_label_coordinate) at ([yshift=-\labeldistance]java_class.south);
+\node[mmlabel, anchor=center] (java_label) at (java_label_coordinate) {Java};
+
+\coordinate (uml_comp_label_coordinate) at ([yshift=-\labeldistance]uml_component.south);
+\node[mmlabel, anchor=center] (uml_comp_label) at (uml_comp_label_coordinate) {\gls{UML} Component};
+
+\begin{pgfonlayer}{bg}
+    \node[mmbg, fit=(pcm_component)(pcm_label.center), inner sep=\mmborder] (pcm) {};
+    \node[mmbg, fit=(java_class)(java_label.center), inner sep=\mmborder] (java) {};
+    \node[mmbg, fit=(uml_class)(uml_class_label.center), inner sep=\mmborder] (uml_classes) {};
+    \node[mmbg, fit=(uml_component)(uml_comp_label.center), inner sep=\mmborder] (uml_comp) {};
+\end{pgfonlayer}
 
 % CONSISTENCY RELATIONS
 \draw[relation] (pcm_component.east) -- node[pos=0, below right] {$bc$} node[above ,align=center] {
