@@ -1,0 +1,138 @@
+\newcommand{\distance}{4em}
+
+% #1: position left model
+% #2: identifier prefix
+\newcommand{\network}[2][]{
+    \node[schematic metamodel, #1] (#2_m1) {};
+    \node[schematic metamodel, right=\distance of #2_m1.center, anchor=center] (#2_m2) {};
+    \node[schematic metamodel, below=\distance of #2_m1.center, anchor=center] (#2_m3) {};
+    \node[schematic metamodel, below right=\distance and \distance of #2_m1.center, anchor=center] (#2_m4) {};
+}
+
+\begin{tikzpicture}[
+    every node/.style={font=\footnotesize},
+    correctness relation/.style={-latex, font=\itshape\footnotesize},
+    irrelevant/.style={gray}
+]
+
+% MONOLITHIC RELATION
+\network{mono_relations}
+\draw[consistency relation] (mono_relations_m1) -- (mono_relations_m4);
+\draw[consistency relation] (mono_relations_m2) -- (mono_relations_m3);
+\filldraw[consistencycolor1]
+    ([xshift=0.5*\distance, yshift=-0.5*\distance]mono_relations_m1.center)
+    circle
+    (0.04*\distance)
+    node[above=0.5em] {$\consistencyrelation{CR}{}$};
+
+% MONOLITHIC TRANSFORMATION
+\network[below=2.7*\distance of mono_relations_m1.center, anchor=center]{mono_transformations}
+\draw[transformation] (mono_transformations_m1) -- (mono_transformations_m4);
+\draw[transformation] (mono_transformations_m2) -- (mono_transformations_m3);
+\filldraw[consistencypreservationcolor]
+    ([xshift=0.5*\distance, yshift=-0.5*\distance]mono_transformations_m1.center)
+    circle
+    (0.04*\distance)
+    node[above=0.5em] {$\consistencypreservationrule{}$};
+
+% MODULAR RELATIONS
+\network[right=3.2*\distance of mono_relations_m1.center, anchor=center]{modu_relations}
+\draw[consistency relation] 
+    (modu_relations_m1) 
+    -- 
+    node[above] {$\consistencyrelation{CR}{1}$}
+    (modu_relations_m2);
+\draw[consistency relation] 
+    (modu_relations_m1) 
+    -- 
+    node[left] (cr2) {$\consistencyrelation{CR}{2}$}
+    (modu_relations_m3);
+\draw[consistency relation] (modu_relations_m1) -- (modu_relations_m4);
+\draw[consistency relation] (modu_relations_m2) -- (modu_relations_m3);
+\draw[consistency relation] 
+    (modu_relations_m2)
+    --
+    node[right] {$\consistencyrelation{CR}{3}$}
+    (modu_relations_m4);
+\draw[consistency relation] 
+    (modu_relations_m3)
+    --
+    node[below] {$\dots$}
+    (modu_relations_m4);
+
+% MODULAR TRANSFORMATIONS
+\network[below=2.7*\distance of modu_relations_m1.center, anchor=center]{modu_transformations}
+\draw[transformation]
+    (modu_transformations_m1) 
+    -- 
+    node[above] {$\consistencypreservationrule{1}$}
+    (modu_transformations_m2);
+\draw[transformation]
+    (modu_transformations_m1) 
+    -- 
+    node[left] (cpr2) {$\consistencypreservationrule{2}$}
+    (modu_transformations_m3);
+\draw[transformation] (modu_transformations_m1) -- (modu_transformations_m4);
+\draw[transformation] (modu_transformations_m2) -- (modu_transformations_m3);
+\draw[transformation]
+    (modu_transformations_m2)
+    --
+    node[right] {$\consistencypreservationrule{3}$}
+    (modu_transformations_m4);
+\draw[transformation] 
+    (modu_transformations_m3)
+    --
+    node[below] {$\dots$}
+    (modu_transformations_m4);
+\node[consistencypreservationcolor, right=1.2*\distance of modu_transformations_m2.north, anchor=north, align=center] (orc_function) {+ orchestration / \\ application \\ function};
+
+% CORRECTNESS RELATIONS
+\draw[correctness relation]
+    ([xshift=0.5*\distance]mono_transformations_m1.center)
+    --
+    node[pos=0.4, left] {correct w.r.t}
+    ([xshift=0.5*\distance,yshift=-0.7*\distance]mono_relations_m1.center);
+\draw[correctness relation, -, irrelevant, decorate, decoration={brace,amplitude=0.5em}] 
+    ([xshift=-1.8em]modu_relations_m3.south west) 
+    -- 
+    ([xshift=-1.8em]modu_relations_m1.north west);
+\draw[correctness relation, irrelevant]
+    ([xshift=-2.3em, yshift=-0.5*\distance]modu_relations_m1.west)
+    --
+    node[pos=0.4, above] {correct w.r.t.}
+    ([xshift=-0.3*\distance,yshift=-0.5*\distance]mono_relations_m2.center);
+\draw[correctness relation, -, irrelevant, decorate, decoration={brace,amplitude=0.5em}] 
+    ([xshift=-1.8em]modu_transformations_m3.south west) 
+    -- 
+    ([xshift=-1.8em]modu_transformations_m1.north west);
+\draw[correctness relation, irrelevant]
+    ([xshift=-2.3em, yshift=-0.5*\distance]modu_transformations_m1.west)
+    --
+    node[pos=0.4, above] {correct w.r.t.}
+    ([xshift=-0.3*\distance,yshift=-0.5*\distance]mono_transformations_m2.center);
+\draw[correctness relation] 
+    (cpr2)
+    --
+    node[left, align=center] {correct w.r.t. \\ (locally)}
+    (cr2);
+\draw[correctness relation, -,, decorate, decoration={brace,amplitude=0.5em,aspect=0.192}] 
+    ([yshift=1em]modu_transformations_m1.north west)
+    -- 
+    ([yshift=1em]modu_transformations_m1.north west-|orc_function.north east);
+\draw[correctness relation, -,, decorate, decoration={brace,amplitude=0.5em}] 
+    ([yshift=-0.6em]modu_relations_m4.south east)
+    --
+    ([yshift=-0.6em]modu_relations_m3.south west);
+\draw[correctness relation] 
+    ([xshift=0.5*\distance, yshift=1.5em]modu_transformations_m1.north)
+    --
+    node[right, align=center] {correct w.r.t. \\ (globally)}
+    ([xshift=0.5*\distance, yshift=-1.1em]modu_relations_m3.south);
+
+% LABELS
+\node[above right=1em and 0.5*\distance of mono_relations_m1.north, anchor=south, font=\bfseries\small] {Monolithic};
+\node[above right=1em and 0.5*\distance of modu_relations_m1.north, anchor=south, font=\bfseries\small] {Modular};
+\node[consistencycolor1, below left=0.5*\distance and 0.5em of mono_relations_m1.center, anchor=east, align=center] {Consistency \\ Relations};
+\node[consistencypreservationcolor, below left=0.5*\distance and 0.5em of mono_transformations_m1.center, anchor=east, align=center] {Consistency \\ Preservation \\ Rules};
+
+\end{tikzpicture}
