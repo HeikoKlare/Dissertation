@@ -1,0 +1,56 @@
+\newcommand{\hdistance}{22em}
+\newcommand{\classwidth}{5em}
+
+\begin{tikzpicture}
+
+% METAMODEL
+\umlclassvarwidth{employee}{}{Employee\sameheight}{
+    name
+}{\classwidth}
+\umlclassvarwidth[, right=\hdistance of employee.north, anchor=north]{resident}{}{Resident\sameheight}{
+    name
+}{\classwidth}
+
+% RELATIONS AND TRANSFORMATIONS
+\draw[consistency relation]
+    ([yshift=1em]employee.east)
+    --
+    node[pos=0, above right] {$e$}
+    node[above, align=center] {$\consistencyrelation{CR}{} = \{ \tupled{e,r} \mid$ \\ $\mathvariable{e.name} = \mathvariable{r.name} \land \mathvariable{e.name} \neq ""\}$}
+    node[pos=1, above left] {$r$}
+    ([yshift=1em]resident.west);
+\draw[transformation]
+    ([yshift=-1em]employee.east)
+    --
+    node[pos=0, above right] {$e$}
+    node[above] {$\consistencypreservationrule{}$}
+    node[below, align=center] {$+e \xrightarrow{\mathvariable{e.name} \; \neq \; ""} +r (\mathvariable{name} = \mathvariable{e.name})$}
+    node[pos=1, above left] {$r$}
+    ([yshift=-1em]resident.west);
+
+% SEPARATION
+\draw[lightgray] ([yshift=-2.5em]employee.south west) -- ([yshift=-2.5em]resident.south east);
+
+% MODELS
+\umlhuman{person}{}{below=0.3*\hdistance of employee.center, anchor=center}{}{0.5}
+\umlobjectvarwidth[, below right=0.3*\hdistance and 0.45*\hdistance of employee.north, anchor=north]{employee_instance}{}{Employee\sameheight}{
+    name = "Alice"
+}{\classwidth}
+\umlobjectvarwidth[, right=0.55*\hdistance of employee_instance.north, anchor=north]{resident_instance}{}{Resident\sameheight}{
+    name = "Alice"
+}{\classwidth}
+
+% EXECUTIONS
+\draw[consistency execution, -latex]
+    (person.east|-employee_instance.west)
+    --
+    node[above] {+}
+    (employee_instance.west);
+\draw[consistency execution, -latex]
+    (employee_instance.east)
+    --
+    node[above] {+}
+    node[below] {$\consistencypreservationrule{}$}
+    (resident_instance.west);
+
+\end{tikzpicture}
