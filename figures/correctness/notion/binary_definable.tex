@@ -1,0 +1,91 @@
+\newcommand{\metamodelsize}{5.5em}
+
+\begin{tikzpicture}[
+    model/.style={schematic model, minimum size=1.8em, inner sep=0.1em},
+    metamodel/.style={schematic metamodel, circle, minimum size=\metamodelsize}
+]
+
+% MONOLITHIC METAMODELS
+\node[metamodel] (mono_mm1) {};
+\node[model, below=0.1*\metamodelsize of mono_mm1.center] (mono_mm1_1) {$\model{m}{1}$};
+\node[model, above=0.1*\metamodelsize of mono_mm1.center] (mono_mm1_2) {$\model{m}{1}'$};
+\node[right=0.1em of mono_mm1.west, anchor=west] {$\metamodelinstanceset{M}{1}$};
+
+\node[metamodel, below left=1.2*\metamodelsize and 0.65*\metamodelsize of mono_mm1.center, anchor=center] (mono_mm2) {};
+\node[model, above left=0.1*\metamodelsize and 0.03*\metamodelsize of mono_mm2.center] (mono_mm2_1) {$\model{m}{2}$};
+\node[model, below right=0.1*\metamodelsize and 0.03*\metamodelsize of mono_mm2.center] (mono_mm2_2) {$\model{m}{2}'$};
+\node[right=0.3em of mono_mm2.west, anchor=north west] {$\metamodelinstanceset{M}{2}$};
+
+\node[metamodel, below right=1.2*\metamodelsize and 0.65*\metamodelsize of mono_mm1.center, anchor=center] (mono_mm3) {};
+\node[model, above right=0.1*\metamodelsize and 0.03*\metamodelsize of mono_mm3.center] (mono_mm3_1) {$\model{m}{3}$};
+\node[model, below left=0.1*\metamodelsize and 0.03*\metamodelsize of mono_mm3.center] (mono_mm3_2) {$\model{m}{3}'$};
+\node[left=0.3em of mono_mm3.east, anchor=north east] {$\metamodelinstanceset{M}{3}$};
+
+% MONOLITHIC RELATIONS
+\coordinate (mono_cr1) at ([yshift=0.1em]mono_mm1.center);
+\draw[consistency related element] (mono_cr1) -- (mono_mm1_2);
+\draw[consistency related element] (mono_cr1) -- (mono_mm2_1);
+\draw[consistency related element] (mono_cr1) -- (mono_mm3_1);
+\filldraw[consistency related element] (mono_cr1) circle (0.12em);
+
+\coordinate (mono_cr2) at ([xshift=0.4*\metamodelsize,yshift=0.45*\metamodelsize]mono_mm2);
+\draw[consistency related element] (mono_cr2) -- (mono_mm1_1);
+\draw[consistency related element] (mono_cr2) -- (mono_mm2_1);
+\draw[consistency related element] (mono_cr2) -- (mono_mm3_2);
+\filldraw[consistency related element] (mono_cr2) circle (0.15em);
+
+\coordinate (mono_cr3) at ([xshift=-0.4*\metamodelsize,yshift=0.45*\metamodelsize]mono_mm3);
+\draw[consistency related element] (mono_cr3) -- (mono_mm1_1);
+\draw[consistency related element] (mono_cr3) -- (mono_mm2_2);
+\draw[consistency related element] (mono_cr3) -- (mono_mm3_1);
+\filldraw[consistency related element] (mono_cr3) circle (0.15em);
+
+\node[consistency related element, anchor=center] at ($(mono_cr2)!0.5!(mono_cr3)$) {$\consistencyrelation{CR}{}$};
+
+% MODULAR METAMODELS
+\node[metamodel, right=3.2*\metamodelsize of mono_mm1.center, anchor=center] (modu_mm1) {};
+\node[model, below=0.1*\metamodelsize of modu_mm1.center] (modu_mm1_1) {$\model{m}{1}$};
+\node[model, above=0.1*\metamodelsize of modu_mm1.center] (modu_mm1_2) {$\model{m}{1}'$};
+\node[right=0.3em of modu_mm1.west, anchor=south west] {$\metamodelinstanceset{M}{1}$};
+
+\node[metamodel, below left=1.2*\metamodelsize and 0.65*\metamodelsize of modu_mm1.center, anchor=center] (modu_mm2) {};
+\node[model, above left=0.1*\metamodelsize and 0.03*\metamodelsize of modu_mm2.center] (modu_mm2_1) {$\model{m}{2}$};
+\node[model, below right=0.1*\metamodelsize and 0.03*\metamodelsize of modu_mm2.center] (modu_mm2_2) {$\model{m}{2}'$};
+\node[right=0.3em of modu_mm2.west, anchor=north west] {$\metamodelinstanceset{M}{2}$};
+
+\node[metamodel, below right=1.2*\metamodelsize and 0.65*\metamodelsize of modu_mm1.center, anchor=center] (modu_mm3) {};
+\node[model, above right=0.1*\metamodelsize and 0.03*\metamodelsize of modu_mm3.center] (modu_mm3_1) {$\model{m}{3}$};
+\node[model, below left=0.1*\metamodelsize and 0.03*\metamodelsize of modu_mm3.center] (modu_mm3_2) {$\model{m}{3}'$};
+\node[left=0.3em of modu_mm3.east, anchor=north east] {$\metamodelinstanceset{M}{3}$};
+
+% MODULAR RELATIONS
+\draw[consistency related element] (modu_mm1_1) -- (modu_mm2_1);
+\draw[consistency related element] (modu_mm1_1) -- (modu_mm2_2);
+\draw[consistency related element] (modu_mm1_2) -- node[left] {$\consistencyrelation{CR}{1}$} (modu_mm2_1);
+
+\draw[consistency related element] (modu_mm2_1) -- node[below=1.8em] {$\consistencyrelation{CR}{2}$} (modu_mm3_1);
+\draw[consistency related element] (modu_mm2_1) -- (modu_mm3_2);
+\draw[consistency related element] (modu_mm2_2) -- (modu_mm3_1);
+
+\draw[consistency related element] (modu_mm1_1) -- (modu_mm3_1);
+\draw[consistency related element] (modu_mm1_1) -- (modu_mm3_2);
+\draw[consistency related element] (modu_mm1_2) -- node[right] {$\consistencyrelation{CR}{3}$} (modu_mm3_1);
+
+% LABELS
+\node[above=0.5em of mono_mm1.north, anchor=south, font=\bfseries\small] {Monolithic};
+\node[above=0.5em of modu_mm1.north, anchor=south, font=\bfseries\small] {Modular};
+
+
+\draw[-latex]
+    ([xshift=0.3*\metamodelsize, yshift=0*\metamodelsize]mono_mm1.north east)
+    --
+    node[above] {requires binary relations}
+    ([xshift=-0.3*\metamodelsize, yshift=0*\metamodelsize]modu_mm1.north west);
+
+\draw[-latex]
+    ([xshift=-0.3*\metamodelsize, yshift=-0.15*\metamodelsize]modu_mm1.north west)
+    --
+    node[below, align=center] {induces further elements\\ in monolithic relation, \\e.g., $\tupled{\model{m}{1}, \model{m}{2}, \model{m}{3}}$}
+    ([xshift=0.3*\metamodelsize, yshift=-0.15*\metamodelsize]mono_mm1.north east);
+
+\end{tikzpicture}
