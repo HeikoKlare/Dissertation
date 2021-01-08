@@ -1,0 +1,57 @@
+\newcommand{\distance}{24em}
+\newcommand{\classwidth}{4em}
+
+\begin{tikzpicture}
+
+\umlclassvarwidth{person}{}{Person}{
+name
+}{\classwidth}
+\umlclassvarwidth[, right=\distance of person.north, anchor=north]{employee}{}{Employee}{
+name
+}{\classwidth}
+\umlclassvarwidth[, below right=0.35*\distance and 0.5*\distance of person.north, anchor=north]{resident}{}{Resident}{
+name
+}{\classwidth}
+
+\draw[consistency relation] 
+    ([yshift=-0.7em]person.east)
+    --
+    node[pos=0, above right] {$p$}
+    node[pos=1, above left] {$e$}
+    node[below, align=center] {$\{\tupled{p,e} \mid \mathvariable{e.name} = \mathvariable{p.name}$ \\
+        $\lor \; \mathvariable{e.name} = \mathvariable{p.name.toLower}\}$}
+    ([yshift=-0.7em]employee.west);
+\draw[consistency relation] 
+    ([xshift=0.7em]person.south)
+    |-
+    node[pos=0, below left] {$p$}
+    node[pos=1, below left] {$r$}
+    node[right, pos=0.32, align=center] {$\{\tupled{p,r} \mid$ \\
+        $\mathvariable{r.name} = \mathvariable{p.name}\}$}
+    ([yshift=0.7em]resident.west);
+\draw[consistency relation] 
+    ([xshift=-0.7em]employee.south)
+    |-
+    node[pos=0, below right] {$p$}
+    node[pos=1, below right] {$r$}
+    node[left, pos=0.32, align=center] {$\{\tupled{r,e} \mid \mathvariable{e.name} = \mathvariable{r.name}$ \\
+        $\lor \; \mathvariable{e.name = r.name.toLower}\}$}
+    ([yshift=0.7em]resident.east);
+
+\draw[transformation, -latex] 
+    ([yshift=0.7em]person.east)
+    --
+    node[above, align=center] {$+p \rightarrow e(\mathvariable{name} = \mathvariable{p.name})$}
+    ([yshift=0.7em]employee.west);
+\draw[transformation, -latex] 
+    ([xshift=-0.7em]person.south)
+    |-
+    node[below=0.3em, pos=0.75] {$+p \rightarrow +r(\mathvariable{name} = \mathvariable{p.name})$}
+    ([yshift=-0.7em]resident.west);
+\draw[transformation, latex-]
+    ([xshift=0.7em]employee.south)
+    |-
+    node[below=0.3em, pos=0.75, align=center] {$+r \rightarrow +e(\mathvariable{name} = \mathvariable{r.name.toLower})$}
+    ([yshift=-0.7em]resident.east);
+
+\end{tikzpicture}
