@@ -1,0 +1,75 @@
+\newcommand{\classwidth}{5em}
+\newcommand{\objectwidth}{5em}
+\newcommand{\hdistance}{19em}
+
+\begin{tikzpicture}[
+    correspondence/.style={consistency relation, -}
+]
+
+\umlclassvarwidth{employee_class}{}{Employee}{
+    name
+}{\classwidth}
+\umlclassvarwidth[, right=1.4*\hdistance of employee_class.north west, anchor=north]{resident_class}{}{Resident}{
+    name
+}{\classwidth}
+\node[above=0.2em of employee_class.north, anchor=south] {$\metamodel{M}{1}$};
+\node[above=0.2em of resident_class.north, anchor=south] {$\metamodel{M}{2}$};
+
+\draw[directed consistency relation]
+    (employee_class)
+    --
+    node[pos=0, below right] {$e$}
+    node[pos=1, below left] {$r$}
+    node[above] {$\consistencyrelation{CR}{ER} = \setted{\tupled{e,r} \mid \mathvariable{e.name} = \mathvariable{r.name.toLower}}$}
+    node[below, align=center] {$\consistencyrelationset{CR} = \setted{\consistencyrelation{CR}{ER}, \consistencyrelation{CR}{ER}^T}$}
+    (resident_class);
+
+% FIRST SCENARIO
+\coordinate (begin_first) at ([yshift=-0.2*\hdistance]employee_class.north west);
+\draw[lightgray] (begin_first) -- (begin_first-|resident_class.east);
+
+\umlobjectvarwidth[, below right=0.11*\hdistance and 0.35*\hdistance of begin_first, anchor=north]{employee_first}{}{Employee}{
+    name = "alice"
+}{\objectwidth}
+\umlobjectvarwidth[, right=0.85*\hdistance of employee_first.center, anchor=center]{resident_first}{}{Resident}{
+    name = "alice"
+}{\objectwidth}
+\umlobjectvarwidth[, below=0.2*\hdistance of resident_first.center, anchor=center]{resident2_first}{}{Resident}{
+    name = "Alice"
+}{\objectwidth}
+\node[above=0.2em of employee_first.north, anchor=south] {$\model{m}{1}$};
+\node[above=0.2em of resident_first.north, anchor=south] {$\model{m}{2}$};
+
+\draw[consistency execution, -latex]
+    ([xshift=-0.2*\hdistance]employee_first.west)
+    --
+    node[above, align=center] {$\change{\metamodel{M}{1}}$}
+    (employee_first.west);
+\draw[consistency execution, -latex]
+    ([yshift=0.5em]employee_first.east)
+    --
+    node[above] {$\change{\metamodel{M}{2}}' = \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$}
+    ([yshift=0.5em]resident_first.west);
+\draw[consistency execution, -latex]
+    ([xshift=0.2*\hdistance]resident2_first.east)
+    --
+    node[above, align=center] {$\change{\metamodel{M}{2}}$}
+    (resident2_first.east);
+\draw[correspondence]
+    ([yshift=-0.5em]employee_first.east)
+    --
+    node[below, pos=0.4] {consistent to $\consistencyrelationset{CR}$}
+    ([yshift=-0.5em]resident_first.west);
+\draw[correspondence]
+    (employee_first.south)
+    |-
+    node[below, pos=0.75] {inconsistent to $\consistencyrelationset{CR}$}
+    (resident2_first.west);
+\coordinate (cross_first) at ([xshift=-0.05*\hdistance]resident2_first.west);
+\draw[correspondence]
+    (cross_first)
+    |-
+    ([yshift=-1em]resident_first.west);
+\filldraw[consistency related element] (cross_first) circle (0.15em);
+
+\end{tikzpicture}
