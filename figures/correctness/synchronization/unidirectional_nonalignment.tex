@@ -1,0 +1,155 @@
+\newcommand{\classwidth}{5em}
+\newcommand{\objectwidth}{5em}
+\newcommand{\hdistance}{19em}
+
+\begin{tikzpicture}[
+    correspondence/.style={consistency relation, -}
+]
+
+\umlclassvarwidth{employee_class}{}{Employee}{
+    name
+}{\classwidth}
+\umlclassvarwidth[, right=1.4*\hdistance of employee_class.north west, anchor=north]{resident_class}{}{Resident}{
+    name
+}{\classwidth}
+
+\draw[directed consistency relation]
+    (employee_class)
+    --
+    node[pos=0, above right] {$e$}
+    node[pos=1, above left] {$r$}
+    node[above] {$\consistencyrelation{CR}{ER} = \setted{\tupled{e,r} \mid \mathvariable{e.name} = \mathvariable{r.name}}$}
+    node[below, align=center] {$\consistencyrelation{CR}{ER}' = \consistencyrelation{CR}{ER} \; \cup $ \\ $\setted{\tupled{e,r} \mid \mathvariable{e.name} = \mathvariable{r.name.toLower}}$}
+    (resident_class);
+
+% FIRST SCENARIO
+\coordinate (begin_first) at ([yshift=-0.25*\hdistance]employee_class.north west);
+\draw[lightgray] (begin_first) -- (begin_first-|resident_class.east);
+\node[anchor=north west] at ([yshift=-0.5em]begin_first) {1. Removing an employee with $\consistencypreservationrule{\consistencyrelation{CR}{ER}}$ only for $\consistencyrelation{CR}{ER}$};
+
+\umlobjectvarwidth[, below right=0.18*\hdistance and 0.45*\hdistance of begin_first, anchor=north]{employee_first}{}{Employee}{
+    name = "Alice"
+}{\objectwidth}
+\umlobjectvarwidth[, right=0.95*\hdistance of employee_first.center, anchor=center]{resident_first}{}{Resident}{
+    name = "Alice"
+}{\objectwidth}
+\node[below=0.4*\hdistance of employee_first.north, anchor=north] (non_employee_first) {$\emptyset$};
+
+\draw[consistency execution, -latex]
+    ([xshift=-0.3*\hdistance]employee_first.west)
+    --
+    node[above, align=center] {1.\\ add by user}
+    (employee_first.west);
+\draw[consistency execution, -latex]
+    ([yshift=0.5em]employee_first.east)
+    --
+    node[above] {2. add by $\consistencypreservationrule{\consistencyrelation{CR}{ER}}$}
+    ([yshift=0.5em]resident_first.west);
+\draw[correspondence]
+    ([yshift=-0.5em]employee_first.east)
+    --
+    node[below] {consistent to $\setted{\consistencyrelation{CR}{ER}, \consistencyrelation{CR}{ER}^T}$}
+    ([yshift=-0.5em]resident_first.west);
+\draw[consistency execution, -latex]
+    (employee_first)
+    --
+    node[left, align=center] {3.\\ remove by user}
+    (non_employee_first);
+\draw[correspondence]
+    (non_employee_first)
+    --
+    node[above, pos=0.35, sloped] {consistent to $\consistencyrelation{CR}{ER}$}
+    node[below, pos=0.35, sloped] {inconsistent to $\consistencyrelation{CR}{ER}^T$}
+    ([xshift=2em]resident_first.south west);
+
+% SECOND SCENARIO
+\coordinate (begin_second) at ([yshift=-0.7*\hdistance]begin_first);
+\draw[lightgray] (begin_second) -- (begin_second-|resident_class.east);
+\node[anchor=north west] at ([yshift=-0.5em]begin_second) {2. Adding a resident with its effect to $\consistencyrelation{CR}{ER}'$};
+
+\umlobjectvarwidth[, below=0.18*\hdistance of begin_second, anchor=north west]{employee_second}{}{Employee}{
+    name = "alice"
+}{\objectwidth}
+\umlobjectvarwidth[, right=0.95*\hdistance of employee_second.center, anchor=center]{resident1_second}{}{Resident}{
+    name = "alice"
+}{\objectwidth}
+\umlobjectvarwidth[, below=0.2*\hdistance of resident1_second.center, anchor=center]{resident2_second}{}{Resident}{
+    name = "Alice"
+}{\objectwidth}
+
+\draw[consistency execution, -latex]
+    ([xshift=0.3*\hdistance]resident2_second.east)
+    --
+    node[below] {add by user}
+    (resident2_second.east);
+\draw[correspondence]
+    ([yshift=0.5em]employee_second.east)
+    --
+    node[above] {consistent to $\consistencyrelation{CR}{ER}'$}
+    ([yshift=0.5em]resident1_second.west);
+\draw[correspondence]
+    ([yshift=-0.5em]employee_second.east)
+    --
+    ([yshift=-0.5em]resident1_second.west);
+\coordinate (cross_second) at ([yshift=-0.5em]$(employee_second.east)!0.75!(resident1_second.west)$);
+\draw[correspondence]
+    (cross_second)
+    |-
+    node[pos=0.25, left, align=center] {inconsistent\\ to $\consistencyrelation{CR}{ER}'$}
+    (resident2_second);
+\filldraw[consistency related element] (cross_second) circle (0.15em);
+
+
+% THIRD SCENARIO
+\coordinate (begin_third) at ([yshift=-0.6*\hdistance]begin_second);
+\draw[lightgray] (begin_third) -- (begin_third-|resident_class.east);
+\node[anchor=north west] at ([yshift=-0.5em]begin_third) {3. Removing an employee with its effect to $\consistencyrelation{CR}{ER}'$};
+
+\umlobjectvarwidth[, below right=0.18*\hdistance and 0.5*\hdistance of begin_third, anchor=north]{employee1_third}{}{Employee}{
+    name = "alice"
+}{\objectwidth}
+\umlobjectvarwidth[, draw=lightgray, text=gray, below=0.2*\hdistance of employee1_third.center, anchor=center]{employee2_third}{}{Employee}{
+    name = "Alice"
+}{\objectwidth}
+\umlobjectvarwidth[, right=0.9*\hdistance of employee1_third.center, anchor=center]{resident1_third}{}{Resident}{
+    name = "alice"
+}{\objectwidth}
+\umlobjectvarwidth[, below=0.2*\hdistance of resident1_third.center, anchor=center]{resident2_third}{}{Resident}{
+    name = "Alice"
+}{\objectwidth}
+
+\draw[consistency execution, -latex]
+    ([xshift=-0.3*\hdistance]employee2_third.west)
+    --
+    node[above, align=center] {remove\\ by user}
+    (employee2_third.west);
+\draw[correspondence]
+    ([yshift=0.5em]employee1_third.east)
+    --
+    node[above] {inconsistent to $\consistencyrelation{CR}{ER}'$}
+    ([yshift=0.5em]resident1_third.west);
+\coordinate (cross_thirdupper) at ([yshift=0.5em]$(employee1_third.east)!0.6!(resident1_third.west)$);
+\draw[correspondence]
+    (cross_thirdupper)
+    |-
+    ([yshift=0.5em]resident2_third.west);
+\filldraw[consistency related element] (cross_thirdupper) circle (0.15em);
+\draw[correspondence]
+    ([yshift=-0.5em]employee2_third.east)
+    --
+    node[below] {consistent to $\consistencyrelation{CR}{ER}'$}
+    ([yshift=-0.5em]resident2_third.west);
+\coordinate (cross_thirdlower1) at ([yshift=-0.5em]$(employee2_third.east)!0.25!(resident2_third.west)$);
+\coordinate (cross_thirdlower2) at ([yshift=-0.5em]$(employee2_third.east)!0.8!(resident2_third.west)$);
+\draw[correspondence]
+    (cross_thirdlower1)
+    |-
+    ([yshift=-0.5em]employee1_third.east);
+\filldraw[consistency related element] (cross_thirdlower1) circle (0.15em);
+\draw[correspondence]
+    (cross_thirdlower2)
+    |-
+    ([yshift=-0.5em]resident1_third.west);
+\filldraw[consistency related element] (cross_thirdlower2) circle (0.15em);
+
+\end{tikzpicture}
