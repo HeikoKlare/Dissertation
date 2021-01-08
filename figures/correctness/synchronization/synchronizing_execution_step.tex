@@ -1,0 +1,62 @@
+\newcommand{\hdistance}{12em}
+\newcommand{\vdistance}{4.5em}
+
+\begin{tikzpicture}[
+    correspondence/.style={consistency relation, -}
+]
+
+\node[schematic model] (m1) {};
+\node[left=0.1em of m1, anchor=east] {$\model{m}{1}$};
+\node[schematic model, below=\vdistance of m1.center, anchor=center] (dm1) {};
+\node[left=0.1em of dm1, anchor=east] {$\change{\metamodel{M}{1}}(\model{m}{1})$};
+\node[schematic model, below=\vdistance of dm1.center, anchor=center] (ddm1) {};
+\node[left=0.1em of ddm1, anchor=east] {$\change{\metamodel{M}{1}}'(\change{\metamodel{M}{1}}(\model{m}{1}))$};
+
+\node[schematic model, right=\hdistance of m1] (m2) {};
+\node[right=0.1em of m2, anchor=west] (m2_label) {$\model{m}{2}$};
+\node[schematic model, below=\vdistance of m2.center, anchor=center] (dm2) {};
+\node[right=0.1em of dm2, anchor=west] {$\change{\metamodel{M}{2}}(\model{m}{2})$};
+\node[schematic model, below=\vdistance of dm2.center, anchor=center] (ddm2) {};
+\node[right=0.1em of ddm2, anchor=west] {$\change{\metamodel{M}{2}}'(\change{\metamodel{M}{2}}(\model{m}{2}))$};
+
+\draw[correspondence] (m1) -- node[above] {consistent to $\consistencyrelationset{CR}$} (m2);
+%\draw[correspondence] (dm1) -- node[above] {consistent to $\consistencyrelationset{CR}$} (dm2);
+%\draw[correspondence] (ddm1) -- node[above] {consistent to $\consistencyrelationset{CR}$} (ddm2);
+
+\draw[consistency execution, -latex] (m1) -- node[left] (d1) {$\change{\metamodel{M}{1}}$} (dm1);
+\draw[consistency execution, -latex] (dm1) -- node[left] (dd1) {$\change{\metamodel{M}{1}}'$} (ddm1);
+\draw[consistency execution, -latex] (m2) -- node[right] (d2) {$\change{\metamodel{M}{2}}$} (dm2);
+\draw[consistency execution, -latex] (dm2) -- node[right] (dd2) {$\change{\metamodel{M}{2}}'$} (ddm2);
+
+\coordinate (cross_one) at ([xshift=0.5*\hdistance, yshift=0.3*\vdistance]dm1);
+\filldraw[consistency execution] (cross_one) circle (0.15em);
+\node[consistency execution, above=0.5em of cross_one] {$\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$};
+\draw[consistency execution, -] (m1) -- (cross_one);
+\draw[consistency execution, -] ([xshift=0.2em]d1.east) -- (cross_one);
+\draw[consistency execution, -] (dm2) -- (cross_one);
+\draw[consistency execution, -latex] (cross_one) -- ([xshift=-0.2em]dd2.west);
+
+\coordinate (cross_two) at ([xshift=0.5*\hdistance, yshift=0.5*\vdistance]ddm1);
+\filldraw[consistency execution] (cross_two) circle (0.15em);
+\node[consistency execution, above=0.3em of cross_two] {$\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}$};
+\draw[consistency execution, -] (dm1) -- (cross_two);
+\draw[consistency execution, -, decorate, decoration={brace,amplitude=0.5em}] 
+    ([xshift=2em]d2.north east)
+    --
+    ([xshift=2em]dd2.south east);
+\draw[consistency execution, -] 
+    ([xshift=2.5em]$(d2.north east)!0.5!(dd2.south east)$)
+    --
+    ++(2.5em,0)
+    node[above, xshift=-0.5em] {$\change{\metamodel{M}{2}}' \concatfunction \change{\metamodel{M}{2}}$}
+    |- ([xshift=-1em,yshift=-0.7em]ddm2.south)
+    -- (cross_two);
+\draw[consistency execution, -] 
+    ([xshift=0.2em]m2_label.east)
+    --
+    ++(7.0em,0)
+    |- ([xshift=-3em,yshift=-1.4em]ddm2.south)
+    -- (cross_two);
+\draw[consistency execution, -latex] (cross_two) -- ([xshift=0.2em]dd1);
+
+\end{tikzpicture}
