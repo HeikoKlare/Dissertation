@@ -1,0 +1,109 @@
+\newcommand{\distance}{24em}
+\newcommand{\classwidth}{4em}
+
+\begin{tikzpicture}
+
+\umlclassvarwidth{person}{}{Person}{
+firstname\\
+lastname
+}{\classwidth}
+\umlclassvarwidth[, right=\distance of person.north, anchor=north]{resident}{}{Resident}{
+name
+}{\classwidth}
+\umlclassvarwidth[, below right=0.4*\distance and 0.5*\distance of person.north, anchor=north]{employee}{}{Employee}{
+name
+}{\classwidth}
+
+\draw[consistency relation] 
+    ([yshift=-2.0em]person.north east)
+    --
+    node[pos=0, above right] {$p$}
+    node[pos=1, above left] {$r$}
+    node[below, align=center] {$\{\tupled{p,r} \mid \mathvariable{r.name} = \mathvariable{p.firstname} + \textnormal{"\textvisiblespace"} + \mathvariable{p.lastname} $\\
+    $\lor \mathvariable{r.name} = \mathvariable{p.lastname} + \textnormal{",\textvisiblespace"} + \mathvariable{p.firstname}\}$}
+    ([yshift=-2.0em]resident.north west);
+\draw[consistency relation] 
+    ([xshift=0.7em]person.south)
+    |-
+    node[pos=0, below left] {$p$}
+    node[pos=1, below left] {$e$}
+    node[right, pos=0.35, align=center] {$\{\tupled{p,e} \mid\mathvariable{e.name} = \mathvariable{p.firstname} + \textnormal{"\textvisiblespace"} + \mathvariable{p.lastname} $\\
+    $\lor \mathvariable{e.name} = \mathvariable{p.lastname} + \textnormal{"\textvisiblespace"} + \mathvariable{p.firstname} \}$}
+    ([yshift=0.7em]employee.west);
+\draw[consistency relation] 
+    ([xshift=-0.7em]resident.south)
+    |-
+    node[pos=0, below right] {$r$}
+    node[pos=1, below right] {$e$}
+    node[left, pos=0.22, align=center] {$\{\tupled{e,r} \mid \mathvariable{r.name} = \mathvariable{e.name}\}$}
+    ([yshift=0.7em]employee.east);
+
+\draw[transformation, -latex] 
+    ([yshift=-0.8em]person.north east)
+    --
+    node[above=0.5em, align=center] {
+        $+p \rightarrow r(\mathvariable{name} = \mathvariable{p.lastname} + \textnormal{",\textvisiblespace}" + \mathvariable{p.firstname})$\\[0.2em]
+        $\begin{aligned}
+            \mathtextspaceafter{\textup{Alternative 1:}} \;
+            +r \rightarrow p(
+            &
+                \mathvariable{firstname} = \mathvariable{r.name.substringAfter}(\textnormal{"\textvisiblespace"})\\
+            &
+                \mathvariable{lastname} = \mathvariable{r.name.substringBeforeFirst}(\textnormal{","}, \textnormal{"\textvisiblespace"})
+            )\\
+            \mathtextspaceafter{\textup{Alternative 2:}}
+            +r \rightarrow \mathvariable{if}(
+            &
+                \mathvariable{r.name.contains}(\textnormal{","})) \mathtextspacearound{then Alternative 1, else} \\
+            p(
+            &
+                \mathvariable{firstname} = \mathvariable{r.name.substringBefore}(\textnormal{"\textvisiblespace"}) \\
+            &
+                \mathvariable{lastname} = \mathvariable{r.name.substringAfter}(\textnormal{"\textvisiblespace"})
+            )
+        \end{aligned}$
+    }
+    ([yshift=-0.8em]resident.north west);
+\draw[transformation, -latex] 
+    ([xshift=-0.7em]person.south)
+    |-
+    node[below left=0.5em and 2.3em, pos=0.5, anchor=north west, align=center] {
+        $\begin{aligned}
+            +p \rightarrow +e(
+            &
+                \mathvariable{name} = \mathvariable{p.lastname} + \textnormal{"\textvisiblespace"} + \mathvariable{p.firstname}
+            ) \\
+            +e \rightarrow +p(
+            &
+                \mathvariable{firstname} = \mathvariable{e.name.substringAfter}(\textnormal{"\textvisiblespace"})\\
+            &
+                \mathvariable{lastname} = \mathvariable{e.name.substringBefore}(\textnormal{"\textvisiblespace"})
+            )
+        \end{aligned}$
+    }
+    ([yshift=-0.7em]employee.west);
+\draw[transformation, latex-]
+    ([xshift=0.7em]resident.south)
+    |-
+    node[below right=0.5em and 2.3em, pos=0.5, anchor=north east, align=center] {
+        $+e \rightarrow +r(\mathvariable{name} = \mathvariable{e.name})$\\
+        $+r \rightarrow +e(\mathvariable{name} = \mathvariable{r.name})$
+    }
+    ([yshift=-0.7em]employee.east);
+
+
+\node[consistency preservation element, below=5em of employee.south, anchor=north] {
+    $\begin{aligned}
+    \mathtextspaceafter{\textup{with:}} \;
+    & 
+    \mathvariable{x.substringBefore}(\mathvariable{separator}) \equalsperdefinition \mathvariable{x.substring}(0, \mathvariable{x.indexOf}(\mathvariable{separator}))\\
+    & 
+    \mathvariable{x.substringBeforeFirst}(\mathvariable{separator1}, \mathvariable{separator2}) \equalsperdefinition\\
+    &
+    \formulaskip \mathvariable{x.substring}(\mathvariable{min}(\mathvariable{x.indexOf}(\mathvariable{separator1}), \mathvariable{x.indexOf}(\mathvariable{separator2})))\\
+    & 
+    \mathvariable{x.substringAfter}(\mathvariable{separator}) \equalsperdefinition \mathvariable{x.substring}(\mathvariable{x.indexOf}(\mathvariable{separator}) + 1)\\
+    \end{aligned}$
+};
+
+\end{tikzpicture}
