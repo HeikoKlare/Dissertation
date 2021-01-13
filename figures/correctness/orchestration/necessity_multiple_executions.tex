@@ -1,0 +1,141 @@
+\newcommand{\pcmclasswidth}{5em}
+\newcommand{\umlclasswidth}{4.2em}
+\newcommand{\distance}{(\pcmclasswidth+5em)}
+\newcommand{\labeldistance}{1.0em}
+
+\begin{tikzpicture}[
+    correspondence/.style={consistency related element, -},
+    invalid correspondence/.style={correspondence, darkred, dashed}
+]
+
+\pgfdeclarelayer{bg}
+\pgfsetlayers{bg,main}
+
+% First
+\umlclassvarwidth{pcm1_i}{}{\umlinterfacelabel\\ I}{
+    \dots
+}{\pcmclasswidth}
+\umlclassvarwidth[, below=0.4*\distance of pcm1_i.north, anchor=north]{pcm1_c}{}{\umlcomponentlabel\\ C}{
+}{\pcmclasswidth}
+
+\umlclassvarwidth[, right=1\distance of pcm1_i.north, anchor=north]{uml1_i}{}{\umlinterfacelabel\\ I}{
+    \dots
+}{\umlclasswidth}
+\umlclassvarwidth[, below=0.4*\distance of uml1_i.north, anchor=north]{uml1_c}{}{CImpl}{
+    CImpl()
+}{\umlclasswidth}
+
+\node[above right=0.0*\distance and 1.25*\distance of uml1_i.north, anchor=north, text width=10em, inner sep=0em] (java1_code) {
+\begin{lstlisting}[language=java, numbers=none, basicstyle=\footnotesize\ttfamily]
+interface I { §\dots§ }
+
+class CImpl implements I {
+    CImpl() { §\dots§ }
+}
+\end{lstlisting}
+};
+\coordinate (java1_south) at ([yshift=1em]java1_code.south);
+
+% Second
+\node[below=0.3*\distance of java1_code.south, anchor=north, text width=10em, inner sep=0em] (java2_code) {
+\begin{lstlisting}[language=java, numbers=none, basicstyle=\footnotesize\ttfamily]
+interface I { §\dots§ }
+
+class CImpl implements I {
+    §\textcolor{consistencypreservationcolor}{I f;}§
+    CImpl() { §\dots§ }
+}
+\end{lstlisting}
+};
+
+\umlclassvarwidth[, left=1.25*\distance of java2_code.north, anchor=north]{uml2_i}{}{\umlinterfacelabel\\ I}{
+    \dots
+}{\umlclasswidth}
+\umlfullclassvarwidth[, below=0.4*\distance of uml2_i.north, anchor=north]{uml2_c}{}{CImpl}{
+    \textcolor{consistencypreservationcolor}{f : I}
+}{
+    CImpl()
+}{\umlclasswidth}
+
+\umlclassvarwidth[, below left=0.55*\distance and 1*\distance of uml2_i.north, anchor=north]{pcm2_i}{}{\umlinterfacelabel\\ I}{
+    \dots
+}{\pcmclasswidth}
+\umlclassvarwidth[, below=0.5*\distance of pcm2_i.north, anchor=north]{pcm2_c}{}{\umlcomponentlabel\\ C}{
+}{\pcmclasswidth}
+\pcmrequirerole{pcm2_c}{pcm2_i}{right, consistencypreservationcolor}
+
+% Third
+\umlclassvarwidth[, below right=0.55*\distance and 1*\distance of pcm2_i.north, anchor=north]{uml3_i}{}{\umlinterfacelabel\\ I}{
+    \dots
+}{\umlclasswidth}
+\umlfullclassvarwidth[, below=0.4*\distance of uml3_i.north, anchor=north]{uml3_c}{}{CImpl}{
+    f : I
+}{
+    CImpl(\textcolor{consistencypreservationcolor}{f : I})
+}{\umlclasswidth}
+
+\node[above right=0.0*\distance and 1.25*\distance of uml3_i.north, anchor=north, text width=10em, inner sep=0em] (java3_code) {
+\begin{lstlisting}[language=java, numbers=none, basicstyle=\footnotesize\ttfamily]
+interface I { §\dots§ }
+
+class CImpl implements I {
+    I f;
+    CImpl(§\textcolor{consistencypreservationcolor}{I f}§) { §\dots§ }
+}
+\end{lstlisting}
+};
+
+\node[mmlabel, above=\labeldistance of pcm1_i.north, anchor=center, font=\small\bfseries] (pcm_label) {\acrshort{PCM}};
+\node[mmlabel, above=\labeldistance of uml1_i.north, anchor=center, font=\small\bfseries] (uml_label) {\acrshort{UML}};
+\node[mmlabel, anchor=south, font=\small\bfseries] (uml_label) at (pcm_label.south-|java1_code.north) {Java};
+
+\draw[correspondence] (pcm1_i) -- (pcm1_i-|uml1_i.west);
+\draw[correspondence] (pcm1_c) -- (pcm1_c-|uml1_c.west);
+\draw[correspondence] (uml1_i) -- ([xshift=-0.1em,yshift=1.9em]java1_code.west);
+\draw[correspondence] (uml1_c) -- ([xshift=-0.1em,yshift=-0.2em]java1_code.west);
+
+\draw[consistency execution,-latex] 
+    ([xshift=-1em]java1_code.south)
+    --
+    node[right, align=center] {add field \\ \enquote{\texttt{I f}}}
+    ([xshift=-1em]java2_code.north);
+
+\draw[consistency execution,-latex] 
+    ([xshift=-0.5em]java2_code.west)
+    --
+    node[above, align=center] {add field \\ \enquote{\texttt{f : I}}}
+    ([xshift=0.5em]uml2_i.east|-java2_code.west);
+\draw[consistency execution, -latex] 
+    ([xshift=-0.5em]uml2_i.west|-java2_code.west)
+    -|
+    node[above left=0.3em and 0em, pos=1, align=center] {add\\ requi-\\ res}
+    ([xshift=0.63*\distance,yshift=-0.1*\distance]pcm2_i.south)
+    --
+    ([xshift=0.4*\distance,yshift=-0.1*\distance]pcm2_i.south);
+\draw[consistency execution, -latex] 
+    ([xshift=0.63*\distance,yshift=-0.1*\distance]pcm2_i.south)
+    |-
+    node[pos=0.4, below left=0em and -0.8em, align=center] {add\\ constructor\\ parameter}
+    ([xshift=-0.5em]uml3_i.west|-java3_code.west);
+\draw[consistency execution,-latex]
+    ([xshift=0.5em]uml3_i.east|-java3_code.west)
+    --
+    node[above, align=center] {add\\ constructor\\ parameter}
+    ([xshift=-0.5em]java3_code.west);
+% \draw[consistency execution, -latex] 
+%     ([xshift=0.65*\distance,yshift=-0.1*\distance]pcm2_i.south)
+%     |-
+%     node[below, pos=0.75, align=center] {add \\constructor\\ parameter}
+%     ([xshift=-0.5em]uml2_i.west|-java3_code.west);
+
+% \draw[correspondence] (pcm1) -- (pcm1-|uml1.west);
+% \draw[correspondence] ([xshift=0.5em]pcm1.north) -- ++(0,1em) -| (java1.north);
+% \draw[correspondence] ([xshift=-0.5em]pcm1.north) -- ++(0,2em) -| ([xshift=1em]java2.east) -- (java2.east);
+% \draw[correspondence] (pcm2) -- (pcm2-|uml2.west);
+% \draw[correspondence] (pcm2.south) -- ++(0,-1em) -| (java2.south);
+% \draw[correspondence] (java1) -- (java1-|uml1.east);
+% \draw[invalid correspondence] (java1) -- (uml2.north east);
+% \draw[correspondence] (java2) -- (java2-|uml2.east);
+% \draw[correspondence] (java2) -- (uml1);
+
+\end{tikzpicture}
