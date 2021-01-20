@@ -85,7 +85,6 @@ These consistency relations are equivalent to a monolithic relation $\consistenc
 For reasons of simplicity, we assume only one consistency relation between each pair of metamodels.
 This also includes that there are no two consistency relations $\consistencyrelation{CR}{i,j}$ and $\consistencyrelation{CR}{j,i}$ for metamodels $\metamodel{M}{i}$ and $\metamodel{M}{j}$, which means that the relations do not have a direction.
 This assumption is without loss of generality, because two relations between the same metamodels are, independent from their direction, equivalent to only considering their intersection, i.e., only the model pairs that are considered consistent by both relations.
-%\todo{wlog: no direction of relation}
 
 % \subsection{Expressiveness of Modular Consistency Specifications}
 % \label{chap:correctness:formalization:expressiveness}
@@ -149,18 +148,12 @@ Incrementality is an essential requirement whenever consistency shall be preserv
 Inductivity, on the other hand, may not be necessary, as consistency preservation rules could also be defined to restore consistency from arbitrarily inconsistent states.
 We, however, make this assumption to avoid requiring from the consistency preservation rules that they need to be able to process an inconsistent state without knowing which changes introduced it.
 From a theoretical point of view, we could omit that requirement, but this would make the specification of consistency preservation rules impractically complicated, such that omitting that requirement is not practically relevant anyway.
-%In consequence, an incremental and inductive \gls{consistency preservation rule} takes a consistent tuple of models and changes to them and returns a tuple of models that is consistent again.
-
-%\todoLater{Do we need inductivity for synchronization? Otherwise we may remove it here and from following definitions?} % Yes, we do!
-%\todo{Explicitly discuss incrementality here, although we actually do not need it. So leave it out? No, needed for synchronization definition. But make clear that this is a specialization and discuss generalization.}
-%\todo{Make precise here that we have incremental consistency, thus last consistent state and delta to that is known. We did not assume that in the informal notion before.}
 
 \mnote{Monolithic and modular consistency preservation}
 Like we already discussed for consistency preservation rules in general, incremental preservation rules can be realized in an either monolithic or modular way.
 A monolithic consistency preservation rules takes a tuple of models that is consistent to a consistency relation and a change to these models and returns a tuple of models that is consistent again.
 In a modular specification of consistency preservation rules, a set of such rules is given which are able to preserve consistency of a subset of the given models according to modular consistency relations.
 In our case, we consider such rules for two models, each of them restoring consistency according to a binary consistency relation.
-%We will later discuss if and how an execution order of such consistency preservation rules can be determined.
 
 \mnote{Drawbacks of existing consistency preservation approaches}
 In the terminology for transformations, a consistency preservation rule that restores consistency of models according to a consistency relation in one direction is called \emph{directional transformation}~\cite{stevens2010sosym} or \emph{consistency restorer}~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
@@ -190,7 +183,6 @@ With a modular specification of consistency preservation, however, several consi
 \autoref{fig:correctness:unidirectionality_example} depicts an example why unidirectional consistency preservation rules cannot be applied when used in combination with others.
 If the depicted consistency preservation rules $\consistencypreservationrule{1}$ and $\consistencypreservationrule{2}$ are executed first, $\consistencypreservationrule{3}$ cannot be unidirectional, as both involved models $\model{m}{1}$ and $\model{m}{3}$ have been modified either by the user or by another consistency preservation rule.
 Thus, in general, it is not possible to only consider changes in one model and unidirectionally propagate them to the other model.
-%\todo{add graphics and explanation for that; a simple example for a concurrent modification scenario (although maybe not induced by a network but several users) are that different classes are added to the UML and the Java model. Now it is necessary to react to changes in both models and to update both to reflect the classes added to the other. A single unidirectional transformation would result in reverting some changes, i.e., removing some classes that were added by the users}.
 In consequence, the rules need to be able to deal with changes performed in both of the input models and, consequentially, need to update both models to reflect the changes in the other.
 
 \mnote{Synchronizing consistency preservation rules}
@@ -209,9 +201,6 @@ This is also how actual implementations, such as the one in \gls{EMF} behave.
 When the elements a change affects are missing a model, applying the change may fail.
 This is why we consider the function describing a change to be partial.
 We denote partiality by allowing the function to return $\bot$ to indicate inputs for which the function is undefined.
-%\todo{Refine change notion to be partial, because not every change is necessarily applicable. Even if it could be, maybe it should not be.}
-%\todo{Discuss that change (esp.~partial notion) is reasonable because of practical realization: Changes in EMF define changes to elements. If that element is found in the model, it can be applied, if not, its behavior is undefined. This induces a function like we propose here, because a change can be applied to any instance of a metamodel, not only to one model.}
-%\todo{Define how a change tuple can be applied to a tuple. Then update every complicated statement about applying a tuple to a tuple by a tuple notation with the short notation.}
 \begin{definition}[Change]
     \label{def:change}
     Given a metamodel $\metamodel{M}{}$, a change $\change{\metamodel{M}{}}$ is a partial function that takes an instance of that metamodel and returns another one or $\bot$:
