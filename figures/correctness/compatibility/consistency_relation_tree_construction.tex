@@ -1,40 +1,41 @@
-\newcommand{\hdistance}{16em}
-\newcommand{\objectwidth}{8em}
+\newcommand{\hdistance}{10.6em}
+\newcommand{\objectwidth}{6.8em}
 
 \begin{tikzpicture}[
-    consistency process/.style={-latex, consistency execution}
+    consistency process/.style={consistency execution}
 ]
 
 % Person
 \umlobjectvarwidth{person}{}{: Person\sameheight}{
-firstname = \enquote{Alice}\\
-lastname = \enquote{Avid}
+firstname = "Alice"\\
+lastname = "Avid"
+}{\objectwidth-0.3em}
+
+% Resident
+\umlobjectvarwidth[,right=\hdistance-0.3em of person.center, anchor=center]{resident}{}{: Resident\sameheight}{
+name = "Alice Avid"
 }{\objectwidth}
 
 % Employee
-\umlobjectvarwidth[,above right=4em and \hdistance of person.center, anchor=south]{employee}{}{: Employee\sameheight}{
-name = \enquote{Alice Avid}
-}{\objectwidth}
-
-\umlobjectvarwidth[,right=\hdistance of person.south, anchor=south]{resident}{}{: Resident\sameheight}{
-name = \enquote{Alice Avid}
+\umlobjectvarwidth[,right=\hdistance of resident.center, anchor=center]{employee}{}{: Employee\sameheight}{
+name = "Alice Avid"
 }{\objectwidth}
 
 
 % CONSISTENCY RELATIONS
-\draw[directed consistency relation] ([yshift=-0.5em]resident.west-|person.east) -- node[pos=0, above right] {$p$} node[pos=0.5, below] {$\consistencyrelation{CR}{1}$} node[pos=1, above left] {$r$} ([yshift=-0.5em]resident.west);
-\draw[directed consistency relation] ([xshift=1em]resident.north) -- node[pos=0, above left] {$r$} node[right, align=left] {$\consistencyrelation{CR}{2}$} node[pos=1, below left] {$e$} ([xshift=1em]employee.south);
+\draw[directed consistency relation] ([yshift=-1em]person.east) -- node[pos=0, above right] {$p$} node[below] {$\consistencyrelation{CR}{1}$} node[pos=1, above left] {$r$} ([yshift=-1em]resident.west);
+\draw[directed consistency relation] ([yshift=-1em]resident.east) -- node[pos=0, above right] {$r$} node[below] {$\consistencyrelation{CR}{2}$} node[pos=1, above left] {$e$} ([yshift=-1em]employee.west);
 
-\node[consistency related element, below left=1em and 2em of person.south west, anchor=north west, inner sep=0em] {
+\node[consistency related element, below=1.5em of resident.south, anchor=north, inner sep=0em] {
 $\begin{aligned}
-    \consistencyrelation{CR}{1} =\; & \setted{\tupled{p,r} \mid r.name = \mathvariable{p.firstname} + \textnormal{\enquote{\textvisiblespace}} + \mathvariable{p.lastname}}\\[0.3em]
+    \consistencyrelation{CR}{1} =\; & \setted{\tupled{p,r} \mid r.name = \mathvariable{p.firstname} + "\text{\textvisiblespace}" + \mathvariable{p.lastname}}\\[0.3em]
     \consistencyrelation{CR}{2} =\; & \setted{\tupled{r,e} \mid \mathvariable{r.name} = \mathvariable{e.name}}
 \end{aligned}$
 };
 
 % CONSISTENCY PROCESS
-\draw[consistency process] ([xshift=-2.5em]person.west) -- node[above] {\textbf{(1)}} (person.west);
-\draw[consistency process] ([yshift=1em]resident.west-|person.east) -- node[above] {\textbf{(2)}} ([yshift=1em]resident.west);
-\draw[consistency process] ([xshift=-1em]resident.north) -- node[left] {\textbf{(3)}} ([xshift=-1em]employee.south);
+\draw[consistency process] ([yshift=1em,xshift=-2em]person.west) -- node[above] {1.} ([yshift=1em]person.west);
+\draw[consistency process] ([yshift=1em]person.east) -- node[above] {2.} ([yshift=1em]resident.west);
+\draw[consistency process] ([yshift=1em]resident.east) -- node[above] {3.} ([yshift=1em]employee.west);
 
 \end{tikzpicture}
