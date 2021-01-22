@@ -1,67 +1,27 @@
 \usetikzlibrary{arrows.meta}
 
-\newlength{\transformationdoublespacing}
-\newlength{\transformationlinewidth}
-\newlength{\transformationshorten}
-\newlength{\transformationarrowwidth}
-\newlength{\transformationarrowheight}
-\newlength{\transformationbaselength}
-\setlength{\transformationbaselength}{0.5pt}
-\newcommand*{\settransformationscale}[1]{%
-	\setlength{\transformationdoublespacing}{\dimexpr #1\transformationbaselength * 3 / 2\relax}%
-	\setlength{\transformationlinewidth}{\dimexpr #1\transformationbaselength\relax}%
-	\setlength{\transformationshorten}{\dimexpr #1\transformationbaselength * 5\relax}
-	\setlength{\transformationarrowheight}{\dimexpr #1\transformationbaselength * 10\relax}%
-	\setlength{\transformationarrowwidth}{\dimexpr \transformationarrowheight * 8 / 5\relax}%
-	\tikzset{%
-		halfsyncxarrow/.tip = {Latex[round,left,length=\the\transformationarrowheight,width=\the\transformationarrowwidth,angle'=45]},%
-		halfsyncxarrow'/.tip = {Latex[round,right,length=\the\transformationarrowheight,width=\the\transformationarrowwidth,angle'=45]},%
-		syncxarrow/.tip={Latex[round,length=\the\transformationarrowheight,width=\the\transformationarrowwidth,angle'=45]}%
-	}%
-}
-\settransformationscale{1}
-\tikzstyle{halfsyncx}=[
-	-halfsyncxarrow,
-	line width=\transformationlinewidth,
-	line cap=round
-]
-\NewDocumentCommand{\halfsyncx}{O{} r()O{0pt} r()O{0pt} D<>{}}{%
-	\path (#2) -- (#4) coordinate[at start](h1) coordinate[at end](h2);
-	\draw [
-		halfsyncx,
-		shorten < = \transformationshorten+#3,shorten > = \transformationshorten+#5,#1
-	]
-	($(h1)!\transformationdoublespacing!90:(h2)$) -- ($(h2)!\transformationdoublespacing!-90:(h1)$)
-	node[midway, above]{#6};
-}
-\NewDocumentCommand{\syncx}{O{} r()O{0pt} r()O{0pt} D<>{}}{
-	\halfsyncx[#1] (#2)[#3] (#4)[#5] <#6>
-	\halfsyncx[#1] (#4)[#5] (#2)[#3]
-}
-
-
 \newcommand{\modelradius}{0.1em}
-\newcommand{\hmodeldistance}{1.07em}
+\newcommand{\hmodeldistance}{0.98em}
 \newcommand{\vmodeldistance}{0.9em}
-\newcommand{\hnetworkdistance}{3.6*\hmodeldistance}
-\newcommand{\vnetworkdistance}{4.15*\vmodeldistance}
+\newcommand{\hnetworkdistance}{4*\hmodeldistance}
+\newcommand{\vnetworkdistance}{4*\vmodeldistance}
 \newcommand{\hborder}{0.4*\hmodeldistance}
 \newcommand{\vborder}{0.4*\hmodeldistance}
 \newcommand{\addnetworktopleft}[3]{
 	\node[model,#2] (m#1left) {};
 	\node[model, above right=\vmodeldistance and \hmodeldistance of m#1left.center, anchor=center] (m#1top) {};
-	\syncx[unconsidered, #3] (m#1left) (m#1top)
+	\draw[unconsidered, #3] (m#1left) -- (m#1top);
 }
 \newcommand{\addnetworkmiddle}[2]{
 	\node[model, below right=\vmodeldistance and \hmodeldistance of m#1left.center, anchor=center] (m#1bottom) {};
-	\syncx[unconsidered, #2] (m#1top) (m#1bottom)
+	\draw[unconsidered, #2] (m#1top) -- (m#1bottom);
 }
 \newcommand{\addnetworktopright}[2]{
 	\node[model, right=2*\hmodeldistance of m#1left.center, anchor=center] (m#1right) {};
-	\syncx[unconsidered, #2] (m#1top) (m#1right)
+	\draw[unconsidered, #2] (m#1top) -- (m#1right);
 }
 \newcommand{\addnetworkbottomleft}[2]{
-	\syncx[unconsidered, #2] (m#1left) (m#1bottom)
+	\draw[unconsidered, #2] (m#1left) -- (m#1bottom);
 }
 \newcommand{\addpseudobottom}[1]{
 	\node[model, draw=none, fill=none, below right=\vmodeldistance and \hmodeldistance of m#1left.center, anchor=center] (m#1bottom) {};
@@ -111,58 +71,54 @@
 	\draw[thick,-{>[scale=0.6]}] ($(#1bottom.south)+(0,-0.35em)$) -- node[right,font=\scriptsize] {rec} ($(#2top.north)+(0,0.35em)$);
 }
 
-\settransformationscale{0.75}
-
 \begin{tikzpicture}[
 	model/.style={draw, circle, fill=black, inner sep=\modelradius},
-	executed/.style={color=blue!50},
-	candidate/.style={color=red!50},
-	unconsidered/.style={color=gray},
-	every node/.append style={font=\scriptsize}
+	executed/.style={transformation, solid, very thin, {Triangle[open,angle=45:0.35em]}-{Triangle[open,angle=45:0.35em]}},
+	candidate/.style={transformation, solid},
+	unconsidered/.style={transformation, densely dotted, -}
 ]
-%\drawnetworkcomplete{1}{}{}{}{}{}
 
-\node[fill=gray!10, above left=1*\vmodeldistance+1*\vborder and \hborder, anchor=north west, minimum width=2*\hmodeldistance+2*\hborder, minimum height=2*\vmodeldistance+2*\vborder] {};
+\node[draw, fill=lightgray!10, above left=1*\vmodeldistance+1*\vborder and \hborder, anchor=north west, minimum width=2*\hmodeldistance+2*\hborder, minimum height=2*\vmodeldistance+2*\vborder] {};
 
-\drawnetworkcomplete{2}{%right=\hnetworkdistance of m1left.center, anchor=center
+\drawnetworkcomplete{2}{
 }{candidate}{}{}{}
 
-\node[fill=gray!10, above right=1*\vmodeldistance+1*\vborder and \hnetworkdistance-\hborder of m2left.center, anchor=north west, minimum width=2*\hmodeldistance+2*\hborder, minimum height=\vnetworkdistance+1*\vmodeldistance+2*\vborder] {};
+\node[draw, fill=lightgray!10, above right=1*\vmodeldistance+1*\vborder and \hnetworkdistance-\hborder of m2left.center, anchor=north west, minimum width=2*\hmodeldistance+2*\hborder, minimum height=\vnetworkdistance+1*\vmodeldistance+2*\vborder] {};
 
 \drawnetworkcomplete{3}{right=\hnetworkdistance of m2left.center, anchor=center}{executed}{candidate}{}{}
 \iteration{m2}{m3}
 \drawnetworktopleft{3-1}{below=\vnetworkdistance of m3left.center,anchor=center}{candidate}
 \recursion{m3}{m3-1}
 
-\node[fill=gray!10, above right=1*\vmodeldistance+1*\vborder and \hnetworkdistance-1*\hborder of m3left.center, anchor=north west, minimum width=\hnetworkdistance+2*\hmodeldistance+2*\hborder, minimum height=2*\vnetworkdistance+1*\vmodeldistance+2*\vborder] {};
+\node[draw, fill=lightgray!10, above right=1*\vmodeldistance+1*\vborder and \hnetworkdistance-1*\hborder of m3left.center, anchor=north west, minimum width=\hnetworkdistance+2*\hmodeldistance+2*\hborder, minimum height=2*\vnetworkdistance+1*\vmodeldistance+2*\vborder] {};
 
 \drawnetworkcomplete{4}{right=\hnetworkdistance of m3left.center, anchor=center}{executed}{executed}{candidate}{}
 \iteration{m3}{m4}
 \drawnetworktop{4-1}{below=\vnetworkdistance of m4left.center,anchor=center}{candidate}{}
 \recursion{m4}{m4-1}
-\node[fill=gray!20, above right=1*\vmodeldistance+1*\vborder and \hnetworkdistance-1*\hborder of m4-1left.center, anchor=north west, minimum width=2*\hmodeldistance+2*\hborder, minimum height=\vnetworkdistance+1*\vmodeldistance+2*\vborder] {};
+\node[draw, fill=lightgray!20, above right=1*\vmodeldistance+1*\vborder and \hnetworkdistance-1*\hborder of m4-1left.center, anchor=north west, minimum width=2*\hmodeldistance+2*\hborder, minimum height=\vnetworkdistance+1*\vmodeldistance+2*\vborder] {};
 \drawnetworktop{4-2}{right=\hnetworkdistance of m4-1left.center,anchor=center}{executed}{candidate}
 \iteration{m4-1}{m4-2}
 \drawnetworktopleft{4-2-1}{below=\vnetworkdistance of m4-2left.center,anchor=center}{candidate}
 \recursion{[yshift=0.1*\vnetworkdistance]m4-2}{[yshift=0.1*\vnetworkdistance]m4-2-1}
 
-\node[fill=gray!10, above right=1*\vmodeldistance+1*\vborder and 2*\hnetworkdistance-1*\hborder of m4left.center, anchor=north west, minimum width=3*\hnetworkdistance+2*\hmodeldistance+2*\hborder, minimum height=3*\vnetworkdistance+1*\vmodeldistance+2*\vborder] {};
+\node[draw, fill=lightgray!10, above right=1*\vmodeldistance+1*\vborder and 2*\hnetworkdistance-1*\hborder of m4left.center, anchor=north west, minimum width=3*\hnetworkdistance+2*\hmodeldistance+2*\hborder, minimum height=3*\vnetworkdistance+1*\vmodeldistance+2*\vborder] {};
 
 \drawnetworkcomplete{5}{right=2*\hnetworkdistance of m4left.center, anchor=center}{executed}{executed}{executed}{candidate}
 \iteration{[xshift=1*\hnetworkdistance]m4}{m5}
 \drawnetworktopmiddle{5-1}{below=\vnetworkdistance of m5left.center,anchor=center}{candidate}{}{}
 \recursion{m5}{m5-1}
-\node[fill=gray!20, above right=1*\vmodeldistance+1*\vborder and \hnetworkdistance-1*\hborder of m5-1left.center, anchor=north west, minimum width=2*\hmodeldistance+2*\hborder, minimum height=\vnetworkdistance+1*\vmodeldistance+2*\vborder] {};
+\node[draw, fill=lightgray!20, above right=1*\vmodeldistance+1*\vborder and \hnetworkdistance-1*\hborder of m5-1left.center, anchor=north west, minimum width=2*\hmodeldistance+2*\hborder, minimum height=\vnetworkdistance+1*\vmodeldistance+2*\vborder] {};
 \drawnetworktopmiddle{5-2}{right=\hnetworkdistance of m5-1left.center,anchor=center}{executed}{candidate}{}
 \iteration{m5-1}{m5-2}
 \drawnetworktopleft{5-2-1}{below=\vnetworkdistance of m5-2left.center,anchor=center}{candidate}
 \recursion{m5-2}{m5-2-1}
-\node[fill=gray!20, above right=1*\vmodeldistance+1*\vborder and \hnetworkdistance-1*\hborder of m5-2left.center, anchor=north west, minimum width=\hnetworkdistance+2*\hmodeldistance+2*\hborder, minimum height=2*\vnetworkdistance+1*\vmodeldistance+2*\vborder] {};
+\node[draw, fill=lightgray!20, above right=1*\vmodeldistance+1*\vborder and \hnetworkdistance-1*\hborder of m5-2left.center, anchor=north west, minimum width=\hnetworkdistance+2*\hmodeldistance+2*\hborder, minimum height=2*\vnetworkdistance+1*\vmodeldistance+2*\vborder] {};
 \drawnetworktopmiddle{5-3}{right=\hnetworkdistance of m5-2left.center,anchor=center}{executed}{executed}{candidate}
 \iteration{m5-2}{m5-3}
 \drawnetworktopleftmiddle{5-3-1}{below=\vnetworkdistance of m5-3left.center,anchor=center}{candidate}{}
 \recursion{m5-3}{m5-3-1}
-\node[fill=gray!30, above right=1*\vmodeldistance+1*\vborder and \hnetworkdistance-1*\hborder of m5-3-1left.center, anchor=north west, minimum width=2*\hmodeldistance+2*\hborder, minimum height=1*\vnetworkdistance+1*\vmodeldistance+2*\vborder] {};
+\node[draw, fill=lightgray!30, above right=1*\vmodeldistance+1*\vborder and \hnetworkdistance-1*\hborder of m5-3-1left.center, anchor=north west, minimum width=2*\hmodeldistance+2*\hborder, minimum height=1*\vnetworkdistance+1*\vmodeldistance+2*\vborder] {};
 \drawnetworktopleftmiddle{5-3-2}{right=\hnetworkdistance of m5-3-1left.center,anchor=center}{executed}{candidate}
 \iteration{m5-3-1}{m5-3-2}
 \drawnetworktopleft{5-3-2-1}{below=\vnetworkdistance of m5-3-2left.center,anchor=center}{candidate}
@@ -170,28 +126,27 @@
 
 % Legend
 \newcommand{\vdistancelegend}{1*\vmodeldistance}
-%\coordinate (legend_left_column) at ([yshift=-2.53*\vnetworkdistance]m2left.center);
 \coordinate (legend_left_column) at ([yshift=-1.6*\vnetworkdistance,xshift=0.2em]m2left.center);
 
-\node[draw, legendbg, minimum height=6.9*\vdistancelegend, minimum width=7.2em, above right=1.1*\vdistancelegend and -0.75em of legend_left_column, anchor=north west] {};
+\node[legendbg, minimum height=6.9*\vdistancelegend, minimum width=7.2em, above right=1.1*\vdistancelegend and -0.75em of legend_left_column, anchor=north west] {};
 
-\syncx[] (legend_left_column) ([xshift=1*\hmodeldistance]legend_left_column)
-\node[right=1.3*\hmodeldistance of legend_left_column,anchor=west] {$\transformationset{T}$};
-\syncx[candidate] ([yshift=-\vdistancelegend]legend_left_column) ([xshift=1*\hmodeldistance,yshift=-\vdistancelegend]legend_left_column)
-\node[below right=\vdistancelegend and 1.3*\hmodeldistance of legend_left_column,anchor=west] {$\provalgcandidate$};
-\syncx[executed] ([yshift=-2*\vdistancelegend]legend_left_column) ([xshift=1*\hmodeldistance,yshift=-2*\vdistancelegend]legend_left_column)
-\node[below right=2*\vdistancelegend and 1.3*\hmodeldistance of legend_left_column,anchor=west] {$\provalgexecuted$};
+\draw[unconsidered] (legend_left_column) -- ([xshift=1*\hmodeldistance]legend_left_column);
+\node[legend, right=1.3*\hmodeldistance of legend_left_column,anchor=west] {$\transformationset{T}$};
+\draw[candidate] ([yshift=-\vdistancelegend]legend_left_column) -- ([xshift=1*\hmodeldistance,yshift=-\vdistancelegend]legend_left_column);
+\node[legend, below right=\vdistancelegend and 1.3*\hmodeldistance of legend_left_column,anchor=west] {$\provalgcandidate$};
+\draw[executed] ([yshift=-2*\vdistancelegend]legend_left_column) -- ([xshift=1*\hmodeldistance,yshift=-2*\vdistancelegend]legend_left_column);
+\node[legend, below right=2*\vdistancelegend and 1.3*\hmodeldistance of legend_left_column,anchor=west] {$\provalgexecuted$};
 
-\coordinate (legend_right_column) at ([yshift=-3.8*\vdistancelegend]legend_left_column); %([xshift=7em]legend_left_column);
+\coordinate (legend_right_column) at ([yshift=-3.8*\vdistancelegend]legend_left_column);
 
 \coordinate (legenditerationright) at ([xshift=-0.3*\hmodeldistance+\modelradius]legend_right_column);
 \coordinate (legenditerationleft) at ([xshift=-0.3*\hmodeldistance-2*\hmodeldistance-\modelradius+\hnetworkdistance]legend_right_column);
 \iteration{legenditeration}{legenditeration}
-\node[right=1.3*\hmodeldistance of legend_right_column, anchor=west] (legenditerationtext) {iteration step};
+\node[legend, right=1.3*\hmodeldistance of legend_right_column, anchor=west] (legenditerationtext) {iteration step};
 
 \coordinate (legendrecursionbottom) at ([yshift=-\vdistancelegend+0.5*\vnetworkdistance-\vmodeldistance-\modelradius]legend_right_column);
 \coordinate (legendrecursiontop) at ([yshift=-\vdistancelegend-0.5*\vnetworkdistance+\vmodeldistance+\modelradius]legend_right_column);
 \recursion{legendrecursion}{legendrecursion}
-\node[below=\vdistancelegend of legenditerationtext.west, anchor=west] {recursion step};
+\node[legend, below=\vdistancelegend of legenditerationtext.west, anchor=west] {recursion step};
 
 \end{tikzpicture}%
