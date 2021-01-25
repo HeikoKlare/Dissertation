@@ -1,5 +1,8 @@
 \newcommand{\parameterizes}{«parameterizes»}
-\newcommand{\distance}{2em}
+\newcommand{\hdistancebase}{2em}
+\newcommand{\hdistancecorrection}{0.08*\difftoafiveimage}
+\newcommand{\hdistance}{(\hdistancebase+\hdistancecorrection)}
+\newcommand{\vdistance}{2em}
 
 % #1: position left model
 % #2: identifier prefix
@@ -7,9 +10,9 @@
 % #4-#7: relations names 
 \newcommand{\network}[7][]{
     \node[schematic metamodel, #1] (#2_m1) {};
-    \node[schematic metamodel, above right=\distance and \distance of #2_m1.center, anchor=center] (#2_m2) {};
-    \node[schematic metamodel, right=2*\distance of #2_m1.center, anchor=center] (#2_m3) {};
-    \node[schematic metamodel, below right=\distance and \distance of #2_m1.center, anchor=center] (#2_m4) {};
+    \node[schematic metamodel, above right=\vdistance and \hdistance of #2_m1.center, anchor=center] (#2_m2) {};
+    \node[schematic metamodel, right=2*\hdistance of #2_m1.center, anchor=center] (#2_m3) {};
+    \node[schematic metamodel, below right=\vdistance and \hdistance of #2_m1.center, anchor=center] (#2_m4) {};
     \draw[#3] (#2_m1) -- node[above left] {#4} (#2_m2);
     \draw[#3] (#2_m2) -- node[above right] {#5} (#2_m3);
     \draw[#3] (#2_m2) -- node[fill=white, opacity=0.7, text opacity=1] {#6} (#2_m4);
@@ -24,14 +27,14 @@
 % INPUTS
 \network{input}{consistency relation}{$\consistencyrelation{CR}{1}$}{$\consistencyrelation{CR}{2}$}{$\consistencyrelation{CR}{3}$}{$\consistencyrelation{CR}{4}$}
 \node[below left=0.2em and 0em of input_m1.west, anchor=east] {$\model{m}{1}$};
-\node[right=1*\distance of input_m3.center, anchor=center] {+};
-\node[right=2*\distance of input_m3.center, anchor=center, font=\small] (changes) {$\Delta_{\model{m}{1}}$};
+\node[right=1*\hdistance of input_m3.center, anchor=center] {+};
+\node[right=2*\hdistance of input_m3.center, anchor=center, font=\small] (changes) {$\Delta_{\model{m}{1}}$};
 \node[below=0.3em of input_m4.south, anchor=north, align=center, annotation] (text_input_models) {models consistent\\ to $\consistencyrelation{CR}{1}, \consistencyrelation{CR}{2}, \dots$};
-\node[right=3*\distance of text_input_models.north, anchor=north, align=center, annotation] (text_input_changes) {changes to \\ models(s)};
-\node[consistency execution element, above left=0.3*\distance and 2.5*\distance of input_m2.north, anchor=north, align=center] {Consistency\\ Relations};
+\node[right=3*\hdistance of text_input_models.north, anchor=north, align=center, annotation] (text_input_changes) {changes to \\ models(s)};
+\node[consistency execution element, above left=0.3*\vdistance and 2.5*\hdistance of input_m2.north, anchor=north, align=center] {Consistency\\ Relations};
 
 % OUTPUT
-\network[right=9.5*\distance of input_m1.center, anchor=center]{output}{consistency relation}{$\consistencyrelation{CR}{1}$}{$\consistencyrelation{CR}{2}$}{$\consistencyrelation{CR}{3}$}{$\consistencyrelation{CR}{4}$}
+\network[right=9.5*\hdistance of input_m1.center, anchor=center]{output}{consistency relation}{$\consistencyrelation{CR}{1}$}{$\consistencyrelation{CR}{2}$}{$\consistencyrelation{CR}{3}$}{$\consistencyrelation{CR}{4}$}
 \node[below=0.3em of output_m4.south, anchor=north, align=center, annotation] (text_output_models) {changed models\\ consistent to \\ $\consistencyrelation{CR}{1}, \consistencyrelation{CR}{2}, \dots$};
 
 \draw[consistency execution, double distance=0.15em] ([xshift=1em]changes.east) -- node[below] {Application Function} ([xshift=-1em]output_m1.west);
@@ -46,10 +49,10 @@
     ([yshift=-10pt]brace_midpoint) 
     |- 
     node[pos=0.7,below] (orchestration_function) {Orchestration Function} 
-    ++(3*\distance,-1*\distance);
+    ++(3*\hdistancebase+3*\hdistancecorrection,-1*\vdistance);
 
 % CONSISTENCY PRESERVATION
-\network[below left=5.7*\distance and 1.7*\distance of input_m1.center, anchor=center]{cprs}{transformation}{$\consistencypreservationrule{1}$}{$\consistencypreservationrule{2}$}{$\consistencypreservationrule{3}$}{$\consistencypreservationrule{4}$}
+\network[below left=5.7*\vdistance and 1.7*\hdistance of input_m1.center, anchor=center]{cprs}{transformation}{$\consistencypreservationrule{1}$}{$\consistencypreservationrule{2}$}{$\consistencypreservationrule{3}$}{$\consistencypreservationrule{4}$}
 \node[consistency execution element, above=0.3em of cprs_m2.north, anchor=south, align=center] {Consistency\\ Preservation Rules};
 \draw[consistency preservation element, -latex] 
     ([xshift=0.5em]cprs_m3.east) 
@@ -58,53 +61,53 @@
     (orchestration_function.south);
 
 % ORCHESTRATION SEQUENCE
-\coordinate (orchestration_start) at ([xshift=3*\distance, yshift=-2.7\distance]brace_midpoint);
+\coordinate (orchestration_start) at ([xshift=3*\hdistance, yshift=-2.7\vdistance]brace_midpoint);
 \draw[transformation] 
-    ([xshift=\distance-0.3*\distance,yshift=-0.3*\distance]orchestration_start) 
+    ([xshift=\hdistance-0.3*\hdistance,yshift=-0.3*\vdistance]orchestration_start) 
     -- 
-    node[left=0.5*\distance, anchor=center] {$\langle$}
-    node[below=0.35*\distance, anchor=north] {1}
-    node[right=0.4*\distance, anchor=north] {,}
-    ++(0.6*\distance, 0.6*\distance);
+    node[left=0.5*\hdistance, anchor=center] {$\langle$}
+    node[below=0.35*\vdistance, anchor=north] {1}
+    node[right=0.4*\hdistance, anchor=north] {,}
+    ++(0.6*\hdistancebase+0.6*\hdistancecorrection, 0.6*\vdistance);
 \draw[transformation] 
-    ([xshift=1.8*\distance-0.3*\distance,yshift=0.3*\distance]orchestration_start) 
+    ([xshift=1.8*\hdistance-0.3*\hdistance,yshift=0.3*\vdistance]orchestration_start) 
     -- 
-    node[below=0.35*\distance, anchor=north] {2} 
-    node[right=0.4*\distance, anchor=north] {,}
-    ++(0.6*\distance, -0.6*\distance);
+    node[below=0.35*\vdistance, anchor=north] {2} 
+    node[right=0.4*\hdistance, anchor=north] {,}
+    ++(0.6*\hdistancebase+0.6*\hdistancecorrection, -0.6*\vdistance);
 \draw[transformation] 
-    ([xshift=2.6*\distance,yshift=0.3*\distance]orchestration_start) 
+    ([xshift=2.6*\hdistance,yshift=0.3*\vdistance]orchestration_start) 
     -- 
-    node[below=0.35*\distance, anchor=north] {3}
-    node[right=0.4*\distance, anchor=north] (orchestration_middle) {,}
-    ++(0, -0.6*\distance);
+    node[below=0.35*\vdistance, anchor=north] {3}
+    node[right=0.4*\hdistance, anchor=north] (orchestration_middle) {,}
+    ++(0, -0.6*\vdistance);
 \draw[transformation] 
-    ([xshift=3.4*\distance-0.3*\distance,yshift=-0.3*\distance]orchestration_start) 
+    ([xshift=3.4*\hdistance-0.3*\hdistance,yshift=-0.3*\vdistance]orchestration_start) 
     -- 
-    node[below=0.35*\distance, anchor=north] {1}
-    node[right=0.4*\distance, anchor=north] {,}
-    ++(0.6*\distance, 0.6*\distance);
+    node[below=0.35*\vdistance, anchor=north] {1}
+    node[right=0.4*\hdistance, anchor=north] {,}
+    ++(0.6*\hdistancebase+0.6*\hdistancecorrection, 0.6*\vdistance);
 \draw[transformation] 
-    ([xshift=4.2*\distance-0.3*\distance,yshift=0.3*\distance]orchestration_start) 
+    ([xshift=4.2*\hdistance-0.3*\hdistance,yshift=0.3*\vdistance]orchestration_start) 
     -- 
-    node[below=0.35*\distance, anchor=north] {4}
-    node[right=0.4*\distance, anchor=north] {,}
-    ++(0.6*\distance, -0.6*\distance);
+    node[below=0.35*\vdistance, anchor=north] {4}
+    node[right=0.4*\hdistance, anchor=north] {,}
+    ++(0.6*\hdistancebase+0.6*\hdistancecorrection, -0.6*\vdistance);
 \draw[transformation] 
-    ([xshift=5.0*\distance,yshift=0.3*\distance]orchestration_start) 
+    ([xshift=5.0*\hdistance,yshift=0.3*\vdistance]orchestration_start) 
     -- 
-    node[below=0.35*\distance, anchor=north] {3}
-    node[right=0.3*\distance, anchor=center] {$\rangle$}
-    ++(0, -0.6*\distance);
+    node[below=0.35*\vdistance, anchor=north] {3}
+    node[right=0.3*\hdistance, anchor=center] {$\rangle$}
+    ++(0, -0.6*\vdistance);
 \node[consistency preservation element, below=0.7em of orchestration_middle, anchor=north, annotation] {orchestrated sequence};
 \draw[consistency preservation element, -latex] 
-    ([xshift=\distance, yshift=0.5*\distance]orchestration_start) 
+    ([xshift=\hdistance, yshift=0.5*\vdistance]orchestration_start) 
     -- 
     node[right, stereotype] {\parameterizes} 
-    ++(0,2.7*\distance);
+    ++(0,2.7*\vdistance);
 
 % LABELS
-\node[above right=0.5em and 1.2*\distance of input_m2.north, anchor=south, font=\bfseries\small] {Process Inputs};
+\node[above right=0.5em and 1.2*\hdistance of input_m2.north, anchor=south, font=\bfseries\small] {Process Inputs};
 \node[above=0.5em of output_m2.north, anchor=south, font=\bfseries\small] {Process Output};
 
 \end{tikzpicture}
