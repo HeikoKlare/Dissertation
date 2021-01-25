@@ -89,6 +89,7 @@
 %%
 
 \def\difftoafiveimage{0mm}
+\def\isafour{0}
 %% Seitenformat
 \ifdinafiveformatksp
     \KOMAoptions{paper=a5, fontsize=10pt}
@@ -102,6 +103,7 @@
 \ifdinafourformatsdq
     \KOMAoptions{paper=a4, fontsize=12pt}
     \def\difftoafiveimage{22mm}
+    \def\isafour{1}
 \fi
 
 %% Satzspiegel
