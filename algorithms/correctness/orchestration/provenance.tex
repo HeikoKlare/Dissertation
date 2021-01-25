@@ -1,8 +1,7 @@
 \begin{algorithmic}[1]
 \Procedure{\function{ProvenanceApply}}{$\transformationset{T}, \modeltuple{m}, \changetuple{\metamodeltuple{M}}$}
     \algindentskip
-    \State $\mathvariable{isConsistent} \gets \function{CheckConsistency}(\transformationset{T}, \modeltuple{m})$
-    \If{$\neg \mathvariable{isConsistent}$}
+    \If{$\neg \function{CheckConsistency}(\transformationset{T}, \modeltuple{m})$}
         \State \Return{$\bot$} \label{algo:orchestration:provenance:line:bot_input}
     \EndIf
     \algblockskip
@@ -28,11 +27,10 @@
 
     \For{$\provalgcandidate \in \transformationset{T} \setminus \provalgexecuted \mid \changetuple{\metamodeltuple{M}}.\mathvariable{affects}(\provalgcandidate)$} \label{algo:orchestration:provenance:line:loop_start}
         \algindentskip
-        \State $\mathvariable{appResult} \gets \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{candidate}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ \label{algo:orchestration:provenance:line:first_execution}
-        \If{$\mathvariable{appResult} = \bot$}
-            \State \Return{$\bot$} \label{algo:orchestration:provenance:line:bot_application}
+        \State $\tupled{\modeltuple{m},\changetuple{\metamodeltuple{M},\mathvariable{candidate}}} \gets \generalizationfunction{\metamodeltuple{M}, \provalgcandidate}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ \label{algo:orchestration:provenance:line:first_execution}
+        \If{$\changetuple{\metamodeltuple{M},\mathvariable{candidate}} = \bot$}
+            \State \Return{$\bot$} \label{algo:orchestration:provenance:line:bot_first_execution}
         \EndIf
-        \State $\tupled{\modeltuple{m}, \changetuple{\metamodeltuple{M},\mathvariable{candidate}}} \gets \mathvariable{appResult}$
         \algblockskip
 
         %\State $\transformationset{T}_{\mathvariable{subnetwork}} \gets \transformationset{T}.\mathvariable{edgeInducedSubgraph}(\transformationset{T}_\mathvariable{executed})$
@@ -41,17 +39,23 @@
         \If{$\changetuple{\metamodeltuple{M},\mathvariable{propagation}} = \bot$}
             \State \Return{$\bot$} \label{algo:orchestration:provenance:line:bot_recursion}
         \EndIf
-        %\State $\changetuple{\metamodeltuple{M},\mathvariable{candidate}} \gets \mathvariable{candidate}.\mathvariable{execute}(\mathvariable{accumulatedChanges})$ \label{line:check-execution}
-        \State $\modeltuple{m}_{\mathvariable{propagation}} \gets \changetuple{\metamodeltuple{M},\mathvariable{propagation}}(\modeltuple{m})$ %\tupled{\change{\metamodel{M}{1},\mathvariable{propagation}}(\model{m}{1}), \dots, \change{\metamodel{M}{n},\mathvariable{propagation}}(\model{m}{n})}$
         \algblockskip
 
-        \State $\mathvariable{isConsistent}$ $\leftarrow$ $\function{CheckConsistency}(\provalgcandidate, \modeltuple{m}_{\mathvariable{propagation}})$
-        \If{$\neg \mathvariable{isConsistent}$} \label{algo:orchestration:provenance:line:bot_failcheck}
+        \State $\tupled{\modeltuple{m},\changetuple{\metamodeltuple{M},\mathvariable{candidate}}} \gets \generalizationfunction{\metamodeltuple{M}, \provalgcandidate}(\modeltuple{m}, \changetuple{\metamodeltuple{M},\mathvariable{propagation}})$ \label{algo:orchestration:provenance:line:second_execution}
+        \If{$\changetuple{\metamodeltuple{M},\mathvariable{candidate}} = \bot$}
+            \State \Return{$\bot$} \label{algo:orchestration:provenance:line:bot_second_execution}
+        \EndIf
+        \algblockskip
+        %\State $\changetuple{\metamodeltuple{M},\mathvariable{candidate}} \gets \mathvariable{candidate}.\mathvariable{execute}(\mathvariable{accumulatedChanges})$ \label{line:check-execution}
+        %\State $\modeltuple{m}_{\mathvariable{propagation}} \gets \changetuple{\metamodeltuple{M},\mathvariable{candidate}}(\modeltuple{m})$ %\tupled{\change{\metamodel{M}{1},\mathvariable{propagation}}(\model{m}{1}), \dots, \change{\metamodel{M}{n},\mathvariable{propagation}}(\model{m}{n})}$
+        %\algblockskip
+
+        \If{$\neg \function{CheckConsistency}(\provalgexecuted, \changetuple{\metamodeltuple{M},\mathvariable{candidate}}(\modeltuple{m}))$} \label{algo:orchestration:provenance:line:bot_failcheck}
             \State \Return{$\bot$} \label{algo:orchestration:provenance:line:bot_nonreactiveconverging}
         \EndIf
         \algblockskip
         
-        \State $\changetuple{\metamodeltuple{M}} \gets \changetuple{\metamodeltuple{M},\mathvariable{propagation}}$
+        \State $\changetuple{\metamodeltuple{M}} \gets \changetuple{\metamodeltuple{M},\mathvariable{candidate}}$
         \State $\provalgexecuted \gets \provalgexecuted \cup \setted{\provalgcandidate}$ \label{algo:orchestration:provenance:line:executed_update}
         \algindentskip
     \EndFor
@@ -60,4 +64,5 @@
     \State \Return{$\changetuple{\metamodeltuple{M}}$}
     \algindentskip
 \EndProcedure
+
 \end{algorithmic}
