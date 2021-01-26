@@ -88,29 +88,18 @@
 %% KONFIGURATION
 %%
 
-\newlength\difftoafiveimage
-\setlength\difftoafiveimage{0mm}
-\def\isafour{0}
-\newif\ifisafour
 %% Seitenformat
 \ifdinafiveformatksp
     \KOMAoptions{paper=a5, fontsize=10pt}
 \fi
 \ifscientificformatksp
     \KOMAoptions{paper=17cm:24cm, fontsize=10pt}
-    \setlength\difftoafiveimage{10mm}
 \fi
 \ifdinafourformatksp
     \KOMAoptions{paper=a4, fontsize=11pt}
-    \setlength\difftoafiveimage{25mm}
-    \def\isafour{1}
-    \isafourtrue
 \fi
 \ifdinafourformatsdq
     \KOMAoptions{paper=a4, fontsize=12pt}
-    \setlength\difftoafiveimage{22mm}
-    \def\isafour{1}
-    \isafourtrue
 \fi
 
 %% Satzspiegel
