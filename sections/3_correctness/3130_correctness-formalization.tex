@@ -405,12 +405,12 @@ We will thus also say that models are consistent to a transformation, which is s
     Let $\transformation{t} = \tupled{\consistencyrelation{CR}{}, \consistencypreservationrule{\consistencyrelation{CR}{}}}$ be a synchronizing transformation.
     We say that a tuple of models $\modeltuple{m}$ is \emph{consistent to} $\transformation{t}$ if, and only if, it is consistent to its consistency relation:
     \begin{align*}
-        \modeltuple{m} \consistenttomath \transformation{t} \equivalentperdefinition \modeltuple{m} \consistenttomath \consistencyrelation{CR}{}.
+        \modeltuple{m} \consistenttomath \transformation{t} \equivalentperdefinition \modeltuple{m} \consistenttomath \consistencyrelation{CR}{}
     \end{align*}
     %
     For a set of transformations $\transformationset{T}$, we say that a model tuple $\modeltuple{m}$ is \emph{consistent to} $\transformationset{T}$ if, and only if, it is consistent to all transformations in it:
     \begin{align*}
-        \modeltuple{m} \consistenttomath \transformationset{T} \equivalentperdefinition \forall \transformation{t} \in \transformationset{T} : \modeltuple{m} \consistenttomath \transformation{t}.
+        \modeltuple{m} \consistenttomath \transformationset{T} \equivalentperdefinition \forall \transformation{t} \in \transformationset{T} : \modeltuple{m} \consistenttomath \transformation{t}
     \end{align*}
 \end{definition}
 
@@ -497,8 +497,7 @@ We define a \emph{generalization function} for transformations, which generalize
 %\todo{Update usages of generalization function to support the case when it return bot}
 \begin{definition}[Transformation Generalization Function]
     \label{def:generalizationfunction}
-    Let $\transformation{t} = \tupled{\consistencyrelation{CR}{}, \consistencypreservationrule{\consistencyrelation{CR}{}}}$ be a transformation for metamodels $\metamodel{M}{i}, \metamodel{M}{k}$.
-    Let $\metamodeltuple{M} = \tupled{\metamodel{M}{1}, \dots, \metamodel{M}{i}, \dots, \metamodel{M}{k}, \dots, \metamodel{M}{n}}$ be a tuple of metamodels containing $\metamodel{M}{i}$ and $\metamodel{M}{k}$.
+    Let $\metamodeltuple{M} = \tupled{\metamodel{M}{1}, \dots, \metamodel{M}{i}, \dots, \metamodel{M}{k}, \dots, \metamodel{M}{n}}$ be a metamodel tuple and let $\transformation{t} = \tupled{\consistencyrelation{CR}{}, \consistencypreservationrule{\consistencyrelation{CR}{}}}$ be a transformation for metamodels $\metamodel{M}{i}, \metamodel{M}{k}$.
     A transformation generalization function $\generalizationfunction{\metamodeltuple{M},\transformation{t}}$ for metamodels $\metamodeltuple{M}$ and transformation $\transformation{t}$ is a partial function:
     \begin{align*}
         \generalizationfunction{\metamodeltuple{M},\transformation{t}} : (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}}) \rightarrow (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}}) \cup \setted{\bot}
@@ -507,21 +506,22 @@ We define a \emph{generalization function} for transformations, which generalize
     Let $\modeltuple{m} \in \metamodeltupleinstanceset{M}$ be a model tuple and let $\changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{i}}, \dots, \change{\metamodel{M}{k}}, \dots, \change{\metamodel{M}{n}}}$ be a change tuple.
     We define $\tupled{\change{\metamodel{M}{i}}', \change{\metamodel{M}{k}}'} \equalsperdefinition \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{i}, \model{m}{k}, \change{\metamodel{M}{i}}, \change{\metamodel{M}{k}})$.
     Then the generalization function is defined as:
-    \begin{align*}
-        &
-        \generalizationfunction{\metamodeltuple{M},\transformation{t}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \\
-        &
-        \formulaskip
-        = 
-        \begin{cases}
-            \bot, & 
-                \tupled{\change{\metamodel{M}{i}}', \change{\metamodel{M}{k}}'} = \bot \\
-            (\modeltuple{m}, \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{i}}' %\concatfunction \change{\metamodel{M}{i}}
-            , \dots, \change{\metamodel{M}{k}}'% \concatfunction \change{\metamodel{M}{k}}
-            , \dots, \change{\metamodel{M}{n}}}), & 
-                \otherwisemath
-        \end{cases}
-    \end{align*}
+    \newcommand{\localequation}[1]{
+        \begin{align*}
+            &
+            \generalizationfunction{\metamodeltuple{M},\transformation{t}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})
+            #1
+            \equalsperdefinition
+            \begin{cases}
+                \bot, & 
+                    \tupled{\change{\metamodel{M}{i}}', \change{\metamodel{M}{k}}'} = \bot \\
+                (\modeltuple{m}, \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{i}}', \dots, \change{\metamodel{M}{k}}', \dots, \change{\metamodel{M}{n}}}), & 
+                    \otherwisemath
+            \end{cases}
+        \end{align*}
+    }
+    % This is really hacky, yes, but I did not find a good way to put an if inside the align environment
+    \ifisafour \localequation{} \else \localequation{\\ & \formulaskip} \fi
 \end{definition}
 
 % \begin{definition}[\ModelLevelConsistencyPreservationRule Generalization Function]
