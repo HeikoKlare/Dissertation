@@ -31,7 +31,7 @@ Furthermore, we now focus on transformation-based approaches for preserving cons
 \subsection{Modular Consistency Specification}
 
 \mnote{Extensional specifications are relations}
-As already discussed informally before, an extensional specification of consistency defines a relation between models by enumerating all tuples of models that are considered consistent to each other.
+As discussed informally before, an extensional specification of consistency defines a relation between models by enumerating all tuples of models that are considered consistent.
 
 \begin{definition}[\ModelLevelConsistencyRelation]
     \label{def:modellevelconsistencyrelation}
@@ -45,33 +45,28 @@ As already discussed informally before, an extensional specification of consiste
 \end{definition}
 
 \mnote{Start with coarse-grained model-level relations}
-Given a tuple of models, we consider it consistent if it is contained in the consistency relation.
-This conforms to consistency definitions such as the one proposed by \textcite{stevens2010sosym} for bidirectional transformations.
-We explicitly denote this kind of consistency relation as \emph{model-level}, because we will later need to refine the notion of consistency relations to the level of \metaclasses and need to distinguish between the two.
+We consider a tuple of models consistent if the consistency relation contains it.
+This conforms to existing consistency definitions for bidirectional transformations~\cite{stevens2010sosym}.
+We denote this kind of consistency relation as \emph{model-level}, because we later need to refine the notion of consistency relations to the level of \metaclasses and distinguish them.
 
 \mnote{Modular notions of consistency}
-If a single relation describes consistency between all relevant models, consistency is directly defined by means of model tuples being contained in that relation. We call such a relation a \emph{monolithic relation}.
-However, if we have a \emph{modular} notion of consistency, i.e., a relation that does only define consistency between some of the relevant models and the global notion of consistency is defined by a combination of several such relations, we need an explicit definition for that notion.
-For the sake of simplicity, we focus on binary relations as a modular representation of consistency, but this definition could also be generalized to relations of arbitrary arity.
+If a single relation describes consistency between all relevant models, consistency is defined by means of model tuples being contained in that relation. We call such a relation \emph{monolithic}.
+If a relation only defines consistency between some of the relevant models and the global consistency relation is defined by a combination of several such relations, we need an explicit definition of such a \emph{modular} notion of consistency.
+For the sake of simplicity, we focus on \emph{binary} relations as a modular representation of consistency.
 
 \begin{definition}[Model-Level Consistency] 
     \label{def:modellevelconsistency}
-    Let $\metamodeltuple{M} =  \tupled{\metamodelsequence{M}{n}}$ be a tuple of metamodels and let $\consistencyrelation{CR}{i,j} \subseteq \metamodelinstanceset{M}{i} \times \metamodelinstanceset{M}{j}$ be a binary \modellevelconsistencyrelation for any two metamodels $\metamodel{M}{i}, \metamodel{M}{j} \in \metamodeltuple{M}$. %\setted{\metamodelsequence{M}{n}}$.
-    For a given tuple of models $\modeltuple{m} = \tupled{\model{m}{1}, \dots, \model{m}{n}} \in \metamodeltupleinstanceset{M}{}% = \metamodelinstanceset{M}{1} \times \dots \times \metamodelinstanceset{M}{n}
-    $, we say that $\modeltuple{m}$ is \emph{consistent to} $\consistencyrelation{CR}{i,j}$ if, and only if, the instances of $\metamodel{M}{i}$ and $\metamodel{M}{j}$ are in that relation:
+    Let $\metamodeltuple{M} =  \tupled{\metamodelsequence{M}{n}}$ be metamodels and let $\consistencyrelation{CR}{i,k} \subseteq \metamodelinstanceset{M}{i} \times \metamodelinstanceset{M}{k}$ be a binary \modellevelconsistencyrelation for $\metamodel{M}{i}, \metamodel{M}{k} \in \metamodeltuple{M}$. 
+    We say that a model tuple $\modeltuple{m} = \tupled{\model{m}{1}, \dots, \model{m}{n}} \in \metamodeltupleinstanceset{M}{}$ is \emph{consistent to} $\consistencyrelation{CR}{i,k}$ if, and only if, the instances of $\metamodel{M}{i}$ and $\metamodel{M}{k}$ are in that relation:
     \begin{align*} 
         &
-        \modeltuple{m} %= \tupled{\model{m}{1}, \dots, \model{m}{n}} 
-        \consistenttomath \consistencyrelation{CR}{i,j} \equivalentperdefinition %\\
-        %& \formulaskip
-        \tupled{\model{m}{i},\model{m}{j}} \in \consistencyrelation{CR}{i,j}
-        %\exists \model{m}{i} \in \metamodelinstanceset{M}{i}, \model{m}{j} \in \metamodelinstanceset{M}{j} : \model{m}{i} \in \modelset{m} \land \model{m}{j} \in \modelset{m} \land \tupled{\model{m}{i}, \model{m}{j}} \in \consistencyrelation{CR}{}
+        \modeltuple{m} \consistenttomath \consistencyrelation{CR}{i,k} \equivalentperdefinition 
+        \tupled{\model{m}{i},\model{m}{k}} \in \consistencyrelation{CR}{i,k}
     \end{align*}
     For a set of binary \modellevelconsistencyrelations $\consistencyrelationset{CR}$ for metamodels $\metamodeltuple{M}$, we say that a tuple of models $\modeltuple{m} \in \metamodeltupleinstanceset{M}{}$ is \emph{consistent to} $\consistencyrelationset{CR}$ if, and only if, it is consistent to each consistency relation in that set:
     \begin{align*} 
         &
-        \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \equivalentperdefinition %\\
-        %& \formulaskip
+        \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \equivalentperdefinition
         \forall \consistencyrelation{CR}{} \in \consistencyrelationset{CR} : \modeltuple{m} \consistenttomath \consistencyrelation{CR}{}
     \end{align*}
 \end{definition}
@@ -101,13 +96,13 @@ Although in the preceding exemplary case the binary relations are equivalent to 
 \end{figure}
 
 \mnote{Binary relations reduce expressiveness}
-It is easy to see that a combination of binary relations is not able to express the same consistency relations as one monolithic relation.
+Obviously, a combination of binary relations is not able to express the same consistency relations as one monolithic relation.
 For example, the monolithic relation $\consistencyrelation{CR}{} = \setted{\tupled{\model{m}{1}, \model{m}{2}, \model{m}{3}'}, \tupled{\model{m}{1}, \model{m}{2}', \model{m}{3}}, \tupled{\model{m}{1}', \model{m}{2}, \model{m}{3}}}$ cannot be expressed by binary relations, as also depicted in \autoref{fig:correctness:binary_definable}.
 The binary relations necessarily need to contain $\tupled{\model{m}{1}, \model{m}{2}}$ because $\tupled{\model{m}{1}, \model{m}{2}, \model{m}{3}'} \in \consistencyrelation{CR}{}$, $\tupled{\model{m}{1}, \model{m}{3}}$ because $\tupled{\model{m}{1}, \model{m}{2}', \model{m}{3}} \in \consistencyrelation{CR}{}$, and $\tupled{\model{m}{2}, \model{m}{3}}$ because $\tupled{\model{m}{1}', \model{m}{2}, \model{m}{3}} \in \consistencyrelation{CR}{}$. However, this would mean that $\tupled{\model{m}{1}, \model{m}{2}, \model{m}{3}}$ is considered consistent to the binary relations although it not consistent to the modular relation $\consistencyrelation{CR}{}$.
 Thus, using sets of binary relations in contrast to a single monolithic relation reduces expressiveness.
 \textcite{stevens2020BidirectionalTransformationLarge-SoSym} discusses the property of a multiary relation to be expressed by binary ones as \emph{binary-definable} in detail.
 She proposes restrictions to binary relations that may be sufficient and still practical for expressing consistency, such as a notion of \emph{binary-implemented} relations.
-However, we have reasoned the assumption that relations need to be specified independently and thus modularly anyway, thus we have to accept that these restrictions in expressiveness exists.
+We have, however, reasoned the assumption that relations need to be specified independently and thus modularly anyway, thus we have to accept that these restrictions in expressiveness exists.
 
 \begin{figure}
     \centering
@@ -118,18 +113,18 @@ However, we have reasoned the assumption that relations need to be specified ind
 \end{figure}
 
 \mnote{Contradictions of binary relations}
-Additionally, it is easy to define multiple binary relations of which each can be fulfilled by certain models, but for which no tuple of models exists that is consistent to all of them. Consider the relations $\consistencyrelation{CR}{1} = \setted{\tupled{\model{m}{1}, \model{m}{2}}}$, $\consistencyrelation{CR}{2} = \setted{\tupled{\model{m}{2}, \model{m}{3}}'}$, $\consistencyrelation{CR}{3} = \setted{\tupled{\model{m}{1}, \model{m}{3}}}$, which are also depicted at the left of \autoref{fig:correctness:contradictions_example}.
+Additionally, it can easily occur that multiple binary relations can be fulfilled by certain models, but no tuple of models exists that is consistent to all of them. Consider the relations $\consistencyrelation{CR}{1} = \setted{\tupled{\model{m}{1}, \model{m}{2}}}$, $\consistencyrelation{CR}{2} = \setted{\tupled{\model{m}{2}, \model{m}{3}}'}$, $\consistencyrelation{CR}{3} = \setted{\tupled{\model{m}{1}, \model{m}{3}}}$, which are also depicted at the left of \autoref{fig:correctness:contradictions_example}.
 Although for each of these relations a consistent tuple of models exists, which is exactly the one defined in each relation, no tuple of models exists that fulfills their combination.
-This example already demonstrates the worst case, in which no consistent models exist for a set of relations.
-In other cases, it may be possible that only for some models that are consistent according to one or some of the relations no model tuple exists that is consistent to all relations.
+This example illustrates the worst case, in which no consistent models exist for a set of relations.
+In other cases, only for some models that are consistent according to one or some of the relations no model tuple may exist that is consistent to all relations.
 Consider the relations $\consistencyrelation{CR}{1} = \setted{\tupled{\model{m}{1}, \model{m}{2}}}$, $\consistencyrelation{CR}{2} = \setted{\tupled{\model{m}{2}, \model{m}{3}}, \tupled{\model{m}{2}, \model{m}{3}'}}$, $\consistencyrelation{CR}{3} = \setted{\tupled{\model{m}{1}, \model{m}{3}}}$, which are also depicted at the right of \autoref{fig:correctness:contradictions_example}.
 In this case, the tuple $\tupled{\model{m}{1}, \model{m}{2}, \model{m}{3}}$ would be considered consistent to the relations, but although $\tupled{\model{m}{2}, \model{m}{3}'} \in \consistencyrelation{CR}{2}$ there exists no $\model{m}{1}^* \in \metamodelinstanceset{M}{1}$ so that $\tupled{\model{m}{1}^*, \model{m}{2}, \model{m}{3}'}$ is consistent to all these relations.
 
 \mnote{Forbidden models through relations}
-It is easy to see that one monolithic relation may be equally represented by an arbitrary number of sets of binary relations by simply adding model pairs to these binary relations that are never consistent to the other relations, like we have seen for the pair $\tupled{\model{m}{2}, \model{m}{3}}$ in the previous example.
+It is easy to see that one monolithic relation can be equally represented by an arbitrary number of sets of binary relations by simply adding model pairs to these binary relations that are never consistent to the other relations, like we have seen for the pair $\tupled{\model{m}{2}, \model{m}{3}}$ in the previous example.
 This means that the combination of relations can lead to the situation that some models are actually forbidden (like $\model{m}{3}$ in the example before) due to the combination of consistency relations.
-Whether such a situation is intended can eventually depend on the semantics of the models and relations, but we will discuss which situations may be unintended in general.
-We already informally discussed this as a notion of \emph{compatibility}, for which we investigate in \autoref{chap:compatibility} how far this behavior is or should be expected.
+Whether such a situation is intended can eventually depend on the semantics of the models and relations, but we will discuss which situations are unintended in general.
+We have informally discussed this as a notion of \emph{compatibility}, for which we investigate in \autoref{chap:compatibility} how far this behavior should be expected.
 
 
 \subsection{Incremental Consistency Preservation}
@@ -150,24 +145,24 @@ We, however, make this assumption to avoid requiring from the consistency preser
 From a theoretical point of view, we could omit that requirement, but this would make the specification of consistency preservation rules impractically complicated, such that omitting that requirement is not practically relevant anyway.
 
 \mnote{Monolithic and modular consistency preservation}
-Like we already discussed for consistency preservation rules in general, incremental preservation rules can be realized in an either monolithic or modular way.
-A monolithic consistency preservation rules takes a tuple of models that is consistent to a consistency relation and a change to these models and returns a tuple of models that is consistent again.
-In a modular specification of consistency preservation rules, a set of such rules is given which are able to preserve consistency of a subset of the given models according to modular consistency relations.
+Like we have discussed for consistency preservation rules in general, incremental preservation rules can be realized in an either monolithic or modular way.
+A monolithic consistency preservation rule takes a tuple of models that is consistent to a consistency relation and a change to these models and returns a tuple of models that is consistent again.
+In a modular specification of consistency preservation rules, a set of such rules is given of which each preserves consistency of a subset of the given models according to a modular consistency relation.
 In our case, we consider such rules for two models, each of them restoring consistency according to a binary consistency relation.
 
 \mnote{Drawbacks of existing consistency preservation approaches}
-In the terminology for transformations, a consistency preservation rule that restores consistency of models according to a consistency relation in one direction is called \emph{directional transformation}~\cite{stevens2010sosym} or \emph{consistency restorer}~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
-Definitions of that terminology do usually not consider changes but only states of models and simply define a consistency preservation rule $\consistencypreservationrule{}$ for metamodels $\metamodel{M}{1}$ and $\metamodel{M}{2}$ that modifies the instance of $\metamodel{M}{2}$ to restore consistency as:
+In existing terminology for transformations, a consistency preservation rule that restores consistency of models according to a consistency relation in one direction is called \emph{directional transformation}~\cite{stevens2010sosym} or \emph{consistency restorer}~\cite{stevens2020BidirectionalTransformationLarge-SoSym}.
+That terminology usually considers model states instead of changes and defines a consistency preservation rule $\consistencypreservationrule{}$ for metamodels $\metamodel{M}{1}$ and $\metamodel{M}{2}$ to modify the instance of $\metamodel{M}{2}$ for restoring consistency as:
 \begin{align*}
     \consistencypreservationrule{}: \metamodelinstanceset{M}{1} \times \metamodelinstanceset{M}{2} \rightarrow \metamodelinstanceset{M}{2}
 \end{align*}
 This notion, however, has two properties that imply essential drawbacks:
 \begin{properdescription}
-    \item[State-Based:] No information about the performed changes that led to the inconsistent state are given. This means that the specification is not aware of how the inconsistent state was reached.
+    \item[State-Based:] Information about the performed changes that led to the inconsistent state is missing. Thus the specification is not aware of how the inconsistent state was reached.
     \item[Unidirectional:] The unidirectionality of the specification always requires to only update one model to restore consistency.
 \end{properdescription}
-State-based transformations always suffer from the problem that it is unknown which changes were made that led to an inconsistent state and reconstructing them from the difference between two states is only a heuristic approximation~\cite{diskin2011StateToDeltaSymmetric-MODELS}.
-This, for example, includes that information about elements that were moved or renamed can potentially not be reconstructed, leading to elements that are deleted and created anew, losing all information that was potentially added to them.
+State-based transformations suffer from not knowing which changes were made that led to an inconsistent state, and reconstructing them from the difference between two states is only a heuristic approximation~\cite{diskin2011StateToDeltaSymmetric-MODELS}.
+This, for example, includes that information about elements that were moved or renamed can potentially not be reconstructed, leading to elements that are deleted and created anew and losing all information that was potentially added to them.
 Unidirectionality may be reasonable when assuming that only one of the models was modified. In that case it is sufficient to update the other model to restore consistency.
 With a modular specification of consistency preservation, however, several consistency preservation rules modifying the same models may need to be executed.
 
@@ -180,96 +175,72 @@ With a modular specification of consistency preservation, however, several consi
 \end{figure}
 
 \mnote{Counterexample for unidirectionality}
-\autoref{fig:correctness:unidirectionality_example} depicts an example why unidirectional consistency preservation rules cannot be applied when used in combination with others.
-If the depicted consistency preservation rules $\consistencypreservationrule{1}$ and $\consistencypreservationrule{2}$ are executed first, $\consistencypreservationrule{3}$ cannot be unidirectional, as both involved models $\model{m}{1}$ and $\model{m}{3}$ have been modified either by the user or by another consistency preservation rule.
+\autoref{fig:correctness:unidirectionality_example} depicts an example in which unidirectional consistency preservation rules cannot be applied when used in combination with others.
+If the depicted consistency preservation rules $\consistencypreservationrule{1}$ and $\consistencypreservationrule{2}$ are executed first, $\consistencypreservationrule{3}$ cannot be unidirectional, as both involved models $\model{m}{1}$ and $\model{m}{3}$ have been modified by either the user or another consistency preservation rule.
 Thus, in general, it is not possible to only consider changes in one model and unidirectionally propagate them to the other model.
-In consequence, the rules need to be able to deal with changes performed in both of the input models and, consequentially, need to update both models to reflect the changes in the other.
+In consequence, the rules need to be able to deal with changes performed in both models and, consequentially, need to update both models to reflect the changes in each other.
 
 \mnote{Synchronizing consistency preservation rules}
 To be able to combine several consistency preservation rules without the discussed drawbacks, we define a \emph{synchronizing} rather than a unidirectional notion of them.
-Those rules are able to react to changes in both models and produce changes in both models again.
+Those rules can react to changes in both models and produce changes in both models again.
 This is sometimes also called the capability of handling \emph{concurrent} modifications (e.g.~\cite{leblebici2014IncrementalTGGSurvey-GTVMT}).
-To precisely define this behavior, we first introduce a notion of \emph{changes} and afterwards of \emph{consistency preservation rules}, which we also refer to as \emph{synchronizing} consistency preservation rules.
+To precisely define this behavior, we introduce a notion of \emph{changes} and \emph{consistency preservation rules}, which we also refer to as \emph{synchronizing} consistency preservation rules.
 
 \mnote{Changes as functions}
 As motivated before, we base our notion of consistency preservation on changes to explicitly express how an inconsistent state was derived from a previously consistent one.
-We consider those changes to be functions that take a model and return a new one.
-They are explicitly not defined for a specific model but for all instances of one metamodel.
-This is reasonable, because a change is supposed to represent how specific elements are modified, such as adding, removing or modifying them.
+We consider these changes as functions that take a model and return a new one.
+They are not restricted to a specific model but defined for all instances of a metamodel, because a change is supposed to represent how specific elements are modified, such as adding, removing or modifying them.
 Thus, they can be applied to any models containing these affected elements.
-This is also how actual implementations, such as the one in \gls{EMF} behave.
-When the elements a change affects are missing a model, applying the change may fail.
-This is why we consider the function describing a change to be partial.
-We denote partiality by allowing the function to return $\bot$ to indicate inputs for which the function is undefined.
+This is also how actual implementations, such as the one in the \gls{EMF} behave.
+When elements affected by a change are not present in a model, applying the change may fail.
+For that reason, we consider the function describing a change to be partial.
+We denote partiality by returning $\bot$ for inputs the function is undefined for.
 \begin{definition}[Change]
     \label{def:change}
     Given a metamodel $\metamodel{M}{}$, a change $\change{\metamodel{M}{}}$ is a partial function that takes an instance of that metamodel and returns another one or $\bot$:
     \begin{align*}
         \change{\metamodel{M}{}}: \metamodelinstanceset{M}{} \rightarrow \metamodelinstanceset{M}{} \cup \setted{\bot}
     \end{align*}
-    It encodes any kind of modification, which may be just an element addition or removal, an attribute change and so on, or any composition of them.
-    We denote the identity change, i.e., the change that always returns the input model, as $\identitychange$:
+    We denote the identity change, i.e., the one always returning the input model, as $\identitychange$:
     \begin{align*}
         \identitychange(x) \equalsperdefinition x
     \end{align*}
-    We denote the universe of all changes in $\metamodel{M}{}$, i.e., all subsets of $\metamodelinstanceset{M}{} \times \metamodelinstanceset{M}{}$ that are injective, as:
+    We denote the universe of all changes in $\metamodel{M}{}$, i.e., all injective subsets of $\metamodelinstanceset{M}{} \times \metamodelinstanceset{M}{}$, as:
     \begin{align*}
         \changeuniverse{\metamodel{M}{}} \equalsperdefinition \setted{\change{\metamodel{M}{}} \subseteq \metamodelinstanceset{M}{} \times \metamodelinstanceset{M}{} \mid
         \tupled{\model{m}{1}, \model{m}{2}}, \tupled{\model{m}{1}, \model{m}{2}'} \in \change{\metamodel{M}{}} \Rightarrow \model{m}{2} = \model{m}{2}'}
     \end{align*}
+\end{definition}
+\begin{definition}[Change Tuple]
+    \label{def:changetuple}
     For a given metamodel tuple $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$, we denote a tuple of changes to an instance of each metamodel as:
     \begin{align*}
-        \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodel{M}{1}} \times \dots \times \changeuniverse{\metamodel{M}{n}} %\change{\metamodel{M}{i}} \in \changeuniverse{\metamodel{M}{i}}
+        \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodel{M}{1}} \times \dots \times \changeuniverse{\metamodel{M}{n}}
     \end{align*}
-    Likewise, we define the set of all tuples of changes in the instance tuples of 
-    $\metamodeltuple{M}$, i.e., in $\metamodeltupleinstanceset{M}$, as $\changeuniverse{\metamodeltuple{M}}$:
+    We define the universe of change tuples in instance tuples of 
+    $\metamodeltuple{M}$ as:
     \begin{align*}
-        \changeuniverse{\metamodeltuple{M}} \equalsperdefinition \changeuniverse{\metamodel{M}{1}} \times \dots \times \changeuniverse{\metamodel{M}{n}} %\setted{ \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \mid \forall i \in \setted{1,\dots,n} : \change{\metamodel{M}{i}} \in \changeuniverse{\metamodel{M}{i}} } 
+        \changeuniverse{\metamodeltuple{M}} \equalsperdefinition \changeuniverse{\metamodel{M}{1}} \times \dots \times \changeuniverse{\metamodel{M}{n}}
     \end{align*}
-    We define the application of a change tuple $\changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}}$ to a model tuple $\modeltuple{m} = \tupled{\modelsequence{m}{n}} \in \metamodeltupleinstanceset{M}$ as the element-wise application of the changes:
+    We define the application of a change tuple $\changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}}$ to a model tuple $\modeltuple{m} = \tupled{\modelsequence{m}{n}} \in \metamodeltupleinstanceset{M}$ as the element-wise application:
     \begin{align*}
         \changetuple{\metamodeltuple{M}}(\modeltuple{m}) = \tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \dots, \change{\metamodel{M}{n}}(\model{m}{n})}
     \end{align*}
 \end{definition}
 
 \mnote{Unapplicable changes}
-For us, it does not matter how the function describing a change behaves in cases, in which the encoded change cannot be applied, e.g., because the changed or removed element does not exist. The function may do nothing for those models, i.e., return the identical model, or even be undefined for those models, i.e., be partial and return $\bot$.
+For us, it does not matter how the function behaves in cases in which the encoded change cannot be applied, e.g., because the changed or removed element does not exist. The function may do nothing, i.e., return the identical model, or even be undefined for those models, i.e., be partial and return $\bot$.
 
 \mnote{Reasonable change behavior}
 In fact, we do not restrict the actual behavior of a change in any way.
-It may return an empty model regardless of the input, or may perform arbitrary changes to different models instead of affecting only specific elements.
-We omit such restrictions, because they are not necessary for us, although, in practice, they are usually given.
-Thus, further restricting the formalism would not provide any benefits.
-%\todoLater{Check whether this behavior is correct.}
-
-% \begin{definition}[\ModelLevelConsistencyPreservationRule]
-%     Let $\metamodel{M}{1}, \metamodel{M}{2}$ be two metamodels and $\consistencyrelation{CR}{} \subseteq \metamodelinstanceset{M}{1} \times \metamodelinstanceset{M}{2}$ a binary \modellevelconsistencyrelation between them.
-%     A \emph{\modellevelconsistencypreservationrule} $\consistencypreservationrule{\consistencyrelation{CR}{}}$ for the relation $\consistencypreservationrule{\consistencyrelation{CR}{}}$ is a function:
-%     \begin{align*}
-%         \consistencypreservationrule{\consistencyrelation{CR}{}} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \change{\metamodel{M}{1}}) \rightarrow \change{\metamodel{M}{2}}
-%     \end{align*}
-%     It takes two consistent models and a change in the first one and returns a change in the second one.
-%     We call a \modellevelconsistencypreservationrule \emph{correct} w.r.t. $\consistencyrelation{CR}{}$ if the resulting models when applying the input and output change are consistent to $\consistencyrelation{CR}{}$ again:
-%     \begin{align*}
-%         &
-%         \forall \model{m}{1} \in \metamodelinstanceset{M}{1}, \model{m}{2} \in \metamodelinstanceset{M}{2} :
-%         \tupled{\model{m}{1}, \model{m}{2}} \in \consistencyrelation{CR}{} \Rightarrow\\
-%         & \formulaskip
-%         \forall \change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}} :
-%         \exists \change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}} :\\
-%         & \formulaskip
-%         \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) = \change{\metamodel{M}{2}} 
-%         \land \tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}(\model{m}{2})} \in \consistencyrelation{CR}{}
-%     \end{align*}
-% \end{definition}
+It may return an empty model regardless of the input, or it may perform arbitrary changes to different models instead of affecting only specific elements.
+Since we do not need such restrictions, they are not reflected in the formalism.
 
 \mnote{Consistency preservation rules}
-With that notion of changes, we can define consistency preservation rules as functions receiving two models and changes to each of them and returning new changes to both models.
-While the general definition does not prescribe this, we assume only the resulting changes to be relevant after applying a consistency preservation rule.
-Thus, the resulting changes include the input changes and not both of them have to be executed consecutively.
+With that notion of changes, we can define consistency preservation rules as functions receiving two models and changes to them and returning new changes to both models.
+While the general definition does not prescribe this, we assume the resulting changes to include the input changes and not both of them have to be executed consecutively.
 This will also be reflected by a correctness notion for such rules.
 
-%\todo{Maybe remove \enquote{model-level} if we do not need a fine-grained notion of preservation rules. Maybe better call it \enquote{synchronizing} to be able to distinguish it from non-synchronizing ones later. -- No, not synchronizing, because other notion is only relevant in synchronization chapter, nowhere else.}
 \begin{definition}[Consistency Preservation Rule]
     \label{def:consistencypreservationrule}
     Let $\metamodel{M}{1}$ and $\metamodel{M}{2}$ be two metamodels and $\consistencyrelation{CR}{} \subseteq \metamodelinstanceset{M}{1} \times \metamodelinstanceset{M}{2}$ a binary \modellevelconsistencyrelation between them.
@@ -277,7 +248,6 @@ This will also be reflected by a correctness notion for such rules.
     \begin{align*}
         \consistencypreservationrule{\consistencyrelation{CR}{}} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}, \changeuniverse{\metamodel{M}{2}}) \rightarrow (\changeuniverse{\metamodel{M}{1}}, \changeuniverse{\metamodel{M}{2}}) \cup \setted{\bot}
     \end{align*}
-    %It takes two consistent models and a change in the first one and returns a change in the second one. 
 \end{definition}
 
 \mnote{Partial consistency preservation rules}
@@ -297,15 +267,12 @@ They do, however, encode the changes in terms of new model states rather than ex
 To consider a consistency preservation rule \emph{correct}, it has to return changes that, when applied to the input models, result in models that are consistent according to the \modellevelconsistencyrelation for which the preservation rule is defined.
 This conforms to the notion of correctness defined for bidirectional transformations~\cite{stevens2010sosym} and the notion of consistency given for synchronizers by \textcite{xiong2013SynchronizingConcurrentUpdates-SoSym}.
 
-%\todo{Revise such that the rule must not necessarily return a result (and also the definition of a rule itself), as it may be undefined for some inputs. Discuss that this is only a "can" requirement, so it is always possible to define a left-total CPR, because it can return any pair of consistent models (in the worst case always the same pair or the empty sets). We will later see that with other definitions this is a "must" requirement, but here we could, theoretically also require the CPR to always return a result. Nevertheless, practically we may want to support the case that the CPR cannot properly restore consistency for some inputs, e.g., because some of the input changes need to be reverted, which may not be wanted.
-%Discuss that we do not define for which inputs the function may be undefined. It is up to the developer to reasonably use the ability to specify the function partially. In the extreme case, the function could be undefined for all inputs, which does not make sense, but that is up to the developer.}
 \begin{definition}[Consistency Preservation Rule Correctness]
     \label{def:consistencypreservationrulecorrectness}
     Let $\consistencypreservationrule{\consistencyrelation{CR}{}}$ be a consistency preservation rule.
     We call $\consistencypreservationrule{\consistencyrelation{CR}{}}$ \emph{correct} if it either returns $\bot$ or changes that deliver models that are consistent to $\consistencyrelation{CR}{}$ if applied to the input models again:
     \begin{align*} &
-        \consistencypreservationrule{\consistencyrelation{CR}{}} \correctmath \equivalentperdefinition %\\
-        %& \formulaskip
+        \consistencypreservationrule{\consistencyrelation{CR}{}} \correctmath \equivalentperdefinition
         \forall 
         \model{m}{1} \in \metamodelinstanceset{M}{1}, 
         \model{m}{2} \in \metamodelinstanceset{M}{2},
@@ -319,20 +286,6 @@ This conforms to the notion of correctness defined for bidirectional transformat
         & \formulaskip\formulaskip
         \Rightarrow
         \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \change{\metamodel{M}{2}}'(\model{m}{2})} \consistenttomath \consistencyrelation{CR}{} \bigr)
-        % &
-        % \forall 
-        % \model{m}{1} \in \metamodelinstanceset{M}{1}, 
-        % \model{m}{2} \in \metamodelinstanceset{M}{2},
-        % \change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}},
-        % \change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}} :
-        % \tupled{\model{m}{1}, \model{m}{2}} \consistenttomath \consistencyrelation{CR}{} \Rightarrow\\
-        % & \formulaskip
-        % \exists 
-        % \change{\metamodel{M}{1}}' \in \changeuniverse{\metamodel{M}{1}},
-        % \change{\metamodel{M}{2}}' \in \changeuniverse{\metamodel{M}{2}} :
-        % \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}) = (\change{\metamodel{M}{1}}', \change{\metamodel{M}{2}}') \\
-        % & \formulaskip
-        % \land \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \change{\metamodel{M}{2}}'(\model{m}{2})} \consistenttomath \consistencyrelation{CR}{}
     \end{align*}
 \end{definition}
 
@@ -342,8 +295,6 @@ In fact, a valid (and especially correct) consistency preservation rule could al
 In consequence, the rule would simply revert all input changes to achieve a consistent state.
 Although this may not be the expected behavior, there is no reason to restrict this behavior by definition.
 Actually, the developer should specify a preservation rule in a \emph{reasonable} way, such that it provides any expected behavior.
-
-%A \modellevelconsistencypreservationrule is defined to restore consistency after a modification in a left model of the underlying \modellevelconsistencyrelation by creating a change for the right model. To consider consistency preservation rules that preserve consistency in the other direction, we regard the inverse of the consistency relation as well, denoted as $\inverseconsistencyrelation{CR}{} = \setted{\tupled{\model{m}{1}, \model{m}{2}} \mid \tupled{\model{m}{2}, \model{m}{1}} \in \consistencyrelation{CR}{}}$.
 
 \mnote{Transformations}
 We have already discussed that it is possible to define consistency relations and derive consistency preservation rules from them or to only define the consistency preservation rules, which then imply the consistency relations by their image, i.e., the set of all models that can be derived from applying the consistency preservation rule to any models and changes for which it is defined.
@@ -357,7 +308,7 @@ We thus define a \emph{synchronizing transformation}, in extension to \emph{bidi
 \end{definition}
 
 \mnote{Transformation correctness}
-We also use the short term \emph{transformation} to refer to a synchronizing transformation.
+We also use the short term \emph{transformation} for a synchronizing transformation.
 Correctness of a transformation is then given by correctness of its consistency preservation rule.
 
 \begin{definition}[Synchronizing Transformation Correctness]
@@ -373,20 +324,22 @@ Correctness of a transformation is then given by correctness of its consistency 
 \mnote{Hippocraticness}
 Transformations are usually expected to by \emph{hippocratic}~\cite{stevens2010sosym}.
 This means that a transformation, or more precisely its consistency preservation rule, does not perform any changes if the input changes applied to the input models already yield consistent models.
-The application of hippocraticness to synchronizing transformations can be defined as follows.
+We define the application of hippocraticness to synchronizing transformations as follows.
 \begin{definition}[Hippocratic Synchronizing Transformation]
     \label{def:hippocratictransformation}
     Let $\transformation{t} = \tupled{\consistencyrelation{CR}{}, \consistencypreservationrule{\consistencyrelation{CR}{}}}$ be a transformation for metamodels $\metamodel{M}{1}$ and $\metamodel{M}{2}$.
     We say that $\transformation{t}$ is \emph{hippocratic} if, and only if, it returns the input changes if their application to the input models yields consistent models:
+    \parameterizeformat{
     \begin{align*}
         &
         \transformation{t} \mathtextspacearound{hippocractic} \equivalentperdefinition
         \forall
         \model{m}{1} \in \metamodelinstanceset{M}{1}, \model{m}{2} \in \metamodelinstanceset{M}{2}, 
         \change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{2}}, \change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}} : \\
-        & \formulaskip[0.5em]
+        & #1 #2
         \tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}(\model{m}{2})} \in \consistencyrelation{CR}{} \Rightarrow \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}) = (\change{\metamodel{M}{1}}, \change{\metamodel{M}{2}})
     \end{align*}
+    }{\formulaskip}{\formulaskip[0.5em]}%
 \end{definition}
 
 \mnote{Benefits of hippocraticness}
@@ -415,26 +368,25 @@ We will thus also say that models are consistent to a transformation, which is s
 \end{definition}
 
 \mnote{Synchronization problem}
-Although \autoref{def:synchronizingtransformationcorrectness} precisely defines when we consider a transformation to be correct, it is unclear how to define a transformation that fulfills such a correctness property.
-In particular, most existing languages for specifying transformation are restricted to input changes to one model or at least to delivering changes to one model.
-We will thus discuss how we can achieve a correct synchronizing transformation by means of such a restricted formalism.
+Although \autoref{def:synchronizingtransformationcorrectness} precisely defines correctness of a transformation, it is unclear how to define a transformation that fulfills that property.
+In particular, most existing transformation languages are restricted to input changes to one model or to delivering changes to one model.
+We thus discuss how we can achieve a correct synchronizing transformation with such a restricted formalism.
 This question was introduced as \autoref{rq:correctness:synchronization} and an approach for that constitutes our contribution \autoref{contrib:correctness:synchronization}, which we discuss in \autoref{chap:synchronization}.
 
 
 \subsection{Transformation Orchestration}
 
 \mnote{Multiple transformations need orchestration}
-Having multiple transformations between several metamodels requires their orchestration, i.e., the decision which transformations have to be executed in which order, if consistency between instances of those metamodels shall be preserved after changes.
-We have discussed in \autoref{chap:correctness:notions_consistency:preservation} that transformations, or more precisely their consistency preservation rules, may be executed independently and thus concurrently, which requires their results to be unified, or to execute them consecutively.
-We have already identified the drawbacks of a concurrent execution approach, including the necessity to define unification operators and the missing guarantee to be consistent to any consistency relation after such a unification.
+Preserving consistency between instances of multiple metamodels after changes with multiple transformations requires their orchestration, i.e., the decision in which order to execute them.
+We have discussed in \autoref{chap:correctness:notions_consistency:preservation} that transformations, or more precisely their consistency preservation rules, may be executed independently, which requires their results to be unified, or to execute them consecutively.
+We have identified the drawbacks of concurrent execution, including the necessity to define unification operators and the missing guarantee of consistency after unification.
 This is why we follow the approach of consecutively executing transformations.
 
 \mnote{Orchestration function to determine execution order}
-To consecutively execute transformations, an order of their execution has to be determined.
-While in practice a dynamic algorithm will be used to determine that order, from a theoretical perspective that algorithm realizes a function that returns the order to execute the transformations in.
-We call this an \emph{orchestration function}, as it is responsible for orchestrating the execution of transformations.
+To consecutively execute transformations, an execution order has to be determined.
+While in practice a dynamic algorithm will determine that order, from a theoretical perspective that algorithm realizes a function that returns the order to execute the transformations in.
+We call this an \emph{orchestration function}, as it is responsible for orchestrating the transformation execution.
 
-%\todo{Prüfen, ob es valide ist, dass die Funktion nicht partiell ist. Man könnte bspw. sagen, die gibt im Fehlerfall einfach die leere Sequenz zurück. Dann müsste halt App prüfen, ob die Modelle schon konistent waren oder nicht.}
 \begin{definition}[Transformation Orchestration Function] \label{def:orchestrationfunction}
     Let $\transformationset{T}$ be a set of transformations with consistency relations and according consistency preservation rules for metamodels $\metamodeltuple{M}$.
     A transformation orchestration function $\orcfunction{\transformationset{T}}$ for these transformations is a function that delivers a sequence of transformations for given models and changes:
@@ -445,34 +397,14 @@ We call this an \emph{orchestration function}, as it is responsible for orchestr
     $\transformationset{T}^{< \mathbb{N}}$ denotes all finite sequences in $\transformationset{T}$, i.e., $\transformationset{T}^{< \mathbb{N}} \equalsperdefinition \emptyset \cup \transformationset{T}^1 \cup \transformationset{T}^2 \cup \dots$
 \end{definition}
 
-% \begin{definition}[Consistency Preservation Orchestration Function]
-%     Let $\consistencypreservationruleset{}$ be a set of consistency preservation rules for a set of consistency relations $\consistencyrelationset{CR}$ on metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$.
-%     A consistency preservation orchestration function $\consistencyorcfunction{\consistencypreservationruleset{}}$ for these rules is a function:
-%     \begin{align*}
-%         &
-%         \consistencyorcfunction{\consistencypreservationruleset{}} : (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}}) \rightarrow \consistencypreservationruleset{}^{< \mathbb{N}}
-%     \end{align*}
-%     $\consistencypreservationruleset{}^{< \mathbb{N}}$ denotes all finite sequences of consistency preservation rules in $\consistencypreservationruleset{}$, i.e., $\consistencypreservationruleset{}^{< \mathbb{N}} = \emptyset \cup \consistencypreservationruleset{}^1 \cup \consistencypreservationruleset{}^2 \cup \dots$.
-% \end{definition}
-
 \mnote{Repetitions in orchestration}
 According to this definition, the orchestration function returns a sequence of transformations and determines that their consistency preservation rules need to be executed in the given order. 
 This especially includes that transformations may occur more than once in such a sequence.
 
 \mnote{Existence of reasonable orchestrations}
 It is obvious that without further restrictions to the transformations it is possible that, for given transformations, models and changes to them, an orchestration function cannot find an execution order that returns a consistent tuple of models after certain changes.
-This can be the case because there is no such order, which is due to the transformations making local decisions to restore consistency for two models that are in no case consistent with the other transformations.
+Such an order may not exist, because due to the transformations making local decisions to restore consistency for two models that are never consistent with the other transformations.
 Additionally, even if such an order exists, it may not be possible to find it.
-
-% Consider the example in \autoref{fig:correctness:no_execution_order}. There exists no execution order for any input value that terminates. The transformations will always increase the value, although the defined relations could be fulfilled for the input value, but the transformations never find that solution.
-
-% \begin{figure}
-%     \centering
-%     \includegraphics[width=\textwidth]{figures/correctness/notion/divergence_example.png}
-%     \caption[Example for divergence]{Example for divergence}
-%     \todo{Change caption}
-%     \label{fig:correctness:no_execution_order}
-% \end{figure}
 
 \mnote{Decidability of existence of orchestration}
 We will discuss these problems in detail in \autoref{chap:orchestration} and investigate whether we can find restrictions for the transformations that ensure that an orchestration that delivers a consistent result always exists.
@@ -490,11 +422,8 @@ Consistency preservation rules according to \autoref{def:consistencypreservation
 Additionally, they require initial models and changes as input, but only return changes.
 For these two reasons, the functions describing the preservation rules cannot be easily concatenated.
 This, however, is necessary to compose them to formally describe their consecutive execution.
-We define a \emph{generalization function} for transformations, which generalizes them to arbitrary tuples of metamodels and a conforming signature for their input and output, which eases the description of their concatenation.
+We define a \emph{generalization function} for transformations, which generalizes them to arbitrary metamodel tuples and a conforming signature for their input and output, which eases the description of their concatenation.
 
-%\todo{Fix that transformation is a parameter and not index, rename function? We later have a generalization of consistency check}
-%\todo{Correct that generalization function may return bot when the consistency preservation rule does. Update all usages of it appropriately}
-%\todo{Update usages of generalization function to support the case when it return bot}
 \begin{definition}[Transformation Generalization Function]
     \label{def:generalizationfunction}
     Let $\metamodeltuple{M} = \tupled{\metamodel{M}{1}, \dots, \metamodel{M}{i}, \dots, \metamodel{M}{k}, \dots, \metamodel{M}{n}}$ be a metamodel tuple and let $\transformation{t} = \tupled{\consistencyrelation{CR}{}, \consistencypreservationrule{\consistencyrelation{CR}{}}}$ be a transformation for metamodels $\metamodel{M}{i}, \metamodel{M}{k}$.
@@ -505,57 +434,37 @@ We define a \emph{generalization function} for transformations, which generalize
     It generalizes the consistency preservation rule $\consistencypreservationrule{\consistencyrelation{CR}{}}$ of $\transformation{t}$ such that it can be applied to changes in $\metamodeltuple{M}$ instead of $\metamodel{M}{i}$ and $\metamodel{M}{k}$, i.e., it applies the changes delivered by $\consistencypreservationrule{\consistencyrelation{CR}{}}$ for the corresponding models to the given change tuple.
     Let $\modeltuple{m} \in \metamodeltupleinstanceset{M}$ be a model tuple and let $\changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{i}}, \dots, \change{\metamodel{M}{k}}, \dots, \change{\metamodel{M}{n}}}$ be a change tuple.
     We define $\tupled{\change{\metamodel{M}{i}}', \change{\metamodel{M}{k}}'} \equalsperdefinition \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{i}, \model{m}{k}, \change{\metamodel{M}{i}}, \change{\metamodel{M}{k}})$.
-    Then the generalization function is defined as:
-    \newcommand{\localequation}[1]{
-        \begin{align*}
-            &
-            \generalizationfunction{\metamodeltuple{M},\transformation{t}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})
-            #1
-            \equalsperdefinition
-            \begin{cases}
-                \bot, & 
-                    \tupled{\change{\metamodel{M}{i}}', \change{\metamodel{M}{k}}'} = \bot \\
-                (\modeltuple{m}, \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{i}}', \dots, \change{\metamodel{M}{k}}', \dots, \change{\metamodel{M}{n}}}), & 
-                    \otherwisemath
-            \end{cases}
-        \end{align*}
-    }
-    % This is really hacky, yes, but I did not find a good way to put an if inside the align environment
-    \ifisafour \localequation{} \else \localequation{\\ & \formulaskip} \fi
+    Then we define:
+    \parameterizeformat{
+    \begin{align*}
+        &
+        \generalizationfunction{\metamodeltuple{M},\transformation{t}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})
+        #2
+        \equalsperdefinition
+        \begin{cases}
+            \bot, & 
+                \tupled{\change{\metamodel{M}{i}}', \change{\metamodel{M}{k}}'} = \bot \\
+            (\modeltuple{m}, \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{i}}', \dots, \change{\metamodel{M}{k}}', \dots, \change{\metamodel{M}{n}}}), & 
+                \otherwisemath
+        \end{cases}
+    \end{align*}
+    }{}{\\ & \formulaskip}
 \end{definition}
-
-% \begin{definition}[\ModelLevelConsistencyPreservationRule Generalization Function]
-%     Let $\consistencypreservationrule{\consistencyrelation{CR}{}}$ be a \modellevelconsistencypreservationrule for metamodels $\metamodel{M}{i}, \metamodel{M}{k}$.
-%     Let $\metamodeltuple{M} = \tupled{\metamodel{M}{1}, \dots, \metamodel{M}{i}, \dots, \metamodel{M}{k}, \dots, \metamodel{M}{n}}$ be a tuple of metamodels containing $\metamodel{M}{i}$ and $\metamodel{M}{k}$.
-%     A \modellevelconsistencypreservationrule generalization function $\cprgeneralizationfunction{\consistencypreservationrule{\consistencyrelation{CR}{}}}$ is a function:
-%     \begin{align*}
-%         \cprgeneralizationfunction{\consistencypreservationrule{\consistencyrelation{CR}{}}} : (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}}) \rightarrow (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}})
-%     \end{align*}
-%     It generalizes $\consistencypreservationrule{\consistencyrelation{CR}{}}$ such that it can be applied to changes in $\metamodeltuple{M}$ instead of $\metamodel{M}{i}$ and $\metamodel{M}{k}$, i.e., it applies the changes delivered by $\consistencypreservationrule{\consistencyrelation{CR}{}}$ for the relevant models to the given change tuple.
-%     Let $\modeltuple{m} \in \metamodeltupleinstanceset{M}$ be a model tuple and $\changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{i}}, \dots, \change{\metamodel{M}{k}}, \dots, \change{\metamodel{M}{n}}}$ a change tuple.
-%     We define $\tupled{\change{m}{i}', \change{m}{k}'} \equalsperdefinition \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{i}, \model{m}{k}, \change{\metamodel{M}{i}}, \change{\metamodel{M}{k}})$.
-%     Then the generalization function is defined as:
-%     \begin{align*}
-%         \cprgeneralizationfunction{\consistencypreservationrule{\consistencyrelation{CR}{}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) =
-%         (\modeltuple{m}, \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{i}}' \concatfunction \change{\metamodel{M}{i}}, \dots, \change{\metamodel{M}{k}}' \concatfunction \change{\metamodel{M}{k}}, \dots, \change{\metamodel{M}{n}}})
-%     \end{align*}
-% \end{definition}
 
 \mnote{Partial generalization function}
 Like consistency preservation rules, a generalization function must also be partial, returning $\bot$ in cases it is undefined, to reflect cases in which it cannot return a result.
 This is a direct consequence of consistency preservation rules being partial, thus a generalization function is defined to return $\bot$ in exactly the same cases as the consistency preservation rule it generalizes.
 
 \mnote{Generalization function is universal}
-The generalization function is a universally-defined auxiliary function that is only necessary to formalize the concepts.
-It must neither be defined individually for a specific transformation, nor must it be explicitly specified by a developer of transformations at all.
+The generalization function is a universally-defined auxiliary function only necessary for formalizing the concepts.
+It must neither be specialized for each transformation, nor must a transformation developer specify it at all.
 
 \mnote{Dealing with unresolvable cases}
-Finally, either the orchestration function or an application function must also be able to reflect the cases in which no execution order of transformation can be found that restores consistency.
-In accordance to the terminology of \textcite{stevens2020BidirectionalTransformationLarge-SoSym}, we call those cases \emph{unresolvable}.
-From a theoretical perspective, it does not make a difference whether the orchestration or the application function makes that decision. 
-The orchestration function could also directly be encoded into the application function from a theoretical perspective.
-From a practical perspective, however, we may want to be able to determine an execution order although there is no order that results in a consistent state.
-This allows us to find out why it is not possible to restore consistency, thus, e.g., which transformation induces that problem.
+Finally, either the orchestration function or an application function must be able to reflect the cases in which no execution order of transformation that restores consistency can be found.
+In accordance to the terminology of \textcite{stevens2020BidirectionalTransformationLarge-SoSym}, we call these cases \emph{unresolvable}.
+From a theoretical perspective, it does not make a difference whether the orchestration or application function makes that decision, as the orchestration function could even be encoded into the application function.
+From a practical perspective, however, we may want to determine an execution order even if there is no order that results in a consistent state.
+This supports finding out why no such order is found, e.g., which transformation induces that problem.
 
 \mnote{Application function}
 We define a transformation application function that applies transformations to a given tuple of models and changes according to an order delivered by an orchestration function.
@@ -563,35 +472,32 @@ This function is partial to allow it to indicate that no result with consistent 
 We indicate those cases with the result $\bot$.
 
 \begin{definition}[Transformation Application Function] \label{def:applicationfunction}
-    Let $\transformationset{T}$ be a set of synchronizing transformations for consistency relations $\consistencyrelationset{CR}$ on metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$ and $\orcfunction{\transformationset{T}}$ an orchestration function for them.
-    A transformation application function $\appfunction{\orcfunction{\transformationset{T}}}$ for these rules is a partial function:
+    Let $\transformationset{T}$ be a synchronizing transformations set for consistency relations $\consistencyrelationset{CR}$ on metamodels $\metamodeltuple{M}$ and $\orcfunction{\transformationset{T}}$ an orchestration function.
+    A transformation application function $\appfunction{\orcfunction{\transformationset{T}}}$ for them is a partial function:
     \begin{align*}
         &
         \appfunction{\orcfunction{\transformationset{T}}} : (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}}) \rightarrow \metamodeltupleinstanceset{M} \cup \setted{\bot}
     \end{align*}
-    The function takes a consistent tuple of models and a tuple of changes that was performed on them and returns a changed tuple of models by acquiring changes from the consistency preservation rules of $\transformationset{t}$. %It is partial, because it is allowed to return $\bot$ especially for inconsistent input models but potentially also in other cases. 
+    The function takes a consistent tuple of models and a tuple of changes that was performed on them and returns a changed tuple of models by acquiring changes from the consistency preservation rules of $\transformationset{t}$.
     Thus, it has to fulfill the following condition:
+    \parameterizeformat{
     \begin{align*}
         &
         \forall \modeltuple{m} \in \setted{\modeltuple{m} \in  \metamodeltupleinstanceset{M} \mid \modeltuple{m} \consistenttomath \consistencyrelationset{CR}} : \forall \changetuple{\metamodeltuple{M}} \in \changeuniverse{\metamodeltuple{M}} : \\
-        & \formulaskip[0.5em]
+        & #1 #2
         \big[
-        %\appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \bot \\
-        %& \formulaskip 
-        %\lor
             \big(\exists \modeltuple{m'} \in \metamodeltupleinstanceset{M} : 
             \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \modeltuple{m'} \big) \Rightarrow\\
-            & \formulaskip[0.5em] \formulaskip
+            & #1 #2 \formulaskip
             \big(\exists \transformation{t}_{1}, \dots, \transformation{t}_{m} \in \transformationset{T} :
-            \exists \changetuple{\metamodeltuple{M}}' \in \changeuniverse{\metamodeltuple{M}} : %\\
-            %& \formulaskip \formulaskip \formulaskip
+            \exists \changetuple{\metamodeltuple{M}}' \in \changeuniverse{\metamodeltuple{M}} :
             \orcfunction{\transformationset{T}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \sequenced{\transformation{t}_{1}, \dots, \transformation{t}_{m}} \\
-            & \formulaskip[0.5em] \formulaskip
-            \land \generalizationfunction{\metamodeltuple{M},\transformation{t}_{1}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M},\transformation{t}_{m}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}') %\\
-            %& \formulaskip \formulaskip \formulaskip
+            & #1 #2 \formulaskip
+            \land \generalizationfunction{\metamodeltuple{M},\transformation{t}_{1}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M},\transformation{t}_{m}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}') 
             \land \changetuple{\metamodeltuple{M}}'(\modeltuple{m}) = \modeltuple{m'}
         \big)\big]
     \end{align*}
+    }{\formulaskip}{\formulaskip[0.5em]}%
 \end{definition}
 
 \mnote{Weak notion of correctness}
@@ -608,84 +514,25 @@ For now, we stick to the simple notion of correctness that the application funct
 \begin{definition}[Transformation Application Function Correctness]
     \label{def:applicationfunctioncorrectness}
     Let $\appfunction{\orcfunction{\transformationset{T}}}$ be an application function for an orchestration function $\orcfunction{\transformationset{T}}$ for transformations $\transformationset{T}$.
-    Let $\consistencyrelationset{CR}$ be the set of consistency relations for which the transformations in $\transformationset{T}$ are defined.
+    Let $\consistencyrelationset{CR}$ be the set of consistency relations of transformations in $\transformationset{T}$.
     We say that $\appfunction{\orcfunction{\transformationset{T}}}$ is \emph{correct} if, and only if, its result is either $\bot$ or consistent to $\consistencyrelationset{CR}{}$ for all inputs:
     \begin{align*}
         &
-        \appfunction{\orcfunction{\transformationset{T}}} \correctmath \equivalentperdefinition %\\
-        %& \formulaskip
+        \appfunction{\orcfunction{\transformationset{T}}} \correctmath \equivalentperdefinition
         \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \forall \changetuple{\metamodeltuple{M}} \in \changeuniverse{\metamodeltuple{M}} :
         \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \\
         & \formulaskip
         \Rightarrow \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \bot \lor \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \consistenttomath \consistencyrelationset{CR}
     \end{align*}
 \end{definition}
-% \begin{definition}[Consistency Preservation Application Function]
-%     \todo{Define for transformations instead?}
-%     Let $\consistencypreservationruleset{}$ be a set of consistency preservation rules for a set of consistency relations $\consistencyrelationset{CR}$ on metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$ and $\consistencyorcfunction{\consistencypreservationruleset{}}$ an orchestration function for the consistency preservation rules.
-%     A consistency preservation application function $\consistencyappfunction{\consistencypreservationruleset{}}$ for these rules is a partial function:
-%     \begin{align*}
-%         &
-%         \consistencyappfunction{\consistencyorcfunction{\consistencypreservationruleset{}}} : (\metamodeltupleinstanceset{M}, \changeuniverse{\metamodeltuple{M}}) \rightarrow \metamodeltupleinstanceset{M} \cup \setted{\bot}
-%     \end{align*}
-%     The function takes a consistent tuple of models and a tuple of changes that was performed on them and returns a changed tuple of models by acquiring changes from the consistency preservation rules in $\consistencypreservationruleset{}$. It is partial, because it is allowed to return $\bot$ especially for inconsistent input models but potentially also in other cases. It has to fulfill the following conditions:
-%     \begin{align*}
-%         &
-%         \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \forall \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} :
-%         \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \Rightarrow \\
-%         & \formulaskip
-%         \big( \consistencyappfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \bot \\
-%         & \formulaskip 
-%         \lor
-%             \exists \modeltuple{m'} \in \metamodeltupleinstanceset{M} : 
-%             \consistencyappfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \modeltuple{m'} \land\\
-%             & \formulaskip \formulaskip
-%             \exists \consistencypreservationrule{1}, \dots, \consistencypreservationrule{m} \in \consistencypreservationruleset{} : %\\
-%             %& \formulaskip \formulaskip
-%             \exists \changetuple{\metamodeltuple{M}}' = \tupled{\change{\metamodel{M}{1}}', \dots, \change{\metamodel{M}{n}}'} \in \changeuniverse{\metamodeltuple{M}} :\\
-%             & \formulaskip \formulaskip
-%             \consistencyorcfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \tupled{\consistencypreservationrule{1}, \dots, \consistencypreservationrule{m}} \\
-%             & \formulaskip \formulaskip
-%             \land \cprgeneralizationfunction{\consistencypreservationrule{1}} \concatfunction \dots \concatfunction \cprgeneralizationfunction{\consistencypreservationrule{m}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}')\\
-%             & \formulaskip \formulaskip
-%             \land \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \dots, \change{\metamodel{M}{n}}'(\model{m}{n})} = \modeltuple{m'}
-%         \big)
-%     \end{align*}
-%     We say that $\consistencyappfunction{\consistencyorcfunction{\consistencypreservationruleset{}}}$ is \emph{correct} if its result is either $\bot$ or consistent to $\consistencyrelation{CR}{}$:
-%     \begin{align*}
-%         &
-%         \consistencyappfunction{\consistencypreservationruleset{}} \mathtext{is correct} \equivalentperdefinition \\
-%         & \formulaskip
-%         \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \forall \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} :
-%         \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \Rightarrow \\
-%         & \formulaskip
-%         \consistencyappfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \bot \lor \consistencyappfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \consistenttomath \consistencyrelationset{CR}
-%     \end{align*}
-% \end{definition}
-
-% The definition of the application function basically ensures that the function either returns $\bot$ or executes the \modellevelconsistencypreservationrules given by the orchestration function to retrieve a changes tuple of models.
-% Actually, we want to have a notion of \emph{correctness}, because the function should not return a tuple of models that is not consistent.
-
-% \begin{definition}[Correct Consistency Preservation Application Function]
-%     Let $\consistencypreservationruleset{}$ be a set of consistency preservation rules for a set of consistency relations $\consistencyrelationset{CR}$ on metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$ and $\consistencyorcfunction{\consistencypreservationruleset{}}$ an orchestration function for the consistency preservation rules.
-%     We say that:
-%     \begin{align*}
-%         &
-%         \consistencyappfunction{\consistencypreservationruleset{}} \mathtext{is correct} \equivalentperdefinition \\
-%         & \formulaskip
-%         \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \forall \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} :
-%         \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \Rightarrow \\
-%         & \formulaskip
-%         \consistencyappfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \bot \lor \consistencyappfunction{\consistencypreservationruleset{}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \consistenttomath \consistencyrelationset{CR}
-%     \end{align*}
-% \end{definition}
 
 \mnote{Conservativeness more relevant}
-This, in fact, is a rather weak notion of correctness. 
-Actually, an application function that always returns $\bot$ is correct according to that definition.
-Due to the fact that the orchestration and application function have to operate conservatively, a binary correctness notion is not that relevant anyway.
-Rather the degree of conservativeness, i.e., how often it returns no result although one exists, and how to improve it is of special interest.
-The question how such an orchestration can or should look like was introduced as \autoref{rq:correctness:orchestration} and the degrees of freedom as well as a concrete approach will be presented as contribution \autoref{contrib:correctness:orchestration} in \autoref{chap:orchestration}.
+This is, in fact, a rather weak notion of correctness.
+An application function that always returns $\bot$ is actually considered correct according to that definition.
+Because the orchestration and application function have to operate conservatively, a binary correctness notion is not that relevant anyway.
+Rather the degree of conservativeness is of special interest, i.e., how often it returns no result although one exists and how it can be improved.
+The question how to determine such an orchestration was introduced as \autoref{rq:correctness:orchestration}.
+We present the degrees of freedom and a concrete approach as contribution \autoref{contrib:correctness:orchestration} in \autoref{chap:orchestration}.
 
 
 \subsection{Transformation Networks}
@@ -695,10 +542,9 @@ Based on the previous definitions of transformations, orchestration and applicat
 A transformation network is composed of transformations, an orchestration and an application function.
 Although we define these artifacts specifically for one transformation network, i.e., an orchestration and application function according to their definitions are specific for one set of transformations, the goal will be to find an orchestration and application function that is independent from the actual transformations.
 
-%\todo{Maybe also metamodels in transformation and networks?}
 \begin{definition}[Transformation Network]
     \label{def:transformationnetwork}
-    Let $\transformationset{T}$ be a set of transformations, $\orcfunction{\transformationset{T}}$ an orchestration function for these transformations and $\appfunction{\orcfunction{\transformationset{T}}}$ an application function.
+    Let $\transformationset{T}$ be a transformation set, $\orcfunction{\transformationset{T}}$ an orchestration function for these transformations and $\appfunction{\orcfunction{\transformationset{T}}}$ an application function.
     A transformation network $\transformationnetwork{N}$ is a triple:
     \begin{align*}
         \transformationnetwork{N} \equalsperdefinition \tupled{\transformationset{T}, \orcfunction{\transformationset{T}}, \appfunction{\orcfunction{\transformationset{T}}}}
@@ -706,17 +552,16 @@ Although we define these artifacts specifically for one transformation network, 
 \end{definition}
 
 \mnote{Correctness of transformation networks}
-Correctness of a transformation network is given by correctness of both the individual transformations as well as the application function, according to \autoref{def:synchronizingtransformationcorrectness} and \autoref{def:applicationfunctioncorrectness}.
-We say that the transformations ensure \emph{local consistency}, because they are able to achieve consistency locally for two models, whereas the application function achieves \emph{global consistency} by applying the individual transformations in a way such that all models are consistent according to all transformations afterwards.
+Correctness of a transformation network is given by correctness of the individual transformations and the application function, according to \autoref{def:synchronizingtransformationcorrectness} and \autoref{def:applicationfunctioncorrectness}.
+We say that the transformations ensure \emph{local consistency}, because they locally achieve consistency for two models, whereas the application function achieves \emph{global consistency} by applying the transformations such that all models are consistent to all transformations.
 
 \begin{definition}[Transformation Network Correctness]
     \label{def:transformationnetworkcorrectness}
     Let $\transformationnetwork{N} = \tupled{\transformationset{T}, \orcfunction{\transformationset{T}}, \appfunction{\orcfunction{\transformationset{T}}}}$ be a transformation network.
-    We say that $\transformationnetwork{N}$ is \emph{correct} if, and only if, its transformations in $\transformationset{T}$ as well as the application function $\appfunction{\orcfunction{\transformationset{T}}}$ are correct:
+    We say that $\transformationnetwork{N}$ is \emph{correct} if, and only if, its transformations in $\transformationset{T}$ and the application function $\appfunction{\orcfunction{\transformationset{T}}}$ are correct:
     \begin{align*}
         & 
-       \transformationnetwork{N} \correctmath \equivalentperdefinition %\\
-        %& \formulaskip
+       \transformationnetwork{N} \correctmath \equivalentperdefinition
         \forall \transformation{t} \in \transformationset{T} : \transformation{t} \correctmath \land \appfunction{\orcfunction{\transformationset{T}}} \correctmath
     \end{align*}
 \end{definition}

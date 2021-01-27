@@ -8,37 +8,16 @@
 Before we formally define the above introduced artifacts, such as consistency relations, consistency preservation rules, an orchestration function and an application function, we first discuss different notions of \emph{correctness} for them.
 Since there are different dimensions of correctness, we need to clarify which of them is relevant in the context of our research questions and will be defined in the formalization.
 
-% \begin{definition}[Monolithic \ModelLevelConsistencyPreservationRule]
-%     Given two metamodels $\metamodeltuple{M} = \tupled{\metamodelsequence{M}{n}}$ and a \modellevelconsistencyrelation between them $\consistencyrelation{CR}{} \subseteq \metamodelinstanceset{M}{1} \times \dots \times \metamodelinstanceset{M}{n}$.
-%     A \emph{monolithic \modellevelconsistencypreservationrule} is a function:
-%     \begin{align*}
-%         \consistencypreservationrule{\consistencyrelation{CR}{}} : (\metamodeltupleinstanceset{M}, \metamodelinstanceset{M}{2}, \change{\metamodel{M}{1}}) \rightarrow \change{\metamodel{M}{2}}
-%     \end{align*}
-%     It that takes two consistent models and a change in the first one and returns a change in the second one.
-%     We call a \modellevelconsistencypreservationrule \emph{correct} w.r.t. $\consistencyrelation{CR}{}$ if the resulting models when applying the input and output change are consistent to $\consistencyrelation{CR}{}$ again:
-%     \begin{align*}
-%         &
-%         \forall \model{m}{1} \in \metamodelinstanceset{M}{1}, \model{m}{2} \in \metamodelinstanceset{M}{2} :
-%         \tupled{\model{m}{1}, \model{m}{2}} \in \consistencyrelation{CR}{} \Rightarrow\\
-%         & \formulaskip
-%         \forall \change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}} :
-%         \exists \change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}} :\\
-%         & \formulaskip
-%         \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) = \change{\metamodel{M}{2}} 
-%         \land \tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}(\model{m}{2})} \in \consistencyrelation{CR}{}
-%     \end{align*}
-% \end{definition}
-
 
 \subsection{Relative Correctness Notions}
 
 \mnote{Intuitive notion of correctness}
 The overall objective regarding correctness of consistency preservation is to find models that are actually consistent.
 Intuitively speaking, artifacts are correct if they fulfill their intended purpose. 
-In our case, this means that consistency relations should consider models consistent whenever they are actually supposed to be considered consistent. 
-Consistency preservation rules should return models that are actually consistent according to a consistency relation to be considered correct.
-This also conforms to the notion of correctness for transformations, which realize consistency preservation rules, defined by \textcite{stevens2010sosym}.
-And finally, the orchestration and application functions should execute the consistency preservation rules such that all models are consistent according to all relations afterwards.
+In our case, this means that consistency relations should consider models consistent whenever they are actually supposed to be considered consistent.
+Consistency preservation rules should return models that are consistent according to a consistency relation to be considered correct.
+This also conforms to existing notions of correctness for transformations~\cite{stevens2010sosym}, which realize consistency preservation rules.
+And finally, the orchestration and application functions should execute the consistency preservation rules such that they yield models that are consistent according to all relations afterwards.
 
 \mnote{Correctness is relative}
 Correctness of an artifact is usually considered with respect to some other specification, be it formally defined or only an informal notion.
@@ -51,8 +30,7 @@ In the latter case, the consistency preservation rule will always be correct by 
 
 \mnote{Correctness of modular w.r.t. monolithic specification}
 We previously distinguished between monolithic and modular notions of consistency.
-In the above considerations, we relate the artifacts of a modular %(or in the special case also a monolithic) 
-specification to each other.
+In the above considerations, we relate the artifacts of a modular specification to each other.
 Another notion of correctness can be defined by relating a modular artifact to a corresponding monolithic artifact.
 For example, a set of modular consistency relations may be considered correct with respect to a monolithic relation when it considers the same tuples of models consistent.
 For three metamodels $\metamodel{M}{1}, \metamodel{M}{2}, \metamodel{M}{3}$ with three modular consistency relations $\consistencyrelation{CR}{1,2}, \consistencyrelation{CR}{1,3}, \consistencyrelation{CR}{2,3}$ between them, as well as a ternary consistency relation $\consistencyrelation{CR}{1,2,3}$, we could say that $\consistencyrelation{CR}{1,2}, \consistencyrelation{CR}{1,3}, \consistencyrelation{CR}{2,3}$ are correct (with respect to $\consistencyrelation{CR}{1,2,3}$) if, and only if,
@@ -88,7 +66,7 @@ That notion of correctness assumes that there is some kind of global truth that 
 This, however, has two essential drawbacks:
 \begin{properdescription}
     \item[Validation Artifacts:] The artifacts to validate correctness against, i.e., the global, monolithic consistency relation as well as an appropriate monolithic consistency preservation rule, do usually not exist. If they existed, they could directly be used to preserve consistency. Thus, it is impossible to validate a set of consistency relations and consistency preservation rules against such a global specification.
-    \item[Modular Knowledge:] This notion of correctness requires that the developers have some global knowledge that represents a monolithic consistency relation and its consistency preservation rule. As discussed before, we assume  the knowledge about relations between models to be usually distributed across several persons. Thus, there will not be such a global knowledge and not even an implicit notion of the necessary artifacts to validate the modular specifications against exists. % not to mention an explicit representation.
+    \item[Modular Knowledge:] This notion of correctness requires that the developers have some global knowledge that represents a monolithic consistency relation and its consistency preservation rule. As discussed before, we assume  the knowledge about relations between models to be usually distributed across several persons. Thus, there will not be such a global knowledge and not even an implicit notion of the necessary artifacts to validate the modular specifications against exists.
 \end{properdescription}
 %
 Since this conflicts with our assumption of distributed knowledge about relations and independently developed, modular specifications, we do not further consider this notion of consistency.
@@ -119,7 +97,7 @@ Identifying an appropriate notion of \emph{compatibility} and how to check it co
 
 \mnote{Induction of monolithic relation}
 In fact, every set of modular consistency relations induces a monolithic one.
-This monolithic relation $\consistencyrelation{CR}{}$ for metamodels $\metamodelsequence{M}{n}$ and pairwise consistency relations $\consistencyrelation{CR}{i,j}$ is defined by:
+The monolithic relation $\consistencyrelation{CR}{}$ for metamodels $\metamodelsequence{M}{n}$ and pairwise relations $\consistencyrelation{CR}{i,j}$ is defined by:
 \begin{align*}
     \consistencyrelation{CR}{} = \setted{\tupled{\model{m}{1}, \dots, \model{m}{n}} \mid \bigwedge\limits_{1 \le i < j \le n} \tupled{\model{m}{i}, \model{m}{j}} \in \consistencyrelation{CR}{i,j}}
 \end{align*}

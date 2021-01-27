@@ -1,15 +1,6 @@
 \section{A Fine-Grained Notion of Consistency}
 \label{chap:correctness:finegrained}
 
-%\begin{copiedFrom}{SoSym MPM4CPS}
-
-% \todo{Check whether we discuss why we do not use explicit trace models, adapt prototypical implementation reference in evaluation
-% -> Will be added by fine-grained consistency relations}
-
-% \todo{Fine-grained relations hierher verschieben. Diskutieren, dass model-level relations im Prinzip erstmal ausreichend für allgemeine Betrachtungen (z.B. und insbesondere für den Formalismus als Ganzes wie auch speziell die Orchestrierung). Daher zunächst der allgemeine Formalismus. Später der feingranulerer und praxisnähere Formalismus, der insb. für Kompatibilität eingeführt wird. Ist aber im Prinzip gleichbedeutend. Feingranularer Konsistenzbegriff: Wir sagen nicht wann zwei Modelle konsistent sind, sondern was wir im zweiten Modell erwarten, wenn in dem ersten etwas vorhanden ist. So drücken es auch Transformationssprachen aus.
-% CPRs bleiben gleich auf feingranularen CRs. Transformation besteht dann aus mehreren CRs und einer CPR.
-% Das definieren wir aber nicht neu, sondern sagen und zeigen in Prosa einfach nur, dass das so ist (ergibt sich daraus, dass jede Menge von feingranulare CRs eine model-level CR induziert). Damit ist das ohne weitere Definitionen abgefrühstückt.}
-
 \mnote{Fine-grained understanding of consistency}
 We have up to now given a common definition of consistency~\cite{stevens2010sosym} by enumerating consistent pairs of models in a relation (see \autoref{chap:correctness:notions_consistency}).
 That notion is sufficient for defining transformation networks, correctness of their artifacts and also the essential considerations regarding orchestration, as presented in the preceding section.
@@ -22,34 +13,14 @@ This is also reflected by transformation languages, such as \gls{QVTR}.
 They, first, require relations to be defined at the level of classes and their properties, i.e., how properties of instances of some classes are related to properties of instances of other classes.
 Second, they are defined in an \emph{intensional} way, i.e., constraints specify which elements shall be considered consistent, rather than enumerating all consistent instances in an \emph{extensional} specification.
 We have already discussed that intensional and extensional specifications both have equal expressiveness and that we stick to extensional specifications for reasons of simplicity, which can be transformed into extensional ones by enumerating all instances that fulfill the constraints.
-However, we reuse the concept of specifying relations at the level of classes and their properties. % rather than complete models.
+However, we reuse the concept of specifying relations at the level of classes and their properties.
 
 \mnote{Benefits of fine-grained notion}
 This reflects a natural understanding of consistency and especially makes it easier to make statements about dependencies between consistency relations, which we will need to make statements about compatibility of consistency relations.
-Thus, we introduce an appropriate, fine-grained notion of consistency relations in the following. %, which, as we will also show, is just a refinement of the already given one, thus especially not improving expressiveness.
-%For example, two fine-grained consistency relations considering completely independent sets of classes cannot interfere, and thus especially do not introduce any compatibility problems, which is not easy to express when considering relations at the level of complete models.
+Thus, we introduce an appropriate, fine-grained notion of consistency relations in the following.
 Finally, from such a fine-grained specification, a \modellevelconsistencyrelation can always be derived by enumerating all models that fulfill all the fine-grained specifications, thus it does not restrict expressiveness in any way and can be seen as a \emph{compositional approach} for defining consistency, which is only a refinement of the notion of \modellevelconsistencyrelations.
 We have presented the following definitions of a fine-grained consistency notion, partly literally, in previous work~\owncite{klare2020compatibility-report}. 
 The definitions are based on those proposed in the work of \textcite[Section 2.3.2, 4.1.1]{kramer2017a} and \textowncite{klare2021Vitruv-JSS}.
-
-% In the following, we start with introducing a fine-grained notion of consistency relations. % based on such fine-grained consistency relations.
-% We proceed with considerations on implicit relations, which are induced by a set of consistency relations, such as transitive relations, to finally precisely define a notion of compatibility.
-
-% General notion of consistency consider relations of models. We use a more fine-grained notion based on consistency relations, which requires those relations to be unidirectional, and the notion of consistency to be more complex. The simple notion (model left requires related model right and vice versa) is not applicable, but induced by our fine-grained specification.
-
-% \begin{itemize}
-%     \item Instead of considering relations on the metamodel level, we can consider relations on the element level
-%     \item Idea: Create a graph of meta elements (meta-classes, attributes, references) containing edges for all relations between elements defined by consistency relations (if there is a rule relating two or more elements, there is an edge between them)
-%     \item If this graph of fine-grained relations forms a set of trees, the transformations are compatible (apply definition from previous section), because a change to one element may only be propagated across one path to each of all other elements
-%     \item This is what we call \emph{decomposition} that witnesses compatibility.
-%     \item We explain this in detail in \autoref{sec:decomposition}.
-% \end{itemize}
-
-
-%\subsection{Compatibility in Transformation Networks}
-
-% As introduced in the previous section, simply put, compatibility in a transformation network means that there are no contradictions in the relations defined by the transformations. That means, there are not restrictions in the relations that prevent another relation from being fulfilled.
-% To precisely specify that notion of \emph{compatibility}, the problems associated with it and prove correctness of a strategy to verify compatibility of given relations, we define our notion of consistency in terms of conditions and consistency relations and define the term \emph{compatibility} based on that.
 
 
 \subsection{Fine-Grained Consistency Relations}
@@ -60,18 +31,14 @@ The central idea of the fine-grained consistency notion is to have consistency r
 A \emph{condition} encapsulates such objects, for which we require objects in another model to occur.
 
 \begin{definition}[Condition]
-    A condition $\condition{c}{}$ for a class tuple $\classtuple{C}{\condition{c}{}} = \tupled{\class{C}{\condition{c}{},1}, \dots, \class{C}{\condition{c}{},n}}$ is a set of object tuples %$\condition{c}{}$ = \setted{\tupled{\object{o}{1}, \dots, \object{o}{n}}}$ 
-    with: 
+    A condition $\condition{c}{}$ for a class tuple $\classtuple{C}{\condition{c}{}} = \tupled{\class{C}{\condition{c}{},1}, \dots, \class{C}{\condition{c}{},n}}$ is a set of object tuple with: 
     \begin{align*}
     &
     \forall \tupled{\object{o}{1}, \dots, \object{o}{n}} \in \condition{c}{}: \forall i \in \setted{1, \dots, n} : \object{o}{i} \in \instances{\class{C}{\condition{c}, i}}
     \end{align*}
     An element $\conditionelement{c}{} \in \condition{c}{}$ is called a \emph{condition element}.
     %
-    For a tuple of models $\modeltuple{m} \in \metamodeltupleinstanceset{M}$ of a metamodel tuple $\metamodeltuple{M}$ and %= \setted{\model{m}{1}, \dots, \model{m}{k}}$ 
-    a condition element $\conditionelement{c}{}$, % = \tupled{\object{o}{1}, \dots, \object{o}{n}}$ 
-    %be a condition element.
-    we say that: 
+    For a model tuple $\modeltuple{m} \in \metamodeltupleinstanceset{M}$ of a metamodel tuple $\metamodeltuple{M}$ and a condition element $\conditionelement{c}{}$, we say that: 
     \begin{align*}
         &
         \modeltuple{m} \containsmath \conditionelement{c}{} \equivalentperdefinition
@@ -81,39 +48,12 @@ A \emph{condition} encapsulates such objects, for which we require objects in an
 
 \mnote{Models containing conditions}
 \emph{Conditions} represent object tuples that instantiate the same tuple of classes. They are supposed to occur in models that fulfill a certain condition regarding consistency, i.e., they define the objects that can occur in the previously mentioned pairs of consistency relations, which we specify later.
-% \begin{definition}[Condition Element Containment] \label{def:conditionelementcontainment}
-%     For a set of metamodels $\metamodelset{M}$, let $\modelset{m} \in \metamodelinstances{\metamodelset{M}}$ %= \setted{\model{m}{1}, \dots, \model{m}{k}}$ 
-%     be a set of models and let $\conditionelement{c}{} = \tupled{\object{o}{1}, \dots, \object{o}{n}}$ be a condition element.
-%     We say that:
-%     \begin{align*}
-%         \formulaskip &
-%         \modelset{m} \mathtext{contains} c \equivalentperdefinition \\
-%         & \formulaskip
-%         \exists \model{m}{} \in \modelset{m} : \exists \object{o'}{1}, \dots, \object{o'}{n} \in \model{m}{} : \forall i \in \setted{1, \dots, n} : \object{o}{i} \subseteq \object{o'}{i}
-%     \end{align*}
-% \end{definition}
-We say that a tuple of models contains a condition element if any of the models contains all the objects within the condition element. %a set of objects, in which the condition is represented. 
-%This does not necessarily mean that the objects have to be exactly those of the condition, but may be a superset of them.
-%That definition allows to a condition may only specify partial information of an object to match, as, for example, a consistency relation may only relate specific properties of classes instead of the whole classes.
+We say that a tuple of models contains a condition element if any of the models contains all the objects within the condition element.
 This implies that the metamodel of such a model has to contain all the classes in the class tuple of the condition.
 We use these conditions to define consistency relations as the co-occurrence of condition elements.
 
-%\todo{Relations also support the semi-automatic case: Whenever there is a choice to map a condition element to another, but no necessity, it is fine that a consistency relation does not require anything. The requirement only comes to the consistency preservation rule, which is supposed to update elements that have a corresponding element. Thus, if there is a corresponding element, then the CPR should update it upon change. This is, however, no necessity of the pure consistency relations, as the models would even be consistent if the there is no corresponding element. Thus, we see that our notion of consistency is purely induced by the models but cannot be influenced by information given from outside, such as user decisions.}
-%\todoLater{Call class tuple the "signature" of a relation.}
 \begin{definition}[Consistency Relation]
 \label{def:consistencyrelation}
-    %Let $\metamodel{M}{1}, \metamodel{M}{2}$ be two metamodels. 
-    %A consistency relation $\consistencyrelation{CR}{}$ is defined for two class tuples $\classtuple{C}{l,\consistencyrelation{CR}{}}$ and $\classtuple{C}{r,\consistencyrelation{CR}{}}$ 
-    %with $\forall \class{C}{l,i} \in \classtuple{C}{l,\consistencyrelation{CR}{}} : \exists \class{C}{} \in \metamodel{M}{1} : \class{C}{l,i} \subseteq \class{C}{}$ and $\forall \class{C}{r,i} \in \classtuple{C}{r,\consistencyrelation{CR}{}} : \exists \class{C}{} \in \metamodel{M}{2} : \class{C}{r,i} \subseteq \class{C}{}$.
-    % $\consistencyrelation{CR}{}$ is a set of pairs of condition elements
-    % \begin{align*}
-    %     \formulaskip
-    %     \consistencyrelation{CR} = \setted{\tuple{c}{l} = \tupled{\object{o}{l,1}, \dots, \object{o}{l,n}}, \tuple{c}{r} = \tupled{\object{o}{r,1}, \dots, \object{o}{r,m}}}
-    % \end{align*}
-    % such that there are induced conditions $\condition{c}{l,\consistencyrelation{CR}{}}, \condition{c}{r,\consistencyrelation{CR}{}}$ 
-    % \begin{align*}
-    %     \exists 
-    % \end{align*}
     Let $\classtuple{C}{l,\consistencyrelation{CR}{}}$ and $\classtuple{C}{r,\consistencyrelation{CR}{}}$ be two class tuples.
     A consistency relation $\consistencyrelation{CR}{}$ is a subset of pairs of condition elements in conditions $\condition{c}{l,\consistencyrelation{CR}{}}, \condition{c}{r,\consistencyrelation{CR}{}}$ with
     $\classtuple{C}{l,\consistencyrelation{CR}{}} = \classtuple{C}{\condition{c}{l,\consistencyrelation{CR}{}}}$ and $\classtuple{C}{r,\consistencyrelation{CR}{}} = \classtuple{C}{\condition{c}{r,\consistencyrelation{CR}{}}}$ :
@@ -121,8 +61,7 @@ We use these conditions to define consistency relations as the co-occurrence of 
         & 
         \consistencyrelation{CR}{} \subseteq \condition{c}{l,\consistencyrelation{CR}{}} \times \condition{c}{r,\consistencyrelation{CR}{}}
     \end{align*}
-    We call a pair of condition elements %$\consistencyrelationpair{cr}{} 
-    $\tupled{\conditionelement{c}{l}, \conditionelement{c}{r}} \in \consistencyrelation{CR}{}$ a \emph{consistency relation pair}. 
+    We call a pair of condition elements $\tupled{\conditionelement{c}{l}, \conditionelement{c}{r}} \in \consistencyrelation{CR}{}$ a \emph{consistency relation pair}. 
     For a model tuple $\modeltuple{m}$ and a consistency relation pair $\tupled{\conditionelement{c}{l}, \conditionelement{c}{r}}$, we say that:
     \begin{align*}
         & 
@@ -135,8 +74,6 @@ We use these conditions to define consistency relations as the co-occurrence of 
         &  
         \land \forall \conditionelement{c}{} \in \condition{c}{r,\consistencyrelation{CR}{}} : \exists \tupled{\conditionelement{c}{l}, \conditionelement{c}{r}} \in \consistencyrelation{CR}{} : \conditionelement{c}{} = \conditionelement{c}{r}
     \end{align*}
-    % these metamodels is a (possibly infinite) set of pairs of model element tuples $\consistencyrelation{CR} = \{ \bigtupled{\tupled{e_{l1}, \ldots, e_{ln}}, \tupled{e_{r1}, \ldots, e_{rm}}}, \bigtupled{\tupled{f_{l1}, \ldots, f_{ln}}, \tupled{f_{r1}, \ldots, f_{rm}}}, \newline \dots \}$ with the elements of each left tuple $e_{li}, f_{li}, \ldots \in \metamodelinstances{\metamodel{M}}$ and the elements of each right tuple $e_{ri}, f_{ri}, \ldots \in \metamodelinstances{\metamodel{N}}$.
-    % A consistency relation denotes that the element tuples have to co-occur or to not occur at all in instances of $\metamodel{M}$ and $\metamodel{N}$ to consider these instances consistent.
 \end{definition}
 
 \mnote{Consistency relations}
@@ -144,9 +81,6 @@ A consistency relation according to \autoref{def:consistencyrelation} is a set o
 This means if a model contains one of the left object tuples that occurs in the relation, which is called \emph{condition element}, one of the related right object tuples has to occur in a model as well.
 It is based on two conditions that define relevant object tuples in instances of each of the two metamodels and defines the ones that are related to each other.
 Based on these consistency relations, we can define a fine-grained notion of consistency.
-%\todo{Metamodels in definition may not be different, so consistency relations within a model can be defined. May be a problem if the class tuples are overlapping, so exclude and discuss that?}
-
-%We can now define a notion of consistency for a tuple of models based on the definition of consistency relations.
 
 \begin{figure}
     \centering
@@ -157,25 +91,8 @@ Based on these consistency relations, we can define a fine-grained notion of con
 \end{figure}
 
 \begin{definition}[Consistency] \label{def:consistency}
-    %Let $\metamodelset{M} = \setted{ \metamodel{M}{1}, \dots, \metamodel{M}{k} }$ be a set of metamodels and 
-    Let $\consistencyrelation{CR}{}$ be a consistency relation % for two of the metamodels in $\metamodelset{M}$.
-    %Let 
-    and let $\modeltuple{m} \in \metamodeltupleinstanceset{M}$ %= \setted{ \model{m}{1}, \dots, \model{m}{k} }, \model{m}{i} \in \metamodelinstances{\metamodel{M}{i}}$ 
-    be a tuple of models of the metamodels in $\metamodeltuple{M}$.
+    Let $\consistencyrelation{CR}{}$ be a consistency relation and let $\modeltuple{m} \in \metamodeltupleinstanceset{M}$ be a tuple of models of the metamodels in $\metamodeltuple{M}$.
     We say that:
-    % \begin{align*}
-    %     \formulaskip
-    %     & 
-    %     \modelset{m} \mathtext{consistent to} \consistencyrelation{CR}{} \equivalentperdefinition \\
-    %     & \formulaskip
-    %     \forall \tuple{c}{l} \in \condition{c}{l, \consistencyrelation{CR}{}} \mid \modelset{m} \mathtext{contains} \conditionelement{c}{l} : \exists \conditionelement{c}{r} \in \condition{c}{r, \consistencyrelation{CR}{}} : \\
-    %     & \formulaskip\formulaskip 
-    %     \tupled{\conditionelement{c}{l}, \conditionelement{c}{r}} \in \consistencyrelation{CR}{} \land \modelset{m} \mathtext{contains} \conditionelement{c}{r} \\
-    %     & \formulaskip
-    %     \land \forall \conditionelement{c}{r} \in \condition{c}{r, \consistencyrelation{CR}{}} \mid \modelset{m} \mathtext{contains} \conditionelement{c}{r} : \exists \conditionelement{c}{l} \in \condition{c}{l, \consistencyrelation{CR}{}} : \\
-    %     & \formulaskip\formulaskip 
-    %     \tupled{\conditionelement{c}{l}, \conditionelement{c}{r}} \in \consistencyrelation{CR}{} \land \modelset{m} \mathtext{contains} \conditionelement{c}{l}
-    % \end{align*}
      \begin{align*}
         & 
         \modeltuple{m} \consistenttomath \consistencyrelation{CR}{} \equivalentperdefinition \\
@@ -189,17 +106,13 @@ Based on these consistency relations, we can define a fine-grained notion of con
         \land \forall \tupled{\conditionelement{c}{l}, \conditionelement{c}{r}} \in  \consistencyrelation{W}{} : \modeltuple{m} \containsmath \conditionelement{c}{l} \land \modeltuple{m} \containsmath \conditionelement{c}{r} \\
         & \formulaskip\formulaskip
         \land \forall \conditionelement{c}{l}' \in \condition{c}{l,\consistencyrelation{CR}{}} : \modeltuple{m} \containsmath \conditionelement{c}{l}' \Rightarrow \conditionelement{c}{l}' \in \condition{c}{l,\consistencyrelation{W}{}}
-        % & \formulaskip\formulaskip
-        % \land 
-        % \forall \conditionelement{c'}{r} \in \condition{c}{r,\consistencyrelation{CR}{}} \mid \modelset{m} \containsmath \conditionelement{c'}{r} : \conditionelement{c'}{r} \in \condition{c}{r,\consistencyrelation{W}{}}
     \end{align*}
     We call such a $\consistencyrelation{W}{}$ a \emph{witness structure} for consistency of $\modeltuple{m}$ to $\consistencyrelation{CR}{}$, and for all pairs $\tupled{\conditionelement{w}{l}, \conditionelement{w}{r}} \in \consistencyrelation{W}{}$, we call $\conditionelement{w}{l}$ and $\conditionelement{w}{r}$ \emph{corresponding to} each other.
     
     For a set of consistency relations $\consistencyrelationset{CR} = \setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR}{2}, \dots}$, we say that:
     \begin{align*}
         \formulaskip &
-        \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \equivalentperdefinition %\\
-        %& \formulaskip
+        \modeltuple{m} \consistenttomath \consistencyrelationset{CR} \equivalentperdefinition
         \forall \consistencyrelation{CR}{} \in \consistencyrelationset{CR} : \modeltuple{m} \consistenttomath \consistencyrelation{CR}{}
     \end{align*}
 \end{definition}
@@ -207,8 +120,7 @@ Based on these consistency relations, we can define a fine-grained notion of con
 \mnote{Consistency by fine-grained relations}
 A consistency relation $\consistencyrelation{CR}{}$ relates one condition element at the left side to one or more other condition elements at the right side of the relation.
 The definition of consistency ensures that if one condition element $\conditionelement{c}{} \in \condition{c}{l,\consistencyrelation{CR}{}}$ at the left side of the relation occurs in a tuple of models, exactly one of the condition elements related to it by a consistency relation $\consistencyrelation{CR}{}$ occurs in another model to consider the tuple of models consistent.
-%\todo{Give example why this is reasonable, i.e., a counterexample for the more simple notion of Max.}
-If another element that is related to $\conditionelement{c}{}$ occurs in the models, this one has to be, in turn, related to another condition element $\conditionelement{c}{}' \in \condition{c}{l,\consistencyrelation{CR}{}}$ of the left side of condition elements by $\consistencyrelation{CR}{}$, which also occurs in the models.
+If another element that is related to $\conditionelement{c}{}$ occurs in the models, this one has to be, in turn, related to another condition element $\conditionelement{c}{}' \in \condition{c}{l,\consistencyrelation{CR}{}}$ of the left side of condition elements by $\consistencyrelation{CR}{}$ that also occurs in the models.
 This ensures that a condition element contained in a model uniquely corresponds to another element to which it is considered consistent according to $\consistencyrelation{CR}{}$.
 
 \mnote{Witness structure}
@@ -219,43 +131,29 @@ Thus, for example, both the employees with names \enquote{Alice} and \enquote{al
 Without the restriction defined by the auxiliary witness structure $\consistencyrelation{W}{}$, an employee model containing the employees with both capitalizations would be considered consistent to a resident model containing a corresponding resident with the same name written in lowercase.
 The witness structure, however, ensures that for each employee one corresponding resident exists, thus there can only exist one employee with one of the allowed capitalizations, as each of them is corresponding to the resident with the lowercase name.
 In general, the witness structure restriction ensures that if several alternatives for a corresponding element exists, only one is actually allowed to be present.
-%Without that restriction, using the modified relation $\consistencyrelation{R}{ER}'$ in the running example defined in \autoref{fig:compatibility:three_persons_example_extended}, there may exist two employees having the same name only with different capitalizations, which are considered consistent to a single resident having the same in lower case.
-%The given restriction ensures that if there are several alternatives for a corresponding element to be consistent, only one is actually present.
-%This is usually expected, as we will see in examples in the following.
-%To achieve that, the definition uses an auxiliary structure $\consistencyrelation{W}{}$, which serves as a witness structure for those pairs of condition elements that co-occur in the models.
 
 \begin{figure}
     \centering
     \input{figures/correctness/notion/consistency_example.tex}
-    \caption[Examples for fine-grained consistency relations]{A consistency relation between employee and resident and six example model pairs: model pairs 1--4 being consistent with an appropriate witness structure $\consistencyrelation{W}{}$ shown in blue, solid lines, and model pair 5 and 6 being inconsistent with an inappropriate mapping structure shown in red, dashed lines. Adapted from~\owncite[Fig.~2]{klare2020compatibility-report}.}
+    \caption[Examples for fine-grained consistency relations]{A consistency relation between employee and resident and six example model pairs: pairs 1--4 consistent with an appropriate witness structure $\consistencyrelation{W}{}$ shown in blue, solid lines, and pairs 5 and 6 inconsistent with an inappropriate mapping structure shown in red, dashed lines. Adapted from~\owncite[Fig.~2]{klare2020compatibility-report}.}
     \label{fig:correctness:consistency_example}
 \end{figure}
 
 \begin{example}
-The definition of consistency is exemplified in \autoref{fig:correctness:consistency_example}, which is an alternation of an extract of \autoref{fig:networks:three_persons_example} only considering employees and residents. Models with employees and residents are considered consistent if for each employee exactly one resident with the same name or the same name in lowercase exists.
+The definition of consistency is exemplified in \autoref{fig:correctness:consistency_example}, which is an alternation of an extract of \autoref{fig:networks:three_persons_example} only considering employees and residents. Models with employees and residents are considered consistent if for each employee exactly one resident with the same name or the name in lowercase exists.
 The model pairs $1$--$3$ are obviously consistent according to the definition, because there is always a pair of objects that fulfills the consistency relation.
-In model pair $4$, there is a consistent resident for each employee, but there is no appropriate employee for the resident with $\mathvariable{name} = "\mathvariable{Bob}"$. However, our definition of consistency only requires that for each condition element of the left side of the relation that appears in the models, an appropriate right element occurs, but not vice versa. Thus, a relation is interpreted unidirectionally, which we will discuss in more detail in the following.
+In model pair $4$, there is a consistent resident for each employee, but there is no appropriate employee for the resident with $\mathvariable{name} = "\mathvariable{Bob}"$. However, our definition of consistency only requires that for each condition element of the left side of the relation that appears in the models, an appropriate right element occurs, but not vice versa. Thus, a relation is interpreted unidirectionally, which we subsequently discuss in more detail.
 In model pair $5$, there are two residents with names in different capitalizations, which would both be considered consistent to the employee according to the consistency relation.
 Comparably, in model pair $6$, there is a resident that fulfills the consistency relations for both employees, each having a different but matching capitalization. 
-However, the consistency definition requires that each element in a model for which consistency is defined by a consistency relation may only have one corresponding element %, which is defined in the consistency relation, 
-in the model. 
-In this case, there are two residents and employees, respectively that could be considered consistent to the employee and resident, respectively, thus there is no appropriate witness structure with a unique mapping between the elements as required by the consistency definition.
+However, the consistency definition requires that each model element for which consistency is defined by a consistency relation must only have one corresponding element. 
+In this case, there are two residents or employees that could be considered consistent to the employee or resident, respectively, thus there is no witness structure with a unique mapping between the elements as required by the definition.
 \end{example}
-
-%For example, if the relation specifies pairs for all instances of two classes that have the same name, then if one class instance occurs in one model, the other with the same name has to occur in another model.
-%Additionally, the relation could ignore the capitalization of the first letter of a class, thus relating all classes with the same name ignoring the first letter capitalization. 
-%In consequence, one class would be considered consistent with two others, but only one of them would be allowed to occur to consider the models consistent.
-
-% This means a set of models is considered consistent to a consistency relation $\consistencyrelation{CR}{}$, if the models contain one of the condition elements in one side of the consistency relations, then one of the condition elements the one is related to according to the consistency relation must occur in the models as well.
-% For example, if the relation specifies pairs for all instances of two classes that have the same name, then if one class instance occurs in one model, the other with the same name has to occur in another model.
-% Additionally, this definition allows that one condition elements can be considered consistent to multiple other, thus the condition element occurs in several pairs of the consistency relation, and in that case only one of them has to be fulfilled.
-% Example: do not consider whether name start upper or lower case
 
 \mnote{Unidirectional notion}
 As mentioned before, we define the notion of consistency in a unidirectional way, which means that a consistency relation may define that some elements $\conditionelement{c}{r}$ are required to occur in a tuple of models if some elements $\conditionelement{c}{l}$ occur, but not vice versa.
 Such a unidirectional notion can also be reasonable in our example, as it could make sense to require a resident for each employee, but not every resident might be employed and thus also represent an employee.
 To achieve a bijective consistency definition, for each consistency relation $\consistencyrelation{CR}{}$ its transposed relation $\consistencyrelation{CR}{}^T = \setted{\tupled{\conditionelement{c}{l}, \conditionelement{c}{r}} \mid \tupled{\conditionelement{c}{r}, \conditionelement{c}{l}} \in \consistencyrelation{CR}{}}$ can be considered as well.
-Regarding \autoref{fig:correctness:consistency_example}, if we consider the relation between employees and residents as well as its transposed, the model pair $4$ would also be considered inconsistent, because an appropriate employee for each resident would be required by the transposed relation.
+Regarding \autoref{fig:correctness:consistency_example}, if we consider the relation between employees and residents as well as its transposed, the model pair $4$ would also be considered inconsistent, because an appropriate employee for each resident is required by the transposed relation.
 We call sets of consistency relations that contain only bijective definitions of consistency \emph{symmetric}.
 
 \begin{definition}[Symmetric Consistency Relation Set]
@@ -263,8 +161,7 @@ We call sets of consistency relations that contain only bijective definitions of
     We say that $\consistencyrelationset{CR}$ is \emph{symmetric} if for each contained relation its transposed one is also contained:
     \begin{align*}
         &
-        \consistencyrelationset{CR} \mathtextspacearound{is symmetric} \equivalentperdefinition %\\
-        %& \formulaskip
+        \consistencyrelationset{CR} \mathtextspacearound{is symmetric} \equivalentperdefinition
         \forall \consistencyrelation{CR}{} \in \consistencyrelationset{CR} :
         \exists \consistencyrelation{CR}{}' \in \consistencyrelationset{CR} :
         \consistencyrelation{CR}{}' = \consistencyrelation{CR}{}^T
@@ -272,21 +169,16 @@ We call sets of consistency relations that contain only bijective definitions of
 \end{definition}
 
 \mnote{Reasons for unidirectionality}
-Any description of bijective consistency relations can be achieved by defining a symmetric set of consistency relations.
-We chose to define consistency in a unidirectional way for two reasons:
+Any description of bijective consistency relations can be defined with a symmetric consistency relation set.
+We have defined consistency in a unidirectional way for two reasons:
 \begin{longenumerate}
     \item Some relevant consistency relations are actually not bijective. 
     Apart from the simple example concerning residents and employees, this situation always occurs when objects at different levels of abstraction are related.
     Consider a relation between components and classes, requiring for each component an implementation class but not vice versa, or a relation between \gls{UML} models and object-oriented code, requiring for each \gls{UML} class an appropriate class in code but not vice versa.
-    %
-    %It may be desired that %keeping an UML model consistent with object-oriented code, 
-    %for each UML class an appropriate class in object-oriented code exists, but not vice versa. 
-    These relations could not be expressed if consistency relations were always considered bidirectional for determining consistency.
+    These relations could not be expressed if consistency relations were always considered bijective.
     \item We consider networks of consistency relations, in which a combination of multiple bijective consistency relations does not necessarily imply a bijective consistency relation again. 
     Thus, we need a unidirectional notion of consistency relations anyway.
 \end{longenumerate}
-
-%\end{copiedFrom} % SoSym MPM4CPS
 
 \mnote{Explicit trace models}
 One might argue that consistency is usually traced by means of a \emph{trace model}, which stores the pairs of element tuples in models that fulfill a consistency relation.
@@ -303,8 +195,8 @@ But this does, as discussed, not restrict applicability of our formalism.
 
 \mnote{Expressiveness of fine-grained consistency}
 The model-level consistency notion of \autoref{def:modellevelconsistency} is established and based on notions used by several researchers.
-The given fine-grained notion of consistency according to \autoref{def:consistency} is based on the insight that practical approaches to describe consistency and its preservation use fine-grained rules rather than enumerating consistent model pairs.
-We did, however, only provide examples that justify specific decisions in the definitions, such as the witness structure for corresponding elements, but we did not argue if and why fine-grained relations are an actual refinement, such that statements about \modellevelconsistencyrelation used for our general formal framework also apply to fine-grained consistency relations.
+The fine-grained notion of consistency according to \autoref{def:consistency} is based on the insight that practical approaches to describe consistency and its preservation use fine-grained rules rather than enumerating consistent model pairs.
+We did, however, only provide examples that justify specific decisions in the definitions, such as the witness structure for corresponding elements, but we did not argue if and why fine-grained relations are an actual refinement, such that statements about \modellevelconsistencyrelation also apply to fine-grained relations.
 
 \mnote{Implication of model-level relation}
 To show that every set of fine-grained consistency relations can be expressed by a single \modellevelconsistencyrelation, we can use the same constructive approach that we have used to define consistency according to multiple consistency relations, be they at model level or fine-grained.
@@ -334,7 +226,7 @@ Thus, we do not consider this case at all.
 Second, the formalism for fine-grained consistency relations can not prevent specific elements from existing at all.
 For example, a consistency relation may define that for a component in an architecture model there has to be a corresponding class in the object-oriented design model, but it may not restrict that only components of specific names are allowed.
 Such restrictions should and actually are separate specifications not related to consistency between models but restricting a model on its own.
-Thus, the metamodel or some additional specification for it should provide such additional restrictions of valid models, which we have already discussed as a restriction of $\metamodelinstanceset{M}{}$ for a metamodel $\metamodel{M}{}$ in \autoref{chap:networks:models}.
+Thus, the metamodel or some additional specification for it should provide such additional restrictions of valid models, which we have discussed as a restriction of $\metamodelinstanceset{M}{}$ for a metamodel $\metamodel{M}{}$ in \autoref{chap:networks:models}.
 
 % \mnote{Fine-grained and model-level relations are equivalent if valid models are restricted externally}
 % If we assume such a restriction of $\metamodelinstanceset{M}{}$, it would be the union of all instances of that metamodel at one side of the \modellevelconsistencyrelation.
@@ -353,9 +245,6 @@ Additionally, we know that there are specific kinds of restrictions that can be 
 We have, however, discussed why they are not relevant for the designated application area of consistency preservation.
 In consequence, all insights made for \modellevelconsistencyrelations can also be applied to fine-grained consistency relations and, if specific restrictions are excluded, vice versa.
 
-
-%\todo{Derive that element-level consistency relations induce model-level consistency relations to be conforming with previous formalism}
-
 %\begin{itemize}
     %\item Is compatibility a subclass of correctness? Is every correct set of relations compatible as well?
     %\item Problematisch: unser Konsistenzbegriff für Relationen (feingranulare Relationen) schließt keine Modelle aus, der Konsistenzbegriff hier aber schon. Wie realisiere ich die feingranularen Relationen, die dafür sorgen, dass nur genau ein Tupel von Modellen konsistent ist?
@@ -370,12 +259,11 @@ As mentioned before, the fine-grained notion of consistency fits well to how tra
 They allow to define rules that relate only some classes by relations, conforming to fine-grained consistency relations, from which fine-grained consistency preservation rules are derived.
 Alternatively, they directly allow to define rules to preserve consistency between specific classes.
 These rules are often called \emph{transformation rules} and composed to a transformation that consists of multiple such rules, each encoding a consistency relation and a preservation rule.
-%We will, however, stick to the coarse-grained notion of consistency preservation rules, because, first, it is difficult to describe how such fine-grained consistency preservation rules can be composed, and second, the coarse-grained notion is sufficient for our considerations anyway.
 
 \mnote{Conflicts between transformation rules}
-It may easily happen that the execution of one transformation rule leads to the violation of the consistency relation of another one, which introduces dependencies between the individual transformation rules.
+It may easily happen that the execution of one transformation rule leads to the violation of the consistency relation of another, which introduces dependencies between the individual transformation rules.
 Thus, a combination of such transformation rules to a transformation has to ensure correctness, i.e., that the consecutive execution of the rules leads to a consistent state of the models.
-Languages such as \gls{QVTR} and \gls{QVTO} therefore specify that transformation rules may not be conflicting (see~\cite[7.10.2.]{qvt}).
+Languages such as \gls{QVTR} and \gls{QVTO} therefore specify that transformation rules may not be conflicting~\cite[7.10.2.]{qvt}.
 It is also a dedicated topic of research to ensure that the rules of a single transformation conform to each other, e.g.~\cite{cuadrado2017tse,cabot2010VerificationInvariants-JSS}, thus we assume that a transformation has that property.
 
 \mnote{Extension of Consistency preservation rules}
@@ -395,15 +283,13 @@ This can, however, be easily extended to fine-grained consistency relations, as 
 A consistency preservation rule $\consistencypreservationrule{\consistencyrelationset{CR}}$ for a set of consistency relations $\consistencyrelationset{CR}$ according to \autoref{def:consistencyrelation} is thus still considered correct if it only returns changes when they yield models that are consistent to all consistency relations if applied to the input models, in accordance with \autoref{def:consistencypreservationrulecorrectness}:
 \begin{align*}
     &
-    \forall \model{m}{1} \in \metamodelinstanceset{M}{1}, \model{m}{2} \in \metamodelinstanceset{M}{2}, \change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}}, \change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}} : %\tupled{\model{m}{1},\model{m}{2}} \consistenttomath \consistencyrelationset{CR} 
-    \\
+    \forall \model{m}{1} \in \metamodelinstanceset{M}{1}, \model{m}{2} \in \metamodelinstanceset{M}{2}, \change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}}, \change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}} : \\
     & \formulaskip
-    %\land 
     \big( \exists \change{\metamodel{M}{1}}' \in \changeuniverse{\metamodel{M}{1}}, \change{\metamodel{M}{2}}' \in \changeuniverse{\metamodel{M}{2}} : \tupled{\change{\metamodel{M}{1}}', \change{\metamodel{M}{2}}'} = \consistencypreservationrule{\consistencyrelationset{CR}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}) \\
     & \formulaskip\formulaskip
     \Rightarrow \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}),\change{\metamodel{M}{2}}'(\model{m}{2})} \consistenttomath \consistencyrelationset{CR} \big)
 \end{align*}
-Note that being consistent to all fine-grained consistency relations is equivalent to being consistent to the single \modellevelconsistencyrelation induced by the fine-grained relations.
+Note that being consistent to all fine-grained consistency relations is equivalent to being consistent to the \modellevelconsistencyrelation induced by the fine-grained relations.
 
 \mnote{Transformations for fine-grained relations}
 Likewise, we consider a synchronizing transformation according to \autoref{def:synchronizingtransformation} as a pair of fine-grained consistency relations and a consistency preservation rule for them, thus $\transformation{t} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}}$.

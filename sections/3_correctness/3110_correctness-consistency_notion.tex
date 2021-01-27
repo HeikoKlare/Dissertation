@@ -4,7 +4,7 @@
 \section{Notions of Consistency and its Preservation}
 \label{chap:correctness:notions_consistency}
 
-We begin with an informal discussion of different ways to consider consistency. This especially involves \emph{intensional} and \emph{extensional}, as well a \emph{monolithic} and \emph{modular} notions of consistency.
+We begin with an informal discussion of different ways to consider consistency. This especially involves \emph{intensional} and \emph{extensional}, as well \emph{monolithic} and \emph{modular} notions of consistency.
 
 \subsection{Intensional and Extensional Consistency Notions}
 \label{chap:correctness:notions_consistency:intensional_extensional}
@@ -62,17 +62,19 @@ A \emph{modular} notion of consistency, on the other hand, considers several rel
 \mnote{Modular specification example}
 For an extensional notion of consistency between three metamodels $\metamodel{M}{1}, \metamodel{M}{2}$ and $\metamodel{M}{3}$, a modular specification could manifest in three relations $\consistencyrelation{CR}{1,2}, \consistencyrelation{CR}{1,3}$ and $\consistencyrelation{CR}{2,3}$ defining the model pairs that are considered consistent.
 If two models are consistent to one of the relations, we can say that they are \emph{locally} consistent to that relation.
-However, we are interested in whether models are \emph{globally} consistent to all these relations, so we can say that:
-\begin{align*}
-    & \model{m}{1}, \model{m}{2}, \model{m}{3} \mathtextspacearound{are consistent} \equivalentperdefinition \\
-    & \formulaskip 
-    \tupled{\model{m}{1},\model{m}{2}} \in \consistencyrelation{CR}{1,2} \land \tupled{\model{m}{1},\model{m}{3}} \in \consistencyrelation{CR}{1,3} \land \tupled{\model{m}{2},\model{m}{3}} \in \consistencyrelation{CR}{2,3}
-\end{align*}
+We are, however, interested in whether models are \emph{globally} consistent to all these relations, so we say:
+\parameterizeformat{
+    \begin{align*}
+        & \model{m}{1}, \model{m}{2}, \model{m}{3} \mathtextspacearound{are consistent} \equivalentperdefinition 
+        #2
+        \tupled{\model{m}{1},\model{m}{2}} \in \consistencyrelation{CR}{1,2} \land \tupled{\model{m}{1},\model{m}{3}} \in \consistencyrelation{CR}{1,3} \land \tupled{\model{m}{2},\model{m}{3}} \in \consistencyrelation{CR}{2,3}
+    \end{align*}%
+}{}{\\ & \formulaskip}%
 
 \mnote{Modular specification for multiary relations}
 Due to the assumptions of independent development and modular reuse, which we defined in \autoref{chap:introduction:objective:assumptions}, we are interested in a modular notion of consistency.
 In the example, we considered a modular notion based on binary relation. Such a modular notion, however, can also be based on multiple multiary relations. 
-But even with multiary relations, modularity is necessary for reasons of independent development and reuse. %, as motivated in \autoref{chap:introduction}.
+But even with multiary relations, modularity is necessary for reasons of independent development and reuse.
 For reasons of simplicity, however, we stick to modular notions of binary relations, although most of our considerations can be transferred to multiary ones.
 
 
@@ -87,10 +89,13 @@ In consequence, consistency preservation is always relative to relations definin
 
 \mnote{Consistency preservation as function}
 Consistency preservation can be considered as a function $\function{Cp}$ that takes (potentially inconsistent) models and returns a consistent tuple of models:
+\parameterizeformat{
 \begin{align*}
-    & \function{Cp} : \metamodeltupleinstanceset{M} \rightarrow \metamodeltupleinstanceset{M}\\
-    & \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \function{Cp}(\modeltuple{m}) \mathtextspacebefore{is consistent}
+    & \function{Cp} : \metamodeltupleinstanceset{M} \rightarrow \metamodeltupleinstanceset{M} 
+    #1 #2
+    \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} : \function{Cp}(\modeltuple{m}) \mathtextspacebefore{is consistent}
 \end{align*}
+}{\qquad\qquad}{\\ &}%
 The definition of \emph{is consistent} depends on whether we rely on a monolithic or modular notion of consistency.
 Thus it may require the models to be in one or multiple relations.
 For example, given a monolithic relation $\consistencyrelation{CR}{}$, $\function{Cp}$ is supposed to fulfill that: 
@@ -129,7 +134,6 @@ We call this an \emph{orchestration}.
 The challenge to find an execution order of transformations without leading to execution cycles has also been identified by \textcite[Sec.~3.9]{kramer2017a}.
 
 \mnote{Unification or orchestration necessary}
-%The examples for the two strategies of executing consistency preservation rules are depicted in \autoref{fig:correctness:concurrent_consecutive_execution}. 
 Even if consistency preservation rules were supposed to only modify one model instead of two, the same problems of unifying changes of their independent execution or orchestration of their consecutive execution occur as soon as there are two sequences of consistency preservation rules that change the same models.
 
 \mnote{Benefits of consecutive execution}
@@ -162,7 +166,6 @@ We do not yet need to consider how these functions are realized to derive consis
 
 \mnote{Only define relation or function}
 We have discussed that consistency preservation can be considered as functions, called consistency preservation rules, that preserve consistency according to some relations.
-%In practice, consistency preservation is usually specified by means of transformations.
 In practice, however, one will usually not specify both the consistency relation itself and also the consistency preservation rule that preserves it.
 Instead, usually one artifact is given and the other is implied or derived.
 This leads to the two approaches of \emph{declarative} and \emph{imperative} consistency specifications, depending on whether the specification defines \emph{how} consistency is achieved.
@@ -179,10 +182,6 @@ This approach is followed by many declarative transformation languages, such as 
 \mnote{Relations as fixed points}
 As a second option, a developer can define consistency preservation rules without explicitly specifying the consistency relations to which they preserve consistency.
 Instead, these functions imply the underlying consistency relations that they preserve, at least if we assume that a consistency preservation rule does not perform changes when the input models are already consistent.
-% If a consistency preservation rule $\function{Cp}$ ensures that its application returns a consistent model, the consistency relation $\consistencyrelation{CR}{}$ it preserves is given by its image: 
-% $\consistencyrelation{CR}{} = \setted{\modeltuple{m} \mid \exists \modeltuple{m}' : \function{Cp}(\modeltuple{m}') = \modeltuple{m}}$.
-% If a consistency preservation rule at least ensures that the models are consistent if its application does not perform any changes, the consistency relation $\consistencyrelation{CR}{}$ it preserves is given by its fixed points:
-% $\consistencyrelation{CR}{} = \setted{\modeltuple{m} \mid \function{Cp}(\modeltuple{m}) = \modeltuple{m}}$.
 Given a function $\function{Cp}$, the relation $\consistencyrelation{CR}{}$ it preserves is implied by its fixed points: $\consistencyrelation{CR}{} = \setted{\modeltuple{m} \mid \function{Cp}(\modeltuple{m}) = \modeltuple{m}}$.
 If a function preserving consistency does not perform any changes, the models are, by definition, consistent.
 Usually, we will assume that such a function returns consistent models with a single application.
@@ -208,7 +207,7 @@ To summarize, we consider the following artifacts necessary to handle consistenc
     \centering
     \input{figures/correctness/notion/execution_process.tex}
     %\includegraphics[width=\textwidth]{figures/correctness/notion/execution_process.png}
-    \caption[Consistency specification execution process and artifacts]{Execution process and artifacts for a modular consistency specification. Central artifacts are annotated in (green) normal font.} %, changes generated by the process are depicted in green, parametrizations of the functions are depicted in orange.}
+    \caption[Consistency specification execution process and artifacts]{Execution process and artifacts for a modular consistency specification. Central artifacts are annotated in (green) normal font.}
     \label{fig:correctness:execution_process}
 \end{figure}
 
@@ -216,5 +215,3 @@ To summarize, we consider the following artifacts necessary to handle consistenc
 We explicitly distinguish the orchestration and the application to be able to make more fine-grained statements about the responsibilities for the orchestration and its actual execution, especially to determine the behavior in cases when no orchestration is found in which the transformations can be applied to yield consistent models.
 The process is depicted in \autoref{fig:correctness:execution_process}. Given models that are consistent according to some consistency relations and changes to them that lead to inconsistencies, the orchestration function delivers an order of consistency preservation rules, which is used to parametrize the application function that executes these rules in the given order.
 The result is, in the best case, a model tuple that is consistent to the relations again.
-%However, we will see that this is not always possible. %Thus, we will especially discuss relevant properties of the artifacts, such as correctness and optimality that reflect how and when this process can be executed successfully.
-
