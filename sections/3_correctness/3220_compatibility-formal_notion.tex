@@ -1,114 +1,13 @@
 \section{A Formal Notion of Compatibility}
 \label{chap:compatibility:formal_notion}
 
-%\begin{copiedFrom}{SoSym MPM4CPS}
-
 \mnote{Formal notion of fine-grained consistency and compatibility}
 In this section, we precisely define our up to now informally introduced notion of \emph{compatibility}.
-%We first discuss properties of transformation networks %in comparison to a single transformation 
-%with an intuitive notion of compatibility, based on considerations in existing work.
 For that, we use the fine-grained notion of consistency and defining relations as proposed in \autoref{chap:correctness:finegrained}.
 We discuss implicit relations, which are induced by a set of consistency relations, such as transitive relations, and,
 finally, derive a compatibility notion from the consistency formalization and its pursued perception.
-%To distinguish the previously given coarse-grained and the coming fine-grained definition of consistency and consistency relations, we used the \enquote{model-level} prefix in the coarse-grained notion.
 The contents of this and the remaining sections of this chapter are mostly, in parts literally, taken from our published article on proving compatibility~\owncite{klare2020compatibility-report}.
 
-%This serves as our contribution \ref{contrib:formalization}.
-%An introduction to properties of transformation networks and especially compatibility of transformations, what compatibility means and how the network influences the possibility to give guarantees regarding compatibility.
-
-%\todoHeiko{Discuss extensional definition of relations / constraints and its relation to intensional definitions}
-% \subsection{Properties of Transformation Network}
-% \label{sec:compatibility:networkproperties}
-
-% %% Correctness as a property of single, bidirectional transformations
-% Keeping pairs of models consistent by means of incremental, bidirectional transformations has been well researched in recent years~\cite{stevens2010sosym, etzlstorfer2013a, cleve2019dagstuhl}.
-% A bidirectional transformation consists of a \emph{relation} that specifies which pairs of models are considered consistent and a pair of directional transformations, denoted as \emph{consistency repair routines}, that take one modified and one originally consistent model and deliver a new model that is consistent to the modified one~\cite{stevens2010sosym}.
-% Several well-defined properties of such transformations have been identified.
-% The essential \emph{correctness} property states that a consistency repair routine delivers a result such that the models are actually consistent according to the defined relation~\cite{stevens2010sosym}.
-% Another important property is \emph{hippocraticness}, which states that a consistency repair routine returns the input model if it was already consistent to the modified one~\cite{stevens2010sosym}.
-
-%%
-%% Correctness property of transformation networks, not induced by correctness of single transformations
-%%
-% When we combine several transformations to a network to achieve consistency between multiple models, those properties of the single transformations are still relevant, as each transformations on its own has to be at least correct to work properly in a network of transformations.
-% However, correctness of the single transformations does not induce correctness of the transformation network.
-% Taking an arbitrary set of correct transformations and executing them one after another does not necessarily constitute a terminating approach that delivers a result, in which all models are consistent according to the relations of the transformations, because the result of one transformation may violate the relation of another.
-% It is possible that the approach does either not terminate, because there is a divergence or alternation in values changed or elements created, or terminates in a state that is not consistent regarding the relations of all transformations~\owncite{klare2019icmt}.
-% %Consider the example of $R_{PE}, R_{PR}, R'_{ER}$ in \autoref{fig:motivational_example}. A transformation network in which each transformation adds the corresponding element for an added element, such as a resident for an added person by the transformation of $R_{PR}$.
-% \todoDiss{Readd}
-% %Since the execution of one transformation may lead to a violation of the relation of another transformation, executing each transformation only once can easily lead to termination in an inconsistent state.
-% %In consequence, transformations have to be executed in a fixed point iteration manner, until all relations are fulfilled.
-% The property of a network to always result in a state in which the models are consistent to all relations of the transformations if they are executed in a specific order, can be seen as a \emph{correctness} property for transformation networks.
-% In this work, we focus on that correctness property and do not discuss further quality properties of transformation networks, such as \emph{modularity}, \emph{evolvability} and \emph{comprehensibility}~\owncite{klare2018docsym}.
-
-
-%%
-%% Correctness considerable at different levels.
-%%
-% A single transformation can only be incorrect in terms of its repair routines, because there are no restrictions regarding its relation that may prevent the repair routine from being able to produce a correct result.
-% In previous work, however, we identified that transformation networks can be incorrect at different levels~\owncite{klare2019icmt}.
-% Networks can also be incorrect at the level of relations rather than repair routines, because multiple relations can be contradictory, i.e., they can relate elements in different ways such that the relations cannot be fulfilled at the same time.
-% \todoDiss{Readd}
-%This especially concerns the \emph{modularization level}, which considers correctness of the binary relations of a set of bidirectional transformations describing when a set of models is consistent, and the \emph{operationalization level}, which considers correctness of the consistency repair routines in terms of producing models that are correct regarding the relations of all bidirectional transformations.
-%For a single transformation, there are no restrictions regarding its relation that may prevent the repair routines from being able to produce a correct result, thus correctness is only considered at the operationalization level. %The correctness definition of \textcite{stevens2010sosym} for a single transformation only concerns the operationalization level, because a single relation is correct by construction. 
-% Considering only a single transformation, its relation is correct by definition, at least if there is no external specification against which the relations have to be correct, thus the definition of \textcite{stevens2010sosym} for correctness only considers the consistency repair routines.
-%However, in case of a transformation network, the different relations may be contradictory, i.e., elements are related in a different way such that the relations cannot be fulfilled at the same time.
-% In such a case, the consistency repair routines cannot be result in a state that is consistent according to the relations anymore, thus they may not terminate anymore.
-%This is due to the fact that several relations can relate the same elements in a different way, such that they cannot be fulfilled at the same time, i.e., that they are contradictory.
-%In such a case, the iteration will not terminate.
-% We call the relations of such transformations \emph{incompatible}.
-%We define this informal notion of compatibility more precisely in the remainder of this section.
-
-%%
-%% Compatibility not achievable by construction -> we focus on checking it
-%%
-% In consequence, compatibility of relations is a necessary prerequisite for consistency repair routines to produce correct results in transformation networks.
-% We also found that correctness of the consistency repair routines can already be achieved by construction, whereas compatibility of the relations cannot be achieved by construction but in the best case be checked for a set of relations.
-% In this work, we focus on the possibility to check compatibility of the relations of a set of transformations.
-% In the following, we therefore precisely define the notion of compatibility of relations, which excludes contradictions in relations that can prevent consistency repair routines from fulfilling the relation.
-
-% \todo{Example!}
-
-%%
-%% Tree topology excludes compatibility
-%%
-%\subsection{Network Topology Impacts}
-% Finally, the topology of a transformation network directly influences how prone it is to incompatibilities of its relations.
-% Contradictions of consistency relations, as exemplified with the relations $R_{PE}, R_{PR}, R'_{ER}$ in \autoref{fig:prologue:three_persons_example}, can only occur if the same classes are related to each other by different (sequences of) transformations in a different way.
-% For example, in \autoref{fig:prologue:three_persons_example}, each combination of two relations puts the same classes into relation as the third one.
-%This can also be a the case if a sequence of transformations introduces this relation, like each combination of two relations in \autoref{fig:motivational_example} relates the same classes as the third relation.
-% This means that a transformation network, in which each pair of classes is only related by one sequence of transformations, cannot have contradictory relations and is thus inherently compatible.
-
-
-
-% \subsection{Consistency by Transformation Networks}
-
-% \begin{itemize}
-%     \item Incremental, bidirectional transformations serve as a means for preserving consistency of models by updating one if the other is modified
-%     \item Transformations specify the conditions for consistency (consistency relations), as well as how consistency can be restored after modifications (consistency repair)~\cite{stevens2010sosym}
-%     \item Consistency between more than two models can be achieved by coupling bidirectional transformations to networks
-%     \item Even if the single transformations are correct, i.e., consistency repair produces results that conform to the consistency relations~\cite{stevens2010sosym}, this may not be the case when \emph{independently developed} bidirectional transformations are combined.
-%     \item Interoperability problems can occur at the level of consistency relations, i.e., that the relations of the different transformations cannot be fulfilled at the same time, or at the level of consistency repair, i.e., that the repair routines do not terminate in a consistent state or even not at all~\owncite{klare2019icmt}
-%     \item While \textowncite{klare2019icmt} focused on techniques to avoid interoperability issues at the level of consistency repair, in this work we focus on finding interoperability issues of the underlying consistency relations, which we previously defined as \emph{compatibility} issues~\owncite{klare2018docsym}.
-%     The avoidance of interoperability issues at the relations level is a necessary assumption to avoid issues at the operationalization level.
-% \end{itemize}
-
-
-% \subsection{Network Topology Impacts}
-
-% \begin{itemize}
-%     \item Idea: Couple independently developed transformations (refer to running example) to network
-%     \item Problem: Trade-off between different properties, depending on the chosen or induced network topology
-%     \item Introduce contrary properties \emph{compatibility} and \emph{modularity} (provide only a naive explanation) and shortly refer to evolvability/comprehensibility~\owncite{klare2018docsym}.
-%     \item Explain problems of building tree structures (inherent compatibility) and motivate arbitrary graph structures, providing high modularity, but not giving compatibility guarantees
-% \end{itemize}
-
-%\end{copiedFrom} % SoSym MPM4CPS
-
-%%%%%%% MOVED FINE-GRAINED RELATION INTRODUCTION TO CORRECTNESS CHAPTER
-
-
-%\begin{copiedFrom}{SoSym MPM4CPS}
 
 \subsection{Implicit Consistency Relations}
 
@@ -120,20 +19,6 @@ We define a notion for the concatenation of relations that implies such transiti
 This especially means that models should always be consistent to a concatenation of consistency relations if they are consistent to each of the concatenated relations, as otherwise the concatenation would introduce additional constraints.
 To achieve this, the following definition makes appropriate restrictions to the derived consistency relation pairs.
 
-% \begin{definition}[Consistency Relations Union] \label{def:relationunion}
-%     Let $\consistencyrelation{CR}{1}, \consistencyrelation{CR}{2}$ be two consistency relations. Their union $ \consistencyrelation{CR}{1} \cup \consistencyrelation{CR}{2}$ is defined as follows:
-%     \begin{align*}
-%         &
-%         %\consistencyrelation{CR}{} = 
-%         \consistencyrelation{CR}{1} \cup \consistencyrelation{CR}{2} \equalsperdefinition \setted{\tupled{\conditionelement{c}{l} = \tupled{\object{o}{l,1}, \dots, \object{o}{l,k}}, \conditionelement{c}{r} = \tupled{\object{o}{r,1}, \dots, \object{o}{r,l}}} \mid \\
-%         & \formulaskip
-%         \exists 1 \leq x < k, 1 \leq y < l :
-%         \tupled{\tupled{\object{o}{l,1}, \dots, \object{o}{l,x}}, \tupled{\object{o}{r,1}, \dots, \object{o}{r,y}}} \in  \consistencyrelation{CR}{1} \land 
-%         \tupled{\tupled{\object{o}{l,x+1}, \dots, \object{o}{l,k}}, \tupled{\object{o}{r,y+1}, \dots, \object{o}{r,l}}} \in  \consistencyrelation{CR}{2}} \\
-%     \end{align*}
-%     with $\classtuple{C}{l,\consistencyrelation{CR}{}} = \classtuple{C}{l,\consistencyrelation{CR}{1}}$ and $\classtuple{C}{r,\consistencyrelation{CR}{}} = \classtuple{C}{r,\consistencyrelation{CR}{2}}$
-% \end{definition}
-
 \todoLater{Actually, a concatenation may also consider that two or more relations are concatenated to a single one. I.e., CR1 could map something to A and B, and CR2 could map A to something and CR3 could map B to something. Then there could be a combination of all of them. In fact, each pair of consistency relations between the same metamodels can be combined to "larger" relation that then may be concatenated to other relations. Such a pair could even be a pair of a relation with itself, like if a relation maps on element to two of the same class and another relation then maps one element of the class to another. 
 In summary, our notion of transitivity has to consider that concatenation may not only be sequences, but acyclic graphs.
 Update: The interesting case is that CR1 requires elements for which at least two CR2 and CR3 require further elements. Then CR4 only requires elements for the ones required by CR2 and CR3. In our definition, on concatenation would consider CR4. }
@@ -142,14 +27,11 @@ Update: The interesting case is that CR1 requires elements for which at least tw
     Let $\consistencyrelation{CR}{1}$ and $\consistencyrelation{CR}{2}$ be two consistency relations. Their concatenation $ \consistencyrelation{CR}{1} \concat \consistencyrelation{CR}{2}$ is defined as follows:
     \begin{align*}
         &
-        %\consistencyrelation{CR}{} = 
         \consistencyrelation{CR}{1} \concat \consistencyrelation{CR}{2} \equalsperdefinition \setted{\tupled{\conditionelement{c}{l}, \conditionelement{c}{r}} \mid \\
         & \formulaskip 
-        \exists %\consistencyrelationpair{cr}{1} = 
-        \tupled{\conditionelement{c}{l}, \conditionelement{c}{r,1}} \in \consistencyrelation{CR}{1} : \exists %\consistencyrelationpair{cr}{2} = 
-        \tupled{\conditionelement{c}{l,2}, \conditionelement{c}{r}} \in \consistencyrelation{CR}{2} : %\conditionelement{c}{l,1} = \conditionelement{c}{l} \land \conditionelement{c}{r,2} = \conditionelement{c}{r} \\
-        %& \formulaskip\formulaskip
-        %\land 
+        \exists
+        \tupled{\conditionelement{c}{l}, \conditionelement{c}{r,1}} \in \consistencyrelation{CR}{1} : \exists
+        \tupled{\conditionelement{c}{l,2}, \conditionelement{c}{r}} \in \consistencyrelation{CR}{2} : 
         \conditionelement{c}{l,2} \subseteq \conditionelement{c}{r,1}\\
         & \formulaskip
         \land \forall \tupled{\conditionelement{c}{l}, \conditionelement{c}{r,1}'} \in \consistencyrelation{CR}{1} : \exists \tupled{\conditionelement{c}{l,2}', \conditionelement{c}{r,2}'} \in \consistencyrelation{CR}{2} : \conditionelement{c}{l,2}' \subseteq \conditionelement{c}{r,1}'
@@ -162,28 +44,12 @@ Update: The interesting case is that CR1 requires elements for which at least tw
 The concatenation of two consistency relations contains pairs of object tuples that are related across common elements in the right respectively left side of the consistency relation pairs.
 Such a concatenation may be empty.
 Two requirements ensure that all models considered consistent to the concatenation are also consistent to the single relations:
-First, two consistency relation pairs of $\consistencyrelation{CR}{1}$ and $\consistencyrelation{CR}{2}$ are only combined if the left condition element of the consistency relation pair of $\consistencyrelation{CR}{2}$ is a subset of the right condition element of the consistency relation pair %$\tupled{\conditionelement{c}{l}, \conditionelement{c}{r,1}}$ 
-of $\consistencyrelation{CR}{1}$.
+First, two consistency relation pairs of $\consistencyrelation{CR}{1}$ and $\consistencyrelation{CR}{2}$ are only combined if the left condition element of the consistency relation pair of $\consistencyrelation{CR}{2}$ is a subset of the right condition element of the consistency relation pair of $\consistencyrelation{CR}{1}$.
 Only in that case the existence of the right condition element of the pair of $\consistencyrelation{CR}{1}$ in a model requires the existence of an according condition element in $\consistencyrelation{CR}{2}$.
-%For example, if $\consistencyrelation{CR}{1}$ requires for an element $a$ the elements $b$ and $c$ to exist, then $\consistencyrelation{CR}{2}$ must define a relation for a subset of $b$ and $c$, such that it transitively requires the existence of further elements.
 Second, it is necessary that for all elements $\conditionelement{c}{r,1}'$ in the right side of $\consistencyrelation{CR}{1}$, which are considered consistent to a condition element $\conditionelement{c}{l}$, there must be a matching condition element, i.e., a subset of $\conditionelement{c}{r,1}'$, in the left condition of $\consistencyrelation{CR}{2}$.
 If there was an element $\conditionelement{c}{r,1}'$ in the right side of $\consistencyrelation{CR}{1}$ for which the left side condition of $\consistencyrelation{CR}{2}$ does not contain a subset, the concatenation does not constrain consistency for the existence of $\conditionelement{c}{l}$.
 Thus, without these restrictions the occurrence of $\conditionelement{c}{l}$ in a model tuple would not necessarily impose any consistency requirement by $\consistencyrelation{CR}{2}$.
 We explain these two restrictions at an example.
-
-% \begin{figure}
-%     \centering
-%     \includegraphics[width=\columnwidth]{figures/concatenation_subset.png}
-%     \caption{Two consistency relations with $\consistencyrelation{CR}{1} \concat \consistencyrelation{CR}{2} = \emptyset$ and $\consistencyrelation{CR^T}{2} \concat \consistencyrelation{CR^T}{1} \neq \emptyset$}
-%     \label{fig:concatenation_subset}
-% \end{figure}
-
-% \begin{figure}
-%     \centering
-%     \includegraphics[width=\columnwidth]{figures/combined_concatenation_example.png}    \caption{Consistency relations $\consistencyrelation{CR}{1}$ and options $\consistencyrelation{CR}{2}, \consistencyrelation{CR'}{2}, \consistencyrelation{CR''}{2}$ with $\consistencyrelation{CR}{1} \concat \consistencyrelation{CR}{2} = \neq \emptyset$, $\consistencyrelation{CR}{1} \concat \consistencyrelation{CR'}{2} = \emptyset$, $\consistencyrelation{CR}{1} \concat \consistencyrelation{CR''}{2} = \emptyset$ and $\consistencyrelation{CR''^T}{2} \concat \consistencyrelation{CR^T}{1} \neq \emptyset$}
-%     \label{fig:concatenation_example}
-% \end{figure}
-
 
 \begin{figure}
     \centering
@@ -197,7 +63,7 @@ We explain these two restrictions at an example.
         \centering
         \input{figures/correctness/compatibility/concatenation_subset_example}
     \end{subfigure}
-%    \includegraphics[width=\columnwidth]{figures/consistency_concatenation_example.png} 
+    %\includegraphics[width=\columnwidth]{figures/consistency_concatenation_example.png} 
     %\includegraphics[width=\columnwidth]{figures/concatenation_subset.png}
     \caption[Examples for consistency relation concatenation]{Two scenarios, each with two consistency relations: 
     Consistency relations $\consistencyrelation{CR}{1}$ and two options $\consistencyrelation{CR}{2}, \consistencyrelation{CR}{2}'$ with $\consistencyrelation{CR}{1} \concat \consistencyrelation{CR}{2} \neq \emptyset$ and $\consistencyrelation{CR}{1} \concat \consistencyrelation{CR}{2}' = \emptyset$, and consistency relations $\consistencyrelation{CR}{3}$ and $\consistencyrelation{CR}{4}$ with $\consistencyrelation{CR}{3} \concat \consistencyrelation{CR}{4} = \emptyset$ and $\consistencyrelation{CR}{4}^T \concat \consistencyrelation{CR}{3}^T \neq \emptyset$. Taken from~\owncite[Fig.~3]{klare2020compatibility-report}.}
@@ -221,11 +87,8 @@ This results in $\consistencyrelation{CR}{1} \concat \consistencyrelation{CR}{2}
 This shows the necessity of the second restriction in the definition. 
     \item $\consistencyrelation{CR}{3} \concat \consistencyrelation{CR}{4}$: 
 The concatenation $\consistencyrelation{CR}{3} \concat \consistencyrelation{CR}{4}$ is obviously empty, because $\consistencyrelation{CR}{3}$ requires a resident for each person, but $\consistencyrelation{CR}{4}$ only requires an employee if there is also a location.
-Such a location does not necessarily exist if a person %and thus a resident
-exists, thus if the models are consistent to $\consistencyrelation{CR}{3}$ and $\consistencyrelation{CR}{4}$ there must not necessarily be an employee for any contained person.
-This shows the necessity for the first restriction in \autoref{def:relationconcatenation}, which would require a left condition element from $\consistencyrelation{CR}{4}$ (resident and location) to be a subset of a right condition element in $\consistencyrelation{CR}{3}$ (resident). %, which is never the case. % because of $\consistencyrelation{CR}{4}$ requiring more elements than $\consistencyrelation{CR}{3}$ ensures to exist or a person.
-%This shows the necessity of the first restriction in the definition, which requires for all persons that for each consistent resident according to $\consistencyrelation{CR}{3}$, there is also a condition in $\consistencyrelation{CR}{4}$ that requires an employee to exist.
-%However, generally speaking, in this case the left condition elements of the second relation are a subset of those of the right side of the first relation, which means that the first relation does never require all elements to exist that are necessary for the second relation to require existence of any further elements.
+Such a location does not necessarily exist if a person exists, thus if the models are consistent to $\consistencyrelation{CR}{3}$ and $\consistencyrelation{CR}{4}$ there must not necessarily be an employee for any contained person.
+This shows the necessity for the first restriction in \autoref{def:relationconcatenation}, which would require a left condition element from $\consistencyrelation{CR}{4}$ (resident and location) to be a subset of a right condition element in $\consistencyrelation{CR}{3}$ (resident).
     \item $\consistencyrelation{CR}{4}^T \concat \consistencyrelation{CR}{3}^T$: 
 The concatenation of the transposed relations $\consistencyrelation{CR}{4}^T \concat \consistencyrelation{CR}{3}^T$ is not empty, but actually contains all combinations of each possible employee with all addresses and relates them to a person with the same name.
 This is reasonable, because $\consistencyrelation{CR}{4}^T$ requires for all existing employees and addresses that an appropriate resident with the same name %(and also a location)
@@ -233,55 +96,6 @@ has to exist, which then requires a person with that name to exist due to $\cons
 The definition does only cover that case due to its first restriction, because $\conditionelement{c}{l,2}$, i.e., the resident related to a person by $\consistencyrelation{CR}{3}^T$ is a subset of $\conditionelement{c}{r,1}$, i.e., a tuple of resident and location.
 \end{enumerate}
 \end{example}
-
-% The exemplary consistency relation show why it is necessary that the left condition element of the second consistency relation pair needs to be a subset of the right condition element of the first consistency relation pair when concatenating them.
-% The concatenation $\consistencyrelation{CR}{1} \concat \consistencyrelation{CR}{2}$ is obviously empty, because for each resident a person is required, but for $\consistencyrelation{CR}{2}$ to require an employee, there must always be a location.
-% Such an address does not necessarily exist if a resident and thus a person exists, thus if the models are consistent to $\consistencyrelation{CR}{1}$.
-% In consequence, there must not always be an employee if a resident exists.
-% The concatenation $\consistencyrelation{CR^T}{2} \concat \consistencyrelation{CR^T}{1}$ is not empty, but actually contains all combinations of each possible employee with all addresses and relates them to a resident with the same name.
-% This is reasonable, because $\consistencyrelation{CR^T}{2}$ requires for all existing employees and addresses that an appropriate person with the same name (and also a location) have to exist, which then requires a resident to exist due to $\consistencyrelation{CR^T}{1}$.
-% The definition does only cover that, because $\conditionelement{c}{l,2}$, i.e., the person related to a resident by $\consistencyrelation{CR^T}{1}$ is a subset of $\conditionelement{c}{r,1}$, i.e., a tuple of person and location.
- 
-% \begin{figure}
-%     \centering
-%     \includegraphics[width=\columnwidth]{figures/consistency_concatenation_example.png}
-%     \caption{Two consistency relations with two alternatives for $\consistencyrelation{CR}{2}$ with $\consistencyrelation{CR}{1} \concat \consistencyrelation{CR}{2} \neq \emptyset$ and $\consistencyrelation{CR}{1} \concat \consistencyrelation{CR'}{2} = \emptyset$}
-%     \label{fig:concatenation_example}
-% \end{figure}
-
-% \autoref{fig:concatenation_example} exemplifies the definition of concatenation and the necessity for its restrictions.
-% Considering $\consistencyrelation{CR}{1} \concat \consistencyrelation{CR}{2}$, this concatenation relates all residents to employees with the same name and all addresses with any names. 
-% So each resident is considered consistent to an employee with the same name and the existence of an address with any street name.
-% This is reasonable, because $\consistencyrelation{CR}{1}$ requires a person with an arbitrary address to exist for each resident with the same name. Additionally $\consistencyrelation{CR}{2}$ requires an employee with the same name and an appropriate address to exist.
-% For any person to which a resident is considered consistent, an appropriate employee and address exist, which are considered consistent, so the concatenation contains those elements, so $\consistencyrelation{CR}{1} \concat \consistencyrelation{CR}{2}$ considers all models consistent that are also consistent to the single relations.
-% In contrast, $\consistencyrelation{CR'}{2}$ further restricts $\consistencyrelation{CR}{2}$ by requiring that the street name must not be empty. 
-% In consequence, persons with an empty street name do not need to have an appropriate employee and address to be considered consistent.
-% In consequence, the concatenation $\consistencyrelation{CR}{1} \concat \consistencyrelation{CR'}{2}$ is empty, because a resident does not necessarily require an employee to exist, because if a person with the same name and an empty street name exist, $\consistencyrelation{CR}{1}$ and $\consistencyrelation{CR'}{2}$ do not require an employee exists.
-% This motivates the necessity for the last restriction in the definition of concatenation, which requires for all residents that for each consistent person according to $\consistencyrelation{CR}{1}$, there is also a condition in $\consistencyrelation{CR'}{2}$ that requires an employee to exist.
-
-%Requiring that there must only be a partial overlap in the related elements, i.e., $\conditionelement{c}{r,1} \cap \conditionelement{c}{l,2} \neq \emptyset$ would lead to a combined consistency relation $\consistencyrelation{CR}{}$ that restricts consistency in comparison to the combined relations $\consistencyrelation{CR}{1}$ and $\consistencyrelation{CR}{2}$.
-
-%If there is no overlap between two relations, i.e., they have no elements in common that they put into relation, then the concatenation of them is empty by definition.
-
-%\todoLater{Maybe readd overlapping definition}
-% To state when consistency relations are overlapping with each other in the sense that they potentially have elements in common, we define when we denote consistency relations as \emph{overlapping}.
-
-% \begin{definition}[Overlapping Consistency Relations]
-%     Let $\consistencyrelation{CR}{1}$ and $\consistencyrelation{CR}{2}$ be two consistency relations. We say that:
-%     \begin{align*}
-%         \formulaskip &
-%         \consistencyrelation{CR}{1} \mathtext{is overlapping with} \consistencyrelation{CR}{2} \equivalentperdefinition \\
-%         & \formulaskip
-%         \exists \class{C}{} \in \classtuple{C}{l,\consistencyrelation{CR}{1}} : \exists \class{C'}{} \in \classtuple{C}{l,\consistencyrelation{CR}{2}} : \class{C}{} \cap \class{C'}{} \neq \emptyset \\
-%         & \formulaskip 
-%         \land \exists \class{C}{} \in \classtuple{C}{r,\consistencyrelation{CR}{1}} \exists \class{C'}{} \in \classtuple{C}{r,\consistencyrelation{CR}{2}} : \class{C}{} \cap \class{C'}{} \neq \emptyset
-%     \end{align*}
-% \end{definition}
-
-% \todoHeiko{Overlapping is not needed right now}
-
-% Consistency relation are considered \emph{overlapping}, if they relate classes that have an overlap in their properties in both sides of the relations. 
-% \todoHeiko{Add an example for non-trivial overlap here!}
 
 \mnote{Concatenation not restricting consistency}
 We can formally show that the defined notion of concatenation does not lead to any restriction of consistency regarding the single relations:
@@ -306,8 +120,7 @@ We can formally show that the defined notion of concatenation does not lead to a
     So we know that $\consistencyrelation{W}{}$ fulfills the first condition of a witness structure according to \autoref{def:consistency} for consistency:
     \begin{align*}
         &
-        \forall \tupled{\conditionelement{c}{l,1}, \conditionelement{c}{r,1}}, \tupled{\conditionelement{c}{l,2}, \conditionelement{c}{r,2}} \in \consistencyrelation{W}{} : %\\
-        %& \formulaskip
+        \forall \tupled{\conditionelement{c}{l,1}, \conditionelement{c}{r,1}}, \tupled{\conditionelement{c}{l,2}, \conditionelement{c}{r,2}} \in \consistencyrelation{W}{} : 
         \tupled{\conditionelement{c}{l,1}, \conditionelement{c}{r,1}} = \tupled{\conditionelement{c}{l,2}, \conditionelement{c}{r,2}} \lor \conditionelement{c}{l,1} \neq \conditionelement{c}{l,2} \land \conditionelement{c}{r,1} \neq \conditionelement{c}{r,2}
     \end{align*}
     Additionally, since $\consistencyrelation{W}{1}$ and $\consistencyrelation{W}{2}$ are witness structures for consistency of $\modeltuple{m}$ to $\consistencyrelation{CR}{1}$ and $\consistencyrelation{CR}{2}$, the model tuple contains all condition elements in $\consistencyrelation{W}{1}$ and $\consistencyrelation{W}{2}$.
@@ -332,43 +145,8 @@ We can formally show that the defined notion of concatenation does not lead to a
         &
         \forall \conditionelement{c}{l}' \in \condition{c}{l,\consistencyrelation{CR}{}} : \modeltuple{m} \containsmath \conditionelement{c}{l}' \Rightarrow \conditionelement{c}{l}' \in \condition{c}{l,\consistencyrelation{W}{}}
     \end{align*}
-    Summarizing, we have shown that $\consistencyrelation{W}{}$ fulfills all three requirements for a witness structure according to consistency defined in \autoref{def:consistency}, so we know that $\modeltuple{m} \consistenttomath \consistencyrelation{CR}{}$.
-    % If any set of models $\modelset{m}$ is inconsistent to $\consistencyrelation{CR}{}$, then
-    % \begin{align*}
-    %     \formulaskip &
-    %     \exists \tuple{c}{l} \in \condition{c}{l, \consistencyrelation{CR'}{}} \mid \modelset{m} \mathtext{contains} \conditionelement{c}{l} : \\
-    %     & \formulaskip %\label{eq:consistencytransitivenoncontainment}
-    %     \forall \conditionelement{c}{r} \in \condition{c}{r, \consistencyrelation{CR'}{}} \mid \tupled{\conditionelement{c}{l}, \conditionelement{c}{r}} \in \consistencyrelation{CR}{} : \neg (\modelset{m} \mathtext{contains} \conditionelement{c}{r}) \\
-    %     & \formulaskip %\label{eq:consistencytransitiveduplicatecontainment}
-    %     \lor \exists \conditionelement{c'}{r} \in \condition{c}{r, \consistencyrelation{CR'}{}} \setminus \setted{\conditionelement{c}{r}} \mid \tupled{\conditionelement{c}{l}, \conditionelement{c'}{r}} \in \consistencyrelation{CR'}{}: \modelset{m} \mathtext{contains} \conditionelement{c'}{r}
-    % \end{align*}
-    % \begin{enumerate}
-    %     \item Assume that there is no condition element $\conditionelement{c}{r}$, such that $\modelset{m} \containsmath \conditionelement{c}{r}$.
-    %     Due to $\consistencyrelation{CR}{}$ being a concatenation of $\consistencyrelation{CR}{1}, \dots, \consistencyrelation{CR}{k}$, for every consistency relation pair $\tupled{\conditionelement{c}{l}, \conditionelement{c}{r}} \in \consistencyrelation{CR}{}$, there is a sequence of consistency relation pairs $\tupled{\conditionelement{c}{l,1}, \conditionelement{c}{r,1}} \in \consistencyrelation{CR}{1}, \dots, \tupled{\conditionelement{c}{l,k}, \conditionelement{c}{r,k}} \in \consistencyrelation{CR}{k}$, such that there is an overlap in the pairs of each sequential consistency relation pair, i.e., $\exists \object{o}{1} \in \conditionelement{c}{r,i}, \object{o}{2} \in \conditionelement{c}{l,i+1} : \object{o}{1} \cap \object{o}{2} \neq \emptyset$.
-    %
-    %
-    %     \item Assume that there are at least two condition elements $\conditionelement{c}{r}, \conditionelement{c'}{r}$, such that $\modelset{m} \containsmath \conditionelement{c}{r}$ and $\modelset{m} \containsmath \conditionelement{c'}{r}$.
-    %  
-    % \end{enumerate}
-    %
-    %
-    % If any set of models $\modelset{m}$ is consistent to $\setted{\consistencyrelation{CR}{1}, \dots, \consistencyrelation{CR}{k}}$, then
-    % \begin{align*}
-    %     \formulaskip &
-    %     \forall \consistencyrelation{CR'}{} \in \setted{\consistencyrelation{CR}{1}, \dots, \consistencyrelation{CR}{k}} : \\
-    %     & \formulaskip 
-    %     \forall \tuple{c}{l} \in \condition{c}{l, \consistencyrelation{CR'}{}} \mid \modelset{m} \mathtext{contains} \conditionelement{c}{l} : \exists \conditionelement{c}{r} \in \condition{c}{r, \consistencyrelation{CR'}{}} \mid \tupled{\conditionelement{c}{l}, \conditionelement{c}{r}} \in \consistencyrelation{CR}{} : \\
-    %     & \formulaskip\formulaskip 
-    %     \modelset{m} \mathtext{contains} \conditionelement{c}{r} \\
-    %     & \formulaskip\formulaskip
-    %     \land \forall \conditionelement{c'}{r} \in \condition{c}{r, \consistencyrelation{CR'}{}} \setminus \setted{\conditionelement{c}{r}} \mid \tupled{\conditionelement{c}{l}, \conditionelement{c'}{r}} \in \consistencyrelation{CR'}{}: \neg \modelset{m} \mathtext{contains} \conditionelement{c'}{r}
-    % \end{align*}
-    % This especially holds for all $\conditionelement{c}{l} \in \condition{c}{l,\consistencyrelation{CR}{1}} \mid \modelset{m} \containsmath \conditionelement{c}{l}$.
-    % Consider the respective condition elements $\conditionelement{c}{r}$, which $\modelset{m}$ contains as well. If there is a $\conditionelement{c'}{l} \in \condition{c}{l,\consistencyrelation{CR}{2}}$ with $\exists \object{o}{1} \in \conditionelement{c}{r} : \exists \object{o}{2} \in \conditionelement{c'}{l}$ such that $\object{o}{1}$
-    % \todoHeiko{Add proof}
+    Summarizing, we have shown that $\consistencyrelation{W}{}$ fulfills all three requirements for a witness structure for consistency according to \autoref{def:consistency}, so we know that $\modeltuple{m} \consistenttomath \consistencyrelation{CR}{}$.
 \end{proof}
-
-% Having shown that our definition of consistency relation concatenation is well-defined in the sense that it does not introduce further restrictions for consistency, we are able to show that the transitive closure of a consistency relation set does also not restrict consistency in comparison to the set of consistency relations itself.
 
 
 \subsection{Transitive Closure of Consistency Relations}
@@ -380,8 +158,7 @@ Having shown that our definition of consistency relations concatenation is well-
 \begin{definition}[Consistency Relations Transitive Closure] \label{def:transitiveclosure}
     Let $\consistencyrelationset{CR}$ be a set of consistency relation. We define its transitive closure $\transitiveclosure{\consistencyrelationset{CR}}$ as:
     \begin{align*}
-        \transitiveclosure{\consistencyrelationset{CR}{}} \equalsperdefinition \setted{\consistencyrelation{CR}{} \mid & \exists \consistencyrelation{CR}{1}, \dots, \consistencyrelation{CR}{k} \in \consistencyrelationset{CR}{} : %\\
-        %&
+        \transitiveclosure{\consistencyrelationset{CR}{}} \equalsperdefinition \setted{\consistencyrelation{CR}{} \mid & \exists \consistencyrelation{CR}{1}, \dots, \consistencyrelation{CR}{k} \in \consistencyrelationset{CR}{} :
         \consistencyrelation{CR}{} = \consistencyrelation{CR}{1} \concat \dots \concat \consistencyrelation{CR}{k} }
     \end{align*}
 \end{definition}
@@ -410,8 +187,7 @@ We show that in the following by first extending the argument of \autoref{lemma:
     Per definition, every $\consistencyrelation{CR}{} \in \transitiveclosure{\consistencyrelationset{CR}}$ is a concatenation of consistency relations in $\consistencyrelationset{CR}$, i.e.:
     \begin{align*}
         &
-        \forall \consistencyrelation{CR}{} \in \transitiveclosure{\consistencyrelationset{CR}} : \exists \consistencyrelation{CR}{1}, \dots, \consistencyrelation{CR}{k} \in \consistencyrelationset{CR} : %\\
-        %& \formulaskip 
+        \forall \consistencyrelation{CR}{} \in \transitiveclosure{\consistencyrelationset{CR}} : \exists \consistencyrelation{CR}{1}, \dots, \consistencyrelation{CR}{k} \in \consistencyrelationset{CR} :
         \consistencyrelation{CR}{} = \consistencyrelation{CR}{1} \concat \dots \concat \consistencyrelation{CR}{k}
     \end{align*}
     We already know for every two consistency relations $\consistencyrelation{CR}{1}$ and $\consistencyrelation{CR}{2}$ and all model tuples $\modeltuple{m}$ that if $\modeltuple{m} \consistenttomath \setted{\consistencyrelation{CR}{1}, \consistencyrelation{CR}{2}}$ then $\modeltuple{m} \consistenttomath \consistencyrelation{CR}{1} \concat \consistencyrelation{CR}{2}$ (\autoref{lemma:concatenationimpliesconsistency}).
@@ -452,33 +228,22 @@ Based on the notion of fine-grained consistency relations and their concatenatio
 We have stated that we consider consistency relation incompatible if they are contradictory, like the relation between names in our initial example in \autoref{fig:compatibility:three_persons_example_extended}.
 In that example, for residents with non-lowercase names no consistent tuple of models could be derived.
 We formalize this notion of \emph{non-contradictory} relations by requiring that relations may not restrict that an object tuple, for which consistency is defined in any consistency relation, cannot occur in a consistent model tuple anymore.
-%More precisely, we consider relations compatible if for all condition elements in the consistency relations, i.e., for every tuple of objects for which consistency is somehow constrained by requiring further elements to exist in a tuple of models to consider it consistent, a consistent model tuple containing those objects can be found. %In consequence, a consistency relation is not allowed to forbid existence of objects in consistency models for which other relations restrain consistency.
 
 \begin{definition}[Compatibility] \label{def:compatibility}
-    Let $\consistencyrelationset{CR}$ be a set of consistency relations for a tuple of metamodels $\metamodeltuple{M}$. % = \setted{\metamodel{M}{1}, \dots \metamodel{M}{k}}$.
+    Let $\consistencyrelationset{CR}$ be a set of consistency relations for a tuple of metamodels $\metamodeltuple{M}$.
     We say that:
     \begin{align*}
         &
-        \consistencyrelationset{CR} \compatiblemath \equivalentperdefinition %\\
-        %& \formulaskip
-        \forall \consistencyrelation{CR}{} \in \consistencyrelationset{CR} : \forall \conditionelement{c}{} \in \condition{c}{l, \consistencyrelation{CR}{}} %\cup \condition{c}{r, \consistencyrelation{CR}{}} 
-        : \exists \modeltuple{m} \in \metamodeltupleinstanceset{M} : \\
-        & \formulaskip %\formulaskip
+        \consistencyrelationset{CR} \compatiblemath \equivalentperdefinition
+        \forall \consistencyrelation{CR}{} \in \consistencyrelationset{CR} : \forall \conditionelement{c}{} \in \condition{c}{l, \consistencyrelation{CR}{}}: \exists \modeltuple{m} \in \metamodeltupleinstanceset{M} : \\
+        & \formulaskip
         \modeltuple{m} \containsmath \conditionelement{c}{} \land \modeltuple{m} \consistenttomath \consistencyrelationset{CR}
-        % \forall \consistencyrelation{CR}{} \in \consistencyrelationset{CR} : \forall %\consistencyrelationpair{cr}{} = 
-        % \tupled{\conditionelement{c}{l}, \conditionelement{c}{r}} \in \consistencyrelation{CR}{} : \exists \modelset{m} \in \metamodelinstances{\metamodelset{M}} : \\
-        % & \formulaskip \formulaskip
-        % \modelset{m} \mathtext{contains} \tupled{\conditionelement{c}{l}, \conditionelement{c}{r}} \land \modelset{m} \mathtext{consistent to} \consistencyrelationset{CR}
     \end{align*}
     We call a set of consistency relation $\consistencyrelationset{CR}$ \emph{incompatible} if it does not fulfill the definition of compatibility.
 \end{definition}
 
-%According to that definition, selecting any condition element (i.e., an object tuple) that occurs in the left side of a consistency relation pair, thus requiring another condition element to occur in a set of model to consider it consistent, it must be possible to derive a set of models that contains that object tuple and is considered consistent. 
-%\autoref{def:compatibility} formalizes the notion of \emph{non-contradictory} relations by requiring that a relation may not restrict that an object tuple, for which consistency is defined in any consistency relation, cannot occur in a model tuple anymore.
 \mnote{Compatibility at running example}
 We exemplify this notion of compatibility at an extract of the initial example with different consistency relations.
-
-% According to that definition, selecting any pair of object tuples from any consistency relation, it must be possible to derive a set of models that contains those tuples and is considered consistent. This formalizes the notion of \emph{non-contradictory} relations, as no relation restricts that an element of another relation cannot be fulfilled anymore.
 
 \begin{example}
 \autoref{fig:compatibility:incompatibility_example} shows an extract of the three metamodels from \autoref{fig:compatibility:three_persons_example_extended} and several consistency relations, of which different combinations are compatible or incompatible according to the previous definition.
@@ -546,23 +311,20 @@ Finally, analogously to the equivalence of a set of consistency relations $\cons
     \end{align}
     Since $\consistencyrelationset{CR}$ is compatible, we know from \autoref{def:compatibility} for compatibility that:
     \begin{align}
-        & %\nonumber
+        & 
         \label{eq:compatibilitysingleelement}
-        \forall \conditionelement{c}{l}' \in \condition{c}{l, \consistencyrelation{CR}{1}} %\cup \condition{c}{r, \consistencyrelation{CR}{}} 
-        : \exists \modeltuple{m} \in \metamodeltupleinstanceset{M} : %\\
-        %& \formulaskip
+        \forall \conditionelement{c}{l}' \in \condition{c}{l, \consistencyrelation{CR}{1}}
+        : \exists \modeltuple{m} \in \metamodeltupleinstanceset{M} :
         \modeltuple{m} \containsmath \conditionelement{c}{l}' \land \modeltuple{m} \consistenttomath \consistencyrelationset{CR}
     \end{align}
     Because of \autoref{eq:transitiverelationcontainment} and \autoref{eq:compatibilitysingleelement}, we know that:
     \begin{align}
-        & %\nonumber 
+        &
         \label{eq:compatibilitysinglelementtransitive}
-        \forall \conditionelement{c}{l} \in \condition{c}{l, \consistencyrelation{CR}{}} %\cup \condition{c}{r, \consistencyrelation{CR}{}} 
-        : \exists \modeltuple{m} \in \metamodeltupleinstanceset{M} : %\\
-        %& \formulaskip
+        \forall \conditionelement{c}{l} \in \condition{c}{l, \consistencyrelation{CR}{}}
+        : \exists \modeltuple{m} \in \metamodeltupleinstanceset{M} :
         \modeltuple{m} \containsmath \conditionelement{c}{l} \land \modeltuple{m} \consistenttomath \consistencyrelationset{CR}
     \end{align}  
-    %Due to \autoref{eq:transitiverelationcontainment}, this statement is also true for all $\conditionelement{c}{l} \in \condition{c}{l, \consistencyrelation{CR}{}}$.
     Furthermore, \autoref{lemma:consistencytransitiveclosure} states that:
     \begin{align}
         & \label{eq:consistencytransitiveequal}
@@ -571,7 +333,7 @@ Finally, analogously to the equivalence of a set of consistency relations $\cons
     In consequence of Equations \ref{eq:compatibilitysinglelementtransitive} and \ref{eq:consistencytransitiveequal}, we know that:
     \begin{align}
         & \nonumber \label{eq:compatibilityonlyclosure}
-        \forall \consistencyrelation{CR}{} \in \transitiveclosure{\consistencyrelationset{CR}} \setminus \consistencyrelationset{CR} : \forall \conditionelement{c}{} \in \condition{c}{l, \consistencyrelation{CR}{}} %\cup \condition{c}{r, \consistencyrelation{CR}{}} 
+        \forall \consistencyrelation{CR}{} \in \transitiveclosure{\consistencyrelationset{CR}} \setminus \consistencyrelationset{CR} : \forall \conditionelement{c}{} \in \condition{c}{l, \consistencyrelation{CR}{}}
         : \exists \modeltuple{m} \in \metamodeltupleinstanceset{M} : \\
         & \formulaskip
         \modeltuple{m} \containsmath \conditionelement{c}{} \land \modeltuple{m} \consistenttomath \transitiveclosure{\consistencyrelationset{CR}}
@@ -581,7 +343,7 @@ Finally, analogously to the equivalence of a set of consistency relations $\cons
     Due to compatibility of $\consistencyrelationset{CR}$ and \autoref{lemma:consistencytransitiveclosure} showing equality of consistency of $\modeltuple{m}$ regarding $\consistencyrelationset{CR}$ and $\transitiveclosure{\consistencyrelationset{CR}}$, it is true that:
     \begin{align}
         & \nonumber \label{eq:compatibilitynonclosure}
-        \forall \consistencyrelation{CR}{} \in \consistencyrelationset{CR} : \forall \conditionelement{c}{} \in \condition{c}{l, \consistencyrelation{CR}{}} %\cup \condition{c}{r, \consistencyrelation{CR}{}} 
+        \forall \consistencyrelation{CR}{} \in \consistencyrelationset{CR} : \forall \conditionelement{c}{} \in \condition{c}{l, \consistencyrelation{CR}{}}
         : \exists \modeltuple{m} \in \metamodeltupleinstanceset{M} : \\
         & \formulaskip
         \modeltuple{m} \containsmath \conditionelement{c}{} \land \modeltuple{m} \consistenttomath \transitiveclosure{\consistencyrelationset{CR}}
@@ -589,63 +351,3 @@ Finally, analogously to the equivalence of a set of consistency relations $\cons
     %
     Equations \ref{eq:compatibilityonlyclosure} and \ref{eq:compatibilitynonclosure} show compatibility of $\transitiveclosure{\consistencyrelationset{CR}}$ if $\consistencyrelationset{CR}$ is compatible.
 \end{proof}
-
-% \begin{figure}
-%     \centering
-%     \includegraphics[width=0.7\columnwidth]{figures/incompatible_constraints.png}
-%     \caption{Three metamodels and three consistency relations relating those elements that have the same valid $i$ ($C1$ and $C2$ resp.~$C1$ and $C3$) or a $i$ value differing by $1$ ($C2$ and $C3$)}
-%     \label{fig:incompatible_constraints}
-% \end{figure}
-
-% \begin{example}
-%     Consider the three metamodels in \autoref{fig:incompatible_constraints}, each containing one class with one attribute $i$. They are related by three consistency relations specifying that in two cases objects having the same $i$ are in the consistency relations, whereas in one case two objects with and $i$ differing by $1$ are in the consistency relation. For any of the consistency relation pairs there are not finite models that are consistency to the consistency relations. Such a model would have to be infinite, as it needed to contain the infinite number of objects with all values of $i$.
-%     In consequence, those consistency relations would be considered \emph{incompatible} according to \ref{def:compatibility}.
-% \end{example}
-
-% \begin{definition}[Strong Compatibility]
-%     Let $\set{\consistencyrelation{CR}}$ be a set of consistency relations for metamodels $\metamodel[1]{M}, \ldots, \metamodel[k]{M}$.
-%     A consistency relation $\consistencyrelation{CR}{}$ is considered \emph{strongly compatible with} $\set{\consistencyrelation{CR}{}}$ if, and only if,
-%     \begin{align*}
-%         \formulaskip
-%         & 
-%         \forall \tupled{\model[1]{m}, \ldots, \model[k]{m}} \in \metamodelinstances{\metamodel[1]{M}} \times \dots \times \metamodelinstances{\metamodel[k]{M}} : \\
-%         & 
-%     \end{align*}
-% \end{definition}
-
-
-% \begin{definition}[Weak Compatibility]
-%     Let $\set{\consistencyrelation{CR}}$ be a set of consistency relations for metamodels $\metamodel[1]{M}, \ldots, \metamodel[k]{M}$.
-%     A consistency relation $\consistencyrelation{CR}$ is considered \emph{compatible with} $\set{\consistencyrelation{CR}}$ if, and only if,
-%     \begin{align*}
-%         \formulaskip
-%         & 
-%         \exists \tupled{\tupled{e_{l1}, \ldots, e_{ln}}, \tupled{e_{r1}, \ldots, e_{rm}}} \in \consistencyrelation{CR} : \\
-%         & 
-%         \exists \tupled{\model[1]{m}, \ldots, \model[k]{m}} \in \metamodelinstances{\metamodel[1]{M}} \times \dots \times \metamodelinstances{\metamodel[k]{M}} : \exists i, j \in \{1, \ldots, k \} : \\
-%         & \formulaskip 
-%         \{ e_{l1}, \ldots, e_{ln} \} \subseteq \model[i]{m} \land \{ e_{r1}, \ldots, e_{rm} \} \subseteq \model[j]{m} \\
-%         & \formulaskip\formulaskip
-%         \land \{ \model[1]{m}, \ldots, \model[k]{m} \} \; \text{consistent according to} \; \set{\consistencyrelation{CR}}
-%     \end{align*}
-% \end{definition}
-
-% This means that a consistency relation is considered compatible with a set of other consistency relations if there is at least one entry of the consistency relation, i.e., a pair of element tuples, which co-occurs in any set of models such that the models are consistent according to the other consistency relations as well.
-% If there is no such set of models, which contains one entry of the consistency relation and is consistent according to the other consistency relations, the consistency relations can never be fulfilled altogether, so the consistency relation is considered \emph{incompatible}.
-
-% \begin{definition}[Possibly well-defined Consistency Relations]
-%     A set of consistency relations $\set{\consistencyrelation{CR}}$ is considered \emph{possibly well-defined} if, and only if,
-%     \begin{align*}
-%         \formulaskip
-%         & 
-%         \forall \consistencyrelation{CR} \in \set{\consistencyrelation{CR}}: \consistencyrelation{CR} \; \text{is compatible with} \; \set{\consistencyrelation{CR}} \setminus \{ \consistencyrelation{CR} \}
-%     \end{align*}
-% \end{definition}
-
-%\begin{itemize}
-%    \item Insight: Compatibility is a mandatory requirement for interoperability of transformations. If they are not compatible, consistency repair will not be able to find a set of consistent models after certain modifications, because the consistency relations do not do not specify appropriate sets of consistent models.
-    %\item TODO: Discuss valid models, why we do not consider them and prove that invariants + consistency relations can express any consistency relation.
-%\end{itemize}
-
-%\end{copiedFrom} % SoSym MPM4CPS
-
