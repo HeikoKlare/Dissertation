@@ -106,16 +106,16 @@ Consistency is defined by transformations between \gls{PCM} and \gls{UML}, as we
 
 \mnote{Duplicate execution of transformation}
 In the scenario in \autoref{fig:orchestration:necessity_multiple_executions}, we begin with a consistent state of one interface and component, each realized by an interface and class, respectively, in both \gls{UML} and Java.
-A user then introduces a change of the Java code, in which he or she adds a field of the interface type to the component realization class in Java.
+A user then introduces a change of the Java code, in which he or she adds a field of the interface type to the component realization class.
 The transformation between \gls{UML} and Java propagates this change to the \gls{UML} model, such that both models are consistent again.
 The transformation between \gls{PCM} and \gls{UML} then detects that the added field is of the type of an architectural interface, thus representing a requires relation between the corresponding component and the architectural interface. 
-It adds the appropriate requires relation to the \gls{PCM} model, but also adds an appropriate parameter to the constructor of the component realization class in \gls{UML}, as required by the consistency relations.
+It adds the appropriate requires relation to the \gls{PCM} model, but also adds an appropriate parameter to the constructor of the component realization class in \gls{UML}.
 This introduces a further inconsistency between the \gls{UML} and the Java model, which requires the transformation between \gls{UML} and Java to be executed again to also add that constructor parameter in the Java code.
 
 \mnote{Cycles in transformation networks}
-We simplified the example to the necessary core, although in practice a further transformation between \gls{PCM} and Java would be required, for example, to ensure that the field is set within the constructor.
-One might argue that having such a cycle in the graph induced by the transformations between \gls{PCM}, \gls{UML} and Java could resolve the problem, as the necessary second execution of the transformation between \gls{UML} and Java is not necessary if the information is propagated from \gls{PCM} to Java.
-This is, however, only true if exactly this order of transformations is chosen for execution and if the transformation between \gls{PCM} and Java does not introduce further information in the Java model that then needs to be propagated to \gls{UML}.
+We simplified the example to the necessary core, although in practice a further transformation between \gls{PCM} and Java may be required, e.g., to ensure that the field is set within the constructor.
+One might argue that having such a cycle in the graph induced by the transformations between \gls{PCM}, \gls{UML} and Java resolves the problem, as the necessary second execution of the transformation between \gls{UML} and Java is not necessary if the information is propagated from \gls{PCM} to Java.
+This is, however, only true if exactly this execution order is chosen and if the transformation between \gls{PCM} and Java does not add further information to the Java model that must then be propagated to \gls{UML}.
 
 \mnote{Synchronizing transformations change already processed models}
 In general, it is always possible that transformations need to react to the changes performed by others if they are not in some way aligned with each other.
@@ -131,16 +131,17 @@ Thus, if one transformation restores consistency between two models and another 
 \end{figure}
 
 \mnote{Example generalization}
-We can generalize the previous example to the one depicted in \autoref{fig:orchestration:no_upper_bound}.
+We can generalize the previous example to the one of \autoref{fig:orchestration:no_upper_bound}.
 It is an extension of the example given in \autoref{fig:synchronization:multiple_unidirectional_execution} for the necessity to execute the consistency preservation rules of a bidirectional transformation multiple times.
 This also applies to the case in which multiple synchronizing transformations are combined.
-The depicted relations and the informally defined consistency preservation rules require that elements \modelelement{A}, \modelelement{B} and \modelelement{C} with the same value of $n$ exist, and that for each \modelelement{A} with value $n$ a \modelelement{B} and \modelelement{C} with $n$ incremented by $1$ exist, except for the case that $n = x-1$.
-In consequence, for an \modelelement{A} with $n = i$, all \modelelement{A}, \modelelement{B} and \modelelement{C} with $i \leq n < x$ need to exist.
+The depicted relations and the sketched consistency preservation rules require that elements \modelelement{A}, \modelelement{B} and \modelelement{C} with the same value of $n$ exist, and that for each \modelelement{A} with value $n$ a \modelelement{B} and \modelelement{C} with $n$ incremented by $1$ exist, except for the case that $n = x-1$.
+Thus, for an \modelelement{A} with $n = i$, all \modelelement{A}, \modelelement{B} and \modelelement{C} with $i \leq n < x$ must exist.
 This, obviously, requires the transformations to be executed $x-1-i$ times.
 
 \mnote{Definition of example transformation network}
-We prove the informally given statement with the following precise definition of the transformations for a fixed but arbitrary value of $x$.
+We prove the informally given statement with the following precise definition of the transformations for a fixed but arbitrary $x$.
 Let $\class{A}{}, \class{B}{}, \class{C}{}$ be the classes depicted in \autoref{fig:orchestration:necessity_multiple_executions}.
+\parameterizeformat{
 \begin{align*}
     & 
     \metamodelinstanceset{M}{1} \equalsperdefinition \mathcal{P}(\instances{\class{A}{}}), %\\
@@ -165,28 +166,27 @@ Let $\class{A}{}, \class{B}{}, \class{C}{}$ be the classes depicted in \autoref{
     & 
     \consistencyrelation{CR}{13} \equalsperdefinition \setted{\tupled{a,c} \in \instances{\class{A}{}} \times \instances{\class{C}{}} \mid c.n = a.n}, \consistencyrelationset{CR}_{13} \equalsperdefinition \setted{\consistencyrelation{CR}{13}, \consistencyrelation{CR}{13}^T} \\
     & 
-    \consistencypreservationrule{\consistencyrelationset{CR}_{13}}^{\rightarrow}(\model{m}{1}, \model{m}{3}, \change{\metamodel{M}{1}}) = \change{\metamodel{M}{3}} \\
-    & \formulaskip
+    \consistencypreservationrule{\consistencyrelationset{CR}_{13}}^{\rightarrow}(\model{m}{1}, \model{m}{3}, \change{\metamodel{M}{1}}) = \change{\metamodel{M}{3}} #2
     \withmath \change{\metamodel{M}{3}}(\model{m}{3}) \equalsperdefinition \setted{c \in \instances{\class{C}{}} \mid \exists a \in \change{\metamodel{M}{1}}(\model{m}{1}) : c.n = a.n} \\
     & 
-    \consistencypreservationrule{\consistencyrelationset{CR}_{13}}^{\leftarrow}(\model{m}{3}, \model{m}{1}, \change{\metamodel{M}{3}}) = \change{\metamodel{M}{1}} \\
-    & \formulaskip
+    \consistencypreservationrule{\consistencyrelationset{CR}_{13}}^{\leftarrow}(\model{m}{3}, \model{m}{1}, \change{\metamodel{M}{3}}) = \change{\metamodel{M}{1}} #2
     \withmath \change{\metamodel{M}{1}}(\model{m}{1}) \equalsperdefinition \setted{a \in \instances{\class{A}{}} \mid \exists c \in \change{\metamodel{M}{3}}(\model{m}{3}) : c.n = a.n} \\
     & 
     \transformation{t}_{13} \equalsperdefinition \tupled{\consistencyrelationset{CR}_{13}, \consistencypreservationrule{\consistencyrelationset{CR}_{13}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}_{13}}^{\leftarrow}} \\[0.5em]
     &
     \consistencyrelation{CR}{23} \equalsperdefinition \setted{\tupled{b,c} \in \instances{\class{B}{}} \times \instances{\class{C}{}} \mid c.n = b.n}, \consistencyrelationset{CR}_{23} \equalsperdefinition \setted{\consistencyrelation{CR}{23}, \consistencyrelation{CR}{23}^T} \\
     & 
-    \consistencypreservationrule{\consistencyrelationset{CR}_{23}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}_{23}}^{\leftarrow} \andmath \transformation{t}_{23} \mathtextspacearound{accordingly} \\[1em]
+    \consistencypreservationrule{\consistencyrelationset{CR}_{23}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}_{23}}^{\leftarrow} \andmath \transformation{t}_{23} \mathtextspacearound{accordingly} \\[0.5em]
     &
     \consistencyrelationset{CR} \equalsperdefinition \consistencyrelationset{CR}_{12} \cup \consistencyrelationset{CR}_{13} \cup \consistencyrelationset{CR}_{23} \\
     &
     \transformationset{T}_\mathvariable{inc} \equalsperdefinition \setted{\transformation{t}_{12}, \transformation{t}_{13}, \transformation{t}_{23}}
 \end{align*}
+}{}{\\ & \formulaskip}%
 
 \mnote{Minimal number of executions in example}
 For these transformations, we can show that the transformation $\transformation{t}_{12}$ needs to be executed a minimal number of times depending on $x$ for a specific input.
-Thus, it is not sufficient to execute each transformation only once in this network and, even worse, we can enforce the necessity for an arbitrary high number of repeated executions by proper selection of $x$.
+Thus, it is not sufficient to execute each transformation only once in this network and, even worse, we can enforce the necessity for an arbitrary high number of executions by proper selection of $x$.
 
 \begin{lemma}[Minimal Number of Transformation Executions]
     \label{lemma:minimal_executions}
@@ -316,7 +316,7 @@ Let us assume that those models are uniquely indexed by $i,k,l$ and that we defi
     &
     \consistencyrelation{CR}{BC} = \setted{\tupled{\model{b}{k}, \model{c}{l}} \mid l = k+1 \lor l = k+2}
 \end{align*}
-This induces the consistent model tuples $\setted{\tupled{\model{a}{i}, \model{b}{k}, \model{c}{l}} \mid  i = k = l-1}$, which are consistent to all three consistency relations.
+This induces the model tuples $\setted{\tupled{\model{a}{i}, \model{b}{k}, \model{c}{l}} \mid  i = k = l-1}$, which are consistent to all three consistency relations.
 Thus for any given model we are able to find instances of the other metamodels that are consistent to all consistency relations.
 If we define consistency preservation rules for these consistency relations, the ones for $\consistencyrelation{CR}{AC}$ and $\consistencyrelation{CR}{BC}$ may decide between two models to restore consistency, because their conditions define two options for consistent models.
 In the set of consistent models, however, only those models fulfilling the first of these two conditions are contained.
