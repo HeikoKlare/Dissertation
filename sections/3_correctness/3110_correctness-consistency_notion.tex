@@ -4,7 +4,7 @@
 \section{Notions of Consistency and its Preservation}
 \label{chap:correctness:notions_consistency}
 
-We begin with an informal discussion of different ways to consider consistency. This especially involves \emph{intensional} and \emph{extensional}, as well \emph{monolithic} and \emph{modular} notions of consistency.
+We begin with an informal discussion of different ways to consider consistency and its preservation. This involves \emph{intensional} and \emph{extensional}, as well \emph{monolithic} and \emph{modular} notions, and different execution strategies.
 
 \subsection{Intensional and Extensional Consistency Notions}
 \label{chap:correctness:notions_consistency:intensional_extensional}
@@ -27,7 +27,7 @@ Given such an enumeration $E = \setted{\modeltuple{m} \mid \modeltuple{m} \matht
 \end{align*}
 
 \mnote{Equivalence of notions}
-It is easy to see that both kinds of specifications are equivalent. For each intensional specification, the extensional one can be derived by enumerating all models that fulfill the constraints:
+Both kinds of specification have equal expressiveness. For each intensional specification, the extensional one can be derived by enumerating all models that fulfill the constraints:
 \begin{align*}
     E = \setted{\modeltuple{m} \mid P(\modeltuple{m}) = true}
 \end{align*}
@@ -39,14 +39,14 @@ An extensional specification can also be transferred to an intensional one by de
         \falsemath, & \modeltuple{m} \not\in E\\
     \end{cases}
 \end{align*}
-For us it will only be relevant that an intensional specification can be transformed into an extensional one.
+For us, it will only be relevant that an intensional specification can be transformed into an extensional one.
 
 \mnote{We use extensional specifications}
 A developer who defines consistency usually wants to use an intensional specification, as tools like transformation languages allow the specification of constraints rather than enumerating consistent instances.
-Since there is usually an infinite number of consistent models, he or she cannot explicitly enumerate all of them but only define constraints that allow to derive them.
-From a theoretical perspective, however, we prefer to consider extensional specifications, because they allow to directly apply set theory.
+Since there is usually an infinite number of consistent models, he or she cannot explicitly enumerate them but only define constraints that allow to derive them.
+From a theoretical perspective, however, we prefer to consider extensional specifications, because they allow to directly apply set theory in a concise way.
 Due to the fact that each intensional specification can be transformed into an extensional one, we can make theoretical statements about extensional specifications that also hold for intensional ones.
-In the following, we always consider extensional specifications, unless otherwise stated.
+In the following, we always consider extensional specifications unless otherwise stated.
 So we define which models are considered consistent in terms of relations, which we also call \emph{consistency relations}.
 
 
@@ -57,7 +57,7 @@ So we define which models are considered consistent in terms of relations, which
 Consistency, be it specified intensionally or extensionally, can be considered in an either monolithic or modular way.
 Having a single specification of consistency for an arbitrary number of models constitutes a \emph{monolithic} notion of consistency.
 Like discussed for intensional and extensional consistency specifications, this can be expressed by a tuple of models fulfilling constraints or being contained in a relation.
-A \emph{modular} notion of consistency, on the other hand, considers several relations between a selection of the relevant metamodels and all together define when models are to be considered consistent.
+A \emph{modular} notion of consistency considers several relations for subsets of the relevant metamodels, which together define when models are considered consistent.
 
 \mnote{Modular specification example}
 For an extensional notion of consistency between three metamodels $\metamodel{M}{1}, \metamodel{M}{2}$ and $\metamodel{M}{3}$, a modular specification could manifest in three relations $\consistencyrelation{CR}{1,2}, \consistencyrelation{CR}{1,3}$ and $\consistencyrelation{CR}{2,3}$ defining the model pairs that are considered consistent.
@@ -68,14 +68,14 @@ We are, however, interested in whether models are \emph{globally} consistent to 
         & \model{m}{1}, \model{m}{2}, \model{m}{3} \mathtextspacearound{are consistent} \equivalentperdefinition 
         #2
         \tupled{\model{m}{1},\model{m}{2}} \in \consistencyrelation{CR}{1,2} \land \tupled{\model{m}{1},\model{m}{3}} \in \consistencyrelation{CR}{1,3} \land \tupled{\model{m}{2},\model{m}{3}} \in \consistencyrelation{CR}{2,3}
-    \end{align*}%
+    \end{align*}
 }{}{\\ & \formulaskip}%
 
 \mnote{Modular specification for multiary relations}
-Due to the assumptions of independent development and modular reuse, which we defined in \autoref{chap:introduction:objective:assumptions}, we are interested in a modular notion of consistency.
-In the example, we considered a modular notion based on binary relation. Such a modular notion, however, can also be based on multiple multiary relations. 
+Due to the assumptions of independent development and modular reuse, which we have defined in \autoref{chap:introduction:objective:assumptions}, we are interested in a modular notion of consistency.
+In the example, we have considered a modular notion based on binary relation. Such a modular notion, however, can also be based on multiple multiary relations. 
 But even with multiary relations, modularity is necessary for reasons of independent development and reuse.
-For reasons of simplicity, however, we stick to modular notions of binary relations, although most of our considerations can be transferred to multiary ones.
+For reasons of simplicity, we stick to modular notions of binary relations, although most of our considerations can be transferred to multiary ones.
 
 
 \subsection{Consistency Preservation}
@@ -83,8 +83,8 @@ For reasons of simplicity, however, we stick to modular notions of binary relati
 
 \mnote{Consistency preservation goal}
 Consistency preservation is the process of ensuring that models stay consistent.
-Based on a notion of consistency relations that describe when models are to be considered consistent, this process ensures that models stay in that relation. 
-If models become changed such they that are not in the relation anymore, consistency preservation updates the models such that they, again, are in that relation.
+Based on a notion of consistency relations that describe when models are considered consistent, this process ensures that models stay in that relation. 
+If models become changed such they that are not in the relation anymore, consistency preservation updates the models such that they are in that relation again.
 In consequence, consistency preservation is always relative to relations defining consistency.
 
 \mnote{Consistency preservation as function}
@@ -116,31 +116,32 @@ Since these functions define how consistency is preserved, we also call them \em
 Like for the proposed notion of consistency, we can also consider consistency preservation in an either monolithic or modular way.
 With a modular notion of consistency preservation, we may have multiple consistency preservation rules that preserve consistency, each of them for a consistency relation that defines consistency for a subset of the involved models.
 Unlike for the relations defining consistency, which can be evaluated independently to identify whether models are consistent, the functions, i.e., consistency preservation rules, cannot be evaluated independently.
-If each function is executed independently, they return new models that may need to be merged. 
+If each function is executed independently, each of them returns new models that may need to be merged. 
 This is exemplified in the following scenario, which is also depicted in \autoref{fig:correctness:concurrent_consecutive_execution}.
-Imagine two functions $\function{Cp}_{1,2}$ and $\function{Cp}_{2,3}$ that preserve consistency for relations $\consistencyrelation{CR}{1,2}$ and $\consistencyrelation{CR}{2,3}$, respectively.
-Consider the input models $\tupled{\model{m}{1}, \model{m}{2}, \model{m}{3}}$ that are not consistent to $\consistencyrelation{CR}{1,2}$ and $\consistencyrelation{CR}{2,3}$.
+Imagine two functions $\function{Cp}_{1,2}$ and $\function{Cp}_{1,3}$ that preserve consistency for relations $\consistencyrelation{CR}{1,2}$ and $\consistencyrelation{CR}{1,3}$, respectively.
+Consider the input models $\tupled{\model{m}{1}, \model{m}{2}, \model{m}{3}}$ that are not consistent to $\consistencyrelation{CR}{1,2}$ and $\consistencyrelation{CR}{1,3}$, i.e., $\tupled{\model{m}{1},\model{m}{2}} \not\in \consistencyrelation{CR}{1,2}$ and $\tupled{\model{m}{1},\model{m}{3}} \not\in \consistencyrelation{CR}{1,3}$.
+This can, for example, occur because $\model{m}{1}$ was changed by a user.
 Now if we apply the functions independently, we have $\function{Cp}_{1,2}(\tupled{\model{m}{1}, \model{m}{2}}) = \tupled{\model{m}{1}', \model{m}{2}'} \in \consistencyrelation{CR}{1,2}$ and 
-$\function{Cp}_{2,3}(\tupled{\model{m}{2}, \model{m}{3}}) = \tupled{\model{m}{2}'', \model{m}{3}''} \in \consistencyrelation{CR}{2,3}$.
-It is now unclear how to unify $\model{m}{2}'$ and $\model{m}{2}''$ to $\model{m}{2}'''$, such that $\tupled{\model{m}{1}', \model{m}{2}'''} \in \consistencyrelation{CR}{1,2}$ and  $\tupled{\model{m}{2}''', \model{m}{3}''} \in \consistencyrelation{CR}{2,3}$.
+$\function{Cp}_{1,3}(\tupled{\model{m}{1}, \model{m}{3}}) = \tupled{\model{m}{1}'', \model{m}{3}'} \in \consistencyrelation{CR}{1,3}$.
+It is now unclear how to unify $\model{m}{1}'$ and $\model{m}{1}''$ to $\model{m}{1}'''$, such that $\tupled{\model{m}{1}''', \model{m}{2}'} \in \consistencyrelation{CR}{1,2}$ and  $\tupled{\model{m}{1}''', \model{m}{3}'} \in \consistencyrelation{CR}{1,3}$.
 
 \mnote{Consecutive function execution}
-An intuitive approach to execute the functions is their composition, i.e., a consecutive execution that does not take the original models as input but the ones delivered by the previous executions of the functions for consistency preservation, which is also exemplarily depicted in \autoref{fig:correctness:concurrent_consecutive_execution}.
+An intuitive approach to execute the functions is their composition, i.e., a consecutive execution that does not apply the functions for consistency preservation to the original models but to the models delivered by the previous executions of the functions, which is also exemplarily depicted in \autoref{fig:correctness:concurrent_consecutive_execution}.
 If we consecutively apply the two given functions, we know that $\function{Cp}_{1,2}(\tupled{\model{m}{1}, \model{m}{2}}) = \tupled{\model{m}{1}', \model{m}{2}'} \in \consistencyrelation{CR}{1,2}$ and 
-$\function{Cp}_{2,3}(\tupled{\model{m}{2}', \model{m}{3}}) = \tupled{\model{m}{2}'', \model{m}{3}''} \in \consistencyrelation{CR}{2,3}$.
-It is, however, unclear whether $\tupled{\model{m}{1}', \model{m}{2}''} \in \consistencyrelation{CR}{1,2}$, so it may be necessary to execute $\function{Cp}_{1,2}$ again.
+$\function{Cp}_{1,3}(\tupled{\model{m}{1}', \model{m}{3}}) = \tupled{\model{m}{1}'', \model{m}{3}'} \in \consistencyrelation{CR}{1,3}$.
+It is, however, unclear whether $\tupled{\model{m}{1}'', \model{m}{2}'} \in \consistencyrelation{CR}{1,2}$, so it may be necessary to execute $\function{Cp}_{1,2}$ again.
 In fact, we need some method to decide in which order and how often the consistency preservation rules are applied to result in a consistent tuple of models.
 We call this an \emph{orchestration}.
 The challenge to find an execution order of transformations without leading to execution cycles has also been identified by \textcite[Sec.~3.9]{kramer2017a}.
 
 \mnote{Unification or orchestration necessary}
-Even if consistency preservation rules were supposed to only modify one model instead of two, the same problems of unifying changes of their independent execution or orchestration of their consecutive execution occur as soon as there are two sequences of consistency preservation rules that change the same models.
+Even if consistency preservation rules were supposed to only modify one model instead of two, the same problems of unifying changes of their independent execution or orchestrating their consecutive execution occur as soon as there are two sequences of consistency preservation rules that change the same models.
 
 \mnote{Benefits of consecutive execution}
 In our work, we follow the approach of orchestrating and consecutively executing consistency preservation rules.
 The benefits of this approach are twofold. First, there is no additional logic required for unifying the changes performed by independently executed consistency preservation rules. 
-Second, the unification may deliver a model that is not consistent to any of the consistency relations anymore, whereas consecutive execution at least gives the guarantee that the models are consistent to the last applied consistency preservation rule.
-With this approach, the repeated execution of consistency preservation rules can be seen as a negotiation of a solution by reacting to the changes the others performed.
+Second, the unification may deliver a model that is not consistent to any of the consistency relations anymore, whereas consecutive execution at least guarantees that the models are consistent to the last applied consistency preservation rule.
+With this approach, the repeated execution of consistency preservation rules can be seen as a negotiation of a solution by reacting to the changes the other consistency preservation rules performed.
 
 \begin{remark} 
 \mnote{Monolithic notions as degraded modular ones}
@@ -150,7 +151,7 @@ Finally, every monolithic notion of consistency and its preservation can be cons
 \mnote{Realization options for consistency preservation rules}
 For now, the introduced consistency preservation rules can be any kind of functions that return consistent models. 
 Their realization may, for example, be transformations that define how to react to certain changes for restoring consistency, or constraint solvers that find consistent models by solving consistency constraints. 
-We do not yet need to consider how these functions are realized to derive consistent models, although, later, we will focus on transformation-based approaches.
+We do not yet need to consider how these functions are realized to derive consistent models, although we later focus on transformation-based approaches.
 
 
 \subsection{Declarative and Imperative Specifications}
@@ -166,18 +167,18 @@ We do not yet need to consider how these functions are realized to derive consis
 
 \mnote{Only define relation or function}
 We have discussed that consistency preservation can be considered as functions, called consistency preservation rules, that preserve consistency according to some relations.
-In practice, however, one will usually not specify both the consistency relation itself and also the consistency preservation rule that preserves it.
-Instead, usually one artifact is given and the other is implied or derived.
+In practice, however, one will usually not specify both the consistency relation and the consistency preservation rule that preserves it.
+Instead, one artifact is given and the other is implied or derived.
 This leads to the two approaches of \emph{declarative} and \emph{imperative} consistency specifications, depending on whether the specification defines \emph{how} consistency is achieved.
-The relation between the two approaches and a consistency relation as well as a consistency preservation rule is depicted in \autoref{fig:correctness:declarative_imperative}.
+The relation between the two approaches regarding a consistency relation and a consistency preservation rule is depicted in \autoref{fig:correctness:declarative_imperative}.
 
 \mnote{Ambiguity in deriving rules}
 As a first option, a developer may only define relations that specify consistency. Functions that preserve these relations can be derived from that.
 This is called a \emph{declarative} specification, because it only declares when models are consistent but not \emph{how} consistency is achieved.
-In general, there is not only a single option how this function can look like.
-It can, for example, calculate the result with minimal differences to the input, according to some defined metrics.
+In general, there are multiple valid options for deriving a consistency preservation rule from a relation.
+It can, for example, calculate the result with minimal differences to the input according to some defined metric.
 Or, especially if there is an intensional specification of the relations, the approach may consider the type of input change and calculate an appropriate change according to the constraints in the intensional specification.
-This approach is followed by many declarative transformation languages, such as \gls{QVTR}~\cite{qvt}, or \glspl{TGG}~\cite{anjorin2014EfficientSynchronizationTGG-ECMFA}.
+This approach is followed by many declarative transformation languages, such as \gls{QVTR}~\cite{qvt} or \glspl{TGG}~\cite{anjorin2014EfficientSynchronizationTGG-ECMFA}.
 
 \mnote{Relations as fixed points}
 As a second option, a developer can define consistency preservation rules without explicitly specifying the consistency relations to which they preserve consistency.
@@ -187,7 +188,7 @@ If a function preserving consistency does not perform any changes, the models ar
 Usually, we will assume that such a function returns consistent models with a single application.
 Thus, if it does not perform changes when the input models are already consistent, the function is idempotent and then the consistency relation is given by its image, i.e., $\consistencyrelation{CR}{} = \setted{\modeltuple{m} \mid \exists \modeltuple{m}' : \function{Cp}(\modeltuple{m}') = \modeltuple{m}}$.
 This is called an \emph{imperative} specification, because it declares \emph{how} consistency can be achieved.
-Such an approach is followed by many imperative transformation languages, such as \gls{QVTO}~\cite{qvt}. % or \gls{VIATRA}.
+Such an approach is followed by many imperative transformation languages, such as \gls{QVTO}~\cite{qvt}.
 
 
 \subsection{Consistency Preservation Artifacts}
@@ -195,9 +196,9 @@ Such an approach is followed by many imperative transformation languages, such a
 \mnote{Four artifacts}
 We have discussed that consistency can be considered in a monolithic or modular way. We have, however, also mentioned that the monolithic case can be considered as a special case of the modular one.
 For the general case, we thus know from the previous considerations that in a consistency preservation process at least specifications that define consistency, called \emph{consistency relations}, functions that preserve consistency, called \emph{consistency preservation rules}, and a function for orchestrating the functions, in the following called \emph{orchestration function}, are necessary. Finally, we also need a function that applies the consistency preservation rules in the order that is determined by the orchestration function, which we call the \emph{application function}.
-To summarize, we consider the following artifacts necessary to handle consistency preservation:
+To summarize, we consider the following four artifacts necessary to handle consistency preservation.
 \begin{properdescription}
-    \item[Consistency Relations:] Binary relations that specify when models are to be considered consistent.
+    \item[Consistency Relations:] Binary relations that specify which pairs of models shall be considered consistent.
     \item[Consistency Preservation Rules:] Functions that restore consistency for a pair of models that became inconsistent by modification.
     \item[Orchestration Function:] A function that determines the execution order of the consistency preservation rules to restore consistency.
     \item[Application Function:] A function that applies the consistency preservation rules in the order determined by the orchestration function. 
@@ -212,6 +213,7 @@ To summarize, we consider the following artifacts necessary to handle consistenc
 \end{figure}
 
 \mnote{Distinction between orchestration and application}
-We explicitly distinguish the orchestration and the application to be able to make more fine-grained statements about the responsibilities for the orchestration and its actual execution, especially to determine the behavior in cases when no orchestration is found in which the transformations can be applied to yield consistent models.
+We explicitly distinguish the orchestration and the application to be able to make more fine-grained statements about the responsibilities for the orchestration and its actual execution.
+This is particularly useful to determine the behavior in cases in which no orchestration of transformations that results in consistent models can be found.
 The process is depicted in \autoref{fig:correctness:execution_process}. Given models that are consistent according to some consistency relations and changes to them that lead to inconsistencies, the orchestration function delivers an order of consistency preservation rules, which is used to parametrize the application function that executes these rules in the given order.
 The result is, in the best case, a model tuple that is consistent to the relations again.
