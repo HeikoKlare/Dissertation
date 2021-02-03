@@ -2,26 +2,23 @@
 \label{chap:synchronizing:bidirectional}
 
 \mnote{Consistency preservation rules for inconsistent models}
-In the following, we discuss how we can extend bidirectional transformations and in particular their unidirectional consistency preservation rules such that they are able to deal with the situation that both models may have been modified.
+In the following, we discuss how we can extend bidirectional transformations and, in particular, their unidirectional consistency preservation rules such that they are able to deal with the situation that both models may have been modified.
 To achieve this, we extend consistency preservation rules to also accept models that are not initially consistent.
-We can then not require them to restore consistency between the models with a single execution anymore.
-Instead, we define a notion of \emph{partial consistency}, which allows us to specify how the execution of consistency preservation rules has to improve partial consistency.
-We derive requirements to the transformations and finally show that transformations fulfilling these requirements terminate consistently.
+We can then not require them to restore consistency with a single execution anymore.
+Instead, we define a notion of \emph{partial consistency}, which allows us to specify how the execution of consistency preservation rules has to improve the degree of consistency.
+We derive requirements for the transformations to improve partial consistency and finally show that transformations fulfilling these requirements terminate consistently.
 
 
 \subsection{Partial Consistency of Models}
 \label{chap:synchronizing:bidirectional:partial}
 
 \mnote{Partial consistency notions}
-%\mnote{Changed models partially consistent}
 Given two models $\model{m}{1}$ and $\model{m}{2}$ and changes $\change{\metamodel{M}{1}}$ and $\change{\metamodel{M}{2}}$ to each of them, a unidirectional consistency preservation rule $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ needs to accept and process the change in one model, be it $\change{\metamodel{M}{1}}$ without loss of generality, and receive the unchanged model $\model{m}{1}$ as well as the changed second model $\change{\metamodel{M}{2}}(\model{m}{2})$.
-We discussed the necessity to process the changed second model in the previous section.
+We have discussed the necessity to process the changed second model in the previous section.
 While $\model{m}{1}$ and $\model{m}{2}$ are consistent, $\model{m}{1}$ and $\change{\metamodel{M}{2}}(\model{m}{2})$ may not.
 In consequence, $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$, even if correct according to \autoref{def:unidirectionalconsistencypreservationrulecorrectness}, does not guarantee that applying the returned change yields consistent models, as its behavior for inconsistent input models is undefined.
 $\model{m}{1}$ and $\change{\metamodel{M}{2}}(\model{m}{2})$ will, however, usually still fulfill some kind of partial consistency notion.
-Depending on the complexity of $\change{\metamodel{M}{2}}$ large parts of the models will still be consistent. %fulfill some kind of consistency notion.
-%
-%\mnote{Options for partial consistency definition}
+Depending on the complexity of $\change{\metamodel{M}{2}}$ large parts of the models will still be consistent.
 Such a notion of partial consistency may be defined in two ways.
 First, two models may only fulfill an extract of the consistency relations.
 Second, only extracts of two models may fulfill the consistency relations.
@@ -33,17 +30,13 @@ Thus, we would call the models completely inconsistent just because of a single 
 We could circumvent that by defining a notion of partial consistency relations, such that we can consider models consistent to a part of a consistency relation.
 Such a notion would have to be defined at the level of consistency relation pairs and their condition elements within the consistency relations.
 Considering subsets of consistency relations, i.e., only a subset of their consistency relation pairs, would, however, not make sense, because when analyzing consistency of two models those consistency relation pairs are not independent.
-Consistency is not evaluated individually for each consistency relation pair, but by the ability to find a witness structure, which is a subset of the consistency relation pairs that uniquely relates the condition elements of a consistency relation that occur within models.
-%If two models contain the condition elements of one consistency relation pair, this may prevent the, from containing the condition elements of another consistency relation pair, because in \autoref{def:consistency} we require a unique mapping between condition elements in terms of witness structure.
+Consistency is not evaluated individually for each consistency relation pair but by the ability to find a witness structure, which is a subset of the consistency relation pairs that uniquely relates the condition elements of a consistency relation that occur within models.
 Thus, if consistency to a relation is given by removing only a single consistency relation pair does not mean that there is only one missing or superfluous element in the models to be consistent.
-%If models are consistent to a consistency relation in which we removed one (or more) consistency relation pairs, this does not give any reasonable indication on how the models violate consistency.
-%This may be due to the reason that an element is missing in the models or that an additional element prevents from finding a witness structure.
-%It does, however, not mean that adding a missing element or removing the additional element ensures that a proper witness structure can be found, because these elements may still be relevant for other consistency relation pairs in the witness structure.
 Due to these interdependencies of consistency relation pairs, consistency to partial consistency relations will in general not provide insights on the reasons for models being inconsistent, which is why we do not consider this as our notion for partial consistency.
 
 \mnote{Parts of models fulfilling relations}
 In the second option, we consider that only parts of the given models are consistent to all given consistency relations.
-In addition to the missing ability of the first option to give reasonable insights on inconsistencies, this, intuitively, is a more reasonable notion, because it explicitly defines that parts of the models are consistent, whereas other parts are not.
+In addition to the missing ability of the first option to give reasonable insights on inconsistencies, this, intuitively, is a more reasonable notion, because it explicitly defines that parts of the models are consistent whereas other parts are not.
 We thus define partial consistency as models having subsets that are actually consistent.
 To identify how far models are partially consistent, we also define an according metric based on finding maximal subsets of the models that are consistent.
 
@@ -56,69 +49,38 @@ To identify how far models are partially consistent, we also define an according
         \tupled{\model{m}{1}^p, \model{m}{2}^p} \consistenttomath \consistencyrelationset{CR} \land
         \model{m}{1}^p \subseteq \model{m}{1} \land \model{m}{2}^p \subseteq \model{m}{2}  \\
         & \formulaskip
-        %\land \forall \model{m}{1}^{p'} \in \metamodelinstanceset{M}{1}, \model{m}{2}^{p'} \in \metamodelinstanceset{M}{2} : \\
         \land 
-        \bigl( \forall \model{m}{1}^{p'} \in \mathcal{P}(\model{m}{1}), \model{m}{2}^{p'} \in \mathcal{P}(\model{m}{2}) : \\ % Potenzmenge der Modelle enthält alle Teilmodelle
+        \forall \model{m}{1}^{p'} \in \mathcal{P}(\model{m}{1}), \model{m}{2}^{p'} \in \mathcal{P}(\model{m}{2}) : \\ % Potenzmenge der Modelle enthält alle Teilmodelle
         & \formulaskip\formulaskip
-        %\bigl(\model{m}{1}^{p'} \subseteq \model{m}{1} \land \model{m}{2}^{p'} \subseteq \model{m}{2} 
-        %\land 
-        \tupled{\model{m}{1}^{p'}, \model{m}{2}^{p'}} \consistenttomath \consistencyrelationset{CR} %\\
-        %& \formulaskip\formulaskip
+        \bigl(\tupled{\model{m}{1}^{p'}, \model{m}{2}^{p'}} \consistenttomath \consistencyrelationset{CR}
         \Rightarrow 
         \abs{\model{m}{1}^{p'}} + \abs{\model{m}{2}^{p'}} \leq \abs{\model{m}{1}^{p}} + \abs{\model{m}{2}^{p}} \bigr)
     \end{align*}
     Partial consistency $\function{cons}_{\consistencyrelationset{CR}}$ of two models regarding $\consistencyrelationset{CR}$ is the ratio between the sizes of the maximal consistent subsets and the models:
     \begin{align*}
         \function{cons}_{\consistencyrelationset{CR}}: \; 
-        & (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}) \rightarrow [0,1], \quad %\\
-        %& 
+        & (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}) \rightarrow [0,1], \quad
         (\model{m}{1}, \model{m}{2}) \mapsto \tfrac{\abs{\model{m}{1}^{p}} + \abs{\model{m}{2}^{p}}}{\abs{\model{m}{1}} + \abs{\model{m}{2}}}
     \end{align*}
-    % with:
-    % \begin{align*}
-    %     & 
-    %     \exists \model{m}{1}^p \in \metamodelinstanceset{M}{1}, \model{m}{2}^p \in \metamodelinstanceset{M}{2} : \\
-    %     & \formulaskip
-    %     \tupled{\model{m}{1}^p, \model{m}{2}^p} \consistenttomath \consistencyrelationset{CR} \land
-    %     \model{m}{1}^p \subseteq \model{m}{1} \land \model{m}{2}^p \subseteq \model{m}{2} : \\
-    %     & \formulaskip
-    %     \land \forall \model{m}{1}^{p'} \in \metamodelinstanceset{M}{1}, \model{m}{2}^{p'} \in \metamodelinstanceset{M}{2} : \\
-    %     & \formulaskip\formulaskip
-    %     \bigl(\model{m}{1}^{p'} \subseteq \model{m}{1} \land \model{m}{2}^{p'} \subseteq \model{m}{2} 
-    %     \land \tupled{\model{m}{1}^{p'}, \model{m}{2}^{p'}} \consistenttomath \consistencyrelationset{CR} \\
-    %     & \formulaskip\formulaskip
-    %     \Rightarrow 
-    %     \abs{\model{m}{1}^{p'}} + \abs{\model{m}{2}^{p'}} \leq \abs{\model{m}{1}^{p}} + \abs{\model{m}{2}^{p}} \bigr) \\
-    %     &\formulaskip
-    %     \land \function{cons}_{\consistencyrelationset{CR}}(\model{m}{1}, \model{m}{2}) = \abs{\model{m}{1}^{p}} + \abs{\model{m}{2}^{p}}
-    % \end{align*}
 \end{definition}
 
 \mnote{Extremes of partial consistency}
 Such maximal consistent subsets always exist.
-In the extreme case, when models are not consistent in any way, it is $\model{m}{1}^p = \model{m}{2}^p = \emptyset$, because empty models are always consistent by definition.
+When models are not consistent in any way, it is $\model{m}{1}^p = \model{m}{2}^p = \emptyset$, because empty models are consistent by definition.
 In that case, partial consistency of the models is $0$.
 When models are consistent, the maximal consistent subsets are the models themselves, which is why partial consistency is $1$.
 
 \mnote{Existing notion of partial consistency}
 A comparable notion of partial consistency has been introduced by \textcite{stevens2014Partial-FASE, stevens2020BidirectionalTransformationLarge-SoSym}.
-She introduces a \emph{consistency indicator} replacing a consistency relation that determines how consistent two models are.
-It is based on a partial order defining whether models are more or less consistent than others.
-This notion is used to define partial bidirectional transformations and especially properties that ensure that their execution does not reduce consistency.
+She introduces a \emph{consistency indicator} replacing a consistency relation, which determines how consistent two models are.
+It is based on a partial order between models regarding their degree of consistency.
+This notion is used to define partial bidirectional transformations that ensure that their execution does not reduce consistency.
 Our definition of partial consistency can be seen as an implementation of such a consistency indicator.
-In contrast, we do not aim to define partial transformations that do not reduce consistency, but to define transformations such that iterative application of their consistency preservation rules results in totally consistent models within a finite number of steps.
-
-% \paragraph{Partielle Konsistenz}
-% Gegeben m1, d2(m2) und d1.
-% d1(m1) und d2(m2) sind partiell konsistent, d.h. es gibt Teilmengen d1(m1)p und d2(m2)p, für die alle Konsistenzrelationen erfüllt sind.
-% Dies kann für mehrere Teilmengen gelten, wir betrachten die, die zusammen maximal groß sind, d.h. |d1(m1)p| + d2(m2)p| > |d1(m1)p'| + d2(m2)p'| für beliebige andere Teilmenge, die konsistent sind.
-% TODO: Metrik definieren für partielle Konsistenz. Dann können nämlich einfach sagen, dass sich die partielle Konsistenz erhöhen muss (indem entweder die Modelle kleiner werden oder die konsistenten Teile größer)
+We, however, use the notion to ensure that the iterative application of consistency preservation rules of transformations results in totally consistent models after a finite number of steps.
 
 
 \subsection{Transformations for Partially Consistent Models}
 \label{chap:synchronization:bidirectional:transformations}
-
-%\todo{Start section again without discussion the starting case for synchronization, but the general case of having partially consistent models. Then later apply it to the starting case for synchronization. Szenario ist, dass wir zwei Modelle reinkriegen (potentiell inkonsistent) und Änderungen an einem davon. Falls das zweite auch geändert wurde, diskutieren wir später, wie wir das noch reinkriegen (indem wir das Delta auf das zweite Modell anwenden und dann die Ausführung der Rückrichtung darauf anwenden).}
 
 \mnote{Resolving partial inconsistencies}
 Before we consider the case that two models have been modified and need to be synchronized, we start with the case that of two initially consistent models one has been changed.
@@ -131,8 +93,6 @@ In the following, we derive the properties a bidirectional transformation has to
 They are based on the idea that each execution has to improve partial consistency of the given models.
 Since a single consistency preservation rule may not be able to improve partial consistency in every case, we always consider the combination of both preservation rules of a bidirectional transformation and require that property from them.
 Therefore, we define the notion of a \emph{bidirectional transformation execution step}, which is composed of a single execution of both unidirectional consistency preservation rules.
-%This is necessary, because a single consistency preservation rule may not be able to improve partial consistency, whereas at least one of them should be, thus executing both may always lead to an improvement.
-%Consider the case that a change was only performed to $\model{m}{2}$, then $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ cannot produce any reasonable changes in $\model{m}{2}$ to restore consistency.
 
 \begin{definition}[Bidirectional Transformation Execution Step]
     Let $\transformation{t} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}$ be a bidirectional transformation for metamodels $\metamodel{M}{1}$ and $\metamodel{M}{2}$.
@@ -149,82 +109,30 @@ Therefore, we define the notion of a \emph{bidirectional transformation executio
     \end{align*}%
     \vspace{-\abovedisplayskip}
     \vspace{-\belowdisplayskip}
-    %with:
-    \begin{align*}
-        \change{\metamodel{M}{2}}' 
-        %\; & 
-        \equalsperdefinition \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) %\\
+    \begin{alignat*}{2}
+        &
+        \change{\metamodel{M}{2}}' \equalsperdefinition \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}})
         \makesomespace\makesomespace
+        &&
         \model{m}{1}' \equalsperdefinition \change{\metamodel{M}{1}}(\model{m}{1}) \\
-        \change{\metamodel{M}{1}}' 
-        %\; & 
-        \equalsperdefinition \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}(\model{m}{2}, \model{m}{1}', \change{\metamodel{M}{2}}') %\\
-        \makesomespace\makesomespace
+        &
+        \change{\metamodel{M}{1}}' \equalsperdefinition \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}(\model{m}{2}, \model{m}{1}', \change{\metamodel{M}{2}}')
+        &&
         \model{m}{2}' \equalsperdefinition \change{\metamodel{M}{2}}'(\model{m}{2})
-    \end{align*}
-    If the consistency preservation rule for either direction is undefined for an input, i.e., $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) = \bot$ or $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}(\model{m}{2}, \model{m}{1}', \change{\metamodel{M}{2}}') = \bot$, then the execution is undefined, i.e., $\function{Ex}_{\transformation{t}}^1(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) = \bot$.
-    % for given models $\model{m}{1} \in \metamodelinstanceset{M}{1}$, $\model{m}{2} \in \metamodelinstanceset{M}{2}$ and a change $\change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}}$ to $\model{m}{1}$ is the consecutive execution of $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ and $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}$, i.e.
-    % \begin{align*}
-    %     & \change{\metamodel{M}{2}}' = \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) \\
-    %     & \change{\metamodel{M}{1}}' = \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}(\model{m}{2}, \change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}')
-    % \end{align*}
-    % with the resulting changes $\change{\metamodel{M}{1}}'$ and $\change{\metamodel{M}{2}}'$.
+    \end{alignat*}
+    If $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) = \bot$ or $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}(\model{m}{2}, \model{m}{1}', \change{\metamodel{M}{2}}') = \bot$, then the execution is undefined, i.e., $\function{Ex}_{\transformation{t}}^1(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) = \bot$.
 \end{definition}
 
 \mnote{Repeated application of execution steps}
 Such execution steps can be applied repeatedly.
 Each execution step delivers a new change to the first model and a changed version of the second model by applying the changes delivered by the consistency preservation rules of the bidirectional transformation.
-To these resulting models and the resulting change the execution step can be reapplied.
-%For models $\model{m}{1} \in \metamodelinstanceset{M}{1}$, $\model{m}{2} \in \metamodelinstanceset{M}{2}$ and a change $\change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}}$ to $\model{m}{1}$ and the resulting changes $\change{\metamodel{M}{1}}'$ and $\change{\metamodel{M}{2}}'$ from an execution step, we can apply the next execution step to models $\change{\metamodel{M}{1}}(\model{m}{1})$ and $\change{\metamodel{M}{2}}'(\model{m}{2})$ and the change $\change{\metamodel{M}{1}}'$.
+The execution step can be reapplied to these resulting models and the resulting change.
 
 \mnote{Execution of bidirectional transformation}
-The execution of a bidirectional transformation then consists of the consecutive application of execution steps until the delivered models are consistent, as defined in \autoref{algo:synchronization:execute_bidirectional_transformation}.
-Although we, theoretically, require the consistency preservation rules to be able to handle initial models that can be arbitrarily inconsistent, it will not be possible to define such rules in practice.
-Since we follow a delta-based notion of consistency preservation, we will therefore stick to the requirement that inconsistencies are introduced by changes.
-Then it is up to the consistency preservation rules to process the changes in a way and produce new changes that all introduced inconsistencies can be resolved.
-In contrast to our initial definition of consistency preservation rules, it is still not necessary that consistency is restored with a single execution of a consistency preservation rule.
-In the synchronization scenario, in which both models have been modified, this will not even be possible anymore.
-% \begin{definition}[Bidirectional Transformation Execution]
-%     Let $\transformation{t} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}$ be a bidirectional transformation for metamodels $\metamodel{M}{1}$ and $\metamodel{M}{2}$.
-%     An \emph{execution} $\function{Ex}_{\transformation{t}}$ of $\transformation{t}$ is a function
-%     \begin{align*}
-%         \function{Ex}_{\transformation{t}} : (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}) \rightarrow (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}) \cup \setted{\bot}
-%     \end{align*}
-%     which consecutively applies the execution steps until a consistent pair of models is reached, i.e.:
-%     \begin{align*}
-%         & 
-%         \forall \model{m}{1} \in \metamodelinstanceset{M}{1}, \model{m}{2} \in \metamodelinstanceset{M}{2}, \change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}}:  \\
-%         & \formulaskip
-%         \bigl(\exists \model{m}{1}' \in \metamodelinstanceset{M}{1}, \model{m}{2}' \in \metamodelinstanceset{M}{2}, \change{\metamodel{M}{1}}' \in \changeuniverse{\metamodel{M}{1}}, i \in \mathbb{N} : \\
-%         & \formulaskip\formulaskip
-%         (\function{Ex}_{\transformation{t}}^1)^i(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) = (\model{m}{1}', \model{m}{2}', \change{\metamodel{M}{1}}') \\
-%         & \formulaskip\formulaskip
-%         \land \tupled{\change{\metamodel{M}{1}}(\model{m}{1}'), \model{m}{2}'} \consistenttomath \consistencyrelationset{CR} \big) \\
-%         & \formulaskip\formulaskip\formulaskip
-%         \Rightarrow \function{Ex}_{\transformation{t}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) = (\change{\metamodel{M}{1}}(\model{m}{1}'), \model{m}{2}')
-%     \end{align*}
-%     % \begin{align*}
-%     %     & 
-%     %     \forall \model{m}{1} \in \metamodelinstanceset{M}{1}, \model{m}{2} \in \metamodelinstanceset{M}{2}, \change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}}: \function{Ex}_{\transformation{t}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) = \bot \\
-%     %     & \formulaskip
-%     %     \lor \big(\exists \model{m}{1}' \in \metamodelinstanceset{M}{1}, \model{m}{2}' \in \metamodelinstanceset{M}{2}, \change{\metamodel{M}{1}}' \in \changeuniverse{\metamodel{M}{1}}, i \in \mathbb{N} : \\
-%     %     & \formulaskip\formulaskip
-%     %     (\function{Ex}_{\transformation{t}}^1)^i(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) = (\model{m}{1}', \model{m}{2}', \change{\metamodel{M}{1}}') \\
-%     %     & \formulaskip\formulaskip
-%     %     \land \function{Ex}_{\transformation{t}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) = (\change{\metamodel{M}{1}}(\model{m}{1}'), \model{m}{2}') \\
-%     %     & \formulaskip\formulaskip
-%     %     \land \tupled{\change{\metamodel{M}{1}}(\model{m}{1}'), \model{m}{2}'} \consistenttomath \consistencyrelationset{CR} \big)
-%     % \end{align*}
-%     % for given models $\model{m}{1} \in \metamodelinstanceset{M}{1}$, $\model{m}{2} \in \metamodelinstanceset{M}{2}$ and a change $\change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}}$ to $\model{m}{1}$ is the consecutive application of execution steps, i.e.
-%     % \begin{align*}
-%     %     \func{Ex}_{\transformation{t}} : & (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}) \rightarrow (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}) \\
-%     %     & (\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}) \mapsto 
-%     %         \begin{cases} 
-%     %             (\model{m}{1}', \model{m}{2}'), \exists i \in \mathbb{N} : \func{Ex}_{\transformation{t}}^i(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}) = (\model{m}{1}'', \model{m}{2}', \change{\metamodel{M}{1}') \land \model{m}{1}' = \change{\metamodel{M}{1}'(\model{m}{1}'') \land \tupled{\model{m}{1}', \model{m}{2}'} \consistenttomath \consistencyrelationset{CR} \\
-%     %             \bot, otherwise
-%     %         \end{cases}
-%     %     \end{align*}
-% \end{definition}
+The execution of a bidirectional transformation consists of the consecutive application of execution steps until the delivered models are consistent, as defined in \autoref{algo:synchronization:execute_bidirectional_transformation}.
+Although we, theoretically, require the consistency preservation rules to handle initial models that can be arbitrarily inconsistent, it will not be possible to define such rules in practice.
+Therefore, we stick to the requirement that inconsistencies are introduced by changes.
+Then, it is up to the consistency preservation rules to process the changes in a way such that all introduced inconsistencies are resolved.
 
 \begin{algorithm}
     \input{algorithms/correctness/synchronization/execute_bidirectional_transformation.tex}
@@ -232,54 +140,44 @@ In the synchronization scenario, in which both models have been modified, this w
     \label{algo:synchronization:execute_bidirectional_transformation}
 \end{algorithm}
 
-% \todo{Möglicherweise müssen wir hier auch noch die Deltas rausgeben, weil die ja von den anderen Transformationen im Netzwerk noch bearbeitet werden müssen. Hierfür könnten wir später definieren, wann eine BX Sync emulierend ist.}
-
-%\todo{Discuss how to realize that function in an algorithm}
-
 \mnote{Direction of execution step}
 Without loss of generality, we have defined bidirectional transformation execution steps for original changes in $\metamodel{M}{1}$, although the consistency preservation rules of a transformation are also able to handle changes in $\metamodel{M}{2}$.
 The definitions can be applied to that case accordingly by swapping $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ and $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}$.
-Since we finally consider the case that both models have been changed, it is not relevant for us which change to consider first anyway.
-
-%\todo{Reihenfolge diskutieren: o.B.d.A. haben wir eine Reihenfolge verwendet, aber es müssen natürlich beide gehen, da in jedem Modell Änderungen passieren können. Wenn beide Modelle geändert sind (wo wir hinwollen), ist es im Prinzip wieder egal. Aber in der Praxis kann es schon einen Unterschied machen, weil eine Richtung sinnvollerweise zuerst ausgeführt wird.
-%Das meiste hiervon ist im vorigen Absatz adressiert, aber später wenn wir das Synchronisationszenario diskutieren müssen wir nochmal darauf eingehen, welche Richtung wir zuerst betrachten und welche "reingemergt" wird.}
+Since we finally consider the case that both models have been changed, it is not relevant for us which change to consider first.
 
 
 \subsection{Transformation Execution Termination}
 
 \mnote{Transformation execution results}
 The algorithm obviously only returns $\bot$ if an execution step of the transformation cannot be applied.
-Additionally, we can easily show that in all other cases, if the algorithm terminates, it returns consistent models.
+Additionally, we can easily show that in all other cases in which the algorithm terminates, it returns consistent models.
 
 \begin{lemma}[Bidirectional Transformation Execution Consistency]
     \label{lemma:bidirectionaltransformationconsistency}
     If \autoref{algo:synchronization:execute_bidirectional_transformation} terminates, it either returns $\bot$ or a consistent model pair.
 \end{lemma}
 \begin{proof}
-    \autoref{algo:synchronization:execute_bidirectional_transformation} can terminate by one of its two return statements in \autoref{algo:synchronization:execute_bidirectional_transformation:line:returnbot} and \autoref{algo:synchronization:execute_bidirectional_transformation:line:returnresult}.
-    \autoref{algo:synchronization:execute_bidirectional_transformation:line:returnbot} returns $\bot$, which fulfills the lemma statement.
-    \autoref{algo:synchronization:execute_bidirectional_transformation:line:returnresult} returns the model pair $\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}}$.
-    This statement can only be reached if the previous while loop terminates by non-fulfillment of the loop condition.
-    %Since the loop can only be quit via the other return statement or the non-fulfillment of the loop condition, this statement can only be reached by non-fulfillment of the loop condition.
-    Since $\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}} \consistenttomath \consistencyrelationset{CR}$ is the negation of the loop condition, the result fulfills the lemma statement.
+    \autoref{algo:synchronization:execute_bidirectional_transformation} terminates with one of its return statements.
+    It returns $\bot$ in \autoref{algo:synchronization:execute_bidirectional_transformation:line:returnbotconsistency} or \autoref{algo:synchronization:execute_bidirectional_transformation:line:returnbotexecution}, which fulfills the lemma.
+    It returns $\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}}$ in \autoref{algo:synchronization:execute_bidirectional_transformation:line:returnresult}.
+    This line is reached when the loop condition was not fulfilled, i.e., when $\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}} \consistenttomath \consistencyrelationset{CR}$, which fulfills the lemma.
 \end{proof}
 
 \mnote{Non-termination of transformation execution}
 The algorithm does, however, not ensure termination for arbitrary bidirectional transformations and input models and changes.
-To ensure termination, we need to assure that after a finite number of execution steps of the transformation either no further execution step can be applied, i.e., it returns $\bot$, or it delivers consistent models.
+To ensure termination, we need to assure that after a finite number of execution steps of the transformation the algorithm either delivers consistent models or cannot apply further execution steps, i.e., returns $\bot$.
 To achieve this, we enforce execution steps to improve partial consistency to finally reach a consistent state. 
 We provide the following notion of \emph{partial consistency improvement} for that.
 
 \begin{definition}[Partial Consistency Improvement]
     \label{def:partialconsistencyimprovingtransformation}
-    Let $\transformation{t} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}$ be a bidirectional transformation for metamodels $\metamodel{M}{1}$ and $\metamodel{M}{2}$.
+    Let $\transformation{t}$ be a bidirectional transformation for metamodels $\metamodel{M}{1}$ and $\metamodel{M}{2}$.
     We say that $\transformation{t}$ is \emph{partial-consistency-improving} if, and only if, an execution step always improves partial consistency by reducing the size of the models or improving the size of the maximal consistent subsets.
-    So for all inputs, for which the execution step of $\transformation{t}$ does not return $\bot$, i.e.,
-    \begin{align*}
-        & (\model{m}{1}', \model{m}{2}', \change{\metamodel{M}{1}}') \equalsperdefinition \function{Ex}_{\transformation{t}}^1(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}})
-    \end{align*}
-    we denote $\change{\metamodel{M}{1}}(\model{m}{1})^p$ and $\model{m}{2}^p$ as the maximal consistent subsets of $\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}}$, and $\change{\metamodel{M}{1}}'(\change{\metamodel{M}{1}}(\model{m}{1}))^p$ as well as $\change{\metamodel{M}{2}}'(\model{m}{2})^p$ as the ones of $\tupled{\change{\metamodel{M}{1}}'(\change{\metamodel{M}{1}}(\model{m}{1})), \change{\metamodel{M}{2}}'(\model{m}{2})}$,
-    and require that when $\change{\metamodel{M}{1}}(\model{m}{1})^p \neq \change{\metamodel{M}{1}}(\model{m}{1})$ and $\model{m}{2}^p \neq \model{m}{2}$ (i.e., when $\change{\metamodel{M}{1}}(\model{m}{1})$ and $\model{m}{2}$ are not consistent):
+    
+    We define $(\model{m}{1}', \model{m}{2}', \change{\metamodel{M}{1}}') \equalsperdefinition \function{Ex}_{\transformation{t}}^1(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}})$ for all inputs, for which $\function{Ex}_{\transformation{t}}^1$ does not return $\bot$.
+    We denote $\change{\metamodel{M}{1}}(\model{m}{1})^p$ and $\model{m}{2}^p$ as the maximal consistent subsets of $\change{\metamodel{M}{1}}(\model{m}{1})$ and $\model{m}{2}$.
+    We denote $\change{\metamodel{M}{1}}'(\change{\metamodel{M}{1}}(\model{m}{1}))^p$ and $\change{\metamodel{M}{2}}'(\model{m}{2})^p$ as the maximal consistent subsets of $\change{\metamodel{M}{1}}'(\change{\metamodel{M}{1}}(\model{m}{1}))$ and $\change{\metamodel{M}{2}}'(\model{m}{2})$.
+    We require that when $\change{\metamodel{M}{1}}(\model{m}{1})^p \neq \change{\metamodel{M}{1}}(\model{m}{1})$ and $\model{m}{2}^p \neq \model{m}{2}$ (i.e., when $\change{\metamodel{M}{1}}(\model{m}{1})$ and $\model{m}{2}$ are not consistent):
     \begin{align*}
         &
         \abs{\change{\metamodel{M}{1}}'(\change{\metamodel{M}{1}}(\model{m}{1}))^p} + \abs{\change{\metamodel{M}{2}}'(\model{m}{2})^p} 
@@ -287,7 +185,6 @@ We provide the following notion of \emph{partial consistency improvement} for th
         & \formulaskip
         > \abs{\change{\metamodel{M}{1}}'(\change{\metamodel{M}{1}}(\model{m}{1}))} + \abs{\change{\metamodel{M}{2}}'(\model{m}{2})} 
         - \abs{\change{\metamodel{M}{1}}(\model{m}{1})} - \abs{\model{m}{2}}
-        %\Rightarrow %\function{Cons}_\consistencyrelationset{CR}(\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}) < \function{Cons}_\consistencyrelationset{CR}(\change{\metamodel{M}{1}}'(\model{m}{1}'), \model{m}{2}')
     \end{align*}
 \end{definition}
 
@@ -295,7 +192,7 @@ We provide the following notion of \emph{partial consistency improvement} for th
 Although the definition may first look like a rather theoretic requirement, it obviously matches an intuitive expectation regarding consistency preservation.
 In each execution step of the bidirectional transformation, we expect that no existing consistency is destroyed and that further consistency is introduced.
 To this end, we expect either the size of the maximal consistent subsets to improve more than the size of the models or the size of the models to decrease more than the size of the maximal consistent subsets.
-This is reasonable because consistency preservation should either add or modify elements such that more elements are consistent or remove elements that are inconsistent because their corresponding elements were removed.
+This is reasonable, because consistency preservation should either add or modify elements such that more elements are consistent or remove elements that are inconsistent because their corresponding elements were removed.
 
 \mnote{Practical necessity of partial consistency improvement}
 In the first case, the size of the maximal consistent subsets is improved by adding or modifying elements such that they are consistent again.
@@ -304,9 +201,9 @@ We do, however, not want consistency preservation rules to violate consistency f
 In the second case, the size of the models is decreased by removing elements that were not consistent because of the removal of a corresponding element.
 At the same time, models should not decrease in size by the same value due to the same reasons as in the first case.
 If elements are removed from the models, which were also present in the maximal consistent subsets, elements that were actually consistent are removed, which is undesired.
-For these reasons, we consider the requirements in \autoref{def:partialconsistencyimprovingtransformation} to be appropriate for practical transformation definition.
-They even represent a weaker notion than what we want to achieve in practice, because the requirement is only based on the sizes of the models and their maximal consistent subsets but not the actual contents.
-In practice, the consistent subsets before transformation execution will be a subset of those after transformation execution, although this is not formally required by the definition.
+For these reasons, we consider the requirement in \autoref{def:partialconsistencyimprovingtransformation} to be appropriate for practical transformation definition.
+They even represent a weaker notion than what we aim to achieve in practice, because the requirement only bases on the sizes of the models and their maximal consistent subsets but not their actual contents.
+In practice, the consistent subsets before executing a transformation will be a subset of those after executing a transformation, although this is not formally required by the definition.
 
 \begin{remark}
     \mnote{Practical derivation of partial consistency improvement}
@@ -320,183 +217,74 @@ In practice, the consistent subsets before transformation execution will be a su
 
 \mnote{Guarantee of achieving consistent models}
 The given notion of partial consistency improvement is stronger than the intuitive notion of just requiring the application of an execution step to improve partial consistency according to the metric in \autoref{def:partialconsistency}.
-Although expecting such an improvement also ensures that the execution steps are strongly monotone regarding partial consistency, it does not ensure that a partial consistency value of $1$ is reached after a finite number of execution steps.
-This is due to the possibility of just having an asymptotic approximation of $1$, which can, for example, be achieved by adding consistent elements in each step, which do not affect the existing elements.
-Then the size of both the maximal consistent subsets as well as the models themselves increases by the same value, thus partial consistency improves but never reaches $1$.
+Although expecting such an improvement also ensures that the execution steps are strongly monotone regarding partial consistency, it does not ensure that a partial consistency of $1$ is reached after a finite number of execution steps.
+This is due to the possibility of just having an asymptotic approximation of $1$, which can, e.g., be achieved by adding consistent elements that do not affect the existing elements in each step.
+Then the sizes of the maximal consistent subsets and the models themselves increase by the same value, thus partial consistency improves but never reaches $1$.
 
-\begin{lemma}[Bidirectional Transformation Execution Termination] %Bidirectional Transformation Execution Termination]
+\begin{lemma}[Bidirectional Transformation Execution Termination]
     \label{lemma:bidirectionaltransformationtermination}
     Let $\transformation{t} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}$ be a partial-consistency-improving bidirectional transformation.
-    Then \autoref{algo:synchronization:execute_bidirectional_transformation} always terminates.
+    Then \autoref{algo:synchronization:execute_bidirectional_transformation} terminates for every input.
 \end{lemma}
 \begin{proof}
     The while loop of the algorithm consecutively applies an execution step of the bidirectional transformation $\transformation{t}$.
     The algorithm terminates when at some point a return statement is executed, thus either an execution step cannot be executed and returns $\bot$, or the loop condition is not fulfilled anymore.
     To quit the loop, the model pair $\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}}$ needs to be consistent.
-    $\model{m}{1}$, $\model{m}{2}$ and $\change{\metamodel{M}{1}}$ are the results of an execution step of $\transformation{t}$, to which the values $\model{m}{1}$, $\model{m}{2}$ and $\change{\metamodel{M}{1}}$ of the previous iteration were given.
+    $\model{m}{1}$, $\model{m}{2}$, and $\change{\metamodel{M}{1}}$ are the results of an execution step of $\transformation{t}$, to which the values $\model{m}{1}$, $\model{m}{2}$, and $\change{\metamodel{M}{1}}$ of the previous iteration were given.
     We know that $\tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}} \consistenttomath \consistencyrelationset{CR}$ if, and only if, their partial consistency is $1$, i.e., $\function{Cons}_\consistencyrelationset{CR}(\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}) = 1$.
     Partial consistency is $1$ if, and only if, the sizes of the maximal consistent subsets are equal to the sizes of the models themselves, i.e., when $\abs{\change{\metamodel{M}{1}}(\model{m}{1})^p} + \abs{\model{m}{2}^p} = \abs{\change{\metamodel{M}{1}}(\model{m}{1})} + \abs{\model{m}{2}}$.
-    To show that partial consistency reaches $1$, we consider the development of the size differences of the maximal consistent subsets and the models during execution of the algorithm.
+    To show that partial consistency reaches $1$, we consider the development of the size differences of the maximal consistent subsets and the models during the execution of the algorithm.
     We start with the initial size difference:
     \begin{align*}
-        \mathvariable{sizeDifference}_0 = \abs{\change{\metamodel{M}{1}}(\model{m}{1})} + \abs{\model{m}{2}} - \abs{\change{\metamodel{M}{1}}(\model{m}{1})^p} + \abs{\model{m}{2}^p}
+        \mathvariable{sizeDifference}_0 \equalsperdefinition \abs{\change{\metamodel{M}{1}}(\model{m}{1})} + \abs{\model{m}{2}} - \abs{\change{\metamodel{M}{1}}(\model{m}{1})^p} - \abs{\model{m}{2}^p}
     \end{align*}
     It is $\mathvariable{sizeDifference}_0 \geq 0$, because the models are always larger than their maximal consistent subsets.
-    In the $i$-th iteration of the loop, we start with models $\model{m}{1}^{i-1}$, $\model{m}{2}^{i-1}$ and change $\change{\metamodel{M}{1}}^{i-1}$ and the execution step returns models $\model{m}{1}^{i}$, $\model{m}{2}^{i}$ and change $\change{\metamodel{M}{1}}^{i}$.
-    Then we have the size differences before that iteration, i.e., the difference after iteration $i-1$, and after that iteration, as:
-    \begin{align*}
+    In the $i$-th iteration of the loop, we start with models $\model{m}{1}^{i-1}$, $\model{m}{2}^{i-1}$ and change $\change{\metamodel{M}{1}}^{i-1}$, and the execution step returns $\model{m}{1}^{i}$, $\model{m}{2}^{i}$, and $\change{\metamodel{M}{1}}^{i}$.
+    Then we have the size differences before this iteration, i.e., the difference after iteration $i-1$, and after this iteration, as:
+    \begin{alignat*}{2}
         &
-        \mathvariable{sizeDifference}_{i-1} = \abs{\change{\metamodel{M}{1}}^{i-1}(\model{m}{1}^{i-1})} + \abs{\model{m}{2}^{i-1}} - \abs{\change{\metamodel{M}{1}}^{i-1}(\model{m}{1}^{i-1})^p} + \abs{\model{m}{2}^{i, p}} \\
+        \mathvariable{sizeDifference}_{i-1} &&\equalsperdefinition \abs{\change{\metamodel{M}{1}}^{i-1}(\model{m}{1}^{i-1})} + \abs{\model{m}{2}^{i-1}} - \abs{\change{\metamodel{M}{1}}^{i-1}(\model{m}{1}^{i-1})^p} - \abs{\model{m}{2}^{i-1, p}} \\
         &
-        \mathvariable{sizeDifference}_{i} = \abs{\change{\metamodel{M}{1}}^{i}(\model{m}{1}^{i})} + \abs{\model{m}{2}^{i}} - \abs{\change{\metamodel{M}{1}}^{i}(\model{m}{1}^{i})^p} + \abs{\model{m}{2}^{i-1,p}}
-    \end{align*}
+        \mathvariable{sizeDifference}_{i} &&\equalsperdefinition \abs{\change{\metamodel{M}{1}}^{i}(\model{m}{1}^{i})} + \abs{\model{m}{2}^{i}} - \abs{\change{\metamodel{M}{1}}^{i}(\model{m}{1}^{i})^p} - \abs{\model{m}{2}^{i,p}}
+    \end{alignat*}
     The reduction of the size difference in the $i$-th iteration is given by:
     \begin{align*}
         & 
-        \mathvariable{sizeDifferenceReduction}_{i} = \mathvariable{sizeDifference}_{i} - \mathvariable{sizeDifference}_{i-1} \\
-        & 
-        = \abs{\change{\metamodel{M}{1}}^{i}(\model{m}{1}^{i})} + \abs{\model{m}{2}^{i}} - \abs{\change{\metamodel{M}{1}}^{i}(\model{m}{1}^{i})^p} + \abs{\model{m}{2}^{i,p}} \\
-        & \formulaskip
-        - \big(\abs{\change{\metamodel{M}{1}}^{i-1}(\model{m}{1}^{i-1})} + \abs{\model{m}{2}^{i-1}} - \abs{\change{\metamodel{M}{1}}^{i-1}(\model{m}{1}^{i-1})^p} + \abs{\model{m}{2}^{i-1,p}}\big)
+        \mathvariable{sizeDifferenceReduction}_{i} \equalsperdefinition \mathvariable{sizeDifference}_{i} - \mathvariable{sizeDifference}_{i-1} \\
+        &  \formulaskip
+        = \abs{\change{\metamodel{M}{1}}^{i}(\model{m}{1}^{i})} + \abs{\model{m}{2}^{i}} - \abs{\change{\metamodel{M}{1}}^{i}(\model{m}{1}^{i})^p} - \abs{\model{m}{2}^{i,p}} \\
+        & \formulaskip\formulaskip
+        - \big(\abs{\change{\metamodel{M}{1}}^{i-1}(\model{m}{1}^{i-1})} + \abs{\model{m}{2}^{i-1}} - \abs{\change{\metamodel{M}{1}}^{i-1}(\model{m}{1}^{i-1})^p} - \abs{\model{m}{2}^{i-1,p}}\big)
     \end{align*}
-    We know that $\mathvariable{sizeDifferenceReduction}_{i} > 0$, because $\transformation{t}$ is partial-consistency-improving. %,  because it is the central requirement of that definition to reduce this difference by applying an execution step. 
+    We know that $\mathvariable{sizeDifferenceReduction}_{i} > 0$, because $\transformation{t}$ is partial-consistency-improving.
     Because of the model sizes being natural numbers, we know:
     \begin{align*}
         \mathvariable{sizeDifferenceReduction}_{i} \geq 1
     \end{align*}
-    So we can calculate the remaining size difference in the $i$-th iteration by applying all size difference reductions starting from $\mathvariable{sizeDifference}$:
+    So we can calculate the remaining size difference in the $i$-th iteration by applying all size difference reductions starting from $\mathvariable{sizeDifference}_0$:
     \begin{align*}
         \mathvariable{sizeDifference}_{i} \; & 
         =  \mathvariable{sizeDifference}_{0} - \sum_{k=1}^{i} \mathvariable{sizeDifferenceReduction}_{k} \\
         &
         \leq \mathvariable{sizeDifference}_{0} - \sum_{k=1}^{i} 1 = \mathvariable{sizeDifference}_{0} - i
     \end{align*}
-    Thus
-    %\begin{align*}
-        $i > \mathvariable{sizeDifference}_{0} \Rightarrow \mathvariable{sizeDifference}_{i} \leq 0$.
-    %\end{align*}
-    For reasons of simplicity, we have ignored that $\mathvariable{sizeDifferenceReduction}_{k} = 0\; (k > i)$ as soon as $\mathvariable{sizeDifference}_{i} = 0$, because $\mathvariable{sizeDifference}_{i}$ cannot be less than $0$.
-    In consequence, after at most $\mathvariable{sizeDifference}_{0}$ loop iterations $\mathvariable{sizeDifference}_{i} = 0$ for $i > \mathvariable{sizeDifference}_{0}$, so models are consistent after that iteration.
+    Thus, we have $\mathvariable{sizeDifference}_{i} \leq 0$ if $i \geq \mathvariable{sizeDifference}_{0}$.
+    In fact, we have $\mathvariable{sizeDifference}_{i} = 0$, because $\mathvariable{sizeDifference}_{i} \geq 0$ by definition.
+    Thus, models are consistent after at most $\mathvariable{sizeDifference}_{0}$ loop iterations.
     Since $0 \leq \mathvariable{sizeDifference}_{0} < \infty$, the algorithm leaves the loop after a finite number of iterations.
+    Note that, for reasons of simplicity, we have ignored that $\mathvariable{sizeDifferenceReduction}_{i} = 0$ if models were already consistent in iteration $i-1$ and thus models and their maximal consistent subsets have equal size in iterations $i-1$ and $i$.
 \end{proof}
 
 \mnote{Termination of partial-consistency-improving transformations}
-With \autoref{lemma:bidirectionaltransformationtermination}, we know that we are able to execute transformations for given models that are not initially consistent, such that their execution terminates in a consistent state whenever possible, as long as these transformations fulfill the property of being partial-consistency-improving.
+With \autoref{lemma:bidirectionaltransformationtermination}, we know that we are able to execute transformations for given models that are not initially consistent such that their execution terminates in a consistent state whenever possible, as long as these transformations fulfill the property of being partial-consistency-improving.
 Note that this property substitutes the correctness property of consistency preservation rules.
-In fact, the original correctness notion is a special case of being partial-consistency-improving, because in that case one execution of a consistency preservation rules %, and thus also one execution step of the transformation, 
-leads to a completely consistent pair of models.
+In fact, the original correctness notion is a special case of being partial-consistency-improving, because in that case one execution of a consistency preservation rules leads to a completely consistent pair of models.
 
 \mnote{Partial consistency improvement to integrate two changes}
 We thus found a requirement for transformations that enables us to repeatedly apply their execution step to consecutively improve consistency until the models are finally consistent again.
 Based on this requirement, we can define a process for integrating changes to both involved models to finally yield consistent models.
 The requirement is, however, still only a theoretic requirement. 
 Although it conforms to an intuitive expectation regarding transformations, it does not provide any assistance in how to be achieved in practice. We discuss this in the subsequent section.
-
-%\todo{Wir haben noch nicht eingebettet, welche Rolle die Änderungen spielen. Theoretisch könnten jetzt die Modelle total inkonsistent sein und die Changes leer und die Transformationen müssen damit klar kommen. Das müssen wir irgendwie noch formulieren. Am besten einfach sagen, dass die initialen Modelle konsistent sein müssen, dann ist implizit klar, dass die Transformationen sich gegenseitig Changes generieren müssen, aus denen sie Konsistenz wiederherstellen können.}
-
-% \begin{definition}[Partial-Consistency-Improving Bidirectional Transformation]
-%     Let $\transformation{t} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}$ be a bidirectional transformation for metamodels $\metamodel{M}{1}$ and $\metamodel{M}{2}$.
-%     We say that $\transformation{t}$ is \emph{partial-consistency-improving} if, and only if, an execution step does always improve partial consistency, i.e.:
-%     \begin{align*}
-%         & \forall \model{m}{1}, \model{m}{1}' \in \metamodelinstanceset{M}{1}, \model{m}{2}, \model{m}{2}' \in \metamodelinstanceset{M}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{1}}' \in \changeuniverse{\metamodel{M}{1}}: \\
-%         & 
-%         \function{Ex}_{\transformation{t}}^1(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) = (\model{m}{1}', \model{m}{2}', \change{\metamodel{M}{1}}') \Rightarrow \function{Cons}_\consistencyrelationset{CR}(\change{\metamodel{M}{1}}(\model{m}{1}), \model{m}{2}) < \function{Cons}_\consistencyrelationset{CR}(\change{\metamodel{M}{1}}'(\model{m}{1}'), \model{m}{2}')
-%     \end{align*}
-% \end{definition}
-%In fact, $\model{m}{1}' = \change{\metamodel{M}{1}}(\model{m}{1})$. We consider the instances of metamodel 1 with applied changes, because the CPRs improve consistency regarding the changes applied to m1 and also do this by the produced change to m1. Otherwise, we would consider the potentially initially consistent m1 and m2 as the baseline and ignore d1', which was produced by the transformation to restore consistency.
-
-
-% \begin{lemma}[Correctness of Partial-Consistency-Improving Bidirectional Transformations]
-%     Partial consistency-improving bx are correct. This is problematic, because correctness if defined for a single CPR, whereas partial-consistency-improving is defined for both.
-% \end{lemma}
-
-% \todo{Erstmal geht es nur um Monotonie und Beschränktheit. Nachher müssen wir noch sicherstellen, dass es dann auch irgendwann konsistent ist}
-% To achieve that the consecutive application of execution steps of a bidirectional transformation terminates, we need to have some guarantee that it is (strongly) monotone and bounded.
-% Based on our notion of partial consistency, we can define monotony based on the metrics for partial consistency.
-% We can require the transformation to at least preserve partial consistency after each execution to be monotone or to improve it to be strongly monotone.
-% This does, however, not ensure that a completely consistent state is reached, as the improvements in partial consistency can be infinitesimally small.
-% For example, the consistency preservation rules could simply add new consistent elements in each iteration, which improves the sizes of both the maximal consistent subsets and the models in the same way, thus partial consistency converges to $1$ but never reaches it.
-
-% It is essential to require strong monotony to ensure that partial consistency improves and does not stagnate at a certain value.
-% This strong monotony can, however, only be required for each bidirectional transformation execution step, thus each execution of both consistency preservation rules, and not a single one.
-% Consider the case that a change was only performed to $\model{m}{2}$, then $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ cannot produce any reasonable changes in $\model{m}{2}$ to restore consistency.
-
-% In fact, we do not only want partial consistency to improve, but the maximal consistency subsets to grow.
-% It is not desired that after each execution of a consistency preservation rule completely different elements than before are consistent.
-% Thus we require that the maximal consistent subsets of $\change{\metamodel{M}{1}}(\model{m}{1})$ and $\model{m}{2}$ are subsets of those of $\change{\metamodel{M}{1}}'(\change{\metamodel{M}{1}}(\model{m}{1}))$ and $\change{\metamodel{M}{2}}'(\model{m}{2})$:
-% \begin{align*}
-%     & \change{\metamodel{M}{1}}(\model{m}{1})^p \subseteq \change{\metamodel{M}{1}}'(\change{\metamodel{M}{1}}(\model{m}{1}))^p\\
-%     & \model{m}{2}^p \subseteq \change{\metamodel{M}{2}}'(\model{m}{2})^p
-% \end{align*}
-% Additionally, we require the size of the maximal consistent subsets to increase more than the size of the models. 
-% If this is not the case, then the consistency preservation rules only add elements that are consistent, but which do not improve consistency of the existing models. Thus the changes are obsolete. \todo{Vielleicht reicht diese Eigenschaft schon und wir brauchen das mit den Mengen oben gar nicht?}
-% \begin{align*}
-%     & 
-%     \abs{\change{\metamodel{M}{1}}'(\change{\metamodel{M}{1}}(\model{m}{1}))^p} + \abs{\change{\metamodel{M}{2}}'(\model{m}{2})^p} 
-%     - \abs{\change{\metamodel{M}{1}}(\model{m}{1})^p} - \abs{\model{m}{2}^p} \\
-%     & \formulaskip
-%     < \abs{\change{\metamodel{M}{1}}'(\change{\metamodel{M}{1}}(\model{m}{1}))} + \abs{\change{\metamodel{M}{2}}'(\model{m}{2})} 
-%     - \abs{\change{\metamodel{M}{1}}(\model{m}{1})} - \abs{\model{m}{2}}
-% \end{align*}
-% \todo{Warum macht das Sinn? Jede Regelanwendung sorgt dafür, dass neue Konsistenz hergestellt wird. Ich sorge also dafür, dass für ein Teil der Elemente im ursprünglichen Modell, was noch nicht konsistent war (durch eine Änderung) durch Änderungen im anderen Modell (evtl. auch Hinzufügungen) }
-% \todo{In Definition packen und dafür einen Namen vergeben}
-
-% If this property is fulfilled, we can easily show that iterative execution leads to partial consistency reaching $1$.
-% PROOF!
-
-%\subsection{Transformation Termination}
-
-% FOLGERUNG:
-% Wenn wir zwei CPR haben, die diese Eigenschaft erfüllen, konvergiert deren sequentielle Ausführung (ggf. auch mehrfach) zu einem konsistenten Zustand, da sie monoton und beschränkt sind.
-
-% \todo{Theorem zur konsistenten Terminierung}
-
-% \paragraph{Randnotiz}
-% Die maximalen Mengen sind eine formale Voraussetzung. In der Praxis hat man i.d.r. explizite Trace-Modelle, die quasi als Witness-Struktur fungieren und damit genau beschrieben, welche Elemente zusammengehören. Das kann dazu führen, dass nicht die maximalen Teilmengen tatsächlich die Teile der Modelle darstellen, die als konsistent betrachtet werden, sondern kleinere Mengen.
-% Das ist o.B.d.A. aber kein Problem, sofern beide CPR Monotonie für immer die gleichen Mengen erfüllen.
-
-% \paragraph{Alte Idee}
-% Anforderung an CPR:
-% Hippokratisch und assoziativ, d.h.
-% d2' = CPR(m1, m2, d1), d2'' CPR(d1(m1), d2'(m2), d1')
-% und d2''' = CPR(m1, m2, d1' o d1) mit d2''' = d2'' o d2'
-% Dadurch kann ich eine Änderung beliebig zerlegen und nacheinander CPR anwenden mit demselben Ergebnis.
-% Das bedeutet insb. auch, dass wenn d1(m1) un d2(m2) konsistent ist CPR(m1, d2(m2), d1) nichts tut, weil es hippokratisch ist, also d2' = id und CPR(m1, d2(m2), d1' o d1) = CPR(m1, d2(m2), d1')
-
-
-% \subsection{Requirements to Transformations}
-
-% Discuss what the actual requirements are to achieve the previously defined property
-
-% \paragraph{Partial Consistency Preservation}
-% Wir verlangen von CPRr, dass nachher ist Konsistenz für eine Obermenge der partiell konsistenten Modelle gilt, also für Obermengen von d1(m1)p und eine Obermenge von d2(m2)p erfüllt. Das verbietet insbesondere, dass eine CPR in m2 beliebig Elemente löscht, die vorher konsistent waren, also verlangt dass d2(m2)p $\subseteq$ d2'(d2(m2))
-% Eigenschaft: Partial-consistency preserving
-% Wir verlangen von CPRl dasselbe.
-% Es gibt nach CPRr auf jeden Fall zwei Teilmengen der Modelle die konsistent sind und größer als die ursprünglich konsistenten Modellteile.
-% Somit muss CPRl für diese (oder eine ggf. andere mindestens genauso große Teilmenge) wieder die Eigenschaft erfüllen.
-% Für CPRr:
-% |d1(m1)p| + |d2'(d2(m2))p| >= |d1(m1)p| + |d2(m2)p|
-
-% \paragraph{Partial Consistency Improving}
-% Wir verlangen außerdem, dass für alle m1, m2, d1, d2 mit d2' = CPRr(m1, d2(m2), d1) und d1' = CPRl(m2, d1(m1), d2)eines der folgenden gilt:
-% 1. |d1(m1)| + |d2'(d2(m2))| < |d1(m1)| + |d2(m2)|
-% 2. |d1'(d1(m1))| + |d2(m2)| < |d1(m1)| + |d2(m2)|
-% 3. |d1'(d1(m1))p| + |d2(m2)p| > |d1(m1)p| + |d2(m2)p|
-% 4. |d1(m1)p| + |d2'(d2(m2))p| > |d1(m1)p| + |d2(m2)p|
-% Das bedeutet, dass für Änderungen an beiden Modellen eine der beiden CPR entweder dafür sorgt, dass eines der Modelle kleiner wird, oder dass sich die partielle Konsistenz erhöht (also die Teilmengen, die konsistent sind, größer werden).
-
-% \paragraph{Non-Inconsistency Introducing}
-% 1. Elemente in d2'(d2(m2)) $\setminus$ d2(m2) müssen in d2'(d2(m2))p sein
-% 2. Elemente in d2(m2) $\setminus$ d2'(d2(m2)) dürfen nicht in d2(m2)p sein
-% Das heißt, alles was neu hinzu kommt muss auch partiell konsistent sein, und alles was entfernt wird darf vorher nicht partiell konsistent gewesen sein.
-% Das ist sinnvoll, da sonst eine CPR ja bereits konsistente Teile inkonsistent machen würde und sonst beliebigen Quatsch hinzufügen könnte, der nicht konsistent ist. Letztes ist insbesondere wichtig, damit eine CPR nicht die Modelle ein bisschen konsistenter macht, aber durch Hinzufügen weiterer Elemente eigentlich viel inkonsistenter.
-% (Die zweite Anforderung sagt, dass keine vorher konsistenten Elemente entfernt werden dürfen und ergibt sich eigentlich auch schon aus der Partial-consistency preserving Eigenschaft. Allerdings nicht ganz, da partial-consistency preserving nur Aussagen über die Größe macht.)
-
-% \paragraph{Informelle Beschreibung}
-% Informell gesagt wollen wir, dass die beiden CPR 1. keine vorhandene Konsistenz zerstören und immer ein bisschen Konsistenz hinzufügen (d.h. partielle Konsistenz erhöhen) und 2. insbesondere keine neue Inkonsistenz einführen indem sie Elemente erzeugen, die neuer Konsistenz bedürfen.
-% Dies ist lediglich die Erkenntnis, dass CPR-Implementierungen so etwas können müssen. Wie das praktisch erreicht werden kann ist damit nicht angegeben.
-% Es ist aber nur natürlich, dass eine CPR so definiert ist, dass sie keine neuen Inkonsistenzen einführt und dass bei Änderungen, die eine Inkonsistenz induzieren, eine der beiden CPR sich dieser Änderung annimmt und Konsistenz wiederherstellt.
-
 
 
 \subsection{Synchronizing Execution of Transformations}
@@ -520,18 +308,18 @@ The transformation then iteratively improves partial consistency until consisten
 
 \mnote{Synchronizing transformation execution step}
 Since we want to consider the case that both models instead of only one of them have been modified, we extend the approach to process changes to both models.
-More precisely, we introduce a modified notion of transformation execution steps, which is able to process changes to both models.
+More precisely, we introduce a modified notion of transformation execution steps that is able to process changes to both models.
 The operation of such an execution step is depicted in \autoref{fig:synchronization:synchronizing_execution_step}.
 To this end, the first executed consistency preservation rule is applied to the first model and the change to it, but receives the modified state of the second model.
 We have motivated the necessity not to apply the first consistency preservation rule to the unmodified second model in \autoref{chap:synchronization:combination:sequencing}.
 Afterwards, we apply the second consistency preservation rule to the modified first model, the original second model, and the modifications to the second model as the concatenation of the original change and the one generated by the first consistency preservation rule.
-This ensures that all inconsistencies are introduced by changes processed by the consistency preservation rules, which was our requirement for practical applicability as it requires to only react to changes instead of processing arbitrarily inconsistent models states.
+This ensures that all inconsistencies are introduced by changes processed by the consistency preservation rules, which was our requirement for practical applicability, as it requires to only react to changes instead of processing arbitrarily inconsistent models states.
 
 \begin{definition}[Synchronizing Bidirectional Execution Step]
     \label{def:synchronizingtransformationexecutionstep}
-    Let $\transformation{t} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}$ be a bidirectional transformation for $\metamodel{M}{1}$ and $\metamodel{M}{2}$.
-    \newcommand{\makesomespace}{\ifisafour\qquad\quad\else\quad\fi}
+    Let $\transformation{t} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}$ be a bidirectional transformation for metamodels $\metamodel{M}{1}$ and $\metamodel{M}{2}$.
     A \emph{synchronizing execution step} $\function{SyncEx}_{\transformation{t}}^1$ of $\transformation{t}$ is a function:
+    \newcommand{\makesomespace}{\ifisafour\qquad\quad\else\quad\fi}
     \begin{align*}
         \function{SyncEx}_{\transformation{t}}^1 : \; & (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}, \changeuniverse{\metamodel{M}{2}}) \rightarrow (\metamodelinstanceset{M}{1}, \metamodelinstanceset{M}{2}, \changeuniverse{\metamodel{M}{1}}) \cup \setted{\bot} \\
         & (\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}) \mapsto 
@@ -540,34 +328,30 @@ This ensures that all inconsistencies are introduced by changes processed by the
             \bot
         \end{cases} \makesomespace \mathtextspacearound{with:} 
     \end{align*}
-    % with:
     \vspace{-\abovedisplayskip}
     \vspace{-\belowdisplayskip}
     \begin{alignat*}{2}
         & 
-        \change{\metamodel{M}{2}}' = \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}(\model{m}{1}, \change{\metamodel{M}{2}}(\model{m}{2}), \change{\metamodel{M}{1}}) %\\
-        %& 
-        \makesomespace\makesomespace &&
-        \model{m}{1}' = \change{\metamodel{M}{1}}(\model{m}{1}) \\
-        & 
-        \change{\metamodel{M}{1}}' = \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}(\model{m}{2}, \model{m}{1}', \change{\metamodel{M}{2}}' \concatfunction \change{\metamodel{M}{2}}) %\\
+        \change{\metamodel{M}{2}}' \equalsperdefinition \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}(\model{m}{1}, \change{\metamodel{M}{2}}(\model{m}{2}), \change{\metamodel{M}{1}})
+        \makesomespace\makesomespace 
         &&
-        \model{m}{2}' = \change{\metamodel{M}{2}}'(\change{\metamodel{M}{2}}(\model{m}{2}))
+        \model{m}{1}' \equalsperdefinition \change{\metamodel{M}{1}}(\model{m}{1}) \\
+        & 
+        \change{\metamodel{M}{1}}' \equalsperdefinition \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}(\model{m}{2}, \model{m}{1}', \change{\metamodel{M}{2}}' \concatfunction \change{\metamodel{M}{2}})
+        &&
+        \model{m}{2}' \equalsperdefinition \change{\metamodel{M}{2}}'(\change{\metamodel{M}{2}}(\model{m}{2}))
     \end{alignat*}
-    If either of the consistency preservation rules is undefined for an input, i.e., if $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}(\model{m}{1}, \change{\metamodel{M}{2}}(\model{m}{2}), \change{\metamodel{M}{1}}) = \bot$ or $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}(\model{m}{2}, \model{m}{1}', \change{\metamodel{M}{2}}' \concatfunction \change{\metamodel{M}{2}}) = \bot$, then the execution is undefined, i.e., $\function{SyncEx}_{\transformation{t}}^1(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) = \bot$.
-    % for given models $\model{m}{1} \in \metamodelinstanceset{M}{1}$, $\model{m}{2} \in \metamodelinstanceset{M}{2}$ and a change $\change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}}$ to $\model{m}{1}$ is the consecutive execution of $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ and $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}$, i.e.
-    % \begin{align*}
-    %     & \change{\metamodel{M}{2}}' = \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}) \\
-    %     & \change{\metamodel{M}{1}}' = \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}(\model{m}{2}, \change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}')
-    % \end{align*}
-    % with the resulting changes $\change{\metamodel{M}{1}}'$ and $\change{\metamodel{M}{2}}'$.
+    If $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}(\model{m}{1}, \change{\metamodel{M}{2}}(\model{m}{2}), \change{\metamodel{M}{1}}) = \bot$ or $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}(\model{m}{2}, \model{m}{1}', \change{\metamodel{M}{2}}' \concatfunction \change{\metamodel{M}{2}}) = \bot$, the execution is undefined, i.e., $\function{SyncEx}_{\transformation{t}}^1(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}) = \bot$.
 \end{definition}
 
 \mnote{Single execution of synchronization step}
 The synchronizing bidirectional execution step is necessary to first integrate the changes made in both models.
-It only produces a change in the first model, such that afterwards ordinary transformation execution steps that only need to deal with a change to one model can be applied.
-This leads to \autoref{algo:synchronization:execute_synchronizing_bidirectional_transformation} for the execution of a synchronizing bidirectional transformation.
-%Step integrates both changes, comparable to ordinary step, but first treats changes to m2 as already applied, i.e., given models are inconsistent, then processes the changes in the opposite direction to generate necessary changes to restore consistency from them.
+It only produces a change in the first model, such that afterwards ordinary execution steps that only need to deal with a change to one model can be applied.
+This leads to \autoref{algo:synchronization:execute_synchronizing_bidirectional_transformation} for the synchronizing execution of a bidirectional transformation.
+%
+%\mnote{Consistent termination of synchronizing transformation execution}
+It is an extension of \autoref{algo:synchronization:execute_bidirectional_transformation} for the non-synchronizing case.
+Thus, it has the same properties regarding termination and return values.
 
 \begin{algorithm}
     \input{algorithms/correctness/synchronization/execute_synchronizing_bidirectional_transformation.tex}
@@ -575,33 +359,31 @@ This leads to \autoref{algo:synchronization:execute_synchronizing_bidirectional_
     \label{algo:synchronization:execute_synchronizing_bidirectional_transformation}
 \end{algorithm}
 
-\mnote{Consistent termination of synchronizing transformation execution}
-This algorithm is an extension of \autoref{algo:synchronization:execute_bidirectional_transformation} for the non-synchronizing case.
-It thus has the same properties regarding termination and either returning $\bot$ or consistent pairs of models.
-
-\begin{theorem}[Synchronizing Transformation Termination] % Synchronizing Bidirectional Transformation Consistent Termination %Synchronizing Bidirectional Transformation Execution]
+\begin{theorem}[Synchronizing Transformation Termination]
     \label{theorem:synchronizingbidirectionaltransformationconsistencytermination}
-    Let $\transformation{t} = \tupled{\consistencyrelationset{CR}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}, \consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}}$ be a partial-consistency-improving bidirectional transformation.
-    Then \autoref{algo:synchronization:execute_synchronizing_bidirectional_transformation} always terminates and either returns $\bot$ or a consistent model pair.
+    Let $\transformation{t}$ be a partial-consistency-improving bidirectional transformation.
+    Then \autoref{algo:synchronization:execute_synchronizing_bidirectional_transformation} terminates for every input and either returns $\bot$ or a consistent model pair.
 \end{theorem}
-\begin{proof}
-    The algorithm is identical to \autoref{algo:synchronization:execute_bidirectional_transformation}, except for Lines~\ref{algo:synchronization:execute_synchronizing_bidirectional_transformation:line:synchronizationstart}--\ref{algo:synchronization:execute_synchronizing_bidirectional_transformation:line:synchronizationend}, which add the initial synchronization step.
-    These lines add a single return statement that can return $\bot$.
-    Since the return statement not returning $\bot$ is still preceded by the while loop having the loop condition that the model pair needs to be inconsistent, the argument of the proof for \autoref{lemma:bidirectionaltransformationconsistency} regarding non-synchronizing bidirectional transformations ensuring that only consistent models are returned still applies.
-    Thus, we know the algorithm either returns $\bot$ or a consistent model pair.
 
-    Termination of the algorithm is guaranteed for the same reasons as for non-synchronizing bidirectional transformations as proven in \autoref{lemma:bidirectionaltransformationtermination}.
+\begin{proof}
+    The algorithm is identical to \autoref{algo:synchronization:execute_bidirectional_transformation} except for Lines~\ref{algo:synchronization:execute_synchronizing_bidirectional_transformation:line:synchronizationstart}--\ref{algo:synchronization:execute_synchronizing_bidirectional_transformation:line:synchronizationend}, which add the initial synchronization step.
+    These lines add a single return statement that can return $\bot$.
+    The return statement in \autoref{algo:synchronization:execute_synchronizing_bidirectional_transformation:line:returnresult} not returning $\bot$ is still preceded by the while loop having the loop condition that the model pair needs to be inconsistent.
+    Thus, the argument of the proof for \autoref{lemma:bidirectionaltransformationconsistency} ensuring that only consistent models are returned still applies.
+    In consequence, we know that the algorithm either returns $\bot$ or a consistent model pair.
+
+    Termination of the algorithm is guaranteed for the non-synchronizing case proven in \autoref{lemma:bidirectionaltransformationtermination}.
     Although the additional execution of $\function{SyncEx}_{\transformation{t}}^1$ may introduce further inconsistencies, the proof already considered that the models given to the while loop may be arbitrarily inconsistent.
-    Thus, the inductive improvement in partial consistency through the while loop is given in the same way and thus, finally, the model pair becomes consistent.
+    Thus, the inductive improvement in partial consistency through the while loop is given in the same way and, thus, the models finally become consistent.
 \end{proof}
 
 \mnote{Inconsistencies only introduced by changes}
-We have proven that a bidirectional transformation that is partial-consistency-improving can be executed for two given models and changes to both of them such that consistent models are delivered, as long as the transformation is able to process the changes.
-In fact, we have already restricted the algorithm such that it must not be able to deal with arbitrarily inconsistent models, but only with models that are initially consistent, such that only the given changes introduce inconsistencies.
-This is supposed to make it easier to define transformations in practice that fulfill the property of being partial-consistency-improving, as they can rely on the assumption that inconsistency is only introduced by the given changes.
+We have proven that a bidirectional transformation that is partial-consistency-improving can be executed for two given models and changes to both of them such that consistent models are delivered, as long as the transformation can process the changes.
+In fact, we have already restricted the algorithm such that it does not need to deal with arbitrarily inconsistent models but with models that are initially consistent, such that only the given changes introduce inconsistencies.
+This is supposed to ease the definition of transformations that fulfill the property of being partial-consistency-improving in practice, as they can rely on the assumption that inconsistency is only introduced by the given changes.
 
 \mnote{Synchronizing bidirectional transformations}
-With the insight that partial-consistency-improving bidirectional transformations can be used to integrate changes to both of two models and deliver consistent models based on those changes, we can define \emph{synchronizing bidirectional transformations} as bidirectional transformations with the property of being partial-consistency-improving.
+With the insight that partial-consistency-improving bidirectional transformations can be used to integrate changes to both of two models and deliver consistent models based on those changes, we define \emph{synchronizing bidirectional transformations} as bidirectional transformations with the property of being partial-consistency-improving.
 
 \begin{definition}[Synchronizing Bidirectional Transformation]
     Let $\transformation{t}$ be a partial-consistency-improving bidirectional transformation.
@@ -609,28 +391,29 @@ With the insight that partial-consistency-improving bidirectional transformation
 \end{definition}
 
 \mnote{Order of consistency preservation rules}
-As discussed in \autoref{chap:synchronization:bidirectional:transformations}, we have defined bidirectional transformation execution steps starting with $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$ although it may also be necessary to start with $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}$ depending on which model was changed.
-We have discussed that the order restriction is without loss of generality and definitions can be transferred by swapping the rules.
+As discussed in \autoref{chap:synchronization:bidirectional:transformations}, we have defined bidirectional transformation execution steps starting with $\consistencypreservationrule{\consistencyrelationset{CR}}^{\rightarrow}$, although it can also be necessary to start with $\consistencypreservationrule{\consistencyrelationset{CR}}^{\leftarrow}$ depending on which model was changed.
+We have discussed that the order restriction is without loss of generality and that definitions can be transferred by swapping the rules.
 For the synchronization case, in which both models have been modified, the execution order does, theoretically, not even make a difference, because changes to both models are present.
 From a practical perspective, it can, however, make sense to define which of the consistency preservation rules to execute first.
 For example, it might make sense to first execute the consistency preservation rule from the more abstract to the more detailed model, if such a relation exists between the models.
-We leave such considerations up to the individual transformation developer or future research, as the selection of the order does not provide any conceptual benefits, but, in the best case, eases the definition of appropriate consistency preservation rules and improves usability.
+We leave such considerations up to the individual transformation developer or future research, as the selection of the order does not provide any conceptual benefits but, in the best case, only eases the definition of appropriate consistency preservation rules and improves usability.
 
 
 \subsection{Equivalence to Synchronizing Transformations}
 
 \mnote{Signatures of synchronizing and synchronizing bidirectional transformations}
-For our definition of transformation networks, we have used the notion of synchronizing transformations (see \autoref{def:synchronizingtransformation}), whose single consistency preservation rule accepts two consistent models and a change to each of them, and returns two changes that, if applied to the models, result in consistent models again.
+For our definition of transformation networks, we have used the notion of synchronizing transformations (see \autoref{def:synchronizingtransformation}).
+Its single consistency preservation rule accepts two consistent models as well as a change to each of them and returns two changes that, if applied to the models, result in consistent models again.
 Synchronizing bidirectional transformations, i.e., the just defined transformations composed of unidirectional consistency preservation rules, also accept two consistent models and a change to each of them and return two consistent models.
-We could also define those transformations to return changes rather than the consistent models by simply concatenating all changes calculated by the transformation execution steps.
-For reasons of simplicity, we omitted that in the formal description.
+We could also define those transformations to return changes rather than the consistent models by concatenating the changes calculated by the execution steps.
+For reasons of simplicity, we have omitted that in the formalization.
 
 \mnote{Expressiveness of synchronizing and synchronizing bidirectional transformations}
-Although synchronizing transformations and synchronizing bidirectional transformations have the same requirements for their inputs and provide the same guarantees regarding consistency for their outputs, both may also return $\bot$ when they were not able to calculate changes that lead to consistent models.
+Although synchronizing transformations and synchronizing bidirectional transformations have the same requirements for their inputs and provide the same guarantees regarding consistency for their outputs, both may also return $\bot$.
 While a synchronizing transformation can be defined such that it never returns $\bot$ by defining a consistency preservation rule that is total, the ability of a synchronizing bidirectional transformation to never return $\bot$ depends on the interplay of the two unidirectional consistency preservation rules.
 Nevertheless, we can show that both have equal expressiveness, i.e., they can always return the same results for the same inputs.
 
-\begin{theorem}[Synchronizing Transformation Expressiveness] % Synchronizing Bidirectional Transformation Expressiveness
+\begin{theorem}[Synchronizing Transformation Expressiveness]
     Synchronizing bidirectional transformations and synchronizing transformations have equal expressiveness, i.e., each synchronizing transformation can be expressed by a synchronizing bidirectional transformation and vice versa.
 \end{theorem}
 \begin{proof}
@@ -639,14 +422,16 @@ Nevertheless, we can show that both have equal expressiveness, i.e., they can al
     \begin{align*}
         \function{ExecuteSync}(\transformation{t}, \model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}) = (\model{m}{1}', \model{m}{2}')
     \end{align*}
-    Then we define the consistency preservation rule $\consistencypreservationrule{}$ of a synchronizing transformation as:
+    We define the consistency preservation rule $\consistencypreservationrule{}$ of a synchronizing transformation for each possible input as:
+    \parameterizeformat{
     \begin{align*}
         &
-        \consistencypreservationrule{}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}) = (\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}', \change{\metamodel{M}{2}}') \\
-        & \formulaskip
-        \withmath \change{\metamodel{M}{1}}'(\change{\metamodel{M}{1}}(\model{m}{1})) \equalsperdefinition \model{m}{1}' 
-        \land \change{\metamodel{M}{2}}'(\change{\metamodel{M}{2}}(\model{m}{2})) \equalsperdefinition \model{m}{2}'
+        \consistencypreservationrule{}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}) \equalsperdefinition (\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}', \change{\metamodel{M}{2}}')
+        #2
+        \withmath \change{\metamodel{M}{1}}'(\model{m}{1}) \equalsperdefinition \model{m}{1}' 
+        \land \change{\metamodel{M}{2}}'(\model{m}{2}) \equalsperdefinition \model{m}{2}'
     \end{align*}
+    }{}{\\ & \formulaskip}%
     Per definition, applying the resulting changes to the input models, the synchronizing transformation delivers for every possible input the same result by applying $\consistencypreservationrule{}$ as the synchronizing bidirectional transformation.
 
     Realizing a synchronizing transformation by a synchronizing bidirectional transformation requires the repeated execution of the two consistency preservation rules to emulate the behavior of the single 
@@ -656,14 +441,18 @@ Nevertheless, we can show that both have equal expressiveness, i.e., they can al
         \consistencypreservationrule{}(\model{m}{1},\model{m}{2},\change{\metamodel{M}{1}},\change{\metamodel{M}{2}}) = (\model{m}{1},\model{m}{2},\change{\metamodel{M}{1}}',\change{\metamodel{M}{2}}')
     \end{align*}
     Then we can define the two unidirectional consistency preservation rules of the synchronizing transformation $\transformation{t}$ as follows.
-    \begin{align*}
+    \begin{alignat*}{2}
         & 
-        \consistencypreservationrule{}^{\rightarrow}(\model{m}{1},\change{\metamodel{M}{2}}(\model{m}{2}),\change{\metamodel{M}{1}}) = \change{\metamodel{M}{2}}^{b} \withmath \change{\metamodel{M}{2}}^{b}(\change{\metamodel{M}{2}}(\model{m}{2})) \equalsperdefinition \change{\metamodel{M}{2}}'(\model{m}{2}) \\
+        \consistencypreservationrule{}^{\rightarrow}(\model{m}{1},\change{\metamodel{M}{2}}(\model{m}{2}),\change{\metamodel{M}{1}}) \equalsperdefinition \change{\metamodel{M}{2}}^{b} 
+        &&
+        \withmath \change{\metamodel{M}{2}}^{b}(\change{\metamodel{M}{2}}(\model{m}{2})) \equalsperdefinition \change{\metamodel{M}{2}}'(\model{m}{2}) \\
         &
-        \consistencypreservationrule{}^{\leftarrow}(\model{m}{2},\change{\metamodel{M}{1}}(\model{m}{1}),\change{\metamodel{M}{2}}^{b} \concatfunction \change{\metamodel{M}{2}}) = \change{\metamodel{M}{1}}^{b} \withmath \change{\metamodel{M}{1}}^{b}(\change{\metamodel{M}{1}}(\model{m}{1})) \equalsperdefinition \change{\metamodel{M}{1}}'(\model{m}{1})
-    \end{align*}
-    So we simply define the two consistency preservation rules in a way such that each of them delivers for the inputs in the synchronizing execution step $\function{SyncEx}_{\transformation{t}}^1$ according to \autoref{def:synchronizingtransformationexecutionstep} those changes that are necessary to produce exactly the results of the consistency preservation rule $\consistencypreservationrule{}$ of the synchronizing transformation.
-    Then according to the behavior of $\function{SyncEx}_{\transformation{t}}^1$, we have:
+        \consistencypreservationrule{}^{\leftarrow}(\model{m}{2},\change{\metamodel{M}{1}}(\model{m}{1}),\change{\metamodel{M}{2}}^{b} \concatfunction \change{\metamodel{M}{2}}) \equalsperdefinition \change{\metamodel{M}{1}}^{b} \; 
+        &&
+        \withmath \change{\metamodel{M}{1}}^{b}(\change{\metamodel{M}{1}}(\model{m}{1})) \equalsperdefinition \change{\metamodel{M}{1}}'(\model{m}{1})
+    \end{alignat*}
+    So we simply define the two consistency preservation rules in a way such that each of them delivers for the inputs in the synchronizing execution step $\function{SyncEx}_{\transformation{t}}^1$ those changes that are necessary to produce exactly the results of the consistency preservation rule $\consistencypreservationrule{}$ of the synchronizing transformation.
+    Then, according to the behavior of $\function{SyncEx}_{\transformation{t}}^1$, we have:
     \begin{align*}
         &
         \function{SyncEx}_{\transformation{t}}^1(\model{m}{1},\model{m}{2},\change{\metamodel{M}{1}},\change{\metamodel{M}{2}}) = (\model{m}{1}^{s}, \model{m}{2}^{s}, \change{\metamodel{M}{1}}^{s}) \withmath \\
@@ -684,38 +473,19 @@ Nevertheless, we can show that both have equal expressiveness, i.e., they can al
         = \change{\metamodel{M}{2}}^{b}(\change{\metamodel{M}{2}}(\model{m}{2})) % per def above
         = \change{\metamodel{M}{2}}'(\model{m}{2})
     \end{align*}
-    So $\function{SyncEx}_{\transformation{t}}^1$ produces $\model{m}{1}^{s}$, $\model{m}{2}^{s}$ and $\change{\metamodel{M}{1}}^{s}$ for which we know that $\change{\metamodel{M}{1}}^{s}(\model{m}{1}^{s})$ and $\model{m}{2}^{s}$ are consistent, because their equivalents $\change{\metamodel{M}{1}}'(\model{m}{1})$ and $\change{\metamodel{M}{2}}'(\model{m}{2})$ are consistent by assumption.
-    Thus, the execution of the synchronizing bidirectional transformation $\transformation{t}$ according to \autoref{algo:synchronization:execute_synchronizing_bidirectional_transformation} terminates after the conditional statement in \autoref{algo:synchronization:execute_synchronizing_bidirectional_transformation:line:synchronizationstart} with the same consistent models that are delivered the applying the changes calculated by the consistency preservation rule $\consistencypreservationrule{}$ of the assumed synchronizing transformation.
+    So $\function{SyncEx}_{\transformation{t}}^1$ produces $\model{m}{1}^{s}$, $\model{m}{2}^{s}$, and $\change{\metamodel{M}{1}}^{s}$, for which we know that $\change{\metamodel{M}{1}}^{s}(\model{m}{1}^{s})$ and $\model{m}{2}^{s}$ are consistent, because their equivalents $\change{\metamodel{M}{1}}'(\model{m}{1})$ and $\change{\metamodel{M}{2}}'(\model{m}{2})$ are consistent by assumption.
+    Thus, the execution of the synchronizing bidirectional transformation $\transformation{t}$ according to \autoref{algo:synchronization:execute_synchronizing_bidirectional_transformation} terminates after the conditional statement in \autoref{algo:synchronization:execute_synchronizing_bidirectional_transformation:line:synchronizationstart} with the same consistent models that are delivered when applying the changes calculated by the consistency preservation rule $\consistencypreservationrule{}$ of the assumed synchronizing transformation.
 
-    With these construction approaches in both directions, we have shown that each synchronizing transformation can be expressed by a synchronizing bidirectional transformation and vice versa.
+    With these construction approaches, we have shown that each synchronizing transformation can be expressed by a synchronizing bidirectional transformation and vice versa.
 \end{proof}
 
 \mnote{Practical applicability of constructive approach}
 Although we have proven that each synchronizing transformation can be expressed by a synchronizing bidirectional transformations and thus the latter ones can be used to express any desired consistency preservation in a transformation network, the constructive proof does not reflect a practical construction approach for the unidirectional consistency preservation rules of a synchronizing bidirectional transformation.
 In practice, it will usually not be possible to define the rules in a way that they deliver consistent models after executing each of them once, as we have already discussed in \autoref{chap:synchronization:combination:bounds}.
-It shows, however, that in theory it would possible.
+It shows, however, that it would possible in theory.
 
 \mnote{Synchronizing bidirectional transformations for transformation networks}
 Based on the knowledge that we can use synchronizing bidirectional transformations in transformation networks, we discuss in the following how a transformation developer can actually achieve that the specification of a bidirectional transformation in terms of two unidirectional consistency preservation rules does actually fulfill the requirements of being partial-consistency-improving and thus represents a synchronizing bidirectional transformation that can be used in a transformation network.
-
-
-% We yet discussed how to integrate one change on partially consistent models.
-% Now we apply to this be able to integrate changes to both models.
-% Describe the process here:
-
-% Two step process.
-% 1 Integrate changes to both models.
-% d2' = CPRr(m1, d2(m2), d1) und d1' = CPRl(m2, d1(m1), d2' o d2)
-% 2. Iteratively propagate changes.
-% d2'' = CPRr(d1(m1), d2' o d2(m2), d1')
-% d1'' = CPRl(d2' o d2(m2), d1(m1), d2'')
-% etc. 
-
-% The first step is special, because CPRl needs to process both the original changes as well as the ones generated by CPRr in the first step.
-% In all further steps it is only necessary to process the changes just generated by the other CPR.
-
-% DISCUSS: Which CPR to execute first? One is the "leading" one. Integrate its changes first. Can be determined by abstraction, or, theoretically, it completely irrelevant. Only a practical consideration.
-
 
 
 % \section{Old contents to integrate}
