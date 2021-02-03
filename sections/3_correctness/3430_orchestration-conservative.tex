@@ -16,42 +16,9 @@ We investigate how we can define optimality of the application function in a gra
 We then follow the goal of finding means to systematically improve optimality.
 Since there are always cases in which the algorithm does not find a consistent orchestration, we propose an algorithm that is supposed to help identifying the reasons for failing in such cases in the subsequent section.
 
-% \begin{itemize}
-%     \item We conclude that we need to deal with the situation of undecidability. In consequence, orchestration must operate conservatively, i.e., we cannot assume to always find a solution, but if find it, it must be consistent.
-%     \item One approach could be to reduce conservativeness. But even if we reduced conservativeness, we would not be able to completely eliminate it and thus have to deal with the situation that the strategy does not find a solution although it may exist.
-%     \item We thus propose an approach that helps to identify the reason when the strategy is in the conservative case, i.e., not able to find a solution although it exists.
-% \end{itemize}
-
-%We found that we cannot achieve optimality (undecidability) for arbitrary transformations, we cannot restrict transformation such that we achieve decidability and thus optimality.
-%So, we need to deal with situation can we cannot resolve all networks.
-%Conclude: Conservativeness rather than correctness or achieving optimality (but improving the latter one)
-
-% \mnote{Achieving a correct application function}
-% The definition of the application function basically ensures that the function either returns $\bot$ or executes the \modellevelconsistencypreservationrules given by the orchestration function to retrieve a changes tuple of models.
-% It is considered \emph{correct} if it ensures that its result is either $\bot$ or a consistent model tuple by executing the \modellevelconsistencypreservationrules given by the orchestration function.
-% % A correct application function thus has to ensure that its result is either $\bot$ or a consistent model tuple by executing the \modellevelconsistencypreservationrules given by the orchestration function.
-% In consequence, the application function can be realized by simply executing the result of the orchestration function and check whether the resulting model tuple is consistent or not and return an appropriate result.
-% Such a realization is generic and does not depend on the actual consistency preservation rules and orchestration function but represents a generic behavior.
-% Additionally, this gives an implementation of that function the ability to present a faulty result to the user, which eases finding out why no consistent state was reached.
-
-% \mnote{Correctness is not crucial}
-% Finally, correctness is not crucial, because correctness can easily be achieved by performing any execution of transformations and just ensuring that we terminate at some point in time and then decide whether the resulting models are consistent or not and appropriately deliver the result.
-
-% \mnote{How to define an orchestration function that is as optimal as possible?}
-% The remaining difficulty is how to define an orchestration function that fulfills the definition, i.e., to find a finite sequence of transformations, and also one that improves optimality, as an \emph{optimal} function can never be given.
-% Although the definition of the orchestration function proposes a closed description of that function, in practice such a function will not have a closed form but will be realized as an algorithm that dynamically decides which transformation to execute next.
-% Therefore the arising problem is that the length of the sequence to execute is not known a priori. Therefore, we need some abortion criterion. When a consistent result is found, this criterion is easy. But since we do not know whether a sequence exist, we need an abortion criterion that is reasonable and does not cut off the process although a consistent solution could be found, thus reducing optimality.
-% A simple realization for that algorithm to deliver a finite sequence of transformations would be to define a fixed termination criterion, such as a specific number of transformation executions. However, there is no upper bound for the number of executed transformations necessary to achieve consistency. Still, a fixed number (even 0) could be defined for the number of executed transformations to fulfill the definition. Hence, optimality would be 0 then as a consistent result is never reached. We therefore discuss in the following how to define an appropriate orchestration function and how to optimize it.
-
 
 \subsection{Systematic Improvement of Optimality}
 \label{chap:orchestration:conservative:improvement}
-
-%\subsection{A Gradual Notion of Optimality}
-%\subsection{Reducing Conservativeness}
-
-%Due to Turing-completeness of the network this would mean that the orchestration function can decide whether a Turing machine halts, which is proven impossible.
-%Thus, our only goal can be to achieve optimality as far as possible in terms of reducing the degree of conservativeness, i.e., reduce the cases in which no sequence is found although it exists.
 
 \mnote{Gradual optimality notion}
 Although no optimal application function can be achieved, we can at least define a gradual notion of optimality.
@@ -157,61 +124,9 @@ It may, however, be used to try different options in a subset of the problem spa
 \mnote{Avoiding alternation}
 Since we did not find a strategy that is, in general, superior to other investigated strategies, we gave up that direction and focused on finding orchestrations that should be generally avoided.
 To this end, we consider alternation as a possibility to reduce the number of cases in which non-termination can occur, thus improving optimality by both its dynamic detection and its avoidance.
-%Additionally, we have focused on finding a strategy that improves the ability to deal with the fact that an optimality of~$1$ can never be achieved such that the process of finding the reason for not finding a consistent orchestration is supported.
-
-% In fact, both these numbers usually infinite, an there is an infinite number of possible models and deltas. However, it does finally not matter for us what the actually value is, but only how to improve that value.
-% \todo{We have to map that value to compatibility, which reduces the number of potential false orders.}
-
-% \textbf{Overall Goal:} Find correct orchestration function that improves optimality.
-
-% There are two ways to improve optimality of the orchestration function:
-% \begin{enumerate}
-%     \item Optimize the orchestration function, i.e., find a good order (probably this is not possible), at least find an order that helps the developer to find problems
-%     \item Optimize the input, i.e., define requirements to the transformations and their relations representing the input to optimize optimality
-% \end{enumerate}
-% \todo{We need an example for that}
-
-% Both goes hand in hand, because restrictions to the input can never lead to an orchestration function that always terminates without leading to unsupported relevant cases.
-
-% This conform to two approaches:
-% \begin{enumerate}
-%     \item Dynamic decision about selected transformation and abortion criteria
-%     \item Constructive restrictions that ensure that appropriate order is (easily) found
-% \end{enumerate}
-
-%\todo{Application function can be generically defined, orchestration maybe not? We actually want to ensure that both are generic and none of them has to be defined for a specific project.}
-
-%\subsection{Systematic Improvement of Optimality}
-%\paragraph{Avoidance of Non-Termination}
-
-% In consequence, we propose to dynamically deal with alternation / divergence.
-% To detect alternations, the execution can simply track if a state way already processed. Apart from spatial problems, this does always work.
-% Finding divergence is not that easy, because it is generally not possible to define an upper bound for the number of executions of a single transformation.
-% This is due to the reason that, again, this conflicts with the Halting problem.
-% We can see this at the simple example in \autoref{fig:formal:noupperboundexample}.
-
-% \begin{figure}
-%     \centering
-%     \includegraphics[width=\textwidth]{figures/correctness/orchestration/no_upper_bound_example_old.png}
-%     \caption{Example for no upper bound}
-%     \label{fig:formal:noupperboundexample}
-% \end{figure}
-
-% Depending on the value X, the transformations have to be executed X times to result in a consistent state. This value can be arbitrarily chosen, thus an arbitrary number of executions may be necessary to terminate in a consistent state.
-
-% \todo{Moved from single execution section -> revise}
-% \begin{theorem}[Orchestration with Unbounded Executions]
-%     \label{theorem:unbounded_execution}
-%     For any set of transformations $\transformationset{T}$, there can be models $\modeltuple{m}$ and changes $\changetuple{}$ to them for which each possible orchestration function $\orcfunction{\transformationset{T}}$ with whom $\appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{})$ is consistent, such that $\abs{\orcfunction{\transformationset{T}}(\modeltuple{m}, \changetuple{})} > \abs{\transformationset{T}}$.
-% \end{theorem}
-% \begin{proof}
-%     We know from \autoref{lemma:minimal_executions} that $\transformationset{T}_{inc}$ requires at least $4$ executions of $\transformation{t}_{12}$ for the inputs defined in \autoref{lemma:minimal_executions} when selecting $x \geq 5$.
-%     Thus, for any orchestration function, we know that $\abs{\orcfunction{\transformationset{T}}(\modeltuple{m}, \changetuple{})} > 4 > 3 = \abs{\transformationset{T}_{inc}}$.
-%     This proves the theorem by example.
-% \end{proof}
 
 
-\subsection{Dynamic Detection of Alternation} % Divergence and alternation
+\subsection{Dynamic Detection of Alternation}
 \label{chap:orchestration:conservative:alternation}
 
 \mnote{Orchestration requires abortion criterion}
@@ -248,11 +163,6 @@ If a concrete realization of the \function{Orchestrate} function is not implemen
 Alternation produces orchestrations that never yield consistent models, thus they are in the problem space $P = {\transformationset{T}^{< \mathbb{N}}}$ of finding an orchestration for given models and changes but never in the solution space $S_{\modeltuple{m}, \changetuple{\metamodeltuple{M}}} = \abs{\setted{\sequence{\transformation{t}} \in \transformationset{T}^{< \mathbb{N}} \mid \sequence{\transformation{t}} \mathtextspacearound{is consistent orchestration for} \tupled{\modeltuple{m}, \changetuple{\metamodeltuple{M}}}}}$ containing the consistent orchestrations.
 Avoiding alternations thus reduces the problem space without affecting the solution space and thus improves the possibility to find a consistent orchestration, as shown in the previous subsection.
 
-%Divergence: If it passes the same changes again, then it either does not pass those changes again 
-
-% Derive from the previous insights that whenever the algorithm does not terminate, we can have two situations: divergence and alternation.
-% Prove that no other options for occurring situation exist!
-
 % Problemraum:
 % \begin{itemize}
 %     \item Ziel ist, dass ein Netzwerk von Transformationen nach einer Änderung in einem konsistenten Zustand terminiert. D.h. Korrektheit stellt Anforderungen an \emph{Terminierung}, sowie den \emph{Zustand} bei Terminierung.
@@ -270,30 +180,6 @@ Avoiding alternations thus reduces the problem space without affecting the solut
 %         \end{itemize}
 %     \end{enumerate}
 % \end{itemize}
-
-% Assume we have an algorithm that sequentially applies transformations.
-% It stops as soon as a transformation cannot be applied or the models are consistent.
-% Then we need to guarantee termination.
-% We need to avoid that transformations can be applied indefinitely never leading to consistent models.
-
-% Reasons for this situation are alternation and divergence.
-% Prove that if we do not pass the same model state again (alternation) and if there is no indefinite number of model states (divergence), the algorithm terminates.
-% Thus, if we ensure that any execution order of transformations does never lead to alternation and divergence, we know that the algorithm terminates!!
-
-% \begin{itemize}
-%     \item Zeigen, dass es Beispiele gibt, in denen es unabhängig von der Ausführungsreihenfolge immer zu einer Alternierung kommt
-%     \item Zeigen, dass es Beispiele gibt, in denen es unabhängig von der Ausführungsreihenfolge immer zu einer Divergenz kommt.
-%     \item Die Beispiele sollten zeigen, dass wir keine Einschränkungen an die Transformationen machen können, was das Problem aushebelt. D.h. egal welche Einschränkungen ich an die Transformationen definiere, es lassen sich immer Beispiele konstruieren, in denen es keine Ausführungsreihenfolge gibt, in denen sie terminieren.
-%     \item Mathematisch zeigen, dass Alternierung und Divergenz die einzigen Probleme sind. D.h. wenn nicht der gleiche Zustand mehrmals durchlaufen wird (Alternierung) und es nicht unendlich viele Zustände gibt (Divergenz), dann ist die Folge endlich.
-%     %\item Außerdem mathematisch die Abbildung von Transformationen auf Turing-Maschinen zeigen und damit ableiten, dass allgemeine Netzwerke erstmal nicht terminieren müssen (Abbildung auf Halteproblem)
-% \end{itemize}
-
-% To avoid these problems by construction, we discussed before that we need to achieve that P = S, such that the application function can execute transformations in an arbitrary order to achieve consistency.
-
-% Another possibility would be to allow the problems and detect them dynamically and react to them.
-% We will finally discuss that in the last section.
-
-%In the following, we discuss whether and how we may restrict synchronizing transformations, such that an arbitrary execution order can avoid divergence and alternation, such that the algorithm terminates.
 
 
 \subsection{Monotony for Avoiding Alternation}
