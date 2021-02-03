@@ -4,41 +4,30 @@
 \mnote{Achieving optimality}
 We have introduced the orchestration problem as the problem to find a consistent orchestration if it exists.
 This is equivalent to the existence of an optimal orchestration function.
-We can distinguish two approaches to ensure that the orchestration function is optimal. %, i.e., that it does always find a consistent orchestration if it exists.
+We can distinguish two approaches to ensure that the orchestration function is optimal.
 Let $P$ be the problem space, i.e., all possible orchestrations of given transformations, and let $S_{i}$ be the solution space with those orders that yield consistent models for a specific input $i$ of models and changes to them.
 \begin{properdescription}
-    \item[Strategy Definition:] Define a strategy that explores the problem space $P$ to find one of the sequences in the solution space $S_{i}$, if $S_{i} \neq \emptyset$.
-    \item[Transformation Restriction:] Define a \emph{well-behavedness} property for transformations that ensures that executing the transformations in any order often enough they yield consistent models if $S_{i} \neq \emptyset$, i.e., for any given input $i$ there is an $n \in \mathbb{N}$ such that $\forall s \in P : \abs{s} > n \Rightarrow s \in S_{i}$.
+    \item[Strategy Definition:] Define a strategy that explores the problem space $P$ to find one of the sequences in the solution space $S_{i}$ if $S_{i} \neq \emptyset$.
+    \item[Transformation Restriction:] Define a \emph{well-behavedness} property for transformations that ensures that executing the transformations in any order often enough they yield consistent models if $S_{i} \neq \emptyset$. This means, for any given input $i$ there is an $n \in \mathbb{N}$ such that $\forall s \in P : \abs{s} > n \Rightarrow s \in S_{i}$.
 \end{properdescription}
 
-%Unfortunately, optimality is a property that we cannot request from an orchestration function. Optimality would mean that the orchestration function can decide whether there is sequence of transformations that leads to consistent models and thus terminate.
-
 \mnote{Restrictions to transformations}
-In the latter case, the orchestration function may return any order of the transformations, as long as the sequence is long enough, to be optimal.
-This means, performing an iterative execution of the transformations leads to a consistent result, comparable to a fixed point iteration.
-Since optimality is a property of an orchestration function with respect to a set of transformations, defining a \emph{well-behavedness} property as a restriction for transformations to ease finding an optimal orchestration function will potentially not concern a single transformation but the set of them.
+In the latter case, the orchestration function only needs to return orders that are longer than a specific length to be optimal.
+This means, performing an iterative execution of the transformations leads to a consistent result.
+Since optimality is a property of an orchestration function with respect to a set of transformations, defining a \emph{well-behavedness} property for transformations to ease finding an optimal orchestration function will potentially not concern a single transformation but the set of them.
 This can easily contradict our assumption of independent development and reuse, or lead to restrictions of transformations that are not practical anymore.
 
 \mnote{Section summary}
 In the following, we first investigate the possibility to find an optimal orchestration function without restricting the transformations.
-We define a general algorithm that realizes an application function, as in practice the function will be realized in terms of an algorithm that dynamically selects the next transformation to execute rather than being an ordinary mathematical function.
+We define a general algorithm that realizes an application function, as in practice the function will be realized in terms of an algorithm that dynamically selects the next transformation to execute.
 We then discuss its correctness and termination and relate it to the orchestration problem.
 After proving undecidability of the orchestration problem, we discuss the possibilities to restrict transformations such that the problem becomes decidable.
 Finally, we shortly discuss confluence as a considerable property of transformation networks.
-
-% Thus, we first follow the former approach and investigate the possibility to find an optimal orchestration function without restricting the transformations.
-% %Optimality of an orchestration function means that it can decide whether there is a sequence of transformations that leads to consistent models and thus terminates.
-% In the following, we therefore define a general algorithm that realizes an application function and investigate how we can ensure that its orchestration function is optimal.
 
 
 \subsection{An Algorithm for Application Functions}
 \label{chap:orchestration:decidability:algorithm}
 
-%Start with defining an algorithm that realizes the application function. (different options depending on when to return $\bot$, discussed later)
-%First option: we assume an oracle that returns the transformation to execute next according to the orchestration function and we stop when consistent models are achieved
-
-%\todo{Transformations as variable instead of index and say that our implementation will be independent from concrete network. But in general, once could define it specific for a set of transformations.}
-%\todo{Rename generatedChanges and executedTransformation to $\change{generated}$ and new command transformationtuple with index executed}
 \newcommand{\applyalgexecuted}{\sequence{\transformation{t}_{\mathvariable{executed}}}}
 \newcommand{\applyalggenerated}{\sequence{\changetuple{\metamodeltuple{M}, \mathvariable{generated}}}}
 \begin{algorithm}
@@ -48,39 +37,39 @@ Finally, we shortly discuss confluence as a considerable property of transformat
 \end{algorithm}
 
 \mnote{Algorithm for application function}
-We have so far discussed the orchestration and application functions as purely mathematical functions.
-In practice, however, they need to be implemented in terms of algorithms.
+We have so far discussed the orchestration and application functions as mathematical functions.
+In practice, they will be implemented as algorithms.
 In \autoref{algo:orchestration:application}, we propose an algorithm that realizes an application function.
-It also encodes the orchestration function, because in contrast to the mathematical definition, an algorithm for the orchestration function will not determine a complete sequence of transformations for given models and changes, but dynamically select the next transformation to execute.
-As soon as no further transformations are determined for execution by the orchestration function, it returns the resulting models if they are consistent or otherwise returns $\bot$.
+It also encodes the orchestration function, because an algorithm for the orchestration function will not determine a complete sequence of transformations for given models and changes but dynamically select the transformation to be executed next.
+As soon as the orchestration function determines no further transformation for execution, the algorithm returns the resulting models if they are consistent and $\bot$ otherwise.
 
 \mnote{Independent from actual transformations}
 An application function according to \autoref{def:applicationfunction} is parametrized by an orchestration function, which, in turn, is parametrized by the set of transformations $\transformationset{T}$ that it is supposed to be executed on.
 A transformation network according to \autoref{def:transformationnetwork} is defined to consist of a set of transformations and an application function, which may suggest that both the application as well as the orchestration function can be defined specific for one network.
 \autoref{algo:orchestration:application} reflects this by assuming an \function{Orchestrate} function that is specific for a set of transformations.
 It may, however, be implemented by a generic function that works independent from the actual transformations and, instead, accepts them as a parameter.
-We do, however, focus on a general algorithm and \function{Orchestrate} function that can be applied to any set of transformations.
+We do, however, focus on a general algorithm and an \function{Orchestrate} function that can be applied to any set of transformations.
 In that case, the algorithm does not realize a single application function but actually a family of application functions for all possible transformation sets $\transformationset{T}$.
 
 \mnote{Dynamic selection of next transformation}
 The dynamic selection of transformations is realized by an \function{Orchestrate} function and stops as soon as no further transformations to apply are delivered.
 The latter may be the case because the models are already consistent or because no further transformations can be applied.
-It is essential that \function{Orchestrate} does only return a transformation that can be applied to the models and current changes, because otherwise its application by the $\generalizationfunction{}$ function in \autoref{algo:orchestration:application:line:stepcalculation} would fail.
+It is essential that \function{Orchestrate} only returns a transformation that can be applied to the models and current changes, because otherwise its application by the $\generalizationfunction{}$ function in \autoref{algo:orchestration:application:line:stepcalculation} would fail.
 The complete logic of the orchestration function is combined with the application of the delivered sequence in Lines~\ref{algo:orchestration:application:line:startorchestrate}--\ref{algo:orchestration:application:line:endorchestrate}.
 Since, in practice, the selection of transformations has to be performed dynamically anyway, an implementation of the orchestration function always needs to apply the transformations.
-Thus a separation of the orchestration function into a separate algorithm, which performs the same steps as in Lines~\ref{algo:orchestration:application:line:startorchestrate}--\ref{algo:orchestration:application:line:endorchestrate} leads to a redundancy by applying the transformations both in the separate orchestration algorithm as well as in the application algorithm.
+Thus, a separation of the orchestration function into a separate algorithm, which performs the same steps as in Lines~\ref{algo:orchestration:application:line:startorchestrate}--\ref{algo:orchestration:application:line:endorchestrate}, leads to a redundancy by applying the transformations both in the separate orchestration algorithm as well as in the application algorithm.
 
 \mnote{History of changes and transformations}
 The \function{Orchestrate} function receives the history of executed transformations and generated changes, because if the complete orchestration function was implemented in a separate method, it would also be able to use that information to determine a proper orchestration.
-Otherwise, its expressiveness would be restricted with respect to the definition of an orchestration function, because that function makes a global decision for all transformations to execute based on the original input, which is not available for the \function{Orchestrate} function after its first execution anymore.
-In a practical implementation of that function, the history may, however, not be considered or truncated, depending on the information necessary for the actually implemented orchestration strategy.
+Otherwise, its expressiveness would be restricted with respect to the definition of an orchestration function, because that function makes a global decision for all transformations to execute based on the original input, which is not available to the \function{Orchestrate} function after its first execution anymore.
+In a practical implementation of that function, the history may not be considered or truncated, depending on the information necessary for the implemented orchestration strategy.
 
 \mnote{Strategies for selecting next transformation}
-%The \function{Orchestrate} function is responsible for selecting the next transformation.
 The \function{Orchestrate} function may implement different strategies for selecting the next transformation, which we later discuss in more detail.
 One simple strategy would execute the same order of transformations iteratively, thus always executing the transformation that was not executed for the longest time.
-Another reasonable strategy would be to manage a queue of transformation and after executing one transformation to enqueue all transformations that are adjacent to the metamodels of the two models that were modified by the transformation if they are not yet enqueued.
-This ensures that those transformations are executed next that can process changes that have just been produced by another transformation.
+Another reasonable strategy would be to manage a queue of transformations.
+After executing one transformation, all transformations that are adjacent to the metamodels of the two models that were modified by the transformation are enqueued if they were not enqueued yet.
+This ensures that those transformations that can process changes that have just been produced by another transformation are executed next.
 Both these strategies are independent from the actual transformations and could thus be implemented in a function that can be used for any set of transformations $\transformationset{T}$.
 In \autoref{chap:orchestration:algorithm}, we discuss a specific orchestration strategy.
 Until then, the actual strategy is not important and any of the exemplified ones can be imagined.
@@ -95,25 +84,8 @@ If the transformations are defined by their consistency relations, from which a 
 In case of \gls{QVTR}, the transformations can be executed in \emph{checkonly mode}~\cite[Sec.~7.9]{qvt}.
 Second, it may be implemented by (virtually) executing the consistency preservation rules and checking whether their execution performs changes.
 If the transformations are hippocratic according to \autoref{def:hippocratictransformation}, i.e., if they do not perform changes when the models are already consistent, consistency can be checked this way.
-This is always necessary when the consistency relations are not explicitly given but implicitly defined as the fixed points of the consistency preservation rules, such as for transformations defined in \gls{QVTO}.
+This is always necessary when the consistency relations are not explicitly given but are implicitly defined as the fixed points of the consistency preservation rules, such as for transformations defined in \gls{QVTO}.
 Due to their simplicity, we do not provide an explicit implementation of these two functions.
-
-% Algorithm dynamically selects next transformation.
-% It stops as soon as orchestration does provide further transformations.
-% Then, either no transformation can be applied anymore, or the models are consistent.
-% This moves some of the logic of the orchestration function into the apply function, as orchestrate only selects the next function rather than delivering a sequence in the beginning.
-% Thus, Lines~\ref{algo:orchestration:application:line:startorchestrate}--\ref{algo:orchestration:application:line:endorchestrate} implement the orchestration function.
-% This is reasonable for two reasons:
-% First, this is how a practical algorithm will perform the selection anyway, by dynamically selecting the next transformation.
-% Second, this is only a matter of implementation, as we could move the lines to a separate method, which acts as the orchestrate function by determining the sequence by dynamically applying the transformations, let it return the sequence and then let the apply function apply the transformations in that order again.
-% %Second, although dynamic selection may sound more expressive than a a priori determination of the complete sequence like defined for the app and orc function in the previous definitions, this is not the case as an orc function according to that definition may be an oracle that, in a practical implementation, determines the sequence for a given input in the same way.
-% Since applying the transformation in the orc function to determine a sequence and then simply applying them in the app function again is redundant, we directly implemented that dynamic selection in the app function.
-
-% Apply is defined to be comprehensible, not efficient. For example, the consistency check can be improved by aborting as soon as one transformation to which the models are inconsistent is found.
-
-% Gen is the generalization function, CheckConsistency is generalized consistency checker which just checks for the appropriate models in the tuple.
-
-%\todo{transformation set should be parameter, not one application/orchestration function per transformation set}
 
 
 \subsection{Correctness and Termination of the Algorithm}
@@ -121,20 +93,21 @@ Due to their simplicity, we do not provide an explicit implementation of these t
 
 \mnote{Algorithm as correct application function}
 \autoref{algo:orchestration:application} is constructed to implement an application function according to \autoref{def:applicationfunction}.
-It is designed to be correct, i.e., it returns models only when they are consistent.
+It is designed to be correct, i.e., to return models only when they are consistent.
 We show that the algorithm fulfills these properties in the following theorem.
 
 \begin{theorem}[Apply Algorithm Correctness]
     The \function{Apply} function in \autoref{algo:orchestration:application} fulfills the functional behavior of an application function as defined in \autoref{def:applicationfunction} and is correct according to \autoref{def:applicationfunctioncorrectness}.
 \end{theorem}
+
 \begin{proof}
     The \function{Apply} function fulfills the input and output requirements of an application function according to \autoref{def:applicationfunction}.
-    It returns a model tuple only in \autoref{algo:orchestration:application:line:returnresult}, which is achieved by applying the changes delivered by the sequence of transformations delivered by the orchestration function realized as a repeated call of the \function{Orchestrate} function in Lines~\ref{algo:orchestration:application:line:startorchestrate}--\ref{algo:orchestration:application:line:endorchestrate}.
+    It returns a model tuple only in \autoref{algo:orchestration:application:line:returnresult}, which is achieved by applying the changes that the sequence of transformations as delivered by the orchestration function yields, which is realized as a repeated call of the \function{Orchestrate} function in Lines~\ref{algo:orchestration:application:line:startorchestrate}--\ref{algo:orchestration:application:line:endorchestrate}.
     Thus, \function{Apply} fulfills the definition of an application function.
 
     Correctness of an application function according to \autoref{def:applicationfunctioncorrectness} requires the output models, if not returning $\bot$, to be consistent to the consistency relations of all transformations, as long as the input models were consistent.
-    The algorithm returns models only in \autoref{algo:orchestration:application:line:returnresult}.
-    These models are always consistent to the consistency relations of all transformations, because Lines~\ref{algo:orchestration:application:line:startconsistencycheck}--\ref{algo:orchestration:application:line:endconsistencycheck} ensure this and otherwise return $\bot$ before.
+    The algorithm returns models only in \autoref{algo:orchestration:application:line:returnresult} and otherwise returns $\bot$ before.
+    The returned models are always consistent to the consistency relations of all transformations, because Lines~\ref{algo:orchestration:application:line:startconsistencycheck}--\ref{algo:orchestration:application:line:endconsistencycheck} ensure this.
 \end{proof}
 
 \mnote{No termination guarantee}
@@ -147,11 +120,11 @@ We do, however, need to ensure that the \function{Orchestrate} function returns 
 
 \mnote{Termination guarantee options}
 If we assumed that we can achieve optimality for the orchestration function, we would have the guarantee that if a consistent orchestration exists, the function will find it.
-There is, however, no restriction to what the orchestration function may return when there is no consistent orchestration at all.
-Thus, we have two options to ensure termination:
+There is, however, no restriction to what the orchestration function may return when there is no consistent orchestration.
+Thus, we have the following two options to ensure termination.
 \begin{longenumerate}
     \item We enable the orchestration function to identify whether a consistent orchestration exists.
-    \item We find an upper bound for the number of necessary transformation executions, such that if more transformations were executed, we cannot expect the algorithm to find consistent models anymore and thus abort it.
+    \item We find an upper bound for the number of necessary transformation executions. Then, if a higher number of transformations was executed, we cannot expect the algorithm to find consistent models anymore and thus abort it.
 \end{longenumerate}
 
 \mnote{Termination by upper bound}
@@ -164,65 +137,38 @@ This leads to the insight that we cannot guarantee termination of the algorithm 
 %\subsection{Upper Execution Bound}
 
 \mnote{No general upper bound}
-With the example in \autoref{fig:orchestration:necessity_multiple_executions}, in which values are incremented by one during each execution of one specific transformation until a fixed but arbitrary value $x$ is reached, we were able to show in \autoref{lemma:minimal_executions} that there can be transformation networks in which a transformation needs to be executed at least $x-1$ times for a fixed but arbitrary $x$ until consistent models are found.
+With the example in \autoref{fig:orchestration:necessity_multiple_executions}, in which values are incremented by one during each execution of one specific transformation until a fixed but arbitrary value $x$ is reached, we were able to show \autoref{lemma:minimal_executions}.
+It states that there can be transformation networks in which a transformation needs to be executed at least $x-1$ times for a fixed but arbitrary $x$ until consistent models are found.
 Thus, any consistent orchestration contains that transformation at least $x-1$ times.
-While we have used that insight in \autoref{theorem:orchestration_single} to show that executing each transformation only once is, in general, insufficient, we can also use it to show the more general statement that there is no maximal length for the orchestration of transformation networks of specific size.
+While we have used that insight in \autoref{theorem:orchestration_single} to show that executing each transformation only once is, in general, insufficient, we can also use it to show the more general statement that there is no maximal length for the orchestration of transformation networks, independent from the network size.
 
 \begin{theorem}[Shortest Consistent Orchestration Upper Bound]
     \label{theorem:orchestration_fixed}
-    For every $t_\mathvariable{size} \geq 3$ and every $n \geq 0$, there is a set of transformations $\transformationset{T}$ with $\abs{\transformationset{T}} > t_\mathvariable{size}$ such that there are models $\modeltuple{m}$ and changes $\changetuple{}$ to them for which each possible orchestration function $\orcfunction{\transformationset{T}}$, with whom $\appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{})$ is consistent, delivers a transformation sequence with $\abs{\orcfunction{\transformationset{T}}(\modeltuple{m}, \changetuple{})} > n$.
+    For every $t_\mathvariable{size} \geq 3$ and every $n \geq 0$, there is a set of transformations $\transformationset{T}$ with $\abs{\transformationset{T}} > t_\mathvariable{size}$ such that there are models $\modeltuple{m}$ and changes $\changetuple{\metamodeltuple{M}}$ to them for which each possible orchestration function $\orcfunction{\transformationset{T}}$ with whom $\appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})$ is consistent delivers a transformation sequence with $\abs{\orcfunction{\transformationset{T}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})} > n$.
 \end{theorem}
+
 \begin{proof}
     We know from \autoref{lemma:minimal_executions} that $\transformationset{T}_\mathvariable{inc}$ requires at least $x-1$ executions of $\transformation{t}_{12}$ for the inputs defined in \autoref{lemma:minimal_executions} and the fixed but arbitrary value $x$.
-    Thus, with $x \geq n+2$ %for $\transformationset{T}_\mathvariable{inc}$
-    , we know that at least $x-1 = n+1$ executions of $\transformation{t}_{12}$ are necessary.
-    Let $\modeltuple{m}$ and $\changetuple{}$ be the inputs defined in \autoref{lemma:minimal_executions}.
-    Then for every orchestration function $\orcfunction{\transformationset{T}_\mathvariable{inc}}$ that delivers a consistent orchestration for $\modeltuple{m}$ and $\changetuple{}$, we know that $\abs{\orcfunction{\transformationset{T}_\mathvariable{inc}}(\modeltuple{m}, \changetuple{})} >= x-1 = n+1 > n$.
-    Since $\abs{\transformationset{T}_\mathvariable{inc}} = 3$ and adding arbitrary transformations whose consistency preservation rules implement the identity function leads to transformation sets of arbitrary size $\geq 3$ with the same behavior, this proves the theorem by example.
+    Thus, with $x \geq n+2$, we know that at least $x-1 \geq n+1$ executions of $\transformation{t}_{12}$ are necessary.
+    Let $\modeltuple{m}$ and $\changetuple{\metamodeltuple{M}}$ be the inputs defined in \autoref{lemma:minimal_executions}.
+    Then, for every orchestration function $\orcfunction{\transformationset{T}_\mathvariable{inc}}$ that delivers a consistent orchestration for $\modeltuple{m}$ and $\changetuple{\metamodeltuple{M}}$, we know that $\abs{\orcfunction{\transformationset{T}_\mathvariable{inc}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}})} \geq x-1 \geq n+1 > n$.
+    Since adding arbitrary transformations whose consistency preservation rules implement the identity function to a set of transformations does not alter the results of the network, we can construct a network of arbitrary size $\geq 3$ with the same behavior out of $\transformationset{T}_\mathvariable{inc}$ by adding such transformations.
+    This proves the theorem by example.
 \end{proof}
 
 \mnote{No upper bound for deciding orchestration existence}
-In consequence, it is not possible to find a fixed value or a value only depending on the transformation network size that defines an upper bound for the necessary number of transformation executions to yield consistent models, i.e., there is no upper bound for the shortest consistent orchestration.
-Thus, even if we are able to ensure optimality of the orchestration realized by the \function{Apply} and \function{Orchestrate} functions, there is no upper bound for the number of executed transformations in a consistent orchestration.
-We cannot abort the execution after a fixed number of loop iterations without the possibility that consistent models would have been found if the execution had proceeded and thus not ensuring optimality.
-
-%To avoid non-termination of the algorithm, we thus need to be able to ensure that the \function{Orchestrate} function at some point returns $\bot$.
-%This means that it must be able to identify when no orchestration that yields consistent models exists at all, and if it exists it must be able to find it.
-
-%Requirement: Know whether orchestration exists, otherwise impossible to find sequence always if it exists, as we do not know whether it exists.
-
-% This is due to the reason that the \function{Orchestrate} function does only receive the current models and changes but not the history of executed transformations.
-% Thus, it cannot identify which and how many transformation have already been executed and whether the current changes have already been produced before such that 
-
-% There are, however, still derivations of the stepwise orchestrate to the original orchestration function:
-% The stepwise application of the orchestrate function cannot derive a complete sequence but only make a local decision based on the given models and changes. Thus, if the transformations produce the same changes repeatedly, i.e., there is an alternation in the produced changes, the orchestrate function cannot detect that and always determinates the same sequences of transformations to be executed next. This results in an infinite sequence of execute transformations, which is conforming to the orchestration function definition, but still is a result of the possibilities of an actual and reasonable implementation of that function.
-%Additionally, the function may be able to determine beforehand whether an orchestration that yields consistent models exists and otherwise return $\bot$ in its first application.
-%A practical implementation, however, will not act that way but instead determine the next transformation until no transformation can be applied anymore.
-%In consequence, it is possible that several transformations are executed before detecting that no orchestration can be found.
-%Since the orchestration is encoded in the apply function anyway and the function then still returns $\bot$, this is not a problem.
-%This affects termination.
-
-%Algorithm is correct if it returns only consistent models. Additionally, it must always terminate.
-%ADD DEFINITION!
-
-%Correctness is given by construction and easy to achieve.
-%Termination if no transformation can be applied or consistent models are found.
-
-%Thus: We need to find an order of transformation such that the result is consistent.
-
-%Give example, where no execution order exists that terminates. Thus, the algorithm does not terminate.
-
-%Approach: We want to decide whether an order exists or not.
+In consequence, there is no fixed value and no value depending on the transformation network size that defines an upper bound for the necessary number of transformation executions to yield consistent models, i.e., there is no upper bound for the shortest consistent orchestration.
+Thus, we cannot abort the execution of the \function{Apply} function after a fixed number of loop iterations without the possibility that consistent models would have been found if the execution had proceeded and thus not ensuring optimality.
 
 
-\subsection{Undecidability of the Orchestration Problem} %Undecidability of Orchestration}
+\subsection{Undecidability of the Orchestration Problem}
 
 \mnote{Undecidability of consistent orchestration existence}
 To ensure termination of the \function{Apply} algorithm with an optimal orchestration function, we need to identify the case that no consistent orchestration exists, because that is the only situation in which otherwise an infinite number of transformation executions is possible.
 Unfortunately, we can show that this orchestration existence problem is undecidable.
-To do so, we reduce the halting problem for Turing machines to the orchestration problem.
+We reduce the halting problem for Turing machines to the orchestration problem.
 Thus, solving the orchestration problem would solve the halting problem.
-We have published a simplified version of this proof, based on a more concise modeling formalism, in previous work~\owncite{gleitze2021orchestration-FASE}.
+We have published a simplified version of this proof, based on a more concise formalism, in previous work~\owncite{gleitze2021orchestration-FASE}.
 
 \begin{figure}
     \centering
@@ -234,43 +180,36 @@ We have published a simplified version of this proof, based on a more concise mo
 \end{figure}
 
 \mnote{Assumptions for Turing machine}
-Given a Turing machine $\TuringMachine$ over some alphabet $\Sigma$, we construct metamodels $\metamodeltuple{M}_{\TuringMachine}$ and a transformation network with a set of transformations $\transformationset{T}_{\TuringMachine}$, as well as initial models $\modeltuple{m}_{\TuringMachine, x} \in \metamodeltupleinstanceset{M_{\TuringMachine}}$ and changes $\changetuple{\metamodeltuple{M},\TuringMachine,x}$ for them for which a consistent orchestration exists if, and only if, $\TuringMachine$ halts on input $x \in \Sigma^*$.
+Given a Turing machine $\TuringMachine$ over some alphabet $\Sigma$, we construct metamodels $\metamodeltuple{M}_{\TuringMachine}$ and a transformation network with a set of transformations $\transformationset{T}_{\TuringMachine}$, as well as initial models $\modeltuple{m}_{\TuringMachine, x} \in \metamodeltupleinstanceset{M_{\TuringMachine}}$ and changes $\changetuple{\metamodeltuple{M},\TuringMachine,x}$, for them for which a consistent orchestration exists if, and only if, $\TuringMachine$ halts on input $x \in \Sigma^*$.
 Without loss of generality, we assume that the graph of the transition function of $\TuringMachine$ contains no cycles of length $\leq 2$.
 This means that it contains no self-loops, i.e., that the transition function always changes the state, and that there is no cycle between two states.
-This is without loss of generality, because cycles of these two lengths can be eliminated by duplicating states.
-A self-loop can be eliminated by duplicating the state with a cycle of length $2$ between the duplicated states,  replicating all outgoing transitions for both states and let all incoming transitions go to one of these two states.
-Likewise, eliminating cycles of length $2$ can be achieved by duplicating both involved states and replacing the cycle of length $2$ by one of length $4$, replicating all outgoing transitions for all states and let all incoming transitions go to one of the two states of each replicated one.
+This is without loss of generality, because cycles of these two lengths can be eliminated by replicating states.
+A self-loop can be eliminated by duplicating the state with a cycle of length $2$ between the duplicated states, replicating all outgoing transitions for both states, and letting all incoming transitions go to one of these two states.
+Likewise, eliminating cycles of length $2$ can be achieved by duplicating both involved states and replacing the cycle of length $2$ by one of length $4$, replicating all outgoing transitions for all states, and letting all incoming transitions go to one of the two states of each replicated one.
 Inductively applying these duplication principles can eliminate all cycles of length $\leq 2$.
-The two principles %and the application to a scenario with self-loops as well as three states with pairwise cycles of length $2$ 
-are depicted in \autoref{fig:orchestration:cycle_elimination}.
+The two principles are depicted in \autoref{fig:orchestration:cycle_elimination}.
 
 \mnote{Models representing Turing machine states}
-We construct models that consist of a timestamp, the tape content and the tape position.
-With our formalism, we can, for example, encode this into a metamodel $\metamodel{M}{\TuringMachine}$ having one class with exactly these contents and models that do only contain one instance of that class.
-For reasons of simplicity, we do not explicitly denote the according metamodel and denote a model $\model{m}{}$ as $\model{m}{} \equalsperdefinition \tupled{\mathvariable{time}, \mathvariable{cont}, \mathvariable{pos}} \in \mathbb{N}_0 \times \Sigma^* \times \mathbb{N}_0$, which simply represents a tuple of timestamp, tape content and tape position.
-We use one model for each state of the Turing machine and one transformation between each pair of models whose represented states have a transition between them.
-To be able to identify the state of the Turing machine that a model represents by its metamodel, we assume one metamodel for each of the states, although they all look equal. Thus, we have $\metamodeltuple{M}_\TuringMachine = \tupled{\metamodel{M}{1, \TuringMachine}, \dots, \metamodel{M}{n, \TuringMachine}}$ with $n = \abs{Q_\TuringMachine}$ if we assume $Q_\TuringMachine = \setted{q_1, \dots, q_n}$ to be the set of states of $\TuringMachine$.
-The instances of each of the metamodels $\metamodel{M}{i,\TuringMachine}$ reflect the possible models combining timestamp, tape content and tape position, i.e., $\metamodelinstanceset{M}{i, \TuringMachine} =  \mathbb{N}_0 \times \Sigma^* \times \mathbb{N}_0$.
-%Equivalently, we may also define $\abs{Q_\TuringMachine}$ metamodels with the same contents.
+We construct models that consist of a timestamp, the tape content, and the tape position.
+We encode this into a metamodel $\metamodel{M}{\TuringMachine}$, whose instances represent exactly these contents.
+In a simplified notation, which considers a model as a tuple of these three elements rather than a set of elements, the instances of such a metamodel are given by $\metamodelinstanceset{M}{\TuringMachine} \equalsperdefinition \mathbb{N}_0 \times \Sigma^* \times \mathbb{N}_0$.
+A model $\model{m}{} \equalsperdefinition \tupled{\mathvariable{time}, \mathvariable{cont}, \mathvariable{pos}} \in \metamodelinstanceset{M}{\TuringMachine}$ then represents a tuple of timestamp, tape content, and tape position.
+To represent the states of the Turing machine, we consider one such metamodel for each state of the Turing machine, although they are all equal.
+Thus, $\metamodeltuple{M}_\TuringMachine \equalsperdefinition \tupled{\metamodel{M}{1, \TuringMachine}, \dots, \metamodel{M}{n, \TuringMachine}}$ with $n = \abs{Q_\TuringMachine}$ if we assume $Q_\TuringMachine = \setted{q_1, \dots, q_n}$ to be the set of states of $\TuringMachine$.
 We define the following function that returns the state of the Turing machine represented by a metamodel:
 \begin{align*}
-     \function{Q} : %\setted{\metamodel{1,\TuringMachine}, \dots, \metamodel{n,\TuringMachine}} \rightarrow Q_\TuringMachine \\
-     \metamodel{M}{i,\TuringMachine} & \mapsto q_i %\mathtext{with} \exists i \in \setted{1, \dots, n} : \model{m}{} \in \metamodelinstanceset{M}{i, \TuringMachine} \land q = q_i
+     \function{Q} : \metamodel{M}{i,\TuringMachine} & \mapsto q_i
 \end{align*}
-% We define the following function that returns the state of the Turing machine represented by a model:
-% \begin{align*}
-%      \function{Q} : \bigcup_{1 \leq i < n} \metamodelinstanceset{M}{i, \TuringMachine} & \rightarrow Q_\TuringMachine \\
-%      \model{m}{} & \mapsto q \mathtext{with} \exists i \in \setted{1, \dots, n} : \model{m}{} \in \metamodelinstanceset{M}{i, \TuringMachine} \land q = q_i
-% \end{align*}
+We consider a transformation between each pair of metamodels whose represented states in the Turing machine have a transition between them.
+Finally, we consider models instantiating each of the metamodels to be kept consistent by an appropriate definition of these transformations representing the transitions of the Turing machine.
 
 \mnote{Transformations representing Turing machine transitions}
-The transformations increment the timestamp, change the tape content and update the tape position according to the transitions of $\TuringMachine$ if, and only if, the timestamp of one model is higher than the one of the other.
-More formally, let $\Tr(q_1,q_2) \subseteq \Sigma \times \setted{-1,0,1} \times \Sigma$ be the transitions defined between the states $q_1 \in Q_\TuringMachine$ and $q_2 \in Q_\TuringMachine$, with $-1$, $0$ and $1$ indicating the head movements \enquote{left}, \enquote{stay} and \enquote{right}. 
-%\todoLater{Visualize at an example}
-We define a consistency preservation rule for the transformation between metamodels $\metamodel{M}{i, \TuringMachine}$ and $\metamodel{M}{k, \TuringMachine}$ realizing the transition between the represented states of $\TuringMachine$ as follows.
+The transformations increment the timestamp, change the tape content, and update the tape position according to the transitions of $\TuringMachine$ if, and only if, the timestamp of one model is higher than the one of the other.
+More formally, let $\Tr(q_1,q_2) \subseteq \Sigma \times \setted{-1,0,1} \times \Sigma$ be the transitions defined between the states $q_1 \in Q_\TuringMachine$ and $q_2 \in Q_\TuringMachine$, with $-1$, $0$, and~$1$ indicating the head movements \enquote{left}, \enquote{stay}, and \enquote{right}, respectively. 
+We define a consistency preservation rule for the transformation between the metamodels $\metamodel{M}{i, \TuringMachine}$ and $\metamodel{M}{k, \TuringMachine}$, which realizes the transition between the represented states of the Turing machine, as follows.
 \begin{align*}
     &
-    \consistencypreservationrule{i,k}(\model{m}{i}, \model{m}{k}, \change{\metamodel{M}{i,\TuringMachine}}, \change{\metamodel{M}{k,\TuringMachine}}) = (\change{\metamodel{M}{i,\TuringMachine}}', \change{\metamodel{M}{k,\TuringMachine}}') 
+    \consistencypreservationrule{i,k}(\model{m}{i}, \model{m}{k}, \change{\metamodel{M}{i,\TuringMachine}}, \change{\metamodel{M}{k,\TuringMachine}}) \equalsperdefinition (\change{\metamodel{M}{i,\TuringMachine}}', \change{\metamodel{M}{k,\TuringMachine}}') 
     \quad \mathtextspacearound{with:} \\
     &
     \model{m}{i}' \equalsperdefinition \tupled{\mathvariable{time}_{\model{m}{i}'}, \sequence{\mathvariable{cont}_{\model{m}{i}'}}, \mathvariable{pos}_{\model{m}{i}'}} \equalsperdefinition \changetuple{\metamodel{M}{i,\TuringMachine}}(\model{m}{i}) \\
@@ -281,10 +220,10 @@ We define a consistency preservation rule for the transformation between metamod
     \begin{cases}
         \tupled{\mathvariable{time}_{\model{m}{k}'} + 1, \mathvariable{cont}_{\model{m}{k}'}|_{\mathvariable{pos}_{\model{m}{k}'} \gets \mathvariable{repl}}, \mathvariable{pos}_{\model{m}{k}'} + \mathvariable{dir}}, \\
         \formulaskip[0.5em+0.05\difftoafiveimage]
-            \ifmath \mathvariable{time}_{\model{m}{k}'} > \mathvariable{time}_{\model{m}{i}'} \land \\
-        \formulaskip[0.8em+0.1\difftoafiveimage]
-            \exists \tupled{\sequenceindex{\mathvariable{cont}_{\model{m}{k}'}}{\mathvariable{pos}_{\model{m}{k}'}}, \mathvariable{dir},\mathvariable{repl}} \in \Tr(Q(\metamodel{M}{i,\TuringMachine}),Q(\metamodel{M}{k,\TuringMachine}))\\[.4em]
-        \change{\metamodel{M}{i,\TuringMachine}}(\model{m}{i}'), \formulaskip 
+            \ifmath \mathvariable{time}_{\model{m}{k}'} > \mathvariable{time}_{\model{m}{i}'} \; \land \\
+        \formulaskip[0.8em+0.13\difftoafiveimage]
+            \exists \tupled{\sequenceindex{\mathvariable{cont}_{\model{m}{k}'}}{\mathvariable{pos}_{\model{m}{k}'}}, \mathvariable{dir},\mathvariable{repl}} \in \Tr(Q(\metamodel{M}{k,\TuringMachine}),Q(\metamodel{M}{i,\TuringMachine}))\\[.4em]
+        \model{m}{i}', \formulaskip 
         \otherwisemath
     \end{cases} \\
     &
@@ -292,64 +231,52 @@ We define a consistency preservation rule for the transformation between metamod
     \begin{cases}
         \tupled{\mathvariable{time}_{\model{m}{i}'} + 1, \mathvariable{cont}_{\model{m}{i}'}|_{\mathvariable{pos}_{\model{m}{i}'} \gets \mathvariable{repl}}, \mathvariable{pos}_{\model{m}{i}'} + \mathvariable{dir}}, \\
         \formulaskip[0.5em+0.05\difftoafiveimage]
-            \ifmath \mathvariable{time}_{\model{m}{i}'} > \mathvariable{time}_{\model{m}{k}'} \land \\
-        \formulaskip[0.8em+0.1\difftoafiveimage]
+            \ifmath \mathvariable{time}_{\model{m}{i}'} > \mathvariable{time}_{\model{m}{k}'} \; \land \\
+        \formulaskip[0.8em+0.13\difftoafiveimage]
             \exists \tupled{\sequenceindex{\mathvariable{cont}_{\model{m}{i}'}}{\mathvariable{pos}_{\model{m}{i}'}}, \mathvariable{dir},\mathvariable{repl}} \in \Tr(Q(\metamodel{M}{i,\TuringMachine}),Q(\metamodel{M}{k,\TuringMachine}))\\[.4em]
-        \change{\metamodel{M}{k,\TuringMachine}}(\model{m}{k}'), \formulaskip 
+        \model{m}{k}', \formulaskip 
         \otherwisemath
     \end{cases}
 \end{align*}
-
-%\begin{multline*}  
-% \forall \left(a,b\right)\in E: T_{\TuringMachine}\left(a,b\right)\left(\alpha\!\eqqcolon\!\left(t_a,w_a,p_a\right), \beta\!\eqqcolon\!\left(t_b,w_b,p_b\right)\right)\\
-% 		=\begin{cases}%
-% 			\left(\alpha,\left(t_a\! +\! 1,\, w_{a}|_{p_a\gets r},\,p_a\!+\!d\right)\right)  \\
-% 			&\shiftedcase{\text{if }t_a > t_b\land\exists\,\left(w_{a}\left[p_a\right],d,r\right)\in\Tr\left(a,b\right)}\\[.4em]
-% 			\left(\left(t_b\! +\! 1,\, w_{b}|_{p_b\gets r},\,p_b\!+\!d\right),\,\beta\right)   \\
-% 			&\shiftedcase{\text{if }t_a < t_b\land\exists\,\left(w_{b}\left[p_b\right],d,r\right)\in\Tr\left(b,a\right)}\\[.4em]
-% 			\left(\alpha, \beta\right)                                  &\shiftedcase{\text{else}}
-% 		\end{cases}
-% \end{multline*}
-% }
-where $\mathvariable{cont}|_{\mathvariable{pos} \gets \mathvariable{repl}} \equalsperdefinition \sequenceindex{\mathvariable{cont}}{0\:..\:\mathvariable{pos}-1} \cdot \mathvariable{repl} \cdot \sequenceindex{\mathvariable{cont}}{\mathvariable{pos}+1\:..\:|\mathvariable{cont}|-1}$.
+where $\mathvariable{cont}|_{\mathvariable{pos} \gets \mathvariable{repl}} \equalsperdefinition \sequenceindex{\mathvariable{cont}}{0 \dots \mathvariable{pos}-1} \cdot \mathvariable{repl} \cdot \sequenceindex{\mathvariable{cont}}{\mathvariable{pos}+1 \dots \abs{\mathvariable{cont}}-1}$.
 
 \mnote{Implicit consistency relations}
 The \modellevelconsistencyrelations are implicitly given by the fixed points of the consistency preservation rules.
 For a consistency preservation rule $\consistencypreservationrule{i,k}$, we define:
 \begin{align*}
-    \consistencyrelation{CR}{i,k} = \setted{
+    \consistencyrelation{CR}{i,k} \equalsperdefinition \setted{
     & 
     \tupled{\model{m}{i}, \model{m}{k}} \in \metamodelinstanceset{M}{i,\TuringMachine} \times \metamodelinstanceset{M}{k,\TuringMachine} \mid 
     \exists \model{m}{i}', \model{m}{k}', \change{\metamodel{M}{i,\TuringMachine}}, \change{\metamodel{M}{k,\TuringMachine}} : \\
     & 
     \consistencypreservationrule{i,k}(\model{m}{i}',\model{m}{k}',\change{\metamodel{M}{i,\TuringMachine}}, \change{\metamodel{M}{k,\TuringMachine}})(\model{m}{i}',\model{m}{k}') = \tupled{\model{m}{i}, \model{m}{k}}}
-    %= (\change{\metamodel{M}{i,\TuringMachine}}, \change{\metamodel{M}{k,\TuringMachine}}) \land \tupled{\change{\metamodel{M}{i,\TuringMachine}}(\model{m}{i}'), \change{\metamodel{M}{k,\TuringMachine}}(\model{m}{k}')} = \tupled{\model{m}{i}, \model{m}{k}}}
 \end{align*} 
-With this definition, each consistency preservation rule is correct, i.e., one application of it yields models that are consistent to its defined consistency relation, because due to the assumption that the graph induced by the transition function of $\TuringMachine$ does not contain cycles of length $\leq 2$, there may be no cyclic transitions between the states which are represented by the models kept consistent by a single transformation.
+With this definition, each consistency preservation rule is correct, i.e., one application of it yields models that are consistent to its defined consistency relation.
+This is because due to the assumption that the graph induced by the transition function of $\TuringMachine$ does not contain cycles of length $\leq 2$, there may be no cyclic transitions between the states which are represented by the models kept consistent by a single transformation.
 
 \mnote{Transformations only for transitions}
-We denote the set of all transformations realizing the transitions of $\TuringMachine$ as $\transformationset{T}_{\TuringMachine}$, containing transformations $\transformation{t}_{i,k} = \tupled{\consistencyrelation{CR}{i,k},\consistencypreservationrule{i,k}}$ for all metamodel pairs $\tupled{\metamodel{M}{i,\TuringMachine},\metamodel{M}{k,\TuringMachine}}$, for which a transition between the represented states in $Q_\TuringMachine$ exists, i.e., $\Tr(Q(\metamodel{M}{i,\TuringMachine}),Q(\metamodel{M}{k,\TuringMachine})) \neq \emptyset$.
+We denote the set of all transformations realizing the transitions of $\TuringMachine$ as $\transformationset{T}_{\TuringMachine}$, containing transformations $\transformation{t}_{i,k} = \tupled{\consistencyrelation{CR}{i,k},\consistencypreservationrule{i,k}}$ for all metamodel pairs $\tupled{\metamodel{M}{i,\TuringMachine},\metamodel{M}{k,\TuringMachine}}$ for which a transition between the represented states in $Q_\TuringMachine$ exists, i.e., $\Tr(Q(\metamodel{M}{i,\TuringMachine}),Q(\metamodel{M}{k,\TuringMachine})) \neq \emptyset$.
 
 \mnote{Representation of Turing machine start state}
 Let $s \in Q_{\TuringMachine}$ be the initial state of $\TuringMachine$. We set
-\begin{align*}
+\parameterizeformat{
+\begin{alignat*}{2}
     &
-    \modeltuple{m}_{\TuringMachine, x} \equalsperdefinition \tupled{\model{m}{1,\TuringMachine,x}, \dots, \model{m}{n,\TuringMachine,x}} \\
-    & \formulaskip\formulaskip\formulaskip
-    \withmath %\forall i \in \setted{1, \dots, n} : %\model{m}{\TuringMachine,x} \in \modeltuple{m}_{\TuringMachine, x} : \model{m}{\TuringMachine, x} = \tupled{0, \varepsilon, 0} \\
+    \modeltuple{m}_{\TuringMachine, x} \equalsperdefinition \tupled{\model{m}{1,\TuringMachine,x}, \dots, \model{m}{n,\TuringMachine,x}} 
+    #1 #2
+    \withmath
     \model{m}{i, \TuringMachine, x} \equalsperdefinition \tupled{0, \varepsilon, 0} \\
-    %
     &
-    \changetuple{\metamodeltuple{M},\TuringMachine,x} \equalsperdefinition \tupled{\change{\metamodel{M}{1},\TuringMachine,x}, \dots, \change{\metamodel{M}{n},\TuringMachine,x}} \\
-    &
-    \formulaskip\formulaskip\formulaskip
+    \changetuple{\metamodeltuple{M},\TuringMachine,x} \equalsperdefinition \tupled{\change{\metamodel{M}{1},\TuringMachine,x}, \dots, \change{\metamodel{M}{n},\TuringMachine,x}}
+    #1 #2
     \withmath 
     \change{\metamodel{M}{i},\TuringMachine,x}(\model{m}{i}) \equalsperdefinition 
     \begin{cases}
         \tupled{1,x,0}, & \ifmath Q(\metamodel{M}{i}) = s\\
         \model{m}{i}, & \otherwisemath
     \end{cases}
-\end{align*}
+\end{alignat*}
+}{\quad &&}{\\ & \formulaskip}%
 
 \mnote{Reduction of halting problem to orchestration problem}
 We can show that for every Turing machine, this construction of a transformation network out of it solves the halting problem if we are able to solve the orchestration problem.
@@ -357,41 +284,33 @@ First, we show an auxiliary lemma that proves that executing the transformations
 
 \begin{lemma}[Halting to Orchestration Problem Reduction]
     \label{lemma:turing_machine_construction}
-    Executing the transformations of $\transformationset{T}_{\TuringMachine}$ for the models $\modeltuple{m}_{\TuringMachine,x}$ and changes $\changetuple{\metamodeltuple{M},\TuringMachine,x}$ until all models are consistent %no transformations modify the changes any more 
-    terminates if, and only if, $\TuringMachine$ halts on input $x$.
+    Executing the transformations of $\transformationset{T}_{\TuringMachine}$ for the models $\modeltuple{m}_{\TuringMachine,x}$ and changes $\changetuple{\metamodeltuple{M},\TuringMachine,x}$ until all models are consistent terminates if, and only if, $\TuringMachine$ halts on input $x$.
 	If executing the transformations terminates with the final changes $\changetuple{\metamodeltuple{M},f}$, then the model in $\modeltuple{m}_{f} \equalsperdefinition \changetuple{\metamodeltuple{M},f}(\modeltuple{m}_{\TuringMachine,x})$ with the highest timestamp contains $\TuringMachine(x)$ as tape content.
 \end{lemma}
+
 \begin{proof}
     Let $\changetuple{s}, s \in \mathbb{N}_0$ be the tuple of changes created after executing $s$ transformations and let $\modeltuple{m}_{s} = \tupled{\model{m}{1,s}, \dots, \model{m}{n,s}}\equalsperdefinition \changetuple{s}(\modeltuple{m}_{\TuringMachine,x})$ be the state of the models after applying that change.
     Then we can see the following per induction over the model states $\modeltuple{m}_{s}$:
-	\begin{longenumerate} %[1., left=0pt .. \parindent]
+	\begin{longenumerate}
         \item 
             There is at most one transformation $\transformation{t}_{i,k} \in \transformationset{T}_{\TuringMachine}$ such that $\tupled{\model{m}{i,s},\model{m}{k,s}}$ is not consistent to $\transformation{t}_{i,k}$, i.e., $\tupled{\model{m}{i,s},\model{m}{k,s}} \not\in \consistencyrelation{CR}{i,k}$.
             This follows from the definition of $\TuringMachine$ and the last executed transformation.
-            Let us, in contrary, assume that there was a second transformation that could be executed because the models are inconsistent. 
+            Let us, in contrary, assume that there was a second transformation that could be executed, because the models are inconsistent. 
             We can distinguish whether the transformation involves any of $\model{m}{i,s},\model{m}{k,s}$ or not.
             If that transformation involves any of these two models, then $\TuringMachine$ would have been non-deterministic, because each transformation realizes a transition between the associated states of $\TuringMachine$.
             If that transformation involves none of these models, then one them must have been changed before, because otherwise they are consistent by construction of $\modeltuple{m}_{\TuringMachine,x}$.
             Let that changed model be $\model{m}{}'$.
             The transformation to which $\model{m}{}'$ and another model are inconsistent cannot be the one that was executed after $\model{m}{}'$ was changed, because its correctness ensures that the two are consistent afterwards.
-            Again, due to $\TuringMachine$ being deterministic, there cannot be another transformation that needed to be executed after $\model{m}{}'$ was changed. Thus another model must have been changed later which led to the inconsistency. Then, however, the transformation would have needed to be applied because the other model was changed.
+            Again, due to $\TuringMachine$ being deterministic, there cannot be another transformation that needed to be executed after $\model{m}{}'$ was changed. 
+            Thus, another model must have been changed later, which led to the inconsistency. Then, however, the transformation would have needed to be applied, because the other model was changed.
             Since another transformation was executed and, again, because of $\TuringMachine$ being deterministic, that inconsistency cannot occur, thus being a contradiction to the assumption.
-            % If a model $\model{m}{h,s}$ is changed, then only one of the transformations involving $\model{m}{h,s}$ makes changes, as each of them realizes a the transitions of $\TuringMachine$ and if more than one of them could be executed, $\TuringMachine$ would have been non-deterministic.
-            % Per induction, for the previously changed model there was also only one transformation that needed to be executed to restore consistency. If the models are still inconsistent after the transformation has been executed, then a change in the opposite direction must be necessary because of the changed timestamp, which must then be exactly $\transformation{t}_{i,k}$ because of $\TuringMachine$ being deterministic.
-            % This inductively ensures that there is always at most one transformation that needs to be executed to restore consistency.
-            %Note that there may be no transformation to execute if for the state of $\TuringMachine$ encoded in all current models no transition exists in $\Tr$, which can especially occur if a final state is reached.
-            %% There is at most one edge \(\left(a,b\right)\in E\) whose transformation is inconsistent, i.e., \(\left(M_i\left(a\right),M_i\left(b\right)\right)\notin R_{T_{\TuringMachine}\left(a,b\right)}\).
-			%% This follows from the definitions of \(\TuringMachine\) and the last executed transformation.
-		 	%% Additionally, \(a=v\) or \(b=v\),
-		 	%% because otherwise, there would have been two inconsistent transformations for \(M_{i-1}\).
-		 	%% We assume without loss of generality \(a=v\).
         \item 
-            There is exactly one model $(\mathvariable{time}_{h,s},\mathvariable{cont}_{h,s},\mathvariable{pos}_{h,s}) \equalsperdefinition \model{m}{h,s} \in \modeltuple{m}_{s}$ that has the highest timestamp $\mathvariable{time}_{i,s}$ of all models in $\modeltuple{m}_{s}$.
-            This follows from the previous insight that there is always at most one transformation to which the models are not consistent and which thus can perform changes, and that this transformation involves the just changed model, which, per induction, has the highest timestamp of all models.
-            Thus, this model must either be $\model{m}{i,s}$ or $\model{m}{k,s}$.
+            There is exactly one model $(\mathvariable{time}_{h,s},\mathvariable{cont}_{h,s},\mathvariable{pos}_{h,s}) \equalsperdefinition \model{m}{h,s} \in \modeltuple{m}_{s}$ that has the highest timestamp $\mathvariable{time}_{h,s}$ of all models in $\modeltuple{m}_{s}$.
+            This follows from the previous insight that there is always at most one transformation to which the models are not consistent and which can thus perform changes, and that this transformation involves the just changed model, which, per induction, has the highest timestamp of all models.
+            Thus, this model must be $\model{m}{i,s}$ or $\model{m}{k,s}$.
             We assume without loss of generality $\model{m}{h,s} = \model{m}{i,s}$.            
 		 \item
-            If a $\transformation{t}_{i,k}$ exists to which $\tupled{\model{m}{i,s},\model{m}{k,s}}$ is not consistent, then $\model{m}{k,s+1}$ contains the same tape content and the same tape position as would result if $\TuringMachine$ was executed one step from the state encoded in $\model{m}{i,s}$ with tape content $\mathvariable{cont}_s$ and tape position $\mathvariable{pos}_s$.
+            If a $\transformation{t}_{i,k}$ exists to which $\tupled{\model{m}{i,s},\model{m}{k,s}}$ is not consistent, then $\model{m}{k,s+1}$ contains the same tape content and the same tape position as would result if $\TuringMachine$ was executed one step from the state encoded in $\model{m}{i,s}$ with tape content $\mathvariable{cont}_{i,s}$ and tape position $\mathvariable{pos}_{i,s}$.
 		 	Additionally, $\model{m}{k,s+1}$ is the model with the highest timestamp of all models in $\modeltuple{m}_{s+1}$.
 		 \item 
              $\modeltuple{m}_{s}$ is consistent to $\transformationset{T}_{\TuringMachine}$ and thus no further transformation can produce changes if, and only if, $\TuringMachine$ would halt in state $\model{m}{i,s}$ with tape content $\mathvariable{cont}_{i,s}$ and tape position $\mathvariable{pos}_{i,s}$.
@@ -408,6 +327,7 @@ In consequence, the orchestration problem is undecidable.
 \begin{theorem}[Orchestration Problem Undecidability] \label{theorem:orchestration_problem_undecidability}
     The orchestration (existence) problem is undecidable.
 \end{theorem}
+
 \begin{proof}
     We have given the constructive proof for \autoref{lemma:turing_machine_construction} that any Turing machine can be simulated by a transformation network such that a repeated execution of transformations finds consistent models of which one contains the resulting tape content of the Turing machine if, and only if, the Turing machine halts.
     Thus, if we could decide the orchestration problem, we could decide whether a consistent orchestration exists. 
@@ -424,64 +344,11 @@ Thus, we know that we cannot find such a function.
     \label{corollary:nooptimalapplication}
     Let $\appfunction{\orcfunction{\transformationset{T}}}$ be an application function. Then $\appfunction{\orcfunction{\transformationset{T}}}$ cannot be optimal.
 \end{corollary}
+
 \begin{proof}
     According to \autoref{theorem:optimal_application_function_orchestration_problem}, an optimal application function can only be defined if a solution for the orchestration problem exists.
     Due to \autoref{theorem:orchestration_problem_undecidability}, we know that the problem is undecidable and thus an optimal application function cannot be defined.
 \end{proof}
-
-% \begin{lemma}[Optimal Application Function Decides Halting Problem]
-%     \label{lemma:optimalapplicationturingmachine}
-%     For any Turing machine $\TuringMachine$, we can construct metamodels $\metamodeltuple{M}_{\TuringMachine}$ and transformations $\transformationset{T}_{\TuringMachine}$ such that any optimal application application function yields consistent models for the models $\modeltuple{m}_{\TuringMachine,x}$ and changes $\changetuple{\metamodeltuple{M},\TuringMachine,x}$ if, and only if $\TuringMachine$ halts for input $x$.
-% \end{lemma}
-% \begin{proof}
-%     We have given the constructive proof for \autoref{lemma:turingmachineconstruction} that any Turing machine can be simulated by a transformation network such that a repeated execution of transformations delivers the resulting tape content of the Turing machine as content of a model if, any only if, the Turing machine halts.
-%     Since the construction ensures that in each step there only one transformation that can be executed because only one pair of models is inconsistent.
-%     Thus, there is only one orchestration of the transformations for every input such that each of them performs changes and every application function has to execute the transformations in exactly that way.
-% \end{proof}
-
-% \begin{theorem}[Orchestration Problem Undecidability]
-%     The orchestration problem is undecidable.
-% \end{theorem}
-% \begin{proof}
-%     We have shown in \autoref{lemma:optimalapplicationturingmachine} that an optimal application function could decide the Halting problem for every Turing machine $\TuringMachine$ and every input.
-%     Thus such a function cannot exist.
-%     Due to \autoref{theorem:applicationfunctionsolveorchestrationproblem} an optimal application function solves the orchestration and orchestration existence problem, respectively.
-
-%     In particular, an optimal application function finds that orchestration, because it yields consistent models.
-%     Thus, implementing an optimal application function, which is able to decide whether a consistent orchestration exists, would solve the Halting problem.
-% \end{proof}
-
-% In particular, an optimal application function finds that orchestration, because it yields consistent models.
-%     Thus, implementing an optimal application function, which is able to decide whether a consistent orchestration exists, would solve the Halting problem.
-
-% \begin{lemma}
-%     \label{lemma:networkfromturingmachine}
-%     For any Turing machine $\TuringMachine$, we can construct metamodels $\metamodeltuple{M}$ and a transformation network $\transformationnetwork{N} = \tupled{\transformationset{T}, \appfunction{\orcfunction{}}}$ with an optimal application function $\appfunction{\orcfunction{}}$, such that $\TuringMachine$ halts for input $x$ if, and only if, for models $\modeltuple{m}_{x}$ and changes $\changetuple{\metamodeltuple{M},x}$ it is $\appfunction{\orcfunction{}}(\modeltuple{m}_{x}, \changetuple{\metamodeltuple{M},x}) \consistenttomath \transformationset{T}$.
-% \end{lemma}
-% \begin{proof}
-%     \todo{Add proof with turing machine construction}
-% \end{proof}
-
-% \begin{theorem}
-%     \label{theorem:nooptimalapplication}
-%     Let $\appfunction{\orcfunction{}}$ be an application function. $\appfunction{\orcfunction{}}$ cannot be optimal.
-% \end{theorem}
-% \begin{proof}
-%     An optimal $\appfunction{\orcfunction{}}$ returns consistent models whenever there is a consistent orchestration.
-%     With such a function, we are able to decide whether such an orchestration exists or not.
-%     \begin{align*}
-%         \function{ExistsOrc}(\transformationset{T},\modeltuple{m},\changetuple{\metamodeltuple{M}}) =
-%             \begin{cases}
-%                 \textsc{true}, & \appfunction{\orcfunction{}}(\transformationset{T}, \modeltuple{m},\changetuple{\metamodeltuple{M}}) \consistenttomath \transformationset{T} \\
-%                 \textsc{false}, & otherwise
-%             \end{cases}
-%     \end{align*}
-%     $\function{ExistsOrc}$ returns \textsc{true} if, any only if, a consistent orchestration exists.
-%     $\appfunction{\orcfunction{}}$ does, per definition, only return consistent models when there is an orchestration that yields them.
-%     Additionally, it does always return consistent models when an orchestration that yields them exists, because it is optimal.
-%     It follows from \autoref{lemma:networkfromturingmachine} that we can simulate a universal Turing machine with a transformation network in the sense that we can construct a transformation network whose application function delivers consistent models for a given input if, and only if, the Turing machine halts for corresponding inputs.
-%     Calculating \function{ExistsOrc} would thus decide whether the Turing machine halts and thus decide the halting problem.
-% \end{proof}
 
 \mnote{Algorithm cannot terminate and be optimal}
 From this corollary, it also follows that we cannot implement the \function{Apply} function of the proposed algorithm in a way that it realizes an optimal application function and terminates for every possible input.
@@ -489,80 +356,42 @@ From this corollary, it also follows that we cannot implement the \function{Appl
 \begin{corollary}[Apply Algorithm Non-Optimality]
     \function{Apply} according to \autoref{algo:orchestration:application} cannot terminate and return consistent models whenever an orchestration exists that yields them exists for every possible input.
 \end{corollary}
+
 \begin{proof}
-    If \function{Apply} always terminated and returned consistent models whenever there is an orchestration that yields them, it would implement an optimal application function. %and could be used to realize \function{ExistsOrc} from the proof of \autoref{theorem:nooptimalapplication}.
+    If \function{Apply} always terminated and returned consistent models whenever there is an orchestration that yields them, it would implement an optimal application function. 
     According to \autoref{corollary:nooptimalapplication} an application function cannot be optimal.
 \end{proof}
 
 \mnote{Transformation restriction vs. conservativeness}
 In consequence, we only have the two options to either restrict the expressiveness of the transformations such that they cannot be used to simulate a Turing machine anymore or to accept the situation that \function{Apply} may either not terminate in some cases or return $\bot$ although a consistent orchestration exists.
-We call this behavior \emph{conservative}, because the algorithm never returns consistent models although there is no orchestration that yields them, but may not return consistent models in some cases in which actually an orchestration that yields them exists.
+We call this behavior \emph{conservative}, because the algorithm never returns consistent models when there is no orchestration that yields them, but it may also not return consistent models in some cases in which actually an orchestration that yields them exists.
 
 \mnote{Practical relevance of undecidability}
-Finally, just because the orchestration problem is undecidable does not mean that this must be an essential problem for executing practical transformation networks.
+Finally, undecidability of the orchestration problem does not mean that this must be an essential problem for executing practical transformation networks.
 Most programming languages are Turing-complete and thus termination of programs written in them is generally undecidable due to the halting problem, but still they are used to develop functional and usable software.
-Thus, it is important to know that, in general, the expressiveness of transformation networks makes the orchestration problem undecidable, but this does not have to mean that we cannot practically apply those networks. as we will also see in the evaluation.
-We thus especially focus on how to deal with undecidability and conservatively approximate the problem.
+Thus, it is important to know that, in general, the expressiveness of transformation networks makes the orchestration problem undecidable, but this does not have to mean that we cannot practically apply these networks, as we will also see in the evaluation.
+We thus especially focus on how to deal with undecidability and approximate the problem conservatively.
 
 \mnote{Discussion of both options}
-%In the following, we first introduce alternation as a special case of non-termination that can be avoided by construction.
 In the following, we discuss options to restrict transformations to make the orchestration problem solvable and finally conclude that this is not an option for solving the discussed problem.
 Afterwards, we discuss how we can realize \function{Apply} in a way that it always terminates and produces reasonable outputs.
-
-% \begin{corollary}
-%     The orchestration problem (see \autoref{def:orchestrationproblem}) is undecidable.
-% \end{corollary}
-% \begin{proof}
-%     \todo{Add proof. Maybe this should be the theorem from the Turing machine. Then we follow insights to the algorithm from that.}
-% \end{proof}
-%Lemma: It is undecidable whether an orchestration exists for a given input.
-
-%Theorem: We cannot guarantee termination of Algorithm, when we allow an arbitrary number of transformation execution. (combine with upper bound, see above/below)
-
-% Consequence: Either we need to restrict transformations to make the problem decidable or we need to restrict the application function and allow it to return $\bot$ although a sequence returning consistency exists, thus, we need to deal with conservativeness.
-% \emph{Weaker version:}
-% Goal: Find a solution in as many cases as possible, abort in the others (conservatively). There are two approaches to achieve that: 
-% 1. Reduce the number of cases in which there is no solution by adding assumptions to the relations and transformations (restrict input of app function)
-% 2. Improve the ability to find a solution if it exists (improve capabilities of app function)
-% Secondary goal: In cases, in which no solution is found, support the user in understanding why no solution was found.
-
-%Since we find that we cannot guarantee to find an orchestration, we need to deal with the conservative case anyway. Thus, we can also deal with the conservative case for the second problem instead of requiring things from the transformation which may not be (easily) fulfillable.
-
-% Conclude that we cannot guarantee termination for an optimal orchestration function
 
 
 \subsection{Restriction of Transformation Networks}
 \label{chap:orchestration:decidability:restriction}
 
 \mnote{Transformation-local vs. network restrictions}
-We have discussed the necessity to restrict transformations as an input of the application function to avoid that it is undecidable whether a consistent orchestration of them exists. % for given models and changes.
-Two kinds of restrictions can be distinguished:
+We have discussed the necessity to restrict transformations as an input of the application function to avoid undecidability of whether a consistent orchestration exists.
+The following two kinds of restrictions can be distinguished.
 \begin{properdescription}
     \item[Transformation:] Restrictions only concern the single transformations. Thus, if each transformation fulfills a specific property, the application function is able to decide whether a consistent orchestration exists.
-    \item[Network:] Restrictions concern the complete network, i.e., the combination of transformations. Only a set of transformations can have an appropriate property that enables the application function to decide the orchestration problem, but not each transformation on its own.
+    \item[Network:] Restrictions concern the complete network. Only the combination of transformations can fulfill an appropriate property that enables the application function to decide the orchestration problem but not each transformation on its own.
 \end{properdescription}
 
 \mnote{Impracticality of restrictions}
 Since we assume transformations to be developed and reused independently, restrictions to single transformations are of special interest.
 It is, however, easy to see that it will unlikely be possible to define practical restrictions to single transformations that make the orchestration problem decidable.
 We show that even impractical restrictions do not make the problem decidable.
-%Additionally, we discuss possible restrictions to complete networks.
-%We discuss properties that obviously provide the ability to avoid divergence and alternation in the states of a network, namely monotony and confluence.
-%Unfortunately, we will show that those restrictions are impractical.
-
-% \todo{Maybe confluence and monotony are rather restrictions of the application function (i.e., conservative operations) rather then restrictions of the transformation?}
-
-% \begin{itemize}
-%     \item Restrictions must, in the best case, be local to a transformation, i.e., they should be fulfillable without knowing with which other transformations the transformation shall be combined
-%     \item Can this ever be the case?
-% \end{itemize}
-
-% \begin{itemize}
-%     \item Discuss different restrictions we may apply to synchronizing transformations and networks
-%     \item We conclude that none of them is practically
-%     \item This does not mean that there is no restriction, but we were not able to find one
-%     \item Maybe also discuss history-ignorance
-% \end{itemize}
 
 % Lösungsoptionen (Grad der Einschränkung an die Transformationen) --  überdeckt sich mit der Klassifizierung hierüber -> zusammenführen
 % \begin{itemize}
@@ -583,42 +412,27 @@ Compatibility of the consistency relations ensures that there is at least one su
 Unfortunately, each transformation can only select one of these options to restore consistency when a condition element is added, and if all transformations choose an element that is not in the overlap of the consistency relations, they will never find a consistent tuple of models.
 
 \mnote{Restrict options in consistency relations}
-In consequence, an obvious option to reduce expressiveness of transformations in order to make the orchestration problem decidable by ensuring that a consistent orchestration always exists would be to restrict consistency relations, such that each condition element is only allowed to occur in a single consistency relation pair of a consistency relation.
+In consequence, an obvious option to reduce expressiveness of transformations in order to make the orchestration problem decidable by ensuring that a consistent orchestration always exists would be an according restriction of consistency relations.
+Such a restriction would require that each condition element is only allowed to occur in a single consistency relation pair of a consistency relation.
 Thus, each condition element has a unique corresponding element to which it is considered consistent.
-Then, the consistency preservation rules cannot select between different options to restore consistency and if the relations are compatible, all consistency relations relate elements in an equal way, thus the transformations must find exactly those elements.
+Then, the consistency preservation rules cannot select between different options to restore consistency, and if the consistency relations are compatible, all of them relate elements in an equal way.
+Thus, the transformations find exactly those elements.
 
 \mnote{Restriction not solving the problem}
 Although that approach will at least reduce the number of cases in which no consistent orchestration is found by our algorithm, there are still inputs for which no consistent orchestration exists.
 Since we do not restrict what transformations are allowed to do, they can perform arbitrary changes to restore consistency.
-This especially includes that they may always returns changes that yield the same two models being consistent to that transformation but not to any models that can be delivered by the other transformations.
-% Since we do not restrict the transformation in what they are allowed to do, they can perform arbitrary changes that restore consistency, such that alternations in the execution can occur.
-% Consider three metamodels $\metamodel{A}, \metamodel{B}, \metamodel{C}$ with the following consistency relations and consistency preservation rules:
-% \begin{align*}
-%     &
-%     \consistencyrelation{CR}{AB} = \setted{\tupled{\model{a}{1}, \model{b}{1}}, \tupled{\model{a}{2}, \model{b}{3}}, \tupled{\model{a}{3}, \model{b}{2}, \tupled{\model{a}{4}, \model{b}{4}} \\
-%     &
-%     \consistencypreservationrule{\consistencyrelation{AB}}(\model{a}, \model{b}, \change{\metamodel{A}}, \change{\metamodel{B}}) = \begin{cases}
-%     \end{cases}
-%     &
-%     \consistencyrelation{CR}{BC} = \setted{\tupled{\model{b}{1}, \model{c}{1}}, \tupled{\model{b}{2}, \model{c}{3}}, \tupled{\model{b}{3}, \model{c}{2}, \tupled{\model{b}{4}, \model{c}{4}} \\
-%     &
-%     \consistencyrelation{CR}{AC} = \setted{\tupled{\model{a}{1}, \model{c}{1}}, \tupled{\model{a}{2}, \model{c}{3}}, \tupled{\model{a}{3}, \model{c}{2}, \tupled{\model{a}{4}, \model{c}{4}} \\
-% \end{align*}
+This especially includes that they may always return changes that yield the same two models being consistent to that transformation but not to any models that can be delivered by the other transformations.
 
 \mnote{Example with unsatisfactory restriction}
-Let $\class{A}{}$, $\class{B}{}$, $\class{C}{}$ be three classes, each with one integer attribute $n$.
-We define the following metamodels, each consisting of one of those classes, and consistency relations that require for each element in one model a corresponding one in another with the same value of $n$. %, which is a further simplification of our running example.
-%These consistency relations are obviously compatible.
-%This is a further simplification of our running example that requires persons, residents and employees with the same names.
-Additionally, we define consistency preservation rules, each delivering changes that yield the same models independent from the input.
-The resulting models are chosen to be consistent to the according consistency relation, but not to any of the others.
+Let $\class{A}{}$, $\class{B}{}$, and $\class{C}{}$ be three classes, each with an integer attribute $n$.
+We define three metamodels, each consisting of one of these classes, and consistency relations that require for each element in one model a corresponding one in another with the same value $n$.
+Additionally, we define consistency preservation rules, which deliver changes that yield the same models independent from the input.
+The resulting models are chosen to be consistent to the according consistency relation but not to any of the others.
 %
 \begin{align*}
     & 
-    \metamodelinstanceset{M}{1} \equalsperdefinition \mathcal{P}(\instances{\class{A}{}}), \;%\\
-    %& 
-    \metamodelinstanceset{M}{2} \equalsperdefinition \mathcal{P}(\instances{\class{B}{}}), \;%\\
-    %& 
+    \metamodelinstanceset{M}{1} \equalsperdefinition \mathcal{P}(\instances{\class{A}{}}), \;
+    \metamodelinstanceset{M}{2} \equalsperdefinition \mathcal{P}(\instances{\class{B}{}}), \;
     \metamodelinstanceset{M}{3} \equalsperdefinition \mathcal{P}(\instances{\class{C}{}}) \\[0.5em]
     &
     \consistencyrelation{CR}{12} \equalsperdefinition \setted{\tupled{a,b} \in \instances{\class{A}{}} \times \instances{\class{B}{}} \mid a.n = b.n}, \;
@@ -645,31 +459,31 @@ The resulting models are chosen to be consistent to the according consistency re
 
 \mnote{Restricted example rules without consistent orchestration}
 The example is a further simplification of our running example.
-Its consistency relations are compatible, as they contain each condition element only in one consistency relation pair.
+Its consistency relations are compatible, as for each condition element, i.e., each instance of one of the classes, a consistent model tuple is given by that object together with instances of the other two classes having the same value of $n$.
 The consistency preservation rules are correct, as their result is consistent to the relation.
-Still, there is no consistent orchestration of the transformation for any input that is not yet consistent.
-This is because the consistency preservation rules always produce models that are not consistent to the other consistency relations.
+Still, there is no consistent orchestration for any input that is not already consistent, because the consistency preservation rules always produce models that are inconsistent to the other consistency relations.
 
 \mnote{Unreasonable changes}
-One might argue that the defined consistency preservation rules are highly unreasonable and will never occur in that way in practice.
-We would probably assume the consistency preservation rules to preserve the input models and changes in some way instead of returning models that are completely unrelated to the input.
-We do, however, not yet have an appropriate notion for that.
-Some work on transformations~\cite{cheney2017LeastChangeBx-JOT,macedo2016qvtAtlAlloy-SoSym} proposes a notion of \emph{least change} to ensure that transformations do not perform arbitrary unrelated changes, which could exclude that situations.
+One might argue that the defined consistency preservation rules are highly unreasonable and will not occur in that way in practice.
+We may assume consistency preservation rules to preserve the input models and changes in some way instead of returning models that are completely unrelated to the input.
+We have, however, not defined an appropriate notion for that, because it is prone to be unpractically restrictive.
+Some work on transformations~\cite{cheney2017LeastChangeBx-JOT,macedo2016qvtAtlAlloy-SoSym} proposes a notion of \emph{least change} to ensure that transformations do not perform arbitrary unrelated changes, which could exclude those situations.
 
 \mnote{Impracticality of restriction}
-Although the given example is rather artificial and although there might be the additional property of least change, which could further reduce the cases in which no consistent orchestration exists, the essential drawback is that these restrictions are not reasonable.
+Although the given example is rather artificial and although there might be the additional property of least change that could further reduce the cases in which no consistent orchestration exists, the essential drawback is that these restrictions are not reasonable.
 Allowing a condition element to occur in multiple consistency relation pairs is essential, because options for corresponding elements are necessary, especially if there is a gap in the abstraction of two related metamodels.
 For example, a \gls{UML} class needs to be able to correspond to all Java classes that provide different implementations of that class.
-Requiring exactly one Java class that is considered consistent to a \gls{UML} class is obviously not applicable in practice, thus this restriction would make the consistency notion useless.
+Requiring exactly one Java class that is considered consistent to a \gls{UML} class is obviously not applicable in practice.
+Thus, the restriction would make the consistency notion useless.
 
 \mnote{Least change property not solving problem}
 If we, instead, only require some notion of least change, like that only elements are changed which are involved in a violated consistency relation, this does also not solve the problem.
-In the example in \autoref{fig:orchestration:no_orchestration}, relating the names of employees, residents and persons, we have defined consistency preservation rules that only require changes to elements that actually violate consistency.
+In the example in \autoref{fig:orchestration:no_orchestration}, relating the names of employees, residents, and persons, we have defined consistency preservation rules that only require changes to elements that actually violate consistency.
 Nevertheless, we have shown that for these consistency preservation rules only specific orchestrations are consistent and that with some modifications even no consistent orchestration exists.
 
 \mnote{Unlikely to find practical restrictions}
 In consequence, we found that even a well-defined restriction that is too strong to be applied in practice still cannot ensure that a consistent orchestration exists for every input, even though the examples at which we have shown that are rather artificial.
-Although this does not prove the impossibility to find a suitable restriction that solves the orchestration problem, which is even impossible because there is no unique notion of what an acceptable restriction would be, the investigated case shows that it is unlikely to find practical restrictions that solve the problem since even impractical restrictions do not solve it.
+Although this does not prove the impossibility to find a suitable restriction that solves the orchestration problem, which is even impossible because there is no unique notion of what an acceptable restriction would be, the investigated case shows that it is unlikely to find practical restrictions that solve the problem, because even impractical restrictions do not solve it.
 
 % Es kann z.B. sein, dass ein Element a ein Element b braucht. Eine andere Transformation braucht zwei as und dafür ein (oder zwei) c. Dann ist (a,b) konsistent und es ist auch kompatibel, weil es mit dem a ein Modell gibt in dem es konsistent ist, nämlich das mit dem zweiten a, aber das Modell mit einem a ist nur lokal konsistent. Wenn das nun immer von der Transformation ausgewählt wird, findet man nie einen konsistenten Zustand.
 
@@ -709,19 +523,19 @@ Although this does not prove the impossibility to find a suitable restriction th
 
 \mnote{Confluence definition}
 Confluence is an even stronger requirement than the existence of an optimal orchestration.
-In literature~\cite{stevens2020BidirectionalTransformationLarge-SoSym}, confluence in a transformation network is described as the property that for given models and changes a consistent orchestration exists and that two consistent orchestrations for the same input always yield the same models.
+In literature~\cite{stevens2020BidirectionalTransformationLarge-SoSym}, confluence in a transformation network is described as the property that for given models and changes a consistent orchestration exists, and that two consistent orchestrations for the same input always yield the same models.
 Thus, executing transformations in any order such that the result is consistent will deliver the same result.
 It is, however, easy to see that this is an impractical requirement.
 
 \mnote{Counterexample for confluence}
-In the example depicted in \autoref{fig:orchestration:confluence}, derived from the running example, three consistency relations expect for each person, employee and resident the two corresponding others to exist.
-They need to have the same name or, in case of the relations between persons and employees as well as between residents and employees, the employee may have the same name in lowercase.
-The consistency preservation rule between persons and employees ensures that an employee with the same name exists, whereas the one between residents and employees ensures that an employee with the name in lowercase exists.
+In the example depicted in \autoref{fig:orchestration:confluence}, derived from the running example, three consistency relations expect for each person, employee, and resident the two corresponding others to exist.
+They need to have the same $\mathvariable{name}$ or, in case of the relations between persons and employees as well as between residents and employees, the employee may have the same $\mathvariable{name}$ in lowercase.
+The consistency preservation rule between persons and employees ensures that an employee with the same $\mathvariable{name}$ exists, whereas the one between residents and employees ensures that an employee with the $\mathvariable{name}$ in lowercase exists.
 Whenever a person is added, two consistent orchestrations can be distinguished.
-First, the transformation between persons and employees can be executed, either followed or preceded by the one between persons and residents. Then all elements have the same name.
+First, the transformation between persons and employees can be executed, either followed or preceded by the one between persons and residents. Then, all elements have the same $\mathvariable{name}$.
 The models are also consistent to the relation between residents and employees, because the relation allows the names to be equal.
-Second, the transformation between persons and residents can be executed, followed by the one between residents and employees.
-Then the employee has the name in lowercase, but still this is consistent to the relation between persons and employees.
+Alternatively, the transformation between persons and residents can be executed, followed by the one between residents and employees.
+Then the employee has the $\mathvariable{name}$ in lowercase, but still this is consistent to the relation between persons and employees.
 
 \mnote{Impracticality of confluence}
 Apart from that artificial example, such a situation can always occur if transformations have different options for elements to be consistent.
