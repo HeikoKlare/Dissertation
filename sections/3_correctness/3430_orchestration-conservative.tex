@@ -201,18 +201,20 @@ We thus define the following, different notion of monotony for transformations.
         &
         \forall \modeltuple{m} = \tupled{\model{m}{1}, \dots, \model{m}{n}} \in \metamodeltuple{M}, \changetuple{\metamodeltuple{M}} = \tupled{\change{\metamodel{M}{1}}, \dots, \change{\metamodel{M}{n}}} \in \changeuniverse{\metamodeltuple{M}} : \\
         & \formulaskip
-        \bigl(
-        \exists \changetuple{\metamodeltuple{M}}' = \tupled{\change{\metamodel{M}{1}}', \dots, \change{\metamodel{M}{n}}'} \in \changeuniverse{\metamodeltuple{M}} : \generalizationfunction{\metamodeltuple{M},\transformation{t}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m},\changetuple{\metamodeltuple{M}}') \\
-        & \formulaskip
-        \Rightarrow
-        \forall i \in \setted{1, \dots, n} : 
-        (\change{\metamodel{M}{i}}(\model{m}{i}) \setminus \model{m}{i}) \subseteq \change{\metamodel{M}{i}}'(\model{m}{i})
-        \\
-        & \formulaskip\formulaskip
-        \land
-        (\model{m}{i} \setminus \change{\metamodel{M}{i}}(\model{m}{i})) \cap \change{\metamodel{M}{i}}'(\model{m}{i})
-         = \emptyset)
-        \bigr)
+        \forall \changetuple{\metamodeltuple{M}}' = \tupled{\change{\metamodel{M}{1}}', \dots, \change{\metamodel{M}{n}}'} \in \changeuniverse{\metamodeltuple{M}} : 
+        \big[
+            \generalizationfunction{\metamodeltuple{M},\transformation{t}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m},\changetuple{\metamodeltuple{M}}') \\
+            & \formulaskip\formulaskip
+            \Rightarrow
+            \forall i \in \setted{1, \dots, n} : 
+            \big(
+                (\change{\metamodel{M}{i}}(\model{m}{i}) \setminus \model{m}{i}) \subseteq \change{\metamodel{M}{i}}'(\model{m}{i})
+                \\
+                & \formulaskip\formulaskip\formulaskip
+                \land
+                (\model{m}{i} \setminus \change{\metamodel{M}{i}}(\model{m}{i})) \cap \change{\metamodel{M}{i}}'(\model{m}{i}) = \emptyset
+            \big)
+        \big]
     \end{align*}
 \end{definition}
 
@@ -220,29 +222,32 @@ We thus define the following, different notion of monotony for transformations.
 The definition is based on the idea that transformations are only supposed to append changes but not to revert previous changes.
 This means that elements that were introduced by previous changes still need to be present after applying the transformation.
 Additionally, elements that were removed are not allowed to be added by the transformation again.
-Thus, all elements of the originally changed models were either contained in the original models or are contained in the models yielded by the transformation execution, which leads to the model relations in the definition.
+Thus, all elements of the originally changed models were either contained in the original models or are contained in the models yielded by the transformation execution.
 
 \mnote{Property of monotone transformation orchestrations}
 Having only monotone transformations ensures that the application of each orchestration that does not apply a transformation to already consistent models yields a sequence of pairwise different model states.
 \begin{lemma}[Monotone Transformation Orchestration Prefixes]
     \label{lemma:monotonetransformationsnosamestates}
     Let $\transformationset{T}$ be a set of correct, monotone synchronizing transformations for metamodels $\metamodeltuple{M}$.
-    Then for all models and changes, as well as any orchestration $\sequenced{\transformation{t}_{1}, \dots, \transformation{t}_{m}} \in \transformationset{T}^{< \mathbb{N}}$ that does not contain a transformation to be executed when its models are already consistent while other models are not, the prefixes of that orchestration yield the same models only if those prefixes are consistent orchestrations:
+    Then for all models and changes as well as any orchestration $\sequenced{\transformation{t}_{1}, \dots, \transformation{t}_{m}} \in \transformationset{T}^{< \mathbb{N}}$ that does not contain a transformation to be executed when its models are already consistent while other models are not, the prefixes of that orchestration yield the same models only if these prefixes are consistent orchestrations:
     \parameterizeformat{
     \begin{align*}
         &
-        \forall \modeltuple{m} \in \metamodeltupleinstanceset{M}, \changetuple{\metamodeltuple{M}} \in \changeuniverse{\metamodeltuple{M}} : \forall i, k \in \setted{1, \dots, m} : \\
+        \forall \modeltuple{m} \in \metamodeltupleinstanceset{M}, \changetuple{\metamodeltuple{M}} \in \changeuniverse{\metamodeltuple{M}} : \forall i, k \in \setted{1, \dots, m}, i \neq k : \\
         &
         #1
-        \big(\generalizationfunction{\metamodeltuple{M}, \transformation{t}_{i}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \\
-        & \formulaskip #1
-        \Rightarrow
-        \exists \changetuple{\metamodeltuple{M}}' \in \changeuniverse{\metamodeltuple{M}} :
-        \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}') \\
-        & \formulaskip\formulaskip #1
-        \land 
-        \changetuple{\metamodeltuple{M}}'(\modeltuple{m}) \consistenttomath \transformationset{T}
-        \big)
+        \big[
+            \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{i}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \\
+            & \formulaskip #1
+            \Rightarrow
+            \exists \changetuple{\metamodeltuple{M}}' \in \changeuniverse{\metamodeltuple{M}} :
+            \big(
+                \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{k}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M}, \transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}') \\
+                & \formulaskip\formulaskip #1
+                \land 
+                \changetuple{\metamodeltuple{M}}'(\modeltuple{m}) \consistenttomath \transformationset{T}
+            \big)
+        \big]
     \end{align*}
     }{\formulaskip}{}%
 \end{lemma}
