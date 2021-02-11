@@ -279,13 +279,14 @@ This conforms to the notion of correctness defined for bidirectional transformat
         \change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{1}},
         \change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}} : \\
         & \formulaskip
-        \bigl( \exists 
-        \change{\metamodel{M}{1}}' \in \changeuniverse{\metamodel{M}{1}},
+        \forall \change{\metamodel{M}{1}}' \in \changeuniverse{\metamodel{M}{1}},
         \change{\metamodel{M}{2}}' \in \changeuniverse{\metamodel{M}{2}} :
+        \big( 
         \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}) = (\change{\metamodel{M}{1}}', \change{\metamodel{M}{2}}') \\
         & \formulaskip\formulaskip
         \Rightarrow
-        \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \change{\metamodel{M}{2}}'(\model{m}{2})} \consistenttomath \consistencyrelation{CR}{} \bigr)
+        \tupled{\change{\metamodel{M}{1}}'(\model{m}{1}), \change{\metamodel{M}{2}}'(\model{m}{2})} \consistenttomath \consistencyrelation{CR}{} 
+        \big)
     \end{align*}
 \end{definition}
 
@@ -336,10 +337,14 @@ We define the application of hippocraticness to synchronizing transformations as
         \forall
         \model{m}{1} \in \metamodelinstanceset{M}{1}, \model{m}{2} \in \metamodelinstanceset{M}{2}, 
         \change{\metamodel{M}{1}} \in \changeuniverse{\metamodel{M}{2}}, \change{\metamodel{M}{2}} \in \changeuniverse{\metamodel{M}{2}} : \\
-        & #1 #2
-        \tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}(\model{m}{2})} \in \consistencyrelation{CR}{} \Rightarrow \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}) = (\change{\metamodel{M}{1}}, \change{\metamodel{M}{2}})
+        & \formulaskip
+        \big(
+        \tupled{\change{\metamodel{M}{1}}(\model{m}{1}), \change{\metamodel{M}{2}}(\model{m}{2})} \in \consistencyrelation{CR}{} 
+        #2
+        \Rightarrow \consistencypreservationrule{\consistencyrelation{CR}{}}(\model{m}{1}, \model{m}{2}, \change{\metamodel{M}{1}}, \change{\metamodel{M}{2}}) = (\change{\metamodel{M}{1}}, \change{\metamodel{M}{2}})
+        \big)
     \end{align*}
-    }{\formulaskip}{\formulaskip[0.5em]}%
+    }{}{\\ & \formulaskip\formulaskip}%
 \end{definition}
 
 \mnote{Benefits of hippocraticness}
@@ -484,17 +489,19 @@ We indicate those cases with the result $\bot$.
         &
         \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} \mid \modeltuple{m} \consistenttomath \consistencyrelationset{CR} : \forall \changetuple{\metamodeltuple{M}} \in \changeuniverse{\metamodeltuple{M}} : \\
         & #1 #2
+        \forall \modeltuple{m'} \in \metamodeltupleinstanceset{M} : 
         \big[
-            \big(\exists \modeltuple{m'} \in \metamodeltupleinstanceset{M} : 
-            \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \modeltuple{m'} \big) \Rightarrow\\
+            \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \modeltuple{m'} \Rightarrow\\
             & #1 #2 \formulaskip
-            \big(\exists \transformation{t}_{1}, \dots, \transformation{t}_{n} \in \transformationset{T} :
+            \exists \transformation{t}_{1}, \dots, \transformation{t}_{n} \in \transformationset{T} :
             \exists \changetuple{\metamodeltuple{M}}' \in \changeuniverse{\metamodeltuple{M}} :
-            \orcfunction{\transformationset{T}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \sequenced{\transformation{t}_{1}, \dots, \transformation{t}_{n}} \\
-            & #1 #2 \formulaskip
-            \land \generalizationfunction{\metamodeltuple{M},\transformation{t}_{n}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M},\transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}') 
-            \land \changetuple{\metamodeltuple{M}}'(\modeltuple{m}) = \modeltuple{m'}
-        \big)\big]
+            \big(
+                \orcfunction{\transformationset{T}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \sequenced{\transformation{t}_{1}, \dots, \transformation{t}_{n}} \\
+                & #1 #2 \formulaskip
+                \land \generalizationfunction{\metamodeltuple{M},\transformation{t}_{n}} \concatfunction \dots \concatfunction \generalizationfunction{\metamodeltuple{M},\transformation{t}_{1}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = (\modeltuple{m}, \changetuple{\metamodeltuple{M}}') 
+                \land \changetuple{\metamodeltuple{M}}'(\modeltuple{m}) = \modeltuple{m'}
+            \big)
+        \big]
     \end{align*}
     }{\formulaskip}{\formulaskip[0.5em]}%
 \end{definition}
@@ -520,7 +527,9 @@ For now, we stick to the simple notion of correctness that the application funct
         \appfunction{\orcfunction{\transformationset{T}}} \correctmath \equivalentperdefinition
         \forall \modeltuple{m} \in \metamodeltupleinstanceset{M} \mid \modeltuple{m} \consistenttomath \consistencyrelationset{CR} : \forall \changetuple{\metamodeltuple{M}} \in \changeuniverse{\metamodeltuple{M}} : \\
         & \formulaskip
-        \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \bot \lor \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \consistenttomath \consistencyrelationset{CR}
+        \big(
+            \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) = \bot \lor \appfunction{\orcfunction{\transformationset{T}}}(\modeltuple{m}, \changetuple{\metamodeltuple{M}}) \consistenttomath \consistencyrelationset{CR}
+        \big)
     \end{align*}
 \end{definition}
 
