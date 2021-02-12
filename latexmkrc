@@ -1,3 +1,5 @@
+# Compiles with TexLive 2020
+
 # Run pdflatex with more memory because of several tikz figures
 $pdflatex = 'pdflatex --extra-mem-top=10000000 -synctex=1 --interaction=nonstopmode -file-line-error %O %S';
 
