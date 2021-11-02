@@ -198,7 +198,7 @@
 % Linux Libertine in math mode
 \RequirePackage[libertine]{newtxmath}
 % grotesque type: Adobe Source Sans Pro
-\RequirePackage[scaled=.92]{sourcesanspro}
+\RequirePackage[scaled=.92, proportional]{sourcesanspro}
 % monospace type: Bera Mono
 \RequirePackage[scaled=.78]{beramono}
 % Microtype für schöneren Textsatz
